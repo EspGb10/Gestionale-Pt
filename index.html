@@ -205,6 +205,9 @@ button.x.ed{color:var(--moss)}
 .title-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .data-btn{font-size:.8rem;font-weight:600;padding:4px 11px;min-height:32px;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--pine);cursor:pointer;opacity:.85}
 .data-btn:hover{opacity:1;border-color:var(--pine)}
+.docs-head{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-top:14px}
+.docs-head label{margin:0}
+#docsList{max-height:40vh;overflow:auto}
 .data-row{margin:4px 0 6px}
 #dlgData h4{margin-top:18px}
 .bk-line{margin:-6px 0 12px;font-size:.88rem;font-weight:600;color:var(--moss)}
@@ -292,7 +295,7 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
 <div class="wrap" id="app"><div class="loading">Caricamento dei tuoi clienti…</div></div>
 
 <input type="file" id="dataInput" accept=".zip,application/zip,application/x-zip-compressed,.json,application/json" hidden>
-<input type="file" id="importInput" accept=".docx,.doc,.pdf,.txt,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword" multiple hidden>
+<input type="file" id="importInput" accept=".docx,.doc,.pdf,.txt,.zip,application/zip,application/x-zip-compressed,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword" multiple hidden>
 
 <dialog id="dlgClient"><form method="dialog">
   <h3 id="dlgClientTitle">Nuova cartella</h3>
@@ -344,6 +347,21 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
   <div class="dlg-actions">
     <button class="btn ghost" value="cancel" formnovalidate>Annulla</button>
     <button class="btn primary" value="ok">Inizia il nuovo pacchetto</button>
+  </div>
+</form></dialog>
+
+<dialog id="dlgDocs"><form method="dialog" id="fDocs">
+  <h3>Esporta documenti</h3>
+  <p class="note-box">La scheda completa di ogni cliente (dati, sedute, pagamenti, pacchetti e anche le note private). La puoi condividere su WhatsApp o salvare in una cartella del computer, e poi reimportarla con “Importa documenti”: diventa di nuovo una cartella normale. Per mandare un riepilogo al cliente, senza le note private, usa “Invia al cliente” dentro la sua cartella.</p>
+  <label>Formato</label>
+  <div class="seg"><label><input type="radio" name="docsFmt" value="docx" checked><span>Word</span></label><label><input type="radio" name="docsFmt" value="pdf"><span>PDF</span></label></div>
+  <div class="docs-head"><label>Clienti</label><span><button type="button" class="btn small ghost" id="docsAll">Tutti</button> <button type="button" class="btn small ghost" id="docsNone">Nessuno</button></span></div>
+  <div class="checks" id="docsList"></div>
+  <p class="hint" id="docsHint"></p>
+  <p class="err" id="docsErr" role="alert"></p>
+  <div class="dlg-actions">
+    <button class="btn ghost" value="cancel" formnovalidate>Annulla</button>
+    <button class="btn primary" value="ok" id="docsOk">Esporta</button>
   </div>
 </form></dialog>
 
@@ -1627,6 +1645,7 @@ function listHTML(){
     <div id="saveStatus" class="status ${store.status==="ok"?"":store.status}">${esc(statusText())}</div></div>
     <div class="actions">
       <button class="btn ghost" data-a="import">Importa documenti</button>
+      ${clients.length ? `<button class="btn ghost" data-a="exportDocs">Esporta documenti</button>` : ""}
       ${cloudAvailable() && clients.length ? `<button class="btn ghost" data-a="backup">Backup su Drive o Dropbox</button>` : ""}
       ${cloudAvailable() ? `<a class="btn ghost" id="openDbx" href="${dbxOpenUrl(DBX_ROOT)}" target="_blank" rel="noopener">${isIOS ? "Apri l'app Dropbox" : "Apri su Dropbox"}</a>
         <a class="btn ghost" id="openDrive" href="${driveWebUrl(settings.driveFolderId)}" target="_blank" rel="noopener">Apri su Drive</a>` : ""}
@@ -2595,6 +2614,7 @@ async function handle(a, el){
     case "doSearch": return runSearch();
     case "exportAll": return exportAll();
     case "dataMenu": return dataMenu();
+    case "exportDocs": return exportDocs();
     case "clearSearch": { query = ""; render(); const s = $("search"); if(s) s.focus(); return; }
     case "quickEdit": { const q = getClient(el.dataset.id); return q && clientForm(q); }
     case "quickDel": return getClient(el.dataset.id) && deleteClient(el.dataset.id);
@@ -3026,8 +3046,18 @@ let importing = false;
 $("importInput").addEventListener("change", async e=>{
   let files = [...e.target.files]; e.target.value = "";
   if(!files.length || importing) return;
-  const fulls = files.filter(f=>/\.(json|zip)$/i.test(f.name) || /json|zip/.test(f.type || ""));
-  files = files.filter(f=>!fulls.includes(f));
+  const isZip = f => /\.zip$/i.test(f.name) || /zip/.test(f.type || "");
+  const zips = files.filter(isZip);
+  const fulls = files.filter(f=>!isZip(f) && (/\.json$/i.test(f.name) || /json/.test(f.type || "")));
+  files = files.filter(f=>!isZip(f) && !fulls.includes(f));
+  for(const z of zips){                                    // ZIP di schede (da "Esporta documenti"): le apro una per una
+    try{
+      const r = await unzipDocs(z);
+      if(r.backup) fulls.push(z);
+      else if(!r.files.length) await messageBox("Nessuna scheda nello ZIP", `In “${z.name}” non ho trovato schede Word, PDF o di testo.`);
+      else files.push(...r.files);
+    }catch(err){ await messageBox("ZIP non letto", err && err.message === "offline" ? OFFLINE_MSG : `Non sono riuscito ad aprire “${z.name}”.`); }
+  }
   if(fulls.length) await messageBox("Questo è un file dei dati del programma",
     `${fulls.map(f=>`“${f.name}”`).join(", ")}: “Importa documenti” legge solo schede Word, PDF o di testo.\n\nPer importare un backup tocca “⚙ Dati” accanto a “I miei clienti”, poi “Importa dati”.`);
   if(!files.length) return;
@@ -3203,6 +3233,87 @@ async function importFull(file){
   } finally { importing = false; }
   openId = null; query = ""; render(); window.scrollTo({top:0});
   toast(`Backup importato: ${incoming.length} ${incoming.length === 1 ? "cliente" : "clienti"}`);
+}
+
+/* ======================= ESPORTA DOCUMENTI ======================= */
+/* Le schede complete dei clienti in Word o PDF: da condividere (WhatsApp, email) o salvare in una cartella,
+   e da reimportare con "Importa documenti" come cartelle normali */
+async function unzipDocs(file){
+  const JSZip = await lib("jszip");
+  const zip = await JSZip.loadAsync(await file.arrayBuffer());
+  const entries = Object.values(zip.files).filter(f=>!f.dir && !/(^|\/)(__MACOSX|\.)/.test(f.name));
+  for(const f of entries.filter(f=>/\.json$/i.test(f.name))){
+    try{ const d = JSON.parse(await f.async("string")); if(d && d.format === FULL_FMT) return {backup:true, files:[]}; }catch(_){}
+  }
+  const out = [];
+  for(const f of entries.filter(f=>/\.(docx|pdf|txt)$/i.test(f.name))){
+    const base = f.name.split("/").pop(), ext = base.split(".").pop().toLowerCase();
+    out.push(new File([await f.async("blob")], base, {type: MIME[ext] || (ext === "txt" ? "text/plain" : "")}));
+  }
+  return {backup:false, files:out};
+}
+function docsChecked(){ return [...$("docsList").querySelectorAll("input:checked")].map(i=>i.value); }
+function docsFmt(){ const el = document.querySelector('input[name="docsFmt"]:checked'); return el ? el.value : "docx"; }
+function syncDocs(){
+  const n = docsChecked().length, f = docsFmt() === "docx" ? "Word" : "PDF";
+  $("docsErr").textContent = "";
+  $("docsHint").textContent = !n ? "Scegli almeno un cliente."
+    : n === 1 ? `Verrà creata una scheda ${f}. Sul telefono si apre la condivisione (WhatsApp, Mail, File…), al computer viene scaricata.`
+    : `Verranno create ${n} schede ${f}. Sul telefono le condividi tutte insieme se il telefono lo permette, altrimenti (e al computer) arrivano in un unico file ZIP.`;
+  $("docsOk").textContent = n > 1 ? `Esporta ${n} schede` : "Esporta";
+}
+$("docsList").addEventListener("change", syncDocs);
+document.querySelectorAll('input[name="docsFmt"]').forEach(r=>r.addEventListener("change", syncDocs));
+$("docsAll").addEventListener("click", ()=>{ $("docsList").querySelectorAll("input").forEach(i=>i.checked = true); syncDocs(); });
+$("docsNone").addEventListener("click", ()=>{ $("docsList").querySelectorAll("input").forEach(i=>i.checked = false); syncDocs(); });
+$("fDocs").addEventListener("submit", e=>{
+  if(!e.submitter || e.submitter.value !== "ok") return;
+  if(!docsChecked().length){ e.preventDefault(); $("docsErr").textContent = "Scegli almeno un cliente da esportare."; }
+});
+async function exportDocs(){
+  if(exporting || !clients.length) return;
+  const sorted = [...clients].sort((a,b)=>a.name.localeCompare(b.name,"it"));
+  $("docsList").innerHTML = sorted.map(c=>`<label class="check"><input type="checkbox" value="${esc(c.id)}" checked><span>${esc(c.name)}</span></label>`).join("");
+  const last = settings.docsFmt === "pdf" ? "pdf" : "docx";
+  document.querySelectorAll('input[name="docsFmt"]').forEach(r=>r.checked = r.value === last);
+  syncDocs();
+  if(await ask("dlgDocs") !== "ok") return;
+  const kind = docsFmt(), ids = docsChecked();
+  if(settings.docsFmt !== kind){ settings.docsFmt = kind; saveSettings(); }
+  const list = sorted.filter(c=>ids.includes(c.id));
+  if(!list.length) return;
+  exporting = true; toast(list.length > 1 ? `Preparo ${list.length} schede…` : "Preparo la scheda…");
+  let ok = false;
+  try{
+    const files = [], used = new Set();
+    for(const c of list){
+      let nm = safeName(c.name), i = 2; while(used.has(nm.toLowerCase())) nm = `${safeName(c.name)} (${i++})`;
+      used.add(nm.toLowerCase());
+      files.push({name:`${nm}.${kind}`, blob: await makeFullFile(c, kind)});
+    }
+    const touch = !!(window.matchMedia && matchMedia("(pointer:coarse)").matches);
+    if(files.length === 1) ok = await saveFile(files[0].blob, files[0].name, touch);
+    else {
+      let shared = false;
+      if(touch && !store.downloads && navigator.canShare && navigator.share){
+        const objs = files.map(f=>new File([f.blob], f.name, {type: MIME[kind]}));
+        try{ if(navigator.canShare({files:objs})){ await navigator.share({files:objs, title:"Schede clienti"}); shared = ok = true; } }
+        catch(e){ if(e && e.name === "AbortError") return; console.warn(e); }
+      }
+      if(!shared){
+        const JSZip = await lib("jszip"), zip = new JSZip();
+        files.forEach(f=>zip.file(f.name, f.blob));
+        const d = new Date(), p = n => String(n).padStart(2,"0");
+        const zb = await zip.generateAsync({type:"blob", mimeType:MIME.zip});
+        ok = await saveFile(zb, `Gestionale PT - schede ${kind === "docx" ? "Word" : "PDF"} ${p(d.getDate())}-${p(d.getMonth()+1)}-${d.getFullYear()}.zip`, touch);
+      }
+    }
+  }catch(e){
+    console.error(e);
+    await messageBox("Esportazione non riuscita", e && e.message === "offline" ? OFFLINE_MSG : "Non sono riuscito a creare i documenti. Riprova.");
+    return;
+  }finally{ exporting = false; }
+  if(ok) toast(list.length > 1 ? `${list.length} schede ${kind === "docx" ? "Word" : "PDF"} pronte` : `Scheda ${kind === "docx" ? "Word" : "PDF"} pronta`);
 }
 
 /* ======================= ⚙ DATI DEL PROGRAMMA ======================= */

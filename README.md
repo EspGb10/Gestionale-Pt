@@ -31,7 +31,8 @@ Clienti, pacchetti, sedute e pagamenti. Funziona nel browser e si installa sulla
 
 - I dati restano **solo su questo dispositivo**. Ogni tanto tocca **⚙ Dati → Esporta dati** (con la spunta "Includi le cartelle dei clienti") e conserva lo ZIP (iCloud Drive, Google Drive, email): serve se cambi telefono o vuoi dare i dati a un'altra persona.
 - Togliendo quella spunta esporti **solo i dati del programma** (impostazioni), senza nessun dato dei clienti.
-- **Importa documenti** serve solo per le schede Word, PDF o di testo dei singoli clienti; i backup si importano da **⚙ Dati**.
+- **Esporta documenti** crea la scheda completa dei clienti che scegli, in **Word** o in **PDF**: sul telefono la condividi (WhatsApp, Mail, File), al computer la salvi in una cartella. Più clienti insieme arrivano in un unico ZIP.
+- **Importa documenti** legge quelle schede (Word, PDF, testo, oppure lo ZIP) e le trasforma di nuovo in cartelle normali. I backup completi invece si importano da **⚙ Dati**.
 - **Non caricare mai il file di backup su GitHub**: il repository è pubblico.
 - Funziona anche senza internet (compresi Word e PDF, dopo la prima apertura con internet).
 - In questa versione non ci sono i pulsanti Google Drive / Dropbox / condivisione con il cliente: servono il collegamento con claude.ai o una versione con account (si può aggiungere più avanti).
