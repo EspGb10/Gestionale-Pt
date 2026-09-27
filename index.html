@@ -202,7 +202,16 @@ button.x.ed{color:var(--moss)}
 .al-row.money .al-what{color:var(--owed);font-weight:600}
 .folder .alert{display:block;margin-top:8px;font-size:.8rem;font-weight:700;color:var(--owed)}
 .alert-box{background:var(--owed-soft);color:var(--pine);border-left:4px solid var(--owed);border-radius:8px;padding:8px 12px;margin:0 0 12px;font-size:.92rem;font-weight:600}
+.title-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.data-btn{font-size:.8rem;font-weight:600;padding:4px 11px;min-height:32px;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--pine);cursor:pointer;opacity:.85}
+.data-btn:hover{opacity:1;border-color:var(--pine)}
+.data-row{margin:4px 0 6px}
+#dlgData h4{margin-top:18px}
+.bk-line{margin:-6px 0 12px;font-size:.88rem;font-weight:600;color:var(--moss)}
+.bk-line.old{color:var(--owed)}
 .danger-zone{text-align:center;margin:28px 0 8px}
+.del-backup{background:var(--moss-soft);border-radius:10px;padding:12px;margin:12px 0}
+.del-backup .btn{width:100%}
 .danger-zone .wipe{background:none;border:none;color:var(--danger);font-weight:600;font-size:.85rem;padding:8px 10px;min-height:36px;opacity:.85;text-decoration:underline;text-underline-offset:3px}
 .fwrap{position:relative}
 .fwrap .folder{padding-top:44px}
@@ -282,7 +291,8 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
 <body>
 <div class="wrap" id="app"><div class="loading">Caricamento dei tuoi clienti…</div></div>
 
-<input type="file" id="importInput" accept=".docx,.doc,.pdf,.txt,.json,application/json,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword" multiple hidden>
+<input type="file" id="dataInput" accept=".zip,application/zip,application/x-zip-compressed,.json,application/json" hidden>
+<input type="file" id="importInput" accept=".docx,.doc,.pdf,.txt,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword" multiple hidden>
 
 <dialog id="dlgClient"><form method="dialog">
   <h3 id="dlgClientTitle">Nuova cartella</h3>
@@ -337,6 +347,19 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
   </div>
 </form></dialog>
 
+<dialog id="dlgData"><form method="dialog">
+  <h3>⚙ Dati del programma</h3>
+  <p class="hint" id="dataLast"></p>
+  <h4>Esporta</h4>
+  <label class="check carry"><input type="checkbox" id="dataInclude" checked><span id="dataIncludeText">Includi le cartelle dei clienti</span></label>
+  <p class="hint" id="dataHint"></p>
+  <div class="data-row"><button class="btn primary" value="export" id="dataExportBtn">Esporta dati</button></div>
+  <h4>Importa</h4>
+  <p class="hint">Scegli un file creato con “Esporta dati” (ZIP o .json). Il gestionale riconosce da solo se contiene anche i clienti: in quel caso ti chiede se aggiungerli o sostituire quelli attuali.</p>
+  <div class="data-row"><button type="button" class="btn" id="dataImportBtn">Importa dati</button></div>
+  <div class="dlg-actions"><button class="btn ghost" value="cancel" formnovalidate>Chiudi</button></div>
+</form></dialog>
+
 <dialog id="dlgFull"><form method="dialog">
   <h3>Importa backup completo</h3>
   <p id="fullText" style="white-space:pre-line"></p>
@@ -383,6 +406,11 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
   <h3 id="delTitle">Elimina</h3>
   <p id="delText" style="white-space:pre-line"></p>
   <div class="checks" id="delOpts"></div>
+  <div id="delBackup" class="del-backup" hidden>
+    <p class="hint" style="margin:0 0 8px">Consigliato: scarica un backup prima di cancellare. Con “Importa scheda o backup” potrai recuperare tutto.</p>
+    <button type="button" class="btn" id="delBackupBtn">📦 Scarica il backup (ZIP)</button>
+    <label class="check carry"><input type="checkbox" id="delBackupOk"><span>Ho salvato il backup (oppure ce l'ho già): so che dopo la cancellazione i dati si recuperano solo da lì.</span></label>
+  </div>
   <div id="delTypeWrap" hidden>
     <label for="delType">Per confermare scrivi CANCELLA</label>
     <input id="delType" autocomplete="off" autocapitalize="characters" placeholder="CANCELLA">
@@ -1590,15 +1618,15 @@ function listHTML(){
     c.packages.forEach(p=>{ const ps=stats(pkgClient(c,p)); sDone+=ps.done; paid+=ps.paid; due+=Math.max(ps.due,0); });   // anche i pacchetti vecchi
   });
   const needCount = clients.filter(followNeeds).length;
+  const bk = backupInfo();
   const q = query.trim();
   const list = clients.filter(c=>nameMatches(c.name, q)).sort((a,b)=>a.name.localeCompare(b.name,"it"));
 
   let h = `<header class="top">
-    <div><h1>I miei clienti</h1><p>Sedute one to one e pagamenti, una cartella per persona.</p>
+    <div><div class="title-row"><h1>I miei clienti</h1><button class="data-btn" data-a="dataMenu" title="Esporta o importa i dati del programma" aria-label="Dati del programma: esporta o importa">⚙ Dati</button></div><p>Sedute one to one e pagamenti, una cartella per persona.</p>
     <div id="saveStatus" class="status ${store.status==="ok"?"":store.status}">${esc(statusText())}</div></div>
     <div class="actions">
-      <button class="btn ghost" data-a="import">Importa scheda o backup</button>
-      <button class="btn ghost" data-a="exportAll">Esporta tutto</button>
+      <button class="btn ghost" data-a="import">Importa documenti</button>
       ${cloudAvailable() && clients.length ? `<button class="btn ghost" data-a="backup">Backup su Drive o Dropbox</button>` : ""}
       ${cloudAvailable() ? `<a class="btn ghost" id="openDbx" href="${dbxOpenUrl(DBX_ROOT)}" target="_blank" rel="noopener">${isIOS ? "Apri l'app Dropbox" : "Apri su Dropbox"}</a>
         <a class="btn ghost" id="openDrive" href="${driveWebUrl(settings.driveFolderId)}" target="_blank" rel="noopener">Apri su Drive</a>` : ""}
@@ -1609,8 +1637,9 @@ function listHTML(){
   if(!clients.length){
     return h + `<div class="empty"><h2>Ancora nessuna cartella</h2>
       <p>Crea la cartella del tuo primo cliente, oppure importa una scheda (Word, PDF o testo): la cartella prende il nome del file.</p>
-      <div class="actions"><button class="btn ghost" data-a="import">Importa scheda o backup</button><button class="btn primary" data-a="newClient">Crea la prima cartella</button></div></div>` + dangerZoneHTML();
+      <div class="actions"><button class="btn ghost" data-a="import">Importa documenti</button><button class="btn primary" data-a="newClient">Crea la prima cartella</button></div></div>` + dangerZoneHTML();
   }
+  if(bk) h += `<p class="bk-line${bk.old ? " old" : ""}">${esc(bk.text)}</p>`;
   h += alertsPanelHTML() + `<div class="totals">
     <div><b>${clients.length}</b><span>clienti</span></div>
     <div><b>${sDone}</b><span>sedute svolte</span></div>
@@ -1900,7 +1929,7 @@ async function clientForm(existing){
   render(); window.scrollTo({top:0});
 }
 
-const MIME = {pdf:"application/pdf", docx:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"};
+const MIME = {pdf:"application/pdf", docx:"application/vnd.openxmlformats-officedocument.wordprocessingml.document", zip:"application/zip", json:"application/json"};
 async function saveFile(blob, filename, share){
   if(store.downloads){
     try{ await store.downloads.save({filename, data:blob}); return true; }
@@ -2565,6 +2594,7 @@ async function handle(a, el){
     case "open": openId = el.dataset.id; render(); window.scrollTo({top:0}); return;
     case "doSearch": return runSearch();
     case "exportAll": return exportAll();
+    case "dataMenu": return dataMenu();
     case "clearSearch": { query = ""; render(); const s = $("search"); if(s) s.focus(); return; }
     case "quickEdit": { const q = getClient(el.dataset.id); return q && clientForm(q); }
     case "quickDel": return getClient(el.dataset.id) && deleteClient(el.dataset.id);
@@ -2748,17 +2778,26 @@ async function newPackage(id, thenSession){
 }
 
 /* ======================= CANCELLAZIONE ======================= */
-let delNeedWord = false;
+let delNeedWord = false, delNeedBackup = false;
+$("delBackupBtn").addEventListener("click", async ()=>{
+  const b = $("delBackupBtn"); b.disabled = true;
+  try{ if(await exportAll()){ $("delBackupOk").checked = true; $("delErr").textContent = ""; } }
+  finally{ b.disabled = false; }
+});
+$("delBackupOk").addEventListener("change", ()=>{ $("delErr").textContent = ""; });
 function delDialog(o){
   $("delTitle").textContent = o.title; $("delText").textContent = o.text;
   $("delOpts").innerHTML = (o.opts || []).map(x=>`<label class="check"><input type="checkbox" value="${x.k}"${x.on ? " checked" : ""}${x.lock ? " disabled" : ""}><span>${esc(x.label)}</span></label>`).join("");
   $("delOpts").hidden = !(o.opts && o.opts.length);
   delNeedWord = !!o.typeWord; $("delTypeWrap").hidden = !delNeedWord; $("delType").value = "";
+  delNeedBackup = !!o.backup; $("delBackup").hidden = !delNeedBackup; $("delBackupOk").checked = false;
   $("delErr").textContent = ""; $("delOk").textContent = o.ok || "Elimina";
   return ask("dlgDel").then(r => r === "ok" ? [...$("delOpts").querySelectorAll("input:checked")].map(i=>i.value) : null);
 }
 $("fDel").addEventListener("submit", e=>{
-  if(!e.submitter || e.submitter.value !== "ok" || !delNeedWord) return;
+  if(!e.submitter || e.submitter.value !== "ok") return;
+  if(delNeedBackup && !$("delBackupOk").checked){ e.preventDefault(); $("delErr").textContent = "Prima scarica il backup con il pulsante qui sopra, oppure spunta la casella se l'hai già."; return; }
+  if(!delNeedWord) return;
   if($("delType").value.trim().toUpperCase() !== "CANCELLA"){ e.preventDefault(); $("delErr").textContent = "Scrivi CANCELLA per confermare."; $("delType").focus(); }
 });
 $("delType").addEventListener("input", ()=>{ $("delErr").textContent = ""; });
@@ -2815,7 +2854,7 @@ async function wipeAll(){
   const sel = await delDialog({title:"Cancellare tutto?",
     text:"Il gestionale torna vuoto come il primo giorno. Non si può annullare: se vuoi tenere una copia, fai prima un backup." +
       (cloudAvailable() ? "\n\nSe elimini anche le cartelle nel cloud, i clienti con cui le hai condivise non le vedranno più." : ""),
-    opts, ok:"Cancella tutto", typeWord:true});
+    opts, ok:"Cancella tutto", typeWord:true, backup: clients.length > 0});
   if(!sel) return;
   exporting = true; toast("Sto cancellando…");
   const errs = [];
@@ -2829,7 +2868,7 @@ async function wipeAll(){
       catch(e){ console.error(e); errs.push("Google Drive: " + cloudErrorText(e, "drive")); }
     }
     for(const cid of clients.map(x=>x.id)) await removeClient(cid);
-    settings = {trainerName:"", driveFolderId: settings.driveFolderId || "", exportDest:"device", backupDest:"drive", followSvcs:["drive"]};
+    settings = {trainerName:"", driveFolderId: settings.driveFolderId || "", exportDest:"device", backupDest:"drive", followSvcs:["drive"], lastBackup: settings.lastBackup || ""};
     await saveSettings();
   } finally { exporting = false; }
   openId = null; query = ""; openPkgs.clear();
@@ -2987,9 +3026,10 @@ let importing = false;
 $("importInput").addEventListener("change", async e=>{
   let files = [...e.target.files]; e.target.value = "";
   if(!files.length || importing) return;
-  const fulls = files.filter(f=>/\.json$/i.test(f.name) || f.type === "application/json");
+  const fulls = files.filter(f=>/\.(json|zip)$/i.test(f.name) || /json|zip/.test(f.type || ""));
   files = files.filter(f=>!fulls.includes(f));
-  for(const f of fulls){ await importFull(f); }
+  if(fulls.length) await messageBox("Questo è un file dei dati del programma",
+    `${fulls.map(f=>`“${f.name}”`).join(", ")}: “Importa documenti” legge solo schede Word, PDF o di testo.\n\nPer importare un backup tocca “⚙ Dati” accanto a “I miei clienti”, poi “Importa dati”.`);
   if(!files.length) return;
   importing = true;
   let done = 0, lastId = null; const errors = [];
@@ -3029,19 +3069,115 @@ function fullBackup(){
   return {format:FULL_FMT, version:1, exported:new Date().toISOString(), app:"Gestionale Personal Trainer",
           settings:keep, clients:[...clients].sort((a,b)=>a.name.localeCompare(b.name,"it")).map(clone)};
 }
+/* ultimo backup completo scaricato: se è vecchio (o non c'è mai stato) lo ricordo */
+const BACKUP_DAYS = 14;
+function backupInfo(){
+  if(!clients.length) return null;
+  const t = settings.lastBackup ? new Date(settings.lastBackup) : null;
+  if(!t || isNaN(t)) return {old:true, text:"⚠ Non hai ancora scaricato un backup completo: tocca “⚙ Dati” accanto a “I miei clienti” → “Esporta dati”, e conserva il file ZIP."};
+  const days = Math.floor((Date.now() - t.getTime()) / 86400000);
+  const when = itDate(new Date(t.getTime() - t.getTimezoneOffset()*60000).toISOString().slice(0,10));
+  if(days >= BACKUP_DAYS) return {old:true, text:`⚠ Ultimo backup completo il ${when}, ${days} giorni fa: conviene farne uno nuovo.`};
+  return {old:false, text:`✓ Ultimo backup completo: ${when}${days === 0 ? " (oggi)" : days === 1 ? " (ieri)" : ""}`};
+}
+/* Backup completo in ZIP: dati per reimportare tutto, riepilogo per Excel, scheda PDF di ogni
+   cliente e istruzioni. Si tiene come copia di sicurezza o si dà a un'altra persona. */
+function csvSummary(){
+  const q = v => { const s = String(v ?? ""); return /[";\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s; };
+  const n2 = v => (Math.round((Number(v)||0)*100)/100).toFixed(2).replace(".", ",");
+  const rows = [["Cliente","Telefono","Email","Inizio pacchetto","Sedute fatte","Sedute nel pacchetto","Stato sedute","Totale da pagare","Già pagato","Da saldare","Stato pagamento","Pacchetti precedenti"]];
+  [...clients].sort((a,b)=>a.name.localeCompare(b.name,"it")).forEach(c=>{
+    const s = stats(c);
+    rows.push([c.name, c.phone, c.email, s.start ? itDate(s.start) : "", s.done, s.total, s.total ? (s.complete ? "Completato" : "In corso") : "",
+      n2(s.price), n2(s.paid), n2(Math.max(s.due,0)), s.price > 0 ? (s.due <= 0 ? "Saldato" : "Da saldare") : "", c.packages.length]);
+  });
+  return "\uFEFF" + rows.map(r=>r.map(q).join(";")).join("\r\n") + "\r\n";   // con BOM: Excel legge bene gli accenti
+}
+function readmeText(n, when){
+  return `GESTIONALE PERSONAL TRAINER - BACKUP COMPLETO
+Creato il ${when}. Clienti: ${n}.
+
+COSA C'È DENTRO
+- Gestionale PT - dati completi.json : tutti i dati (clienti, pacchetti, sedute,
+  pagamenti, impostazioni). Serve per reimportare tutto.
+- Riepilogo clienti.csv : tabella da aprire con Excel o Numbers.
+- Schede PDF : la scheda completa di ogni cliente, leggibile da chiunque.
+
+COME REIMPORTARE TUTTO
+1. Apri il gestionale.
+2. Tocca "⚙ Dati" accanto a "I miei clienti", poi "Importa dati".
+3. Scegli QUESTO FILE ZIP (non serve estrarlo).
+4. Se il gestionale ha già dei clienti, scegli "Aggiungi" oppure "Sostituisci tutto".
+
+ATTENZIONE
+Il backup contiene dati personali dei clienti, comprese le note private.
+Dallo solo a persone di fiducia e non pubblicarlo online.
+`;
+}
+let backingUp = false;
 async function exportAll(){
-  if(!clients.length){ toast("Non ci sono ancora clienti da esportare"); return; }
-  const d = new Date(), p = n => String(n).padStart(2,"0");
-  const name = `Gestionale PT - backup completo ${p(d.getDate())}-${p(d.getMonth()+1)}-${d.getFullYear()}.json`;
-  const blob = new Blob([JSON.stringify(fullBackup(), null, 1)], {type:"application/json"});
-  const ok = await saveFile(blob, name);
-  if(ok) toast(`Backup completo pronto: ${clients.length} ${clients.length === 1 ? "cliente" : "clienti"}`);
+  if(backingUp) return false;
+  if(!clients.length){ toast("Non ci sono ancora clienti da salvare"); return false; }
+  backingUp = true; toast("Preparo il backup…");
+  try{
+    const JSZip = await lib("jszip");
+    const zip = new JSZip();
+    const d = new Date(), p = n => String(n).padStart(2,"0");
+    const day = `${p(d.getDate())}-${p(d.getMonth()+1)}-${d.getFullYear()}`;
+    zip.file("Gestionale PT - dati completi.json", JSON.stringify(fullBackup(), null, 1));
+    zip.file("Riepilogo clienti.csv", csvSummary());
+    zip.file("LEGGIMI.txt", readmeText(clients.length, `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} alle ${p(d.getHours())}.${p(d.getMinutes())}`));
+    let pdfOk = 0;
+    try{
+      const jsPDF = await lib("jspdf"), used = new Set();
+      for(const c of [...clients].sort((a,b)=>a.name.localeCompare(b.name,"it"))){
+        let nm = safeName(c.name), i = 2; while(used.has(nm.toLowerCase())) nm = `${safeName(c.name)} (${i++})`;
+        used.add(nm.toLowerCase());
+        zip.file(`Schede PDF/${nm}.pdf`, buildPdf(c, jsPDF).output("arraybuffer")); pdfOk++;
+      }
+    }catch(e){ console.warn("PDF nel backup", e); }
+    const blob = await zip.generateAsync({type:"blob", mimeType:MIME.zip, compression:"DEFLATE"});
+    const touch = !!(window.matchMedia && matchMedia("(pointer:coarse)").matches);   // sul telefono: condividi (WhatsApp, email, File…)
+    const ok = await saveFile(blob, `Gestionale PT - backup ${day}.zip`, touch);
+    if(ok){
+      settings.lastBackup = new Date().toISOString(); saveSettings();
+      if(!openId) render();
+      toast(`Backup pronto: ${clients.length} ${clients.length === 1 ? "cliente" : "clienti"}${pdfOk < clients.length ? " (senza schede PDF: manca internet)" : ""}`);
+    }
+    return !!ok;
+  }catch(e){
+    console.error(e);
+    await messageBox("Backup non riuscito", e && e.message === "offline" ? OFFLINE_MSG : "Non sono riuscito a creare il backup. Riprova.");
+    return false;
+  }finally{ backingUp = false; }
+}
+async function readBackupFile(file){
+  const isZip = /\.zip$/i.test(file.name) || /zip/.test(file.type || "");
+  if(!isZip){ try{ return JSON.parse(await file.text()); }catch(_){ return null; } }
+  let zip;
+  try{ const JSZip = await lib("jszip"); zip = await JSZip.loadAsync(await file.arrayBuffer()); }
+  catch(e){ if(e && e.message === "offline") throw e; return null; }
+  for(const f of Object.values(zip.files).filter(f=>!f.dir && /\.json$/i.test(f.name))){
+    try{ const d = JSON.parse(await f.async("string")); if(d && d.format === FULL_FMT) return d; }catch(_){}
+  }
+  return null;
 }
 async function importFull(file){
   let data;
-  try{ data = JSON.parse(await file.text()); }catch(_){ data = null; }
-  if(!data || data.format !== FULL_FMT || !Array.isArray(data.clients)){
-    await messageBox("File non riconosciuto", `“${file.name}” non è un backup completo del gestionale. Usa un file creato con “Esporta tutto”.`); return;
+  try{ data = await readBackupFile(file); }
+  catch(e){ await messageBox("Import non riuscito", e && e.message === "offline" ? OFFLINE_MSG : "Non sono riuscito ad aprire il file."); return; }
+  if(!data || data.format !== FULL_FMT){
+    await messageBox("File non riconosciuto", `“${file.name}” non è un file di dati del gestionale. Usa un file creato con “⚙ Dati” → “Esporta dati”.`); return;
+  }
+  const S_KEYS = ["trainerName","folderPattern","alertLeft","exportDest","backupDest","followSvcs"];
+  const applySettings = async ()=>{
+    const s = data.settings && typeof data.settings === "object" ? data.settings : {};
+    S_KEYS.forEach(k=>{ if(s[k] !== undefined && s[k] !== "") settings[k] = clone(s[k]); });
+    await saveSettings();
+  };
+  if(!Array.isArray(data.clients)){                     // solo dati del programma, senza clienti
+    await applySettings(); render();
+    toast("Dati del programma importati: i tuoi clienti non sono stati toccati"); return;
   }
   const incoming = data.clients.filter(x=>x && typeof x === "object").map(normalize);
   const when = data.exported ? new Date(data.exported) : null;
@@ -3063,12 +3199,50 @@ async function importFull(file){
       }
       commit(nc, true);
     }
-    const s = data.settings && typeof data.settings === "object" ? data.settings : {};
-    ["trainerName","folderPattern","alertLeft"].forEach(k=>{ if(s[k] !== undefined && s[k] !== "") settings[k] = clone(s[k]); });
-    await saveSettings();
+    await applySettings();
   } finally { importing = false; }
   openId = null; query = ""; render(); window.scrollTo({top:0});
   toast(`Backup importato: ${incoming.length} ${incoming.length === 1 ? "cliente" : "clienti"}`);
+}
+
+/* ======================= ⚙ DATI DEL PROGRAMMA ======================= */
+/* Esporta: con le cartelle dei clienti (ZIP completo) oppure solo i dati del programma (impostazioni).
+   Importa: riconosce da solo che cosa contiene il file. */
+async function exportProgram(){
+  const d = new Date(), p = n => String(n).padStart(2,"0");
+  const full = fullBackup();
+  const data = {format:FULL_FMT, version:2, kind:"program", exported:full.exported, app:full.app, settings:full.settings};
+  const blob = new Blob([JSON.stringify(data, null, 1)], {type:"application/json"});
+  const ok = await saveFile(blob, `Gestionale PT - dati del programma ${p(d.getDate())}-${p(d.getMonth()+1)}-${d.getFullYear()}.json`);
+  if(ok) toast("Dati del programma esportati (senza le cartelle dei clienti)");
+  return !!ok;
+}
+function syncDataDlg(){
+  const inc = $("dataInclude").checked && clients.length > 0;
+  $("dataHint").textContent = inc
+    ? "Backup completo in ZIP: tutte le cartelle dei clienti (sedute, pagamenti, pacchetti, note), una scheda PDF per ogni cliente, un riepilogo per Excel e i dati del programma. Contiene dati personali: conservalo con cura."
+    : "Solo i dati del programma: il tuo nome, lo schema dei nomi delle cartelle, la soglia degli avvisi e le preferenze di salvataggio. Nessun dato dei clienti.";
+}
+$("dataInclude").addEventListener("change", syncDataDlg);
+$("dataImportBtn").addEventListener("click", ()=>{
+  $("dlgData").close("cancel");
+  $("dataInput").click();                                  // subito, dentro il tocco: così su iPhone si apre la scelta del file
+});
+$("dataInput").addEventListener("change", async e=>{
+  const files = [...e.target.files]; e.target.value = "";
+  for(const f of files) await importFull(f);
+});
+async function dataMenu(){
+  const n = clients.length;
+  $("dataInclude").checked = n > 0; $("dataInclude").disabled = n === 0;
+  $("dataIncludeText").textContent = n ? `Includi le cartelle dei clienti (${n} ${n === 1 ? "cliente" : "clienti"})` : "Includi le cartelle dei clienti (per ora non ce ne sono)";
+  const bk = backupInfo();
+  $("dataLast").textContent = !bk ? "" : settings.lastBackup ? bk.text : "⚠ Non hai ancora fatto un backup completo con le cartelle dei clienti.";
+  $("dataLast").hidden = !bk;
+  syncDataDlg();
+  if(await ask("dlgData") !== "export") return;
+  if($("dataInclude").checked && clients.length) return exportAll();
+  return exportProgram();
 }
 
 /* ======================= AVVIO ======================= */
