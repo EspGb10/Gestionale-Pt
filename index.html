@@ -1,0 +1,3085 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gestionale Personal Trainer</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#2F6B4F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Gestionale PT">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --chalk:#EEF1EC; --paper:#FFFFFF; --pine:#1C2B24; --moss:#2F6B4F; --moss-soft:#D7E6DC; --on-moss:#FFFFFF;
+  --folder:#E9DDBF; --folder-edge:#D4C39A; --owed:#B45309; --owed-soft:#FCEBD3;
+  --muted:#5E6B64; --line:#CFD6D0; --danger:#B42318;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --chalk:#141B17; --paper:#1D2621; --pine:#E6ECE8; --moss:#6FBF93; --moss-soft:#24392D; --on-moss:#0E1C15;
+    --folder:#3A3424; --folder-edge:#524A33; --owed:#F2A94B; --owed-soft:#3B2C17;
+    --muted:#9AA8A0; --line:#33403A; --danger:#F07167;
+  }
+}
+:root[data-theme="dark"]{
+  --chalk:#141B17; --paper:#1D2621; --pine:#E6ECE8; --moss:#6FBF93; --moss-soft:#24392D; --on-moss:#0E1C15;
+  --folder:#3A3424; --folder-edge:#524A33; --owed:#F2A94B; --owed-soft:#3B2C17;
+  --muted:#9AA8A0; --line:#33403A; --danger:#F07167;
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{margin:0}
+body{background:var(--chalk);color:var(--pine);font-family:"Barlow",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%}
+h1,h2,h3{font-family:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;font-weight:700;line-height:1.1;margin:0}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:3px solid var(--moss);outline-offset:2px}
+
+.wrap{max-width:1040px;margin:0 auto;padding:20px 16px 60px}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:24px}
+header.top h1{font-size:clamp(2rem,6vw,3.2rem);letter-spacing:-.01em}
+header.top p{margin:4px 0 0;color:var(--muted)}
+.status{font-size:.85rem;color:var(--muted);display:flex;align-items:center;gap:6px;margin-top:6px}
+.status::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--moss)}
+.status.saving::before{background:var(--owed)}
+.status.error{color:var(--danger)}
+.status.error::before{background:var(--danger)}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+
+.btn{border:1.5px solid var(--pine);background:transparent;border-radius:8px;padding:9px 14px;font-weight:600;min-height:44px;white-space:nowrap}
+.btn.primary{background:var(--moss);border-color:var(--moss);color:var(--on-moss)}
+.btn.small{padding:6px 10px;min-height:36px;font-size:.9rem}
+a.btn{display:flex;align-items:center;justify-content:center;color:var(--pine)}
+a.btn.primary{color:var(--on-moss)}
+a.btn[hidden]{display:none}
+.btn.ghost{border-color:var(--line)}
+.btn.danger{border-color:var(--danger);color:var(--danger)}
+.btn.danger.fill{background:var(--danger);color:#fff}
+.btn:hover{filter:brightness(1.08)}
+.btn[disabled]{opacity:.5;cursor:default}
+
+.totals{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:24px}
+.totals div{background:var(--paper);padding:12px 14px}
+.totals b{display:block;font-family:"Barlow Condensed",sans-serif;font-size:1.7rem;line-height:1}
+.totals span{color:var(--muted);font-size:.9rem}
+.totals .owed b{color:var(--owed)}
+
+.searchbar{position:relative;margin-bottom:22px}
+.search{width:100%;padding:12px 100px 12px 14px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper)}
+.search::-webkit-search-cancel-button{-webkit-appearance:none;display:none}
+.s-btn{position:absolute;top:50%;transform:translateY(-50%);height:40px;border:none;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}
+.s-go{right:5px;width:48px;background:var(--moss);color:var(--on-moss)}
+.s-go:hover{filter:brightness(1.08)}
+.s-clear{right:58px;width:36px;background:transparent;color:var(--muted);font-size:1.05rem;font-weight:700}
+.found{margin:-12px 0 16px;font-size:.92rem;font-weight:600;color:var(--moss)}
+
+.folders{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:26px 18px}
+.folder{position:relative;display:block;text-align:left;background:var(--folder);border:1.5px solid var(--folder-edge);border-radius:0 10px 10px 10px;padding:16px 16px 14px;margin-top:14px;width:100%;transition:transform .15s}
+.folder::before{content:"";position:absolute;left:-1.5px;top:-15px;width:42%;height:15px;background:var(--folder);border:1.5px solid var(--folder-edge);border-bottom:none;border-radius:8px 14px 0 0}
+.folder .fname{display:block;font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:700;font-size:1.45rem;line-height:1.1;margin-bottom:10px;overflow-wrap:anywhere}
+.folder .row{display:flex;justify-content:space-between;gap:8px;font-size:.92rem;color:var(--muted)}
+.folder .row strong{color:var(--pine);text-align:right}
+.folder .row strong.due{color:var(--owed)}
+.folder .freq{display:block;font-size:.85rem;color:var(--muted);margin-top:8px}
+.folder:hover{transform:translateY(-2px)}
+
+.dots{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 10px}
+.dot{width:12px;height:12px;border-radius:50%;border:1.5px solid var(--moss);background:transparent}
+.dot.on{background:var(--moss)}
+.dots.big .dot{width:22px;height:22px}
+.more{font-size:.8rem;color:var(--muted);align-self:center}
+
+.empty{border:2px dashed var(--line);border-radius:12px;padding:40px 20px;text-align:center;color:var(--muted)}
+.empty h2{color:var(--pine);font-size:1.8rem;margin-bottom:6px}
+.empty .actions{justify-content:center;margin-top:12px}
+.loading{padding:60px 0;text-align:center;color:var(--muted)}
+
+.back{background:none;border:none;padding:8px 0;color:var(--moss);font-weight:600;margin-bottom:10px;min-height:44px}
+.detail-head{background:var(--folder);border:1.5px solid var(--folder-edge);border-radius:0 12px 12px 12px;padding:20px;position:relative;margin-top:16px}
+.detail-head::before{content:"";position:absolute;left:-1.5px;top:-17px;width:180px;max-width:45%;height:17px;background:var(--folder);border:1.5px solid var(--folder-edge);border-bottom:none;border-radius:8px 16px 0 0}
+.detail-head h2{font-size:clamp(2rem,6vw,2.8rem);overflow-wrap:anywhere}
+.contact{color:var(--muted);margin:4px 0 12px;overflow-wrap:anywhere}
+.big-count{font-family:"Barlow Condensed",sans-serif;font-size:1.5rem;font-weight:700}
+.head-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+
+section.block{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:18px}
+section.block .bh{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+section.block h3{font-size:1.4rem}
+.sub{font-size:.9rem;color:var(--muted);margin:6px 0 14px}
+
+.fields{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.field{border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--chalk);min-width:0}
+.field label{display:block;margin:0 0 4px;font-size:.85rem;color:var(--muted);font-weight:600}
+.stepper{display:flex;align-items:center;gap:6px}
+.stepper input,.field input.big{width:100%;min-width:0;border:none;background:transparent;font-family:"Barlow Condensed",sans-serif;font-size:1.8rem;font-weight:700;padding:0;border-radius:6px}
+.stepper input{text-align:center}
+.stepper button{flex:0 0 auto;width:44px;height:44px;border-radius:8px;border:1.5px solid var(--moss);background:var(--paper);font-size:1.3rem;font-weight:700;color:var(--moss)}
+.field .row2{display:flex;align-items:center;gap:8px}
+.field.due{background:var(--owed-soft);border-color:transparent}
+.field.due .val{font-family:"Barlow Condensed",sans-serif;font-size:1.8rem;font-weight:700;color:var(--owed)}
+.field.ok{background:var(--moss-soft);border-color:transparent}
+.field.ok .val{font-family:"Barlow Condensed",sans-serif;font-size:1.8rem;font-weight:700;color:var(--moss)}
+
+.info dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 16px;margin:0}
+.info dt{color:var(--muted);font-size:.92rem}
+.info dd{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1.5px solid var(--moss);color:var(--moss);border-radius:999px;padding:1px 10px;font-size:.88rem;font-weight:600}
+
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:.85rem}
+td.num,th.num{text-align:right;white-space:nowrap}
+td.act{text-align:right;white-space:nowrap;width:1%}
+td.date{white-space:nowrap}
+.x{background:none;border:none;color:var(--muted);padding:6px 10px;border-radius:6px;min-height:36px}
+.x:hover{color:var(--danger);background:var(--owed-soft)}
+.none{color:var(--muted);font-size:.95rem;margin:4px 0}
+
+dialog{border:none;border-radius:14px;padding:0;width:min(480px,94vw);max-height:90vh;overflow:auto;background:var(--paper);color:var(--pine)}
+dialog::backdrop{background:rgba(10,20,15,.5)}
+dialog form{padding:20px}
+.dlg-x{position:sticky;top:0;float:right;z-index:3;width:42px;height:42px;margin:-8px -8px 4px 10px;padding:0;border-radius:50%;border:1px solid var(--line);background:var(--paper);color:var(--pine);font-size:1.15rem;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);cursor:pointer}
+.dlg-x:hover{border-color:var(--pine)}
+dialog h3{font-size:1.6rem;margin-bottom:14px}
+dialog h4{font-family:"Barlow Condensed",sans-serif;font-size:1.15rem;margin:18px 0 0;padding-top:12px;border-top:1px solid var(--line)}
+dialog p{margin:0 0 10px;white-space:pre-line}
+dialog label{display:block;font-size:.9rem;font-weight:600;margin:10px 0 4px}
+dialog input,dialog textarea,dialog select{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--chalk);font-size:16px}
+dialog textarea{min-height:64px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.days{display:flex;flex-wrap:wrap;gap:6px}
+.days label{margin:0;font-weight:600;position:relative}
+.days input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
+.days span{display:inline-block;padding:8px 13px;border:1.5px solid var(--line);border-radius:999px;cursor:pointer;user-select:none}
+.days input:checked + span{background:var(--moss);border-color:var(--moss);color:var(--on-moss)}
+.days input:focus-visible + span{outline:3px solid var(--moss);outline-offset:2px}
+.dlg-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin-top:18px}
+.hint{font-size:.85rem;color:var(--muted);margin:6px 0 0;font-weight:400}
+.err{color:var(--danger);font-size:.88rem;margin:6px 0 0;min-height:1em}
+
+.choice{display:grid;gap:10px}
+.choice button{display:flex;align-items:center;gap:14px;text-align:left;width:100%;padding:14px;border:1.5px solid var(--line);border-radius:10px;background:var(--chalk)}
+.choice button:hover{border-color:var(--moss)}
+.choice .ico{flex:0 0 auto;width:46px;height:54px;border-radius:4px 12px 4px 4px;display:grid;place-items:center;color:#fff;font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:1rem}
+.choice .ico.w{background:#2B579A}
+.choice .ico.p{background:#B42318}
+.choice strong{display:block;font-size:1.05rem}
+.choice small{color:var(--muted)}
+.choice .ico.t{background:#0061FE}
+.choice button[hidden],dialog .seg label[hidden]{display:none}
+
+.follow{border-left:5px solid var(--moss)}
+td.act{white-space:nowrap;position:sticky;right:0;background:var(--paper);box-shadow:-8px 0 8px -8px rgba(0,0,0,.25)}
+th:last-child{position:sticky;right:0;background:var(--paper)}
+a.btn{text-decoration:none}
+button.x.ed{font-size:1.05rem}
+button.x.ed{color:var(--moss)}
+.pkg-body .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.pkg-body .acts .btn{margin-top:0}
+.alerts{background:var(--owed-soft);border:1.5px solid var(--owed);border-radius:12px;padding:12px 14px;margin:14px 0}
+.alerts.ok{background:var(--moss-soft);border-color:var(--line)}
+.alerts .al-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px 12px}
+.alerts h3{font-size:1.2rem;margin:0}
+.alerts.ok h3{color:var(--moss)}
+.alerts .sub{margin:6px 0 0}
+.al-set{font-size:.85rem;color:var(--muted);display:flex;align-items:center;gap:6px;margin:0}
+.al-set input{width:3.2em;min-height:34px;padding:4px 6px;text-align:center;font-size:.95rem}
+.al-list{display:grid;gap:6px;margin-top:10px}
+.al-row{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;background:var(--paper);border:1px solid var(--line);border-left:5px solid var(--moss);border-radius:8px;padding:9px 12px;min-height:44px;width:100%}
+.al-row.money{border-left-color:var(--owed)}
+.al-name{font-weight:700}
+.al-what{font-size:.88rem;color:var(--muted)}
+.al-row.money .al-what{color:var(--owed);font-weight:600}
+.folder .alert{display:block;margin-top:8px;font-size:.8rem;font-weight:700;color:var(--owed)}
+.alert-box{background:var(--owed-soft);color:var(--pine);border-left:4px solid var(--owed);border-radius:8px;padding:8px 12px;margin:0 0 12px;font-size:.92rem;font-weight:600}
+.danger-zone{text-align:center;margin:28px 0 8px}
+.danger-zone .wipe{background:none;border:none;color:var(--danger);font-weight:600;font-size:.85rem;padding:8px 10px;min-height:36px;opacity:.85;text-decoration:underline;text-underline-offset:3px}
+.fwrap{position:relative}
+.fwrap .folder{padding-top:44px}
+.ftools{position:absolute;top:22px;right:8px;display:flex;gap:4px}
+.ftool{width:36px;height:36px;border-radius:8px;border:1px solid var(--folder-edge);background:var(--paper);color:var(--pine);font-weight:700;font-size:.95rem;display:flex;align-items:center;justify-content:center;padding:0}
+.ftool.del{color:var(--danger)}
+.ftool:hover{border-color:var(--pine)}
+.ticks{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tick{display:inline-block;font-size:.78rem;font-weight:700;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:transparent}
+.tick.on{background:var(--moss);border-color:var(--moss);color:var(--on-moss)}
+#headTicks .ticks{margin:6px 0 10px}
+.openbtns{display:grid;gap:8px}
+.pkg-line{margin:2px 0 4px;font-size:.95rem;color:var(--muted)}
+.done-badge{display:inline-block;background:var(--moss);color:var(--on-moss);font-weight:700;border-radius:999px;padding:3px 12px;font-size:.9rem}
+.folder .pk{display:block;font-size:.82rem;font-weight:600;color:var(--muted);margin:-2px 0 6px}
+.folder .pk.done{color:var(--moss)}
+details.pkg{border:1px solid var(--line);border-radius:10px;margin-top:10px;background:var(--paper)}
+details.pkg summary{cursor:pointer;padding:12px 14px;list-style:none;display:flex;flex-direction:column;gap:3px;min-height:44px}
+details.pkg summary::-webkit-details-marker{display:none}
+details.pkg summary .pt{font-weight:700}
+details.pkg summary .pt::before{content:"▸ ";color:var(--moss)}
+details.pkg[open] summary .pt::before{content:"▾ "}
+details.pkg summary .ps{font-size:.88rem;color:var(--muted)}
+details.pkg .ok{color:var(--moss)} details.pkg .due{color:var(--owed)}
+.pkg-body{padding:0 14px 14px}
+.pkg-body .lbl{font-weight:700;margin:10px 0 4px;font-size:.9rem}
+.pkg-body .btn{margin-top:12px}
+dialog label[hidden]{display:none}
+dialog label.check.carry{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-weight:600}
+dialog label.check.carry input{width:22px;height:22px;flex:none;margin-top:1px}
+dialog label.check.carry[hidden]{display:none}
+.folder .sh{display:block;margin-top:6px;font-size:.8rem;font-weight:600;color:var(--moss)}
+.folder .sh.stale{color:var(--owed)}
+.follow .state{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin:4px 0 12px;font-size:.95rem}
+.follow .svc{display:inline-block;padding:3px 10px;border-radius:999px;font-weight:600;font-size:.82rem;background:var(--moss-soft);color:var(--moss)}
+.follow .svc.dbx{background:#DCE8FF;color:#0048BD}
+.follow .stale{color:var(--owed);font-weight:600}
+.follow .fresh{color:var(--moss);font-weight:600}
+.follow .acts{display:flex;flex-wrap:wrap;gap:8px}
+.seg.multi input:checked + span::before{content:"✓ "}
+#followSvcHint,#linkText,#linkWarn{white-space:pre-line}
+.lk-t{margin:10px 0 2px;font-weight:700;font-size:.9rem}
+.linkbox{display:flex;gap:8px;margin:6px 0 4px}
+.linkbox input{flex:1;min-width:0;font-size:14px!important}
+.bigbtns{display:grid;gap:8px;margin-top:12px}
+.bigbtns a{text-decoration:none;text-align:center}
+.warn{background:var(--owed-soft);color:var(--pine);border-radius:8px;padding:10px 12px;font-size:.88rem;margin:10px 0 0}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .follow .svc.dbx{background:#15294D;color:#9DBEFF} }
+:root[data-theme="dark"] .follow .svc.dbx{background:#15294D;color:#9DBEFF}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--pine);color:var(--chalk);padding:10px 16px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;text-align:center;z-index:10}
+.toast.show{opacity:1}
+
+.checks{display:grid;margin:6px 0 4px}
+dialog .check{display:flex;align-items:center;gap:12px;padding:10px 2px;border-bottom:1px solid var(--line);margin:0;font-weight:500;cursor:pointer}
+dialog .check input{width:22px;height:22px;flex:0 0 auto;margin:0;padding:0;accent-color:var(--moss)}
+dialog .check.sub{padding-left:34px}
+dialog .check.dis{opacity:.45;cursor:default}
+.seg{display:flex;gap:8px}
+dialog .seg label{flex:1;margin:0;position:relative}
+dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
+.seg span{display:block;text-align:center;padding:10px;border:1.5px solid var(--line);border-radius:8px;font-weight:600;cursor:pointer}
+.seg input:checked + span{background:var(--moss);color:var(--on-moss);border-color:var(--moss)}
+.seg input:focus-visible + span{outline:3px solid var(--moss);outline-offset:2px}
+.note-box{background:var(--chalk);border-radius:8px;padding:10px 12px;font-size:.88rem;color:var(--muted);margin:0 0 12px}
+
+@media (max-width:560px){
+  .fields{grid-template-columns:1fr}
+  .two{grid-template-columns:1fr}
+  .info dl{grid-template-columns:1fr}
+  .info dt{margin-top:6px}
+  .head-actions .btn{flex:1 1 auto}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><div class="loading">Caricamento dei tuoi clienti…</div></div>
+
+<input type="file" id="importInput" accept=".docx,.doc,.pdf,.txt,.json,application/json,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword" multiple hidden>
+
+<dialog id="dlgClient"><form method="dialog">
+  <h3 id="dlgClientTitle">Nuova cartella</h3>
+  <label for="cName">Nome e cognome</label>
+  <input id="cName" required autocomplete="off">
+  <div class="two">
+    <div><label for="cPhone">Telefono</label><input id="cPhone" type="text" autocomplete="off"></div>
+    <div><label for="cEmail">Email</label><input id="cEmail" type="email" autocomplete="off"></div>
+  </div>
+  <h4>Pacchetto</h4>
+  <label for="cStart">Data di inizio del pacchetto</label>
+  <input id="cStart" type="date">
+  <div class="two">
+    <div><label for="cTotal">Sedute nel pacchetto</label><input id="cTotal" type="text" placeholder="es. 10"></div>
+    <div><label for="cDone">Sedute già fatte</label><input id="cDone" type="text" placeholder="0"></div>
+  </div>
+  <div class="two">
+    <div><label for="cPrice">Totale da pagare (€)</label><input id="cPrice" type="text" placeholder="es. 400"></div>
+    <div><label for="cPaid">Già pagato / acconto (€)</label><input id="cPaid" type="text" placeholder="0"></div>
+  </div>
+  <h4>Informazioni facoltative</h4>
+  <div class="two">
+    <div><label for="cFreq">Quante volte a settimana</label><input id="cFreq" type="text" placeholder="es. 3"></div>
+    <div></div>
+  </div>
+  <label>In quali giorni si allena</label>
+  <div class="days" id="cDays"></div>
+  <label for="cTraining">Allenamento</label>
+  <textarea id="cTraining" placeholder="Obiettivo, tipo di scheda, livello…"></textarea>
+  <label for="cNotes">Note</label>
+  <textarea id="cNotes" placeholder="Infortuni, orari preferiti, altro…"></textarea>
+  <div class="dlg-actions">
+    <button class="btn ghost" value="cancel" formnovalidate>Annulla</button>
+    <button class="btn primary" value="ok">Salva</button>
+  </div>
+</form></dialog>
+
+<dialog id="dlgPkg"><form method="dialog" id="fPkg">
+  <h3 id="pkgTitle">Nuovo pacchetto</h3>
+  <p class="note-box" id="pkgNote" style="white-space:pre-line"></p>
+  <label for="pStart">Data di inizio</label>
+  <input id="pStart" type="date">
+  <div class="two">
+    <div><label for="pTotal">Sedute nel pacchetto</label><input id="pTotal" type="text" placeholder="es. 10" autocomplete="off"></div>
+    <div><label for="pPrice">Totale da pagare (€)</label><input id="pPrice" type="text" placeholder="es. 400" autocomplete="off"></div>
+  </div>
+  <label class="check carry" id="pCarryL" hidden><input type="checkbox" id="pCarry" checked><span id="pCarryText"></span></label>
+  <p class="err" id="pkgErr" role="alert"></p>
+  <div class="dlg-actions">
+    <button class="btn ghost" value="cancel" formnovalidate>Annulla</button>
+    <button class="btn primary" value="ok">Inizia il nuovo pacchetto</button>
+  </div>
+</form></dialog>
+
+<dialog id="dlgFull"><form method="dialog">
+  <h3>Importa backup completo</h3>
+  <p id="fullText" style="white-space:pre-line"></p>
+  <div class="dlg-actions">
+    <button class="btn ghost" value="cancel" formnovalidate>Annulla</button>
+    <button class="btn" value="add">Aggiungi</button>
+    <button class="btn danger fill" value="replace">Sostituisci tutto</button>
+  </div>
+</form></dialog>
+
+<dialog id="dlgName"><form method="dialog" id="fName">
+  <h3>Rinomina cliente</h3>
+  <label for="nName">Nome e cognome</label>
+  <input id="nName" autocomplete="off">
+  <label class="check carry" id="nFolderL" hidden><input type="checkbox" id="nFolder" checked><span id="nFolderText"></span></label>
+  <p class="err" id="nErr" role="alert"></p>
+  <div class="dlg-actions">
+    <button class="btn ghost" value="cancel" formnovalidate>Annulla</button>
+    <button class="btn primary" value="ok">Rinomina</button>
+  </div>
+</form></dialog>
+
+<dialog id="dlgPkgEdit"><form method="dialog" id="fPkgEdit">
+  <h3>Modifica pacchetto</h3>
+  <div class="two">
+    <div><label for="eStart">Inizio</label><input id="eStart" type="date"></div>
+    <div><label for="eEnd">Fine</label><input id="eEnd" type="date"></div>
+  </div>
+  <div class="two">
+    <div><label for="eTotal">Sedute nel pacchetto</label><input id="eTotal" type="text" autocomplete="off"></div>
+    <div><label for="eDone">Sedute fatte</label><input id="eDone" type="text" autocomplete="off"></div>
+  </div>
+  <div class="two">
+    <div><label for="ePrice">Totale da pagare (€)</label><input id="ePrice" type="text" autocomplete="off"></div>
+    <div><label for="ePaid">Già pagato (€)</label><input id="ePaid" type="text" autocomplete="off"></div>
+  </div>
+  <div class="dlg-actions">
+    <button class="btn ghost" value="cancel" formnovalidate>Annulla</button>
+    <button class="btn primary" value="ok">Salva</button>
+  </div>
+</form></dialog>
+
+<dialog id="dlgDel"><form method="dialog" id="fDel">
+  <h3 id="delTitle">Elimina</h3>
+  <p id="delText" style="white-space:pre-line"></p>
+  <div class="checks" id="delOpts"></div>
+  <div id="delTypeWrap" hidden>
+    <label for="delType">Per confermare scrivi CANCELLA</label>
+    <input id="delType" autocomplete="off" autocapitalize="characters" placeholder="CANCELLA">
+  </div>
+  <p class="err" id="delErr" role="alert"></p>
+  <div class="dlg-actions">
+    <button class="btn ghost" value="cancel" formnovalidate>Annulla</button>
+    <button class="btn danger fill" value="ok" id="delOk">Elimina</button>
+  </div>
+</form></dialog>
+
+<dialog id="dlgSes"><form method="dialog">
+  <h3 id="sesTitle">Segna seduta</h3>
+  <label for="sDate">Data</label>
+  <input id="sDate" type="date" required>
+  <label for="sNote">Cosa avete fatto (facoltativo)</label>
+  <input id="sNote" placeholder="es. Gambe + core" autocomplete="off">
+  <p class="hint" id="sesHint">Le sedute fatte aumentano di 1.</p>
+  <div class="dlg-actions">
+    <button class="btn ghost" value="cancel" formnovalidate>Annulla</button>
+    <button class="btn primary" value="ok" id="sesOk">Segna seduta</button>
+  </div>
+</form></dialog>
+
+<dialog id="dlgPay"><form method="dialog" id="fPay">
+  <h3 id="payTitle">Aggiungi rata</h3>
+  <div class="two">
+    <div><label for="yAmount">Importo (€)</label><input id="yAmount" type="text" autocomplete="off" placeholder="es. 50 oppure 50,50"></div>
+    <div><label for="yDate">Data</label><input id="yDate" type="date" required></div>
+  </div>
+  <label for="yMethod">Metodo</label>
+  <input id="yMethod" list="methodList" autocomplete="off" placeholder="es. Contanti, Bonifico, Satispay…">
+  <datalist id="methodList"><option value="Contanti"><option value="Bonifico"><option value="Carta"><option value="Satispay"><option value="PayPal"></datalist>
+  <label for="yNote">Note</label>
+  <input id="yNote" placeholder="es. seconda rata" autocomplete="off">
+  <p class="hint" id="payHint">L'importo viene sommato al “già pagato”.</p>
+  <p class="err" id="payErr" role="alert"></p>
+  <div class="dlg-actions">
+    <button class="btn ghost" value="cancel" formnovalidate>Annulla</button>
+    <button class="btn primary" value="ok" id="payOk">Aggiungi rata</button>
+  </div>
+</form></dialog>
+
+<dialog id="dlgExport"><form method="dialog">
+  <h3 id="dlgExportTitle">Esporta cartella</h3>
+  <p class="note-box" id="exportNote"></p>
+  <div id="destWrap" hidden style="margin-bottom:14px">
+    <label style="margin-top:0">Dove salvarla</label>
+    <div class="seg" id="destSeg"><label id="destDeviceL"><input type="radio" name="dest" value="device" checked><span>Dispositivo</span></label><label><input type="radio" name="dest" value="drive"><span>Drive</span></label><label><input type="radio" name="dest" value="dropbox"><span>Dropbox</span></label></div>
+    <p class="hint" id="destHint"></p>
+  </div>
+  <div class="choice">
+    <button value="docx" id="chDocx"><span class="ico w">DOCX</span><span><strong>Documento Word</strong><small>Modificabile, e si può reimportare</small></span></button>
+    <button value="pdf" id="chPdf"><span class="ico p">PDF</span><span><strong>Documento PDF</strong><small>Da inviare o stampare, e si può reimportare</small></span></button>
+    <button value="txt" id="chTxt" hidden><span class="ico t">TXT</span><span><strong>File di testo</strong><small>Dropbox accetta solo testo: si legge da telefono e si può reimportare</small></span></button>
+  </div>
+  <div class="dlg-actions"><button class="btn ghost" value="cancel">Annulla</button></div>
+</form></dialog>
+
+<dialog id="dlgShare"><form method="dialog" id="fShare">
+  <h3 id="shareTitle">Invia al cliente</h3>
+  <p class="hint" style="margin:-6px 0 8px">Scegli cosa vedrà il cliente. Le tue scelte vengono ricordate per questa cartella.</p>
+  <div class="checks" id="shareChecks"></div>
+  <p class="err" id="shareErr" role="alert"></p>
+  <label for="shareMsg">Messaggio per il cliente (facoltativo)</label>
+  <textarea id="shareMsg" placeholder="es. Ottimo lavoro questo mese! Ci vediamo lunedì."></textarea>
+  <label for="shareTrainer">Il tuo nome (compare nel documento, facoltativo)</label>
+  <input id="shareTrainer" autocomplete="off" placeholder="es. Marco Verdi">
+  <label>Formato del file</label>
+  <div class="seg"><label><input type="radio" name="shareFmt" value="pdf"><span>PDF</span></label><label><input type="radio" name="shareFmt" value="docx"><span>Word</span></label></div>
+  <p class="hint">Sul telefono si apre la condivisione, da cui lo mandi su WhatsApp o per email. Al computer il file viene scaricato e lo alleghi tu.</p>
+  <div class="dlg-actions">
+    <button class="btn ghost" value="cancel" formnovalidate>Annulla</button>
+    <button class="btn primary" value="ok">Crea e invia</button>
+  </div>
+</form></dialog>
+
+<dialog id="dlgFollow"><form method="dialog" id="fFollow">
+  <h3 id="followTitle">Segui l'andamento con il cliente</h3>
+  <p class="note-box">Creo una cartella solo per questo cliente e la condivido con la sua email, in sola lettura. Ogni volta che premi “Aggiorna per il cliente” il riepilogo nella cartella viene sostituito con quello nuovo: il cliente riapre lo stesso link e vede i dati aggiornati.</p>
+  <label>Dove (puoi sceglierli entrambi)</label>
+  <div class="seg multi"><label><input type="checkbox" name="followSvc" value="drive"><span>Google Drive</span></label><label><input type="checkbox" name="followSvc" value="dropbox"><span>Dropbox</span></label></div>
+  <p class="hint" id="followSvcHint"></p>
+  <label for="followEmail">Email del cliente</label>
+  <input id="followEmail" type="email" autocomplete="off" placeholder="es. mario.rossi@gmail.com">
+  <p class="err" id="followErr" role="alert"></p>
+  <label for="followFolder">Nome della cartella</label>
+  <input id="followFolder" autocomplete="off" placeholder="es. Personal Francesco">
+  <p class="hint" id="followFolderHint"></p>
+  <h4>Cosa vedrà il cliente</h4>
+  <div class="checks" id="followChecks"></div>
+  <label for="followMsg">Messaggio per il cliente (facoltativo, resta finché non lo cambi)</label>
+  <textarea id="followMsg" placeholder="es. Ottimo lavoro questo mese! Ci vediamo lunedì."></textarea>
+  <label for="followTrainer">Il tuo nome (facoltativo)</label>
+  <input id="followTrainer" autocomplete="off" placeholder="es. Marco Verdi">
+  <div class="dlg-actions">
+    <button class="btn ghost" value="cancel" formnovalidate>Annulla</button>
+    <button class="btn primary" value="ok" id="followOk">Condividi e aggiorna</button>
+  </div>
+</form></dialog>
+
+<dialog id="dlgOpen"><form method="dialog">
+  <h3 id="openTitle"></h3>
+  <p id="openText" style="white-space:pre-line"></p>
+  <div class="bigbtns"><a class="btn primary" id="openLink" href="#" target="_blank" rel="noopener">Apri</a>
+    <a class="btn ghost" id="openWeb" href="#" target="_blank" rel="noopener" hidden>Apri nel browser</a></div>
+  <div class="dlg-actions"><button class="btn" value="ok">Chiudi</button></div>
+</form></dialog>
+
+<dialog id="dlgLink"><form method="dialog">
+  <h3 id="linkTitle">Link per il cliente</h3>
+  <p id="linkText"></p>
+  <div id="linkRows"></div>
+  <div class="bigbtns">
+    <a class="btn primary" id="linkWa" href="#" target="_blank" rel="noopener">Mandalo su WhatsApp</a>
+    <a class="btn ghost" id="linkMail" href="#" target="_blank" rel="noopener">Mandalo per email</a>
+  </div>
+  <p class="warn" id="linkWarn" hidden></p>
+  <div class="dlg-actions"><button class="btn" value="ok">Fatto</button></div>
+</form></dialog>
+
+<dialog id="dlgRename"><form method="dialog" id="fRename">
+  <h3>Rinomina cartella</h3>
+  <p class="note-box">La cartella viene rinominata su Google Drive e su Dropbox. Il link che il cliente ha già ricevuto continua a funzionare.</p>
+  <label for="renameInput">Nuovo nome</label>
+  <input id="renameInput" autocomplete="off" placeholder="es. Personal Francesco">
+  <p class="err" id="renameErr" role="alert"></p>
+  <div class="dlg-actions">
+    <button class="btn ghost" value="cancel" formnovalidate>Annulla</button>
+    <button class="btn primary" value="ok">Rinomina</button>
+  </div>
+</form></dialog>
+
+<dialog id="dlgConflict"><form method="dialog">
+  <h3>Cartella già esistente</h3>
+  <p id="conflictText"></p>
+  <div class="dlg-actions">
+    <button class="btn ghost" value="cancel">Salta questo file</button>
+    <button class="btn" value="new">Crea nuova cartella</button>
+    <button class="btn primary" value="update">Aggiorna cartella</button>
+  </div>
+</form></dialog>
+
+<dialog id="dlgMsg"><form method="dialog">
+  <h3 id="msgTitle"></h3>
+  <p id="msgText"></p>
+  <div class="dlg-actions">
+    <button class="btn ghost" value="cancel" id="msgCancel">Annulla</button>
+    <button class="btn primary" value="ok" id="msgOk">OK</button>
+  </div>
+</form></dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/*BUILDERS-START*/
+const DAYS = ["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
+const eur = n => (Number(n)||0).toLocaleString("it-IT",{style:"currency",currency:"EUR"});
+const num2 = n => (Number(n)||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2});
+const eurDoc = n => "€ " + num2(n);
+const itDate = iso => { if(!iso) return ""; const [y,m,d]=iso.split("-"); return `${d}/${m}/${y}`; };
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const byDate = (a,b) => (b.date||"").localeCompare(a.date||"");
+const byDateAsc = (a,b) => (a.date||"").localeCompare(b.date||"");
+const round2 = n => Math.round(n*100)/100;
+
+function normalize(c){
+  return {
+    id: c.id || uid(), name: (c.name||"").trim() || "Senza nome", phone: c.phone || "", email: c.email || "",
+    totalSessions: Number(c.totalSessions)||0, doneSessions: Number(c.doneSessions)||0,
+    price: Number(c.price)||0, paid: Number(c.paid)||0,
+    freq: c.freq === "" || c.freq == null ? "" : Number(c.freq)||0,
+    days: Array.isArray(c.days) ? DAYS.filter(d=>c.days.includes(d)) : [],
+    training: c.training || "", notes: c.notes || "",
+    sessionLog: Array.isArray(c.sessionLog) ? c.sessionLog : [],
+    payLog: Array.isArray(c.payLog) ? c.payLog : [],
+    start: /^\d{4}-\d{2}-\d{2}$/.test(c.start||"") ? c.start : "",      // inizio del pacchetto in corso
+    carriedIn: round2(Number(c.carriedIn)||0),                               // saldo portato dal pacchetto precedente (già dentro "price")
+    packages: Array.isArray(c.packages) ? c.packages.filter(p=>p && typeof p === "object").map(normPackage) : [],
+    share: c.share && typeof c.share === "object" && c.share.inc ? {inc:{...c.share.inc}, format:c.share.format==="docx"?"docx":"pdf"} : null,
+    follow: normFollow(c.follow)
+  };
+}
+/* Condivisione con il cliente (cartella su Drive o Dropbox, aggiornata da te) */
+function normFollow(f){
+  if(!f || typeof f !== "object") return null;
+  const o = x => x && typeof x === "object" ? x : {};
+  const d = o(f.drive), x = o(f.dropbox), S = v => String(v || "");
+  /* versioni precedenti: un solo servizio (svc) oppure l'oggetto services */
+  const legacyOn = s => f.services && typeof f.services === "object" ? !!f.services[s] : f.svc === s;
+  return {
+    email: S(f.email), message: S(f.message), folderName: S(f.folderName),
+    inc: f.inc && typeof f.inc === "object" ? {...f.inc} : null,
+    drive: {on: typeof d.on === "boolean" ? d.on : legacyOn("drive"), folderId:S(d.folderId), folderName:S(d.folderName), renameTo:S(d.renameTo), fileId:S(d.fileId), sharedWith:S(d.sharedWith)},
+    dropbox: {on: typeof x.on === "boolean" ? x.on : legacyOn("dropbox"), id:S(x.id || x.folderId), path:S(x.path), folderName:S(x.folderName), renameTo:S(x.renameTo), fileId:S(x.fileId), filePath:S(x.filePath), sharedWith:S(x.sharedWith), url:S(x.url)},
+    updated: S(f.updated), sig: S(f.sig)
+  };
+}
+/* Pacchetti conclusi, tenuti nello storico della cartella */
+function normPackage(p){
+  const D = v => /^\d{4}-\d{2}-\d{2}$/.test(v||"") ? v : "";
+  return { id: p.id || uid(), start: D(p.start), end: D(p.end),
+    totalSessions: Number(p.totalSessions)||0, doneSessions: Number(p.doneSessions)||0,
+    price: Number(p.price)||0, paid: Number(p.paid)||0,
+    carriedIn: round2(Number(p.carriedIn)||0), carriedOut: round2(Number(p.carriedOut)||0),
+    sessionLog: Array.isArray(p.sessionLog) ? p.sessionLog : [], payLog: Array.isArray(p.payLog) ? p.payLog : [] };
+}
+function stats(c){
+  const total = c.totalSessions, done = c.doneSessions, carriedOut = Number(c.carriedOut)||0;
+  return { total, done, left:Math.max(total-done,0), price:c.price, paid:c.paid,
+           due:round2(c.price - c.paid - carriedOut),          // se il saldo è stato spostato nel pacchetto dopo, qui non si conta più
+           start:c.start||"", end:c.end||"", complete: total>0 && done>=total,
+           carriedIn:Number(c.carriedIn)||0, carriedOut };
+}
+/* un pacchetto vecchio visto "come un cliente", per riusare le stesse tabelle nei documenti */
+const pkgClient = (c, p) => ({...c, ...p});
+const pastPackages = c => [...(c.packages||[])].sort((a,b)=>((b.start||b.end||"")).localeCompare(a.start||a.end||""));
+function pkgTitle(p){
+  if(p.start) return `Pacchetto dal ${itDate(p.start)}${p.end ? ` al ${itDate(p.end)}` : ""}`;
+  return p.end ? `Pacchetto chiuso il ${itDate(p.end)}` : "Pacchetto precedente";
+}
+/* righe comuni a Word, PDF e testo */
+function sessRows(s){
+  const r = [];
+  if(s.start) r.push(s.end ? ["Periodo", `dal ${itDate(s.start)} al ${itDate(s.end)}`] : ["Inizio pacchetto", itDate(s.start)]);
+  r.push(["Sedute nel pacchetto", String(s.total)], ["Sedute fatte", String(s.done)], ["Sedute da fare", String(s.left)]);
+  if(s.total > 0) r.push(["Stato sedute", s.complete ? "Completato" : "In corso"]);
+  return r;
+}
+const carriedInRows = s => s.carriedIn ? [[s.carriedIn > 0 ? "Di cui dal pacchetto precedente" : "Credito dal pacchetto precedente", eurDoc(Math.abs(s.carriedIn))]] : [];
+const payStateRows = s => s.price > 0 ? [["Stato pagamento", s.due <= 0 ? "Saldato" : "Da saldare"]] : [];
+const carriedOutRows = s => s.carriedOut ? [["Saldo spostato nel pacchetto dopo", (s.carriedOut > 0 ? "" : "credito ") + eurDoc(Math.abs(s.carriedOut))]] : [];
+function freqText(c){
+  const parts = [];
+  if(c.freq) parts.push(`${c.freq} ${c.freq==1?"volta":"volte"} a settimana`);
+  if(c.days.length) parts.push(c.days.join(", "));
+  return parts.join(": ");
+}
+const b64enc = s => btoa(unescape(encodeURIComponent(s)));
+const b64dec = s => decodeURIComponent(escape(atob(s)));
+
+/* ===== WORD (.docx) ===== */
+const X = s => String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+function wRun(text, o={}){
+  let pr = "";
+  if(o.bold) pr += "<w:b/>";
+  if(o.italic) pr += "<w:i/>";
+  if(o.color) pr += `<w:color w:val="${o.color}"/>`;
+  if(o.size) pr += `<w:sz w:val="${o.size}"/><w:szCs w:val="${o.size}"/>`;
+  if(o.spacing) pr += `<w:spacing w:val="${o.spacing}"/>`;
+  const parts = String(text ?? "").split("\n");
+  return `<w:r>${pr?`<w:rPr>${pr}</w:rPr>`:""}${parts.map((t,i)=>(i?"<w:br/>":"")+`<w:t xml:space="preserve">${X(t)}</w:t>`).join("")}</w:r>`;
+}
+function wPara(runs, o={}){
+  let pr = "";
+  if(o.style) pr += `<w:pStyle w:val="${o.style}"/>`;
+  if(o.keepNext) pr += "<w:keepNext/>";
+  if(o.before!=null || o.after!=null) pr += `<w:spacing w:before="${o.before||0}" w:after="${o.after??0}"/>`;
+  if(o.align) pr += `<w:jc w:val="${o.align}"/>`;
+  return `<w:p>${pr?`<w:pPr>${pr}</w:pPr>`:""}${Array.isArray(runs)?runs.join(""):runs}</w:p>`;
+}
+function wCell(content, w, o={}){
+  let pr = `<w:tcW w:w="${w}" w:type="dxa"/>`;
+  if(o.fill) pr += `<w:shd w:val="clear" w:color="auto" w:fill="${o.fill}"/>`;
+  pr += `<w:vAlign w:val="${o.vAlign||"center"}"/>`;
+  return `<w:tc><w:tcPr>${pr}</w:tcPr>${content}</w:tc>`;
+}
+function wTable(rows, widths, o={}){
+  const b = o.borders || `<w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="single" w:sz="4" w:color="CFD6D0"/><w:right w:val="nil"/><w:insideH w:val="single" w:sz="4" w:color="CFD6D0"/><w:insideV w:val="nil"/>`;
+  const mar = o.margins || `<w:top w:w="90" w:type="dxa"/><w:left w:w="120" w:type="dxa"/><w:bottom w:w="90" w:type="dxa"/><w:right w:w="120" w:type="dxa"/>`;
+  return `<w:tbl><w:tblPr><w:tblW w:w="${widths.reduce((a,b)=>a+b,0)}" w:type="dxa"/><w:tblLayout w:type="fixed"/><w:tblBorders>${b}</w:tblBorders><w:tblCellMar>${mar}</w:tblCellMar><w:tblLook w:val="04A0" w:firstRow="1" w:lastRow="0" w:firstColumn="0" w:lastColumn="0" w:noHBand="1" w:noVBand="1"/></w:tblPr><w:tblGrid>${widths.map(w=>`<w:gridCol w:w="${w}"/>`).join("")}</w:tblGrid>${rows.join("")}</w:tbl>`;
+}
+function wRow(cells, header){ return `<w:tr>${header?`<w:trPr><w:tblHeader/><w:cantSplit/></w:trPr>`:`<w:trPr><w:cantSplit/></w:trPr>`}${cells.join("")}</w:tr>`; }
+/* ===== Cosa si può inviare al cliente ===== */
+const SHARE_ITEMS = [
+  {k:"sedute",           label:"Sedute fatte e rimanenti",               def:true},
+  {k:"pagamenti",        label:"Pagamenti: pagato e da saldare",         def:true},
+  {k:"storicoSedute",    label:"Storico delle sedute con le date",       def:true},
+  {k:"noteSedute",       label:"Note di ogni seduta (cosa avete fatto)", def:true},
+  {k:"storicoPagamenti", label:"Storico dei pagamenti",                  def:false},
+  {k:"pacchetti",        label:"Pacchetti precedenti (date e sedute)",   def:true},
+  {k:"giorni",           label:"Giorni e volte a settimana",             def:true},
+  {k:"allenamento",      label:"Descrizione dell'allenamento",           def:true},
+  {k:"note",             label:"Note (di solito private)",               def:false}
+];
+function shareDefaults(c){
+  const inc = {}; SHARE_ITEMS.forEach(i=>inc[i.k] = i.def);
+  if(c && c.share && c.share.inc) SHARE_ITEMS.forEach(i=>{ if(typeof c.share.inc[i.k]==="boolean") inc[i.k] = c.share.inc[i.k]; });
+  return {inc, format: c && c.share && c.share.format==="docx" ? "docx" : "pdf"};
+}
+
+/* ===== WORD: blocchi ===== */
+const DC = {PINE:"1C2B24", MOSS:"2F6B4F", MUTED:"5E6B64", OWED:"B45309", W:9638};
+function dHeader(label, name, sub){
+  return wPara(wRun(label, {color:DC.MOSS, size:18, bold:true, spacing:40}), {after:40}) +
+         wPara(wRun(name), {style:"Title"}) +
+         wPara(wRun(sub, {color:DC.MUTED, size:20}), {after:280});
+}
+function dBoxes(items){
+  const n = items.length, w = Math.floor(DC.W / n);
+  const white = `<w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="single" w:sz="36" w:color="FFFFFF"/>`;
+  return wTable([wRow(items.map(([v,l,fill,col]) => wCell(
+    wPara(wRun(v, {bold:true, size:32, color:col}), {align:"center", after:20}) +
+    wPara(wRun(l, {size:17, color:DC.MUTED}), {align:"center"}), w, {fill})))],
+    Array(n).fill(w), {borders:white, margins:`<w:top w:w="160" w:type="dxa"/><w:left w:w="80" w:type="dxa"/><w:bottom w:w="160" w:type="dxa"/><w:right w:w="80" w:type="dxa"/>`});
+}
+function dDots(done, total){
+  const n = Math.max(total, done);
+  if(!(n > 0 && n <= 60)) return "";
+  return wPara([wRun("Avanzamento  ", {size:18, color:DC.MUTED}), wRun("●".repeat(done), {color:DC.MOSS, size:24}), wRun("○".repeat(Math.max(total-done,0)), {color:"9DB5A6", size:24})], {before:200, after:0});
+}
+function dHeading(t){ return wPara(wRun(t), {style:"Heading1"}); }
+function dKv(rows){
+  return wTable(rows.map(([k,v,opt])=>wRow([
+    wCell(wPara(wRun(k,{color:DC.MUTED})), 3200),
+    wCell(wPara(wRun(v===""||v==null?"—":v,{bold:!!(opt&&opt.bold), color:(opt&&opt.color)||DC.PINE})), DC.W-3200)
+  ])), [3200, DC.W-3200]);
+}
+function dHeadRow(cols, widths){ return wRow(cols.map((t,i)=>wCell(wPara(wRun(t,{bold:true,color:DC.MOSS,size:19})), widths[i], {fill:"D7E6DC"})), true); }
+function dEmpty(t){ return wPara(wRun(t,{italic:true,color:DC.MUTED}), {before:60}); }
+function dSessions(c, withNotes){
+  if(!c.sessionLog.length) return dEmpty("Nessuna seduta registrata nello storico.");
+  const W = DC.W;
+  const wd = withNotes ? [900, 1900, W-2800] : [900, W-900];
+  const rows = [dHeadRow(withNotes ? ["N°","Data","Note seduta"] : ["N°","Data"], wd)];
+  [...c.sessionLog].sort(byDateAsc).forEach((x,i)=>{
+    const cells = [wCell(wPara(wRun(String(i+1),{color:DC.MUTED})), wd[0]), wCell(wPara(wRun(itDate(x.date))), wd[1])];
+    if(withNotes) cells.push(wCell(wPara(wRun(x.note||"—")), wd[2]));
+    rows.push(wRow(cells));
+  });
+  return wTable(rows, wd);
+}
+function dPayments(c){
+  if(!c.payLog.length) return dEmpty("Nessun pagamento registrato nello storico.");
+  const W = DC.W, wd = [1900, 2000, 2000, W-5900];
+  const rows = [dHeadRow(["Data","Importo","Metodo","Note"], wd)];
+  [...c.payLog].sort(byDateAsc).forEach(x=>rows.push(wRow([
+    wCell(wPara(wRun(itDate(x.date))), wd[0]),
+    wCell(wPara(wRun(eurDoc(x.amount),{bold:true})), wd[1]),
+    wCell(wPara(wRun(x.method||"—")), wd[2]),
+    wCell(wPara(wRun(x.note||"—")), wd[3])])));
+  rows.push(wRow([
+    wCell(wPara(wRun("Totale",{bold:true})), wd[0], {fill:"EEF1EC"}),
+    wCell(wPara(wRun(eurDoc(c.payLog.reduce((a,p)=>a+(Number(p.amount)||0),0)),{bold:true})), wd[1], {fill:"EEF1EC"}),
+    wCell(wPara(""), wd[2], {fill:"EEF1EC"}), wCell(wPara(""), wd[3], {fill:"EEF1EC"})]));
+  return wTable(rows, wd);
+}
+function dMessage(title, text){
+  const b = `<w:top w:val="nil"/><w:left w:val="single" w:sz="36" w:color="${DC.MOSS}"/><w:bottom w:val="nil"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="nil"/>`;
+  return wTable([wRow([wCell(
+    wPara(wRun(title,{bold:true,color:DC.MOSS,size:18}),{after:60}) + wPara(wRun(text,{size:22})), DC.W, {fill:"EEF1EC"})])],
+    [DC.W], {borders:b, margins:`<w:top w:w="160" w:type="dxa"/><w:left w:w="220" w:type="dxa"/><w:bottom w:w="160" w:type="dxa"/><w:right w:w="220" w:type="dxa"/>`}) + wPara("", {after:200});
+}
+const dBoxSess = s => [[`${s.done} su ${s.total}`, s.complete ? "completato ✓" : "sedute fatte", s.complete ? "D7E6DC" : "EEF1EC", s.complete ? DC.MOSS : DC.PINE], [String(s.left), "sedute da fare", "EEF1EC", DC.PINE]];
+const dBoxPay = s => [[eurDoc(s.paid), "già pagato", "D7E6DC", DC.MOSS], [eurDoc(Math.abs(s.due)), s.due<0?"credito cliente":"da saldare", s.due>0?"FCEBD3":"D7E6DC", s.due>0?DC.OWED:DC.MOSS]];
+const rowsSess = s => sessRows(s);
+const rowsPay = s => [["Totale da pagare", eurDoc(s.price)], ...carriedInRows(s), ["Già pagato", eurDoc(s.paid)], ...carriedOutRows(s), [s.due<0?"Credito cliente":"Da saldare", eurDoc(Math.abs(s.due)), {bold:true, color:s.due>0?"OWED":"MOSS"}], ...payStateRows(s)];
+const wKvRows = rows => rows.map(r=>r[2]?[r[0],r[1],{bold:true,color:DC[r[2].color]}]:r);
+/* pacchetti precedenti: o = {pay, sessions, notes, payments} */
+function dPackages(c, o){
+  let b = "";
+  pastPackages(c).forEach(p=>{
+    const pc = pkgClient(c, p), s = stats(pc);
+    b += dHeading(pkgTitle(p)) + dKv(wKvRows([...rowsSess(s), ...(o.pay ? rowsPay(s) : [])]));
+    if(o.sessions && pc.sessionLog.length) b += dSessions(pc, o.notes);
+    if(o.payments && pc.payLog.length) b += dPayments(pc);
+  });
+  return b;
+}
+
+/* Scheda completa (per te: si può reimportare) */
+function docxFullBody(c){
+  const s = stats(c);
+  const contact = [c.phone, c.email].filter(Boolean).join("   |   ");
+  let b = dHeader("SCHEDA CLIENTE", c.name, (contact?contact+"\n":"") + "Aggiornata al " + itDate(today()));
+  b += dBoxes([...dBoxSess(s), ...dBoxPay(s)]);
+  b += dDots(s.done, s.total);
+  b += dHeading("Pacchetto e pagamenti");
+  b += dKv([...rowsSess(s), ...rowsPay(s)].map(r=>r[2]?[r[0],r[1],{bold:true,color:DC[r[2].color]}]:r));
+  b += dHeading("Dati cliente e allenamento");
+  b += dKv([["Telefono", c.phone], ["Email", c.email], ["Volte a settimana", c.freq===""?"":String(c.freq)],
+            ["Giorni di allenamento", c.days.join(", ")], ["Allenamento", c.training], ["Note", c.notes]]);
+  b += dHeading("Storico sedute") + dSessions(c, true);
+  b += dHeading("Storico pagamenti") + dPayments(c);
+  b += dPackages(c, {pay:true, sessions:true, notes:true, payments:true});
+  return b;
+}
+/* Riepilogo da mandare al cliente (solo ciò che scegli) */
+function docxClientBody(c, o){
+  const s = stats(c), inc = o.inc;
+  let b = dHeader("RIEPILOGO ALLENAMENTI", c.name, "Aggiornato al " + itDate(today()) + (o.trainer ? "\nPersonal trainer: " + o.trainer : ""));
+  if(o.message) b += dMessage("Messaggio dal tuo personal trainer", o.message);
+  const boxes = [...(inc.sedute?dBoxSess(s):[]), ...(inc.pagamenti?dBoxPay(s):[])];
+  if(boxes.length) b += dBoxes(boxes);
+  if(inc.sedute) b += dDots(s.done, s.total);
+  if(inc.sedute) b += dHeading("Il tuo pacchetto") + dKv(rowsSess(s));
+  if(inc.pagamenti) b += dHeading("Pagamenti") + dKv(rowsPay(s).map(r=>r[2]?[r[0],r[1],{bold:true,color:DC[r[2].color]}]:r));
+  const tr = [];
+  if(inc.giorni){ tr.push(["Volte a settimana", c.freq===""?"":String(c.freq)]); tr.push(["Giorni di allenamento", c.days.join(", ")]); }
+  if(inc.allenamento) tr.push(["Allenamento", c.training]);
+  if(tr.length) b += dHeading("Il tuo allenamento") + dKv(tr);
+  if(inc.note) b += dHeading("Note") + wPara(wRun(c.notes || "—"), {before:60});
+  if(inc.storicoSedute) b += dHeading("Storico sedute") + dSessions(c, !!inc.noteSedute);
+  if(inc.storicoPagamenti) b += dHeading("Storico pagamenti") + dPayments(c);
+  if(inc.pacchetti) b += dPackages(c, {pay:!!inc.pagamenti, sessions:!!inc.storicoSedute, notes:!!(inc.storicoSedute && inc.noteSedute), payments:!!inc.storicoPagamenti});
+  return b;
+}
+function docxParts(body, footerText, title, subject){
+  const MUTED = DC.MUTED;
+  const fr = t => `<w:r><w:rPr><w:color w:val="${MUTED}"/><w:sz w:val="16"/></w:rPr>${t}</w:r>`;
+  const footer = `<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">${wPara([
+    wRun(footerText+"   ", {color:MUTED, size:16}),
+    fr(`<w:t xml:space="preserve">Pagina </w:t>`), fr(`<w:fldChar w:fldCharType="begin"/>`), fr(`<w:instrText xml:space="preserve"> PAGE </w:instrText>`),
+    fr(`<w:fldChar w:fldCharType="separate"/>`), fr(`<w:t>1</w:t>`), fr(`<w:fldChar w:fldCharType="end"/>`)
+  ], {align:"right"})}</w:ftr>`;
+  return {
+    doc: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><w:body>${body}<w:sectPr><w:footerReference w:type="default" r:id="rIdFooter"/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="567" w:footer="567" w:gutter="0"/></w:sectPr></w:body></w:document>`,
+    styles: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:eastAsia="Calibri" w:cs="Calibri"/><w:color w:val="${DC.PINE}"/><w:sz w:val="21"/><w:szCs w:val="21"/><w:lang w:val="it-IT"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="0" w:line="264" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>
+<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>
+<w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:spacing w:after="60"/></w:pPr><w:rPr><w:b/><w:color w:val="${DC.PINE}"/><w:sz w:val="56"/><w:szCs w:val="56"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="420" w:after="120"/><w:pBdr><w:bottom w:val="single" w:sz="8" w:space="4" w:color="${DC.MOSS}"/></w:pBdr><w:outlineLvl w:val="0"/></w:pPr><w:rPr><w:b/><w:color w:val="${DC.MOSS}"/><w:sz w:val="28"/><w:szCs w:val="28"/></w:rPr></w:style>
+</w:styles>`,
+    footer,
+    types: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>`,
+    rels: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>`,
+    docRels: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rIdFooter" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/></Relationships>`,
+    core: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>${X(title)}</dc:title><dc:subject>${X(subject)}</dc:subject><dc:creator>Gestionale Personal Trainer</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">${new Date().toISOString().slice(0,19)}Z</dcterms:created></cp:coreProperties>`
+  };
+}
+function zipDocx(p, JSZip){
+  const z = new JSZip();
+  z.file("[Content_Types].xml", p.types); z.file("_rels/.rels", p.rels);
+  z.file("word/document.xml", p.doc); z.file("word/styles.xml", p.styles);
+  z.file("word/footer1.xml", p.footer); z.file("word/_rels/document.xml.rels", p.docRels);
+  z.file("docProps/core.xml", p.core);
+  return z;
+}
+async function buildDocx(c, JSZip){ return zipDocx(docxParts(docxFullBody(c), c.name, c.name, "PTGEST1"), JSZip); }
+async function buildClientDocx(c, JSZip, o){ return zipDocx(docxParts(docxClientBody(c, o), "Riepilogo per " + c.name, "Riepilogo " + c.name, "PTCLIENT"), JSZip); }
+
+/* ===== PDF: blocchi ===== */
+function pdfKit(jsPDF){
+  const doc = new jsPDF({unit:"mm", format:"a4"});
+  const M = 15, PW = 210, CW = PW - 2*M, BOTTOM = 280;
+  const C = {pine:[28,43,36], moss:[47,107,79], mossSoft:[215,230,220], chalk:[238,241,236], muted:[94,107,100], line:[207,214,208], owed:[180,83,9], owedSoft:[252,235,211], dotOff:[157,181,166]};
+  const fill = a => doc.setFillColor(...a), color = a => doc.setTextColor(...a), draw = a => doc.setDrawColor(...a);
+  const font = (st, sz) => { doc.setFont("helvetica", st); doc.setFontSize(sz); };
+  let y = 0;
+  const ensure = h => { if(y + h > BOTTOM){ doc.addPage(); y = 18; return true; } return false; };
+  const K = { doc, C, CW };
+
+  K.header = (label, name, sub) => {
+    fill(C.moss); doc.rect(0, 0, PW, 42, "F");
+    color([215,230,220]); font("bold", 9); doc.text(label, M, 13, {charSpace:0.6});
+    color([255,255,255]); font("bold", 24); doc.text(doc.splitTextToSize(name, CW)[0], M, 25);
+    font("normal", 10); doc.text(doc.splitTextToSize(sub, CW)[0], M, 34);
+    y = 50;
+  };
+  K.message = (title, text) => {
+    font("normal", 10.5);
+    const lines = doc.splitTextToSize(text, CW - 12);
+    const h = 11 + lines.length*4.8 + 3;
+    ensure(h);
+    fill(C.chalk); doc.rect(M, y, CW, h, "F");
+    fill(C.moss); doc.rect(M, y, 1.4, h, "F");
+    color(C.moss); font("bold", 9); doc.text(title, M+6, y+7);
+    color(C.pine); font("normal", 10.5); doc.text(lines, M+6, y+13);
+    y += h + 7;
+  };
+  K.boxes = items => {
+    const gap = 3, n = items.length, bw = (CW - gap*(n-1))/n, bh = 24;
+    ensure(bh + 4);
+    items.forEach(([v,l,bg,fg],i)=>{
+      const x = M + i*(bw+gap);
+      fill(bg); doc.roundedRect(x, y, bw, bh, 2, 2, "F");
+      color(fg); font("bold", n <= 2 ? 17 : 15); doc.text(v, x+bw/2, y+11, {align:"center"});
+      color(C.muted); font("normal", 8.5); doc.text(l, x+bw/2, y+18, {align:"center"});
+    });
+    y += bh + 9;
+  };
+  K.dots = (done, total) => {
+    const n = Math.max(total, done);
+    if(!(n > 0 && n <= 60)) return;
+    const r = 1.9, step = 5.4, perRow = Math.floor(CW/step);
+    ensure(8 + Math.ceil(n/perRow)*step);
+    color(C.muted); font("normal", 9); doc.text("Avanzamento pacchetto", M, y); y += 5;
+    for(let i=0;i<n;i++){
+      const cx = M + r + (i%perRow)*step, cy = y + Math.floor(i/perRow)*step;
+      doc.setLineWidth(0.4);
+      if(i < done){ fill(C.moss); draw(C.moss); doc.circle(cx, cy, r, "FD"); }
+      else { draw(C.dotOff); doc.circle(cx, cy, r, "S"); }
+    }
+    y += Math.ceil(n/perRow)*step + 2;
+  };
+  K.heading = t => {
+    ensure(22); y += 8;
+    color(C.moss); font("bold", 13); doc.text(t, M, y);
+    y += 2.5; draw(C.moss); doc.setLineWidth(0.5); doc.line(M, y, M+CW, y); y += 2;
+  };
+  K.kv = rows => {
+    rows.forEach(([k,v,opt])=>{
+      const val = v===""||v==null ? "—" : String(v);
+      font(opt&&opt.bold?"bold":"normal", 10);
+      const lines = doc.splitTextToSize(val, CW-55);
+      const h = lines.length*4.6 + 4;
+      ensure(h);
+      color(C.muted); font("normal", 10); doc.text(k, M, y+5);
+      color((opt&&opt.color)||C.pine); font(opt&&opt.bold?"bold":"normal", 10); doc.text(lines, M+55, y+5);
+      y += h; draw(C.line); doc.setLineWidth(0.2); doc.line(M, y, M+CW, y);
+    });
+  };
+  K.text = t => {
+    font("normal", 10.5);
+    const lines = doc.splitTextToSize(t || "—", CW);
+    lines.forEach(l=>{ ensure(5.2); color(C.pine); font("normal", 10.5); doc.text(l, M, y+5); y += 5.2; });
+    y += 2;
+  };
+  K.table = (cols, rows, total) => {
+    const drawHead = () => {
+      fill(C.mossSoft); doc.rect(M, y, CW, 7.5, "F");
+      color(C.moss); font("bold", 9.5);
+      let x = M; cols.forEach(cl=>{ doc.text(cl.t, cl.right ? x+cl.w-2 : x+2, y+5, {align:cl.right?"right":"left"}); x += cl.w; });
+      y += 7.5;
+    };
+    ensure(16); drawHead();
+    rows.forEach((r,ri)=>{
+      font("normal", 9.5);
+      const wrapped = r.map((v,i)=>doc.splitTextToSize(String(v), cols[i].w-4));
+      const h = Math.max(...wrapped.map(w=>w.length))*4.3 + 3.5;
+      if(ensure(h)) drawHead();
+      const isTot = total && ri===rows.length-1;
+      if(isTot){ fill(C.chalk); doc.rect(M, y, CW, h, "F"); }
+      let x = M;
+      wrapped.forEach((w,i)=>{
+        const cl = cols[i];
+        color(cl.muted && !isTot ? C.muted : C.pine); font(cl.bold||isTot?"bold":"normal", 9.5);
+        doc.text(w, cl.right ? x+cl.w-2 : x+2, y+5, {align:cl.right?"right":"left"});
+        x += cl.w;
+      });
+      y += h; draw(C.line); doc.setLineWidth(0.2); doc.line(M, y, M+CW, y);
+    });
+  };
+  K.empty = t => { ensure(8); color(C.muted); font("italic", 10); doc.text(t, M, y+5); y += 7; };
+  K.sessions = (c, withNotes) => {
+    if(!c.sessionLog.length) return K.empty("Nessuna seduta registrata nello storico.");
+    const list = [...c.sessionLog].sort(byDateAsc);
+    if(withNotes) K.table([{t:"N°",w:14,muted:true},{t:"Data",w:32},{t:"Note seduta",w:CW-46}], list.map((x,i)=>[String(i+1), itDate(x.date), x.note||"—"]));
+    else K.table([{t:"N°",w:14,muted:true},{t:"Data",w:CW-14}], list.map((x,i)=>[String(i+1), itDate(x.date)]));
+  };
+  K.payments = c => {
+    if(!c.payLog.length) return K.empty("Nessun pagamento registrato nello storico.");
+    const rows = [...c.payLog].sort(byDateAsc).map(x=>[itDate(x.date), eurDoc(x.amount), x.method||"—", x.note||"—"]);
+    rows.push(["Totale", eurDoc(c.payLog.reduce((a,p)=>a+(Number(p.amount)||0),0)), "", ""]);
+    K.table([{t:"Data",w:32},{t:"Importo",w:34,right:true,bold:true},{t:"Metodo",w:36},{t:"Note",w:CW-102}], rows, true);
+  };
+  K.footer = left => {
+    const pages = doc.getNumberOfPages();
+    for(let i=1;i<=pages;i++){
+      doc.setPage(i); color(C.muted); font("normal", 8);
+      doc.text(left, M, 290); doc.text(`Pagina ${i} di ${pages}`, PW-M, 290, {align:"right"});
+    }
+  };
+  const bSess = s => [[`${s.done} su ${s.total}`, "sedute fatte", C.chalk, C.pine], [String(s.left), "sedute da fare", C.chalk, C.pine]];
+  const bPay = s => [[eurDoc(s.paid), "già pagato", C.mossSoft, C.moss], [eurDoc(Math.abs(s.due)), s.due<0?"credito cliente":"da saldare", s.due>0?C.owedSoft:C.mossSoft, s.due>0?C.owed:C.moss]];
+  K.boxesFor = (s, sess, pay) => { const items = [...(sess?bSess(s):[]), ...(pay?bPay(s):[])]; if(items.length) K.boxes(items); };
+  K.rowsSess = s => sessRows(s);
+  K.rowsPay = s => [["Totale da pagare", eurDoc(s.price)], ...carriedInRows(s), ["Già pagato", eurDoc(s.paid)], ...carriedOutRows(s), [s.due<0?"Credito cliente":"Da saldare", eurDoc(Math.abs(s.due)), {bold:true, color:s.due>0?C.owed:C.moss}], ...payStateRows(s)];
+  K.packages = (c, o) => pastPackages(c).forEach(p=>{
+    const pc = pkgClient(c, p), s = stats(pc);
+    K.heading(pkgTitle(p)); K.kv([...K.rowsSess(s), ...(o.pay ? K.rowsPay(s) : [])]);
+    if(o.sessions && pc.sessionLog.length) K.sessions(pc, o.notes);
+    if(o.payments && pc.payLog.length) K.payments(pc);
+  });
+  return K;
+}
+
+/* Scheda completa (per te: si può reimportare) */
+function buildPdf(c, jsPDF){
+  const K = pdfKit(jsPDF), s = stats(c);
+  const contact = [c.phone, c.email].filter(Boolean).join("   |   ");
+  K.header("SCHEDA CLIENTE", c.name, (contact ? contact + "      " : "") + "Aggiornata al " + itDate(today()));
+  K.boxesFor(s, true, true);
+  K.dots(s.done, s.total);
+  K.heading("Pacchetto e pagamenti"); K.kv([...K.rowsSess(s), ...K.rowsPay(s)]);
+  K.heading("Dati cliente e allenamento");
+  K.kv([["Telefono", c.phone], ["Email", c.email], ["Volte a settimana", c.freq===""?"":String(c.freq)],
+        ["Giorni di allenamento", c.days.join(", ")], ["Allenamento", c.training], ["Note", c.notes]]);
+  K.heading("Storico sedute"); K.sessions(c, true);
+  K.heading("Storico pagamenti"); K.payments(c);
+  K.packages(c, {pay:true, sessions:true, notes:true, payments:true});
+  K.footer(c.name);
+  const data = {...c}; delete data.id;
+  K.doc.setProperties({title:c.name, subject:"PTGEST1:" + b64enc(JSON.stringify(data)), creator:"Gestionale Personal Trainer"});
+  return K.doc;
+}
+/* Riepilogo da mandare al cliente (solo ciò che scegli) */
+function buildClientPdf(c, jsPDF, o){
+  const K = pdfKit(jsPDF), s = stats(c), inc = o.inc;
+  K.header("RIEPILOGO ALLENAMENTI", c.name, "Aggiornato al " + itDate(today()) + (o.trainer ? "      Personal trainer: " + o.trainer : ""));
+  if(o.message) K.message("Messaggio dal tuo personal trainer", o.message);
+  K.boxesFor(s, inc.sedute, inc.pagamenti);
+  if(inc.sedute){ K.dots(s.done, s.total); K.heading("Il tuo pacchetto"); K.kv(K.rowsSess(s)); }
+  if(inc.pagamenti){ K.heading("Pagamenti"); K.kv(K.rowsPay(s)); }
+  const tr = [];
+  if(inc.giorni){ tr.push(["Volte a settimana", c.freq===""?"":String(c.freq)]); tr.push(["Giorni di allenamento", c.days.join(", ")]); }
+  if(inc.allenamento) tr.push(["Allenamento", c.training]);
+  if(tr.length){ K.heading("Il tuo allenamento"); K.kv(tr); }
+  if(inc.note){ K.heading("Note"); K.text(c.notes); }
+  if(inc.storicoSedute){ K.heading("Storico sedute"); K.sessions(c, !!inc.noteSedute); }
+  if(inc.storicoPagamenti){ K.heading("Storico pagamenti"); K.payments(c); }
+  if(inc.pacchetti) K.packages(c, {pay:!!inc.pagamenti, sessions:!!inc.storicoSedute, notes:!!(inc.storicoSedute && inc.noteSedute), payments:!!inc.storicoPagamenti});
+  K.footer("Riepilogo per " + c.name);
+  K.doc.setProperties({title:"Riepilogo " + c.name, subject:"PTCLIENT", creator:"Gestionale Personal Trainer"});
+  return K.doc;
+}
+
+/* ===== TESTO (per Dropbox, che accetta solo file di testo) ===== */
+const tLine = "────────────────────────────────────────";
+function tDots(done, total){
+  const n = Math.max(total, done); if(!n) return "";
+  const shown = Math.min(n, 40);
+  let t = ""; for(let i=0;i<shown;i++) t += i < done ? "●" : "○";
+  return t + (n > shown ? ` +${n-shown}` : "");
+}
+function tHead(t){ return `\n${t.toUpperCase()}\n${tLine}\n`; }
+function tKv(rows){ return rows.filter(r=>r[1]!==undefined).map(r=>`${r[0]}: ${r[1] === "" ? "—" : r[1]}`).join("\n") + "\n"; }
+function tSessions(c, withNotes){
+  if(!c.sessionLog.length) return "Nessuna seduta registrata.\n";
+  return [...c.sessionLog].sort(byDateAsc).map((x,i)=>`${String(i+1).padStart(3," ")}.  ${itDate(x.date)}${withNotes && x.note ? "   " + x.note : ""}`).join("\n") + "\n";
+}
+function tPayments(c){
+  if(!c.payLog.length) return "Nessun pagamento registrato.\n";
+  return [...c.payLog].sort(byDateAsc).map(x=>`${itDate(x.date)}   ${eurDoc(x.amount)}${x.method ? "   " + x.method : ""}${x.note ? "   " + x.note : ""}`).join("\n") + "\n";
+}
+const tSess = s => sessRows(s);
+const tPay = s => [["Totale da pagare", eurDoc(s.price)], ...carriedInRows(s), ["Già pagato", eurDoc(s.paid)], ...carriedOutRows(s), [s.due<0?"Credito":"Da saldare", eurDoc(Math.abs(s.due))], ...payStateRows(s)];
+function tPackages(c, o){
+  let t = "";
+  pastPackages(c).forEach(p=>{
+    const pc = pkgClient(c, p), s = stats(pc);
+    t += tHead(pkgTitle(p)) + tKv([...tSess(s), ...(o.pay ? tPay(s) : [])]);
+    if(o.sessions && pc.sessionLog.length) t += "Sedute:\n" + tSessions(pc, o.notes);
+    if(o.payments && pc.payLog.length) t += "Pagamenti:\n" + tPayments(pc);
+  });
+  return t;
+}
+
+/* Scheda completa in testo: leggibile, e con in fondo il codice per reimportarla */
+function buildFullText(c){
+  const s = stats(c);
+  let t = `SCHEDA CLIENTE\n${c.name}\nAggiornata al ${itDate(today())}\n`;
+  t += tHead("Pacchetto e pagamenti") + tKv([...tSess(s), ...tPay(s)]);
+  const d = tDots(s.done, s.total); if(d) t += d + "\n";
+  t += tHead("Dati cliente e allenamento") + tKv([["Telefono", c.phone], ["Email", c.email], ["Volte a settimana", c.freq===""?"":String(c.freq)],
+       ["Giorni di allenamento", c.days.join(", ")], ["Allenamento", c.training], ["Note", c.notes]]);
+  t += tHead("Storico sedute") + tSessions(c, true);
+  t += tHead("Storico pagamenti") + tPayments(c);
+  t += tPackages(c, {pay:true, sessions:true, notes:true, payments:true});
+  const data = {...c}; delete data.id;
+  t += `\n${tLine}\nCodice per reimportare la scheda nel gestionale (non modificarlo):\nPTGEST1:${b64enc(JSON.stringify(data))}\n`;
+  return t;
+}
+/* Riepilogo in testo per il cliente (solo ciò che scegli) */
+function buildClientText(c, o){
+  const s = stats(c), inc = o.inc;
+  let t = `RIEPILOGO ALLENAMENTI\n${c.name}\nAggiornato al ${itDate(today())}${o.trainer ? "\nPersonal trainer: " + o.trainer : ""}\n`;
+  if(o.message) t += tHead("Messaggio dal tuo personal trainer") + o.message + "\n";
+  if(inc.sedute){ t += tHead("Il tuo pacchetto") + tKv(tSess(s)); const d = tDots(s.done, s.total); if(d) t += d + "\n"; }
+  if(inc.pagamenti) t += tHead("Pagamenti") + tKv(tPay(s));
+  const tr = [];
+  if(inc.giorni){ tr.push(["Volte a settimana", c.freq===""?"":String(c.freq)]); tr.push(["Giorni di allenamento", c.days.join(", ")]); }
+  if(inc.allenamento) tr.push(["Allenamento", c.training]);
+  if(tr.length) t += tHead("Il tuo allenamento") + tKv(tr);
+  if(inc.note) t += tHead("Note") + (c.notes || "—") + "\n";
+  if(inc.storicoSedute) t += tHead("Storico sedute") + tSessions(c, !!inc.noteSedute);
+  if(inc.storicoPagamenti) t += tHead("Storico pagamenti") + tPayments(c);
+  if(inc.pacchetti) t += tPackages(c, {pay:!!inc.pagamenti, sessions:!!inc.storicoSedute, notes:!!(inc.storicoSedute && inc.noteSedute), payments:!!inc.storicoPagamenti});
+  return t;
+}
+
+/* ===== IMPORT: lettura tabelle ===== */
+function xmlDecode(s){ return s.replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&#(\d+);/g,(m,d)=>String.fromCharCode(d)).replace(/&amp;/g,"&"); }
+function docxTables(xml){
+  const tables = xml.match(/<w:tbl[ >][\s\S]*?<\/w:tbl>/g) || [];
+  return tables.map(t => (t.match(/<w:tr[ >][\s\S]*?<\/w:tr>/g)||[]).map(tr =>
+    (tr.match(/<w:tc[ >][\s\S]*?<\/w:tc>/g)||[]).map(tc =>
+      (tc.match(/<w:p[ >][\s\S]*?<\/w:p>|<w:p\/>/g)||[]).map(p =>
+        (p.match(/<w:t(?:\s[^>]*)?>[^<]*<\/w:t>|<w:br\/>|<w:tab\/>/g)||[]).map(x => x==="<w:br/>"?"\n":x==="<w:tab/>"?" ":xmlDecode(x.replace(/<[^>]+>/g,""))).join("")
+      ).join("\n").trim())));
+}
+function parseNum(v){
+  let t = String(v||"").replace(/[€\s]/g,"").replace(/EUR/i,"");
+  if(t.includes(",")) t = t.replace(/\./g,"").replace(",",".");
+  return parseFloat(t)||0;
+}
+function parseDate(v){
+  const t = String(v||"").trim();
+  let m = t.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})$/);
+  if(m){ let y=m[3]; if(y.length===2) y="20"+y; return `${y}-${m[2].padStart(2,"0")}-${m[1].padStart(2,"0")}`; }
+  return /^\d{4}-\d{2}-\d{2}$/.test(t) ? t : today();
+}
+function clientFromTables(tables, name){
+  const c = normalize({name});
+  const clean = v => (v==="—"||v==="-") ? "" : (v||"");
+  let found = false;
+  /* Ordine della scheda: pacchetto in corso, dati cliente, sue sedute e suoi pagamenti,
+     poi i pacchetti precedenti, ognuno con le sue tabelle. Sedute e pagamenti vanno
+     al pacchetto la cui tabella è comparsa per ultima. */
+  let target = c, seenCurrent = false;
+  tables.forEach(rows=>{
+    if(!rows.length) return;
+    const lab = rows.map(r=>(r[0]||"").toLowerCase().trim());
+    const has = k => lab.some(l=>l.startsWith(k));
+    const get = k => { const i = lab.findIndex(l=>l.startsWith(k)); return i>=0 ? clean(rows[i][1]) : ""; };
+    const head = rows[0].map(x=>(x||"").toLowerCase().trim());
+
+    if(has("sedute nel pacchetto") || has("totale da pagare")){
+      found = true;
+      let t;
+      if(!seenCurrent){ t = c; seenCurrent = true; }
+      else { t = {start:"", end:"", sessionLog:[], payLog:[]}; c.packages.push(t); }
+      t.totalSessions = parseInt(get("sedute nel pacchetto"))||0;
+      t.doneSessions = parseInt(get("sedute fatte"))||0;
+      t.price = parseNum(get("totale da pagare"));
+      t.paid = parseNum(get("già pagato") || get("gia pagato"));
+      const st = get("inizio pacchetto"); if(st) t.start = parseDate(st);
+      const ds = get("periodo").match(/\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}/g) || [];
+      if(ds[0]) t.start = parseDate(ds[0]);
+      if(ds[1]) t.end = parseDate(ds[1]);
+      const ci = get("di cui dal pacchetto precedente"), cc = get("credito dal pacchetto precedente");
+      t.carriedIn = ci ? parseNum(ci) : cc ? -parseNum(cc) : 0;
+      const co = get("saldo spostato");
+      t.carriedOut = co ? (/credito/i.test(co) ? -parseNum(co.replace(/credito/i,"")) : parseNum(co)) : 0;
+      target = t;
+    } else if(has("telefono") || has("email") || has("volte a settimana") || has("allenamento")){
+      found = true;
+      c.phone = get("telefono"); c.email = get("email");
+      const f = get("volte a settimana"); c.freq = f ? parseInt(f)||0 : "";
+      const g = get("giorni").toLowerCase();
+      c.days = DAYS.filter(d=>g.includes(d.toLowerCase()));
+      c.training = get("allenamento"); c.notes = get("note");
+    } else if(head.some(h=>h.startsWith("importo"))){
+      found = true;
+      const iD = head.indexOf("data"), iI = head.findIndex(h=>h.startsWith("importo")), iM = head.indexOf("metodo"), iN = head.findIndex(h=>h.startsWith("note"));
+      rows.slice(1).forEach(r=>{
+        if(!r[iD] || /^totale/i.test(r[iD])) return;
+        target.payLog.push({id:uid(), date:parseDate(r[iD]), amount:parseNum(r[iI]), method:iM>=0?clean(r[iM]):"", note:iN>=0?clean(r[iN]):""});
+      });
+    } else if(head.includes("data")){
+      found = true;
+      const iD = head.indexOf("data"), iN = head.findIndex(h=>h.startsWith("note"));
+      rows.slice(1).forEach(r=>{ if(r[iD]) target.sessionLog.push({id:uid(), date:parseDate(r[iD]), note:iN>=0?clean(r[iN]):""}); });
+    }
+  });
+  c.carriedIn = round2(Number(c.carriedIn)||0);
+  delete c.carriedOut; delete c.end;
+  c.packages = c.packages.map(normPackage);
+  return found ? c : null;
+}
+/*BUILDERS-END*/
+/* ======================= STATO ======================= */
+const LOCAL_KEY = "pt_gestionale_v2";
+let clients = [];
+let openId = null;
+let query = "";
+let loaded = false;
+let settings = {trainerName:"", driveFolderId:"", exportDest:"device", backupDest:"drive", followSvcs:["drive"]};
+const SETTINGS_KEY = "pt_settings_v1";
+const SETTINGS_ID = "_settings";
+
+const $ = id => document.getElementById(id);
+const getClient = id => clients.find(c=>c.id===id);
+const clone = o => JSON.parse(JSON.stringify(o));
+const sleep = ms => new Promise(r=>setTimeout(r, ms));
+const fmtIn = n => String(Number(n)||0).replace(".", ",");
+const toInt = v => { const n = parseInt(String(v||"").replace(/\D/g,""), 10); return isNaN(n) ? 0 : n; };
+
+/* ======================= SALVATAGGIO ======================= */
+/* Online (pagina privata): i dati stanno nel tuo account, in uno spazio privato.
+   File HTML: i dati stanno nel browser (localStorage). */
+const store = {
+  mode: "local",   // "cloud" | "local"
+  col: null, downloads: null, mcp: null,
+  pending: new Map(),   // id -> {timer, writing, ver, savedVer}
+  dirty: new Map(),     // id -> cliente non ancora confermato dal server
+  deleting: new Set(),
+  status: "ok", lastError: ""
+};
+
+function loadLocalSettings(){
+  try{ const raw = localStorage.getItem(SETTINGS_KEY); if(raw) settings = {...settings, ...JSON.parse(raw)}; }catch(e){}
+}
+/* finché un salvataggio delle impostazioni è in viaggio, ignoro le copie vecchie che arrivano dal server */
+let settingsWrites = 0;
+async function saveSettings(){
+  if(store.mode === "local"){ try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }catch(e){} return; }
+  settingsWrites++;
+  try{ await store.col.doc(SETTINGS_ID).set({...settings}); }catch(e){ console.error(e); }
+  finally{ settingsWrites--; }
+}
+function loadLocal(){
+  try{ const raw = localStorage.getItem(LOCAL_KEY); return raw ? JSON.parse(raw).map(normalize) : []; }
+  catch(e){ return []; }
+}
+function saveLocal(){
+  try{ localStorage.setItem(LOCAL_KEY, JSON.stringify(clients)); setStatus("ok"); }
+  catch(e){ setStatus("error", "Il browser non permette di salvare: esporta le cartelle per non perdere i dati."); }
+}
+
+async function initStore(){
+  let db = null, user = null, uidv = null;
+  if(window.claude && typeof window.claude.use === "function"){
+    try{
+      [db, user, store.downloads, store.mcp] = await Promise.all([
+        window.claude.use("db"), window.claude.use("user"), window.claude.use("downloads"), window.claude.use("mcp")
+      ]);
+      if(db && user) uidv = await user.id();
+    }catch(e){ console.warn(e); db = null; }
+  }
+  if(db && uidv){
+    store.mode = "cloud";
+    store.col = db.collection("data/users/" + uidv);
+    store.col.onSnapshot(applySnapshot, err=>{
+      console.error(err);
+      setStatus("error", "Connessione interrotta. Ricarica la pagina per vedere i dati aggiornati.");
+    });
+  } else {
+    store.mode = "local";
+    loadLocalSettings();
+    clients = loadLocal(); loaded = true; render();
+  }
+}
+
+function applySnapshot(snap){
+  const map = new Map();
+  snap.docs.forEach(d=>{
+    const data = d.data(); if(!data) return;
+    if(d.id === SETTINGS_ID){ if(settingsWrites > 0) return; settings = {trainerName:"", driveFolderId:"", exportDest:"device", backupDest:"drive", followSvcs:["drive"], ...clone(data)}; return; }
+    map.set(d.id, normalize({...clone(data), id:d.id}));
+  });
+  store.dirty.forEach((c,id)=>map.set(id, c));        // le modifiche non ancora salvate vincono
+  store.deleting.forEach(id=>map.delete(id));
+  clients = [...map.values()];
+  loaded = true;
+  softRender();
+}
+
+/* Salva un cliente (in automatico, con una piccola attesa se stai scrivendo) */
+function persist(c, now){
+  if(store.mode === "local"){ saveLocal(); return; }
+  store.dirty.set(c.id, c);
+  let p = store.pending.get(c.id);
+  if(!p){ p = {timer:null, writing:false, ver:0, savedVer:0}; store.pending.set(c.id, p); }
+  p.ver++;
+  clearTimeout(p.timer);
+  p.timer = setTimeout(()=>{ p.timer = null; flush(c.id); }, now ? 0 : 600);
+  setStatus("saving");
+}
+async function flush(id){
+  const p = store.pending.get(id); if(!p || p.writing) return;
+  const c = store.dirty.get(id); if(!c){ store.pending.delete(id); updateSavingStatus(); return; }
+  const ver = p.ver, body = clone(c);
+  delete body.id;
+  p.writing = true;
+  let ok = false;
+  for(let attempt=0; attempt<3 && !ok; attempt++){
+    try{ await store.col.doc(id).set(body); ok = true; }
+    catch(e){
+      console.error(e);
+      if(e && e.code === "quota_exceeded"){ setStatus("error", "Spazio esaurito: elimina qualche cartella che non usi più."); break; }
+      if(e && (e.code === "unavailable" || !e.code)) await sleep(700 + Math.random()*800*(attempt+1));
+      else { setStatus("error", "Non sono riuscito a salvare. Ricarica la pagina e riprova."); break; }
+    }
+  }
+  p.writing = false;
+  if(!ok){ if(store.status !== "error") setStatus("error", "Non sono riuscito a salvare. Controlla la connessione."); return; }
+  if(p.ver !== ver){ if(!p.timer) flush(id); return; }   // nel frattempo è cambiato: salva di nuovo
+  store.pending.delete(id); store.dirty.delete(id);
+  updateSavingStatus();
+}
+function flushAll(){ store.pending.forEach((p,id)=>{ if(p.timer){ clearTimeout(p.timer); p.timer=null; } flush(id); }); }
+function updateSavingStatus(){ if(store.status==="error") return; setStatus(store.pending.size ? "saving" : "ok"); }
+
+async function removeClient(id){
+  clients = clients.filter(c=>c.id!==id);
+  if(store.mode === "local"){ saveLocal(); return; }
+  const p = store.pending.get(id); if(p && p.timer){ clearTimeout(p.timer); p.timer = null; }
+  store.dirty.delete(id);
+  store.deleting.add(id);
+  /* se un salvataggio di questa cartella è ancora in corso, aspetto che finisca:
+     altrimenti arriverebbe dopo l'eliminazione e la cartella tornerebbe */
+  for(let i=0; p && p.writing && i<200; i++) await sleep(50);
+  store.pending.delete(id);
+  updateSavingStatus();
+  try{ await store.col.doc(id).delete(); }
+  catch(e){ console.error(e); setStatus("error", "Non sono riuscito a eliminare la cartella. Riprova."); }
+  finally{ store.deleting.delete(id); }
+}
+
+/* Aggiorna un cliente in memoria e lo salva */
+function commit(c, now){
+  const i = clients.findIndex(x=>x.id===c.id);
+  if(i >= 0) clients[i] = c; else clients.push(c);
+  persist(c, now);
+}
+
+function statusText(){
+  if(store.status === "error") return store.lastError;
+  if(store.status === "saving") return "Salvataggio in corso…";
+  return store.mode === "cloud" ? "Dati salvati nel tuo account" : "Dati salvati in questo browser";
+}
+function setStatus(s, msg){
+  store.status = s; if(msg) store.lastError = msg;
+  const el = $("saveStatus");
+  if(el){ el.className = "status " + (s==="ok" ? "" : s); el.textContent = statusText(); }
+}
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState === "hidden") flushAll(); });
+window.addEventListener("pagehide", flushAll);
+
+/* ======================= CLOUD: GOOGLE DRIVE E DROPBOX ======================= */
+const DRIVE = "Google Drive", DROPBOX = "Dropbox", DRIVE_FOLDER = "Gestionale PT";
+const DBX_ROOT = "/Gestionale PT";
+const SVC_NAME = {drive:"Google Drive", dropbox:"Dropbox"};
+const cloudAvailable = () => !!store.mcp;
+/* indirizzi per aprire le cartelle nell'app o nel sito di Dropbox e Drive */
+const dbxWebUrl = path => "https://www.dropbox.com/home" + String(path||DBX_ROOT).split("/").map(encodeURIComponent).join("/");
+const driveWebUrl = id => id ? `https://drive.google.com/drive/folders/${id}` : "https://drive.google.com/drive/my-drive";
+/* Su iPhone l'app Dropbox si apre con il suo indirizzo speciale; Dropbox non permette di saltare
+   a una cartella precisa dell'app, per questo sotto c'è anche il sito */
+const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const DBX_APP = "dbapi-2://";
+const dbxOpenUrl = path => isIOS ? DBX_APP : dbxWebUrl(path);
+const dbxOpenLabel = () => isIOS ? "Apri l'app Dropbox" : "Apri la cartella su Dropbox";
+async function showOpen(title, text, url, label, webUrl){
+  $("openTitle").textContent = title; $("openText").textContent = text;
+  $("openLink").href = url; $("openLink").textContent = label;
+  $("openWeb").hidden = !webUrl; if(webUrl) $("openWeb").href = webUrl;
+  await ask("dlgOpen");
+}
+const dbxAppHint = where => isIOS ? `\n\nNell'app Dropbox tocca la cartella “${where}”.` : "";
+const driveAvailable = cloudAvailable;
+const STOP_CODES = ["server_not_connected","server_not_found","needs_reauth","not_in_manifest","consent_required","blocked_by_policy","approval_required","selection_required","not_granted","capability_disabled","capability_removed"];
+
+function cloudErrorText(e, svc){
+  const N = SVC_NAME[svc] || "il servizio", code = e && e.code;
+  const where = svc === "dropbox" ? `nella cartella “${DRIVE_FOLDER}” su Dropbox` : `nella cartella “${DRIVE_FOLDER}” sul tuo Drive`;
+  switch(code){
+    case "server_not_connected": case "server_not_found":
+      return `${N} non è collegato. Collegalo da claude.ai in Impostazioni → Connettori, poi riprova.`;
+    case "needs_reauth":
+      return `Il collegamento con ${N} è scaduto. Ricollegalo da claude.ai in Impostazioni → Connettori, poi riprova.`;
+    case "selection_required":
+      return `Hai più account ${N} collegati: scegli quale usare nel messaggio che compare in alto, poi riprova.`;
+    case "not_in_manifest": case "consent_required":
+      return `Non hai dato il permesso di usare ${N} in questa pagina. Riprova e, quando te lo chiede, scegli di consentire.`;
+    case "blocked_by_policy": case "approval_required":
+      return `Le impostazioni del tuo account non permettono a questa pagina di usare ${N}.`;
+    case "server_unavailable": case "upstream_error": case "cancelled":
+      return `${N} non ha risposto in tempo. L'operazione potrebbe essere andata a buon fine comunque: controlla ${where} prima di riprovare.`;
+    case "tool_error":
+      return `${N} ha rifiutato l'operazione` + (e.message ? ": " + e.message : ".");
+    case "not_granted": case "capability_disabled": case "capability_removed":
+      return `${N} non è disponibile in questa visualizzazione.`;
+    default:
+      return `Non sono riuscito a completare l'operazione su ${N}. Riprova tra poco.`;
+  }
+}
+const driveErrorText = e => cloudErrorText(e, "drive");
+/* Il codice Dropbox (es. ALREADY_EXISTS) arriva nel messaggio o nella risposta completa dell'errore */
+const errHas = (e, word) => !!e && e.code === "tool_error" && new RegExp(word).test(String(e.message || "") + " " + (()=>{ try{ return JSON.stringify(e.result || ""); }catch(_){ return ""; } })());
+
+async function mcpCall(server, tool, input){
+  const r = await store.mcp.callTool(server, tool, input, {cache:false});
+  let p = r && r.payload;
+  if(typeof p === "string"){ try{ p = JSON.parse(p); }catch(_){ } }
+  return p && typeof p === "object" ? p : {};
+}
+const driveCall = (tool, input) => mcpCall(DRIVE, tool, input);
+const dbxCall = (tool, input) => mcpCall(DROPBOX, tool, input);
+
+function stampNow(){
+  const d = new Date(), p = n => String(n).padStart(2,"0");
+  return `${p(d.getDate())}-${p(d.getMonth()+1)}-${d.getFullYear()} ore ${p(d.getHours())}.${p(d.getMinutes())}`;
+}
+
+/* ---------- Google Drive ---------- */
+async function driveMainFolder(){
+  if(settings.driveFolderId) return settings.driveFolderId;
+  const found = await driveCall("search_files", {query:`title = '${DRIVE_FOLDER}' and mimeType = 'application/vnd.google-apps.folder'`, pageSize:5, excludeContentSnippets:true});
+  const f = Array.isArray(found.files) ? found.files.find(x=>x && x.id && x.canAddChildren !== false) : null;
+  let id = f && f.id;
+  if(!id){
+    const made = await driveCall("create_file", {title:DRIVE_FOLDER, contentMimeType:"application/vnd.google-apps.folder"});
+    id = made.id;
+  }
+  if(!id) throw {code:"tool_error", message:"cartella non creata"};
+  settings.driveFolderId = id; saveSettings();
+  return id;
+}
+async function driveSubFolder(parentId, title){
+  const made = await driveCall("create_file", {title, parentId, contentMimeType:"application/vnd.google-apps.folder"});
+  if(!made.id) throw {code:"tool_error", message:"cartella non creata"};
+  return made.id;
+}
+/* Crea una sottocartella della cartella principale; se la principale è stata eliminata, la ricrea una volta */
+async function driveSubOfMain(title){
+  const main = await driveMainFolder();
+  try{ return await driveSubFolder(main, title); }
+  catch(e){
+    if(e && e.code === "tool_error" && settings.driveFolderId === main){ settings.driveFolderId = ""; return await driveSubFolder(await driveMainFolder(), title); }
+    throw e;
+  }
+}
+function blobToBase64(blob){
+  return new Promise((res, rej)=>{ const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1] || ""); r.onerror = () => rej(r.error); r.readAsDataURL(blob); });
+}
+async function driveUpload(blob, filename, parentId){
+  const ext = filename.split(".").pop();
+  const b64 = await blobToBase64(blob);
+  const res = await driveCall("create_file", {title:filename, parentId, base64Content:b64, contentMimeType:MIME[ext] || "application/octet-stream", disableConversionToGoogleType:true});
+  if(!res.id) throw {code:"tool_error", message:"file non creato"};
+  return res;
+}
+async function driveSave(blob, filename){
+  const folder = await driveMainFolder();
+  try{ return await driveUpload(blob, filename, folder); }
+  catch(e){
+    if(e && e.code === "tool_error" && settings.driveFolderId === folder){
+      settings.driveFolderId = ""; const again = await driveMainFolder();
+      return await driveUpload(blob, filename, again);
+    }
+    throw e;
+  }
+}
+
+/* ---------- Dropbox (solo file di testo) ---------- */
+const dbxName = s => safeName(s).replace(/[.\s]+$/,"").normalize("NFC") || "Cliente";
+let dbxRootOk = false;
+async function dbxEnsureFolder(path){
+  try{ await dbxCall("create_folder", {path}); }
+  catch(e){ if(!errHas(e, "ALREADY_EXISTS")) throw e; }
+}
+async function dbxRoot(force){
+  if(dbxRootOk && !force) return DBX_ROOT;
+  await dbxEnsureFolder(DBX_ROOT);
+  dbxRootOk = true; return DBX_ROOT;
+}
+/* Crea un file di testo; se esiste già un file con lo stesso nome ne sceglie uno libero */
+async function dbxWriteText(folder, filename, content){
+  const dot = filename.lastIndexOf("."), base = filename.slice(0, dot), ext = filename.slice(dot);
+  for(let i=1; i<=5; i++){
+    const path = `${folder}/${i===1 ? base : `${base} (${i})`}${ext}`.normalize("NFC");
+    try{
+      const r = await dbxCall("create_file", {path, content});
+      const f = r.file || {};
+      return {path: f.path_display || path, name: f.name || filename, id: f.file_id || ""};
+    }catch(e){ if(!errHas(e, "ALREADY_EXISTS")) throw e; }
+  }
+  throw {code:"tool_error", message:"esistono già troppi file con questo nome"};
+}
+/* Salva nella cartella principale; se è stata eliminata la ricrea una volta */
+async function dbxSaveText(filename, content){
+  await dbxRoot();
+  try{ return await dbxWriteText(DBX_ROOT, filename, content); }
+  catch(e){
+    if(errHas(e, "PARENT_NOT_FOUND")){ await dbxRoot(true); return await dbxWriteText(DBX_ROOT, filename, content); }
+    throw e;
+  }
+}
+async function dbxDelete(path){ return dbxCall("delete", {entries:[{source_path:path}]}); }
+/* Ritrova una cartella dal suo codice (o percorso): funziona anche se l'hai rinominata dall'app Dropbox.
+   null = non esiste più */
+async function dbxResolve(idOrPath){
+  try{
+    const r = await dbxCall("get_file_metadata", {path_or_file_id:idOrPath});
+    const f = r.folder;
+    if(r.metadata_type !== "folder" || !f || !f.path_display) return null;
+    return {id: f.id || "", path: f.path_display, name: f.name || f.path_display.split("/").pop()};
+  }catch(e){ if(errHas(e, "NOT_FOUND")) return null; throw e; }
+}
+/* Le operazioni lunghe di Dropbox (rinomina) finiscono in un secondo momento: aspetto l'esito */
+async function dbxWaitJob(r){
+  for(let i=0; i<8 && r && r.status === "in_progress" && r.operation_id; i++)
+    r = await dbxCall("check_job_status", {operation_id:r.operation_id, wait_ms:3000});
+  return r || {};
+}
+async function dbxRenameFolder(folderId, parentPath, newName){
+  const r = await dbxWaitJob(await dbxCall("move", {entries:[{source_path:folderId, destination_path:`${parentPath}/${newName}`.normalize("NFC")}]}));
+  if(r.status !== "completed") throw {code:"server_unavailable", message:"rinomina non ancora confermata"};
+  const e = (r.move_result && r.move_result.entries || [])[0];
+  if(!e || e.entry_status !== "success"){
+    const fc = e && e.failure ? String(e.failure.error_code || "") : "";
+    throw {code:"tool_error", conflict:/conflict/.test(fc), message:(e && e.failure && (e.failure.message || fc)) || "rinomina non riuscita"};
+  }
+  const o = e.object || {};
+  return {path: o.path_display || `${parentPath}/${newName}`, name: o.name || newName};
+}
+/* Drive: la cartella esiste ancora? (se è nel cestino Drive risponde "non trovata") */
+async function driveResolve(id){
+  try{
+    const r = await driveCall("get_file_metadata", {fileId:id, excludeContentSnippets:true});
+    if(!r || !r.id || r.trashed === true) return null;
+    return {id:r.id, name:r.title || ""};
+  }catch(e){
+    const t = e && e.code === "tool_error" ? String(e.message||"") + " " + (()=>{ try{ return JSON.stringify(e.result||""); }catch(_){ return ""; } })() : "";
+    if(/not\s*found|notFound|404/i.test(t)) return null;
+    throw e;
+  }
+}
+
+/* ======================= LIBRERIE ======================= */
+const LIBS = {
+  jszip: ["https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js", ()=>window.JSZip],
+  jspdf: ["https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js", ()=>window.jspdf && window.jspdf.jsPDF]
+};
+const libPromises = {};
+function lib(name){
+  const [src, get] = LIBS[name];
+  if(get()) return Promise.resolve(get());
+  if(libPromises[name]) return libPromises[name];
+  libPromises[name] = new Promise((res, rej)=>{
+    const sc = document.createElement("script"); sc.src = src; sc.async = true;
+    sc.onload = () => get() ? res(get()) : rej(new Error("offline"));
+    sc.onerror = () => { sc.remove(); rej(new Error("offline")); };
+    document.head.appendChild(sc);
+  }).catch(e=>{ delete libPromises[name]; throw e; });
+  return libPromises[name];
+}
+const OFFLINE_MSG = "Per creare o leggere file Word e PDF serve la connessione a internet. Controlla la connessione e riprova.";
+
+/* ======================= FINESTRE ======================= */
+/* ✕ in alto a destra in ogni finestra: chiude senza salvare, come “Annulla” */
+document.querySelectorAll("dialog > form[method=dialog]").forEach(f=>{
+  const b = document.createElement("button");
+  b.type = "submit"; b.value = "cancel"; b.formNoValidate = true;
+  b.className = "dlg-x"; b.textContent = "✕";
+  b.setAttribute("aria-label", "Chiudi"); b.title = "Chiudi";
+  f.prepend(b);
+});
+function ask(dlgId){
+  return new Promise(res=>{
+    const d = $(dlgId);
+    d.returnValue = "";
+    d.addEventListener("close", ()=>res(d.returnValue), {once:true});
+    d.showModal();
+  });
+}
+async function messageBox(title, text, {ok="OK", cancel=null, danger=false}={}){
+  $("msgTitle").textContent = title; $("msgText").textContent = text;
+  $("msgOk").textContent = ok;
+  $("msgOk").className = "btn " + (danger ? "danger fill" : "primary");
+  $("msgCancel").hidden = !cancel; if(cancel) $("msgCancel").textContent = cancel;
+  return (await ask("dlgMsg")) === "ok";
+}
+let tt;
+function toast(t){ const el=$("toast"); el.textContent=t; el.classList.add("show"); clearTimeout(tt); tt=setTimeout(()=>el.classList.remove("show"),2800); }
+
+/* ======================= RENDER ======================= */
+function dotsHTML(done,total,max,big){
+  const n = Math.max(total,done), shown = Math.min(n,max);
+  let h = `<span class="dots${big?" big":""}" aria-hidden="true">`;
+  for(let i=0;i<shown;i++) h += `<span class="dot${i<done?" on":""}"></span>`;
+  if(n > max) h += `<span class="more">+${n-max}</span>`;
+  return h + "</span>";
+}
+function render(){
+  if(!loaded) return;
+  const app = $("app");
+  if(openId && getClient(openId)) app.innerHTML = detailHTML(getClient(openId));
+  else { openId = null; app.innerHTML = listHTML(); }
+}
+/* Aggiorna senza disturbare mentre stai scrivendo in un campo */
+function softRender(){
+  const a = document.activeElement;
+  const typing = a && $("app").contains(a) && (a.tagName === "INPUT" || a.tagName === "TEXTAREA");
+  if(typing){
+    if(openId && getClient(openId)) refreshSummary(getClient(openId));
+    return;
+  }
+  render();
+}
+function countText(s){
+  if(s.done > s.total) return `Fatte ${s.done} su ${s.total} (oltre il pacchetto)`;
+  if(s.complete) return `Completato: ${s.done} su ${s.total}`;
+  return `Fatte ${s.done} su ${s.total}, ne mancano ${s.left}`;
+}
+function pkgLineHTML(s){
+  const from = s.start ? `iniziato il ${itDate(s.start)}` : "";
+  if(s.complete) return `<span class="done-badge">✓ Pacchetto completato</span>${from ? ` <span>· ${from}</span>` : ""}`;
+  return from ? `Pacchetto ${from}` : `Pacchetto senza data di inizio`;
+}
+function listHTML(){
+  let sDone=0, sLeft=0, paid=0, due=0;
+  clients.forEach(c=>{
+    const s=stats(c); sDone+=s.done; sLeft+=s.left; paid+=s.paid; due+=Math.max(s.due,0);
+    c.packages.forEach(p=>{ const ps=stats(pkgClient(c,p)); sDone+=ps.done; paid+=ps.paid; due+=Math.max(ps.due,0); });   // anche i pacchetti vecchi
+  });
+  const needCount = clients.filter(followNeeds).length;
+  const q = query.trim();
+  const list = clients.filter(c=>nameMatches(c.name, q)).sort((a,b)=>a.name.localeCompare(b.name,"it"));
+
+  let h = `<header class="top">
+    <div><h1>I miei clienti</h1><p>Sedute one to one e pagamenti, una cartella per persona.</p>
+    <div id="saveStatus" class="status ${store.status==="ok"?"":store.status}">${esc(statusText())}</div></div>
+    <div class="actions">
+      <button class="btn ghost" data-a="import">Importa scheda o backup</button>
+      <button class="btn ghost" data-a="exportAll">Esporta tutto</button>
+      ${cloudAvailable() && clients.length ? `<button class="btn ghost" data-a="backup">Backup su Drive o Dropbox</button>` : ""}
+      ${cloudAvailable() ? `<a class="btn ghost" id="openDbx" href="${dbxOpenUrl(DBX_ROOT)}" target="_blank" rel="noopener">${isIOS ? "Apri l'app Dropbox" : "Apri su Dropbox"}</a>
+        <a class="btn ghost" id="openDrive" href="${driveWebUrl(settings.driveFolderId)}" target="_blank" rel="noopener">Apri su Drive</a>` : ""}
+      ${cloudAvailable() && needCount ? `<button class="btn" data-a="followAll">Aggiorna i clienti condivisi (${needCount})</button>` : ""}
+      <button class="btn primary" data-a="newClient">Nuova cartella</button>
+    </div></header>`;
+
+  if(!clients.length){
+    return h + `<div class="empty"><h2>Ancora nessuna cartella</h2>
+      <p>Crea la cartella del tuo primo cliente, oppure importa una scheda (Word, PDF o testo): la cartella prende il nome del file.</p>
+      <div class="actions"><button class="btn ghost" data-a="import">Importa scheda o backup</button><button class="btn primary" data-a="newClient">Crea la prima cartella</button></div></div>` + dangerZoneHTML();
+  }
+  h += alertsPanelHTML() + `<div class="totals">
+    <div><b>${clients.length}</b><span>clienti</span></div>
+    <div><b>${sDone}</b><span>sedute svolte</span></div>
+    <div><b>${sLeft}</b><span>sedute da fare</span></div>
+    <div><b>${eur(paid)}</b><span>incassato</span></div>
+    <div class="owed"><b>${eur(due)}</b><span>da incassare</span></div>
+  </div>
+  <div class="searchbar" role="search">
+    <input class="search" id="search" type="search" enterkeyhint="search" placeholder="Cerca un cliente…" value="${esc(query)}" aria-label="Cerca un cliente" autocomplete="off">
+    ${q ? `<button class="s-btn s-clear" data-a="clearSearch" aria-label="Cancella la ricerca" title="Cancella">✕</button>` : ""}
+    <button class="s-btn s-go" data-a="doSearch" aria-label="Cerca" title="Cerca"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.4"/><line x1="15.4" y1="15.4" x2="21" y2="21" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
+  </div>
+  ${q ? `<p class="found" id="found">${list.length ? `${list.length} ${list.length === 1 ? "cliente trovato" : "clienti trovati"} per “${esc(q)}”` : ""}</p>` : ""}`;
+  if(!list.length) return h + `<p class="none">Nessun cliente trovato con “${esc(q)}”.</p>` + dangerZoneHTML();
+  h += `<div class="folders">`;
+  list.forEach(c=>{
+    const s = stats(c), f = freqText(c);
+    h += `<div class="fwrap"><button class="folder" data-a="open" data-id="${esc(c.id)}">
+      <span class="fname">${esc(c.name)}</span>
+      ${s.start ? `<span class="pk">Pacchetto dal ${itDate(s.start)}</span>` : ""}
+      ${dotsHTML(s.done,s.total,20,false)}
+      <span class="row"><span>Sedute</span><strong>${s.done} su ${s.total}</strong></span>
+      <span class="row"><span>Pagato</span><strong>${eur(s.paid)} su ${eur(s.price)}</strong></span>
+      <span class="row"><span>${s.due<0?"Credito":"Da saldare"}</span><strong class="${s.due>0?"due":""}">${eur(Math.abs(s.due))}</strong></span>
+      ${f?`<span class="freq">${esc(f)}</span>`:""}
+      ${ticksHTML(s)}
+      ${alertsFor(c).length ? `<span class="alert">⚠ ${esc(alertText(c))}</span>` : ""}
+      ${c.follow && cloudAvailable() ? `<span class="sh${followNeeds(c)?" stale":""}">${followNeeds(c) ? "Condiviso · da aggiornare" : "Condiviso · aggiornato"}</span>` : ""}
+    </button>
+    <div class="ftools">
+      <button class="ftool" data-a="quickEdit" data-id="${esc(c.id)}" title="Modifica" aria-label="Modifica ${esc(c.name)}">✎</button>
+      <button class="ftool" data-a="renameClient" data-id="${esc(c.id)}" title="Rinomina" aria-label="Rinomina ${esc(c.name)}">Aa</button>
+      <button class="ftool del" data-a="quickDel" data-id="${esc(c.id)}" title="Elimina" aria-label="Elimina ${esc(c.name)}">🗑</button>
+    </div></div>`;
+  });
+  return h + `</div>` + dangerZoneHTML();
+}
+/* ======================= AVVISI ======================= */
+/* pacchetto quasi finito o finito, saldo da completare, pacchetti vecchi non saldati */
+const alertLeft = () => { const n = Number(settings.alertLeft); return Number.isFinite(n) && n >= 0 ? Math.min(Math.round(n), 50) : 2; };
+function alertsFor(c){
+  const s = stats(c), th = alertLeft(), out = [];
+  const ending = s.total > 0 && (s.complete || s.left <= th);
+  if(s.total > 0){
+    if(s.complete) out.push({k:"done", w:2, t:"Pacchetto finito"});
+    else if(s.left <= th) out.push({k:"near", w:1, t: s.left === 1 ? "Manca 1 seduta" : `Mancano ${s.left} sedute`});
+  }
+  if(s.due > 0 && ending) out.push({k:"due", w:3, t:`da saldare ${eur(s.due)}`});
+  const oldDue = round2(c.packages.reduce((a,p)=>a + Math.max(stats(pkgClient(c,p)).due, 0), 0));
+  if(oldDue > 0) out.push({k:"old", w:3, t:`pacchetti precedenti da saldare ${eur(oldDue)}`});
+  return out;
+}
+const alertWeight = c => alertsFor(c).reduce((a,x)=>a+x.w, 0);
+function alertText(c){
+  const t = alertsFor(c).map(x=>x.t).join(" · ");
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+function alertsPanelHTML(){
+  if(!clients.length) return "";
+  const list = clients.filter(c=>alertsFor(c).length).sort((a,b)=>alertWeight(b)-alertWeight(a) || a.name.localeCompare(b.name,"it"));
+  const th = alertLeft();
+  let h = `<section class="alerts${list.length ? "" : " ok"}"><div class="al-head"><h3>${list.length ? `⚠ Da tenere d'occhio (${list.length})` : "✓ Nessun avviso"}</h3>
+    <label class="al-set">Avvisami quando mancano <input id="alertLeft" value="${th}" aria-label="Numero di sedute rimaste per l'avviso" autocomplete="off"> sedute</label></div>`;
+  if(!list.length) return h + `<p class="sub">Nessun pacchetto in scadenza e nessun saldo da completare.</p></section>`;
+  h += `<div class="al-list">`;
+  list.forEach(c=>{
+    const al = alertsFor(c), money = al.some(x=>x.k==="due" || x.k==="old");
+    h += `<button class="al-row${money ? " money" : ""}" data-a="open" data-id="${esc(c.id)}"><span class="al-name">${esc(c.name)}</span><span class="al-what">${esc(alertText(c))}</span></button>`;
+  });
+  return h + `</div></section>`;
+}
+function headAlertHTML(c){
+  const al = alertsFor(c); if(!al.length) return "";
+  const tip = al.some(x=>x.k==="done") ? " Quando vuoi, premi “Nuovo pacchetto”." : al.some(x=>x.k==="near") ? " È un buon momento per proporre il rinnovo." : "";
+  return `<p class="alert-box">⚠ ${esc(alertText(c))}.${tip}</p>`;
+}
+document.addEventListener("change", e=>{
+  if(e.target.id !== "alertLeft") return;
+  settings.alertLeft = Math.min(toInt(e.target.value), 50); saveSettings(); render();
+});
+
+/* ricerca: contiene il testo in qualsiasi punto del nome, senza badare a maiuscole e accenti;
+   con più parole, devono esserci tutte ("mar ros" trova "Marco Rossi") */
+const plain = s => String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+function nameMatches(name, q){
+  const words = plain(q).split(/\s+/).filter(Boolean);
+  const n = plain(name);
+  return words.every(w=>n.includes(w));
+}
+function runSearch(){
+  const s = $("search"); if(s) query = s.value;
+  render();
+  const ns = $("search"); if(ns) ns.blur();                 // chiude la tastiera sul telefono
+  const target = $("found") || document.querySelector(".none") || $("search");
+  if(target) target.scrollIntoView({behavior:"smooth", block:"start"});
+}
+document.addEventListener("keydown", e=>{
+  if(e.key === "Enter" && e.target && e.target.id === "search"){ e.preventDefault(); runSearch(); }
+});
+
+function dangerZoneHTML(){
+  if(!clients.length && !cloudAvailable()) return "";
+  return `<div class="danger-zone"><button class="wipe" data-a="wipeAll">🗑 Cancella tutto…</button></div>`;
+}
+/* due spunte automatiche: pagato tutto / sedute finite (le vede anche il cliente nel riepilogo) */
+function ticksHTML(s){
+  const paid = s.price > 0 && s.due <= 0;
+  return `<span class="ticks"><span class="tick${paid ? " on" : ""}">${paid ? "✓" : "○"} Pagato</span><span class="tick${s.complete ? " on" : ""}">${s.complete ? "✓" : "○"} Sedute completate</span></span>`;
+}
+function detailHTML(c){
+  const s = stats(c);
+  const contact = [c.phone,c.email].filter(Boolean).map(esc).join("  |  ");
+  let h = `<button class="back" data-a="back">‹ Tutte le cartelle</button>
+  <div class="detail-head">
+    <h2>${esc(c.name)}</h2>
+    ${contact?`<p class="contact">${contact}</p>`:`<div style="height:10px"></div>`}
+    <p class="pkg-line" id="pkgLine">${pkgLineHTML(s)}</p>
+    <div class="big-count" id="bigCount">${countText(s)}</div>
+    <div id="bigDots">${dotsHTML(s.done,s.total,40,true)}</div>
+    <div id="headTicks">${ticksHTML(s)}</div>
+    <div id="headAlert">${headAlertHTML(c)}</div>
+    <div class="head-actions">
+      <button class="btn ${s.complete ? "" : "primary"}" data-a="addSes" id="addSesBtn">Segna seduta</button>
+      <button class="btn" data-a="addPay">Aggiungi rata</button>
+      <button class="btn ${s.complete ? "primary" : ""}" data-a="newPkg" id="newPkgBtn">Nuovo pacchetto</button>
+      <button class="btn" data-a="share">Invia al cliente</button>
+      <button class="btn" data-a="export">${cloudAvailable() ? "Esporta o salva la scheda" : "Esporta in Word o PDF"}</button>
+      <button class="btn ghost" data-a="edit">Modifica dati</button>
+      <button class="btn danger" data-a="delClient">Elimina cartella</button>
+    </div>
+  </div>
+  ${followHTML(c)}
+  <section class="block">
+    <h3>Pacchetto in corso e pagamenti</h3>
+    <p class="sub">Tutti i campi si possono cambiare in qualsiasi momento: vengono salvati appena li modifichi. Quando il pacchetto finisce, premi “Nuovo pacchetto”: questo va nello storico e si riparte da zero.</p>
+    <div class="fields">
+      <div class="field">
+        <label for="fStart">Inizio pacchetto</label>
+        <input class="big" id="fStart" type="date" value="${esc(c.start)}">
+      </div>
+      <div class="field">
+        <label for="fTotal">Sedute nel pacchetto</label>
+        <div class="stepper"><button data-step="totalSessions" data-d="-1" aria-label="Togli una seduta dal pacchetto">−</button>
+        <input id="fTotal" type="text" data-f="totalSessions" value="${c.totalSessions}" autocomplete="off">
+        <button data-step="totalSessions" data-d="1" aria-label="Aggiungi una seduta al pacchetto">+</button></div>
+      </div>
+      <div class="field">
+        <label for="fDone">Sedute fatte</label>
+        <div class="stepper"><button data-step="doneSessions" data-d="-1" aria-label="Togli una seduta fatta">−</button>
+        <input id="fDone" type="text" data-f="doneSessions" value="${c.doneSessions}" autocomplete="off">
+        <button data-step="doneSessions" data-d="1" aria-label="Aggiungi una seduta fatta">+</button></div>
+      </div>
+      <div class="field">
+        <label for="fPrice">Totale da pagare (€)</label>
+        <input class="big" id="fPrice" type="text" data-f="price" value="${fmtIn(c.price)}" autocomplete="off">
+        ${c.carriedIn ? `<p class="hint">${c.carriedIn > 0 ? `Di cui ${eur(c.carriedIn)} ancora da saldare del pacchetto precedente` : `Già scalato il credito di ${eur(-c.carriedIn)} del pacchetto precedente`}</p>` : ""}
+      </div>
+      <div class="field">
+        <label for="fPaid">Già pagato (€)</label>
+        <div class="row2"><input class="big" id="fPaid" type="text" data-f="paid" value="${fmtIn(c.paid)}" autocomplete="off">
+        <button class="btn small" data-a="addPay">+ Rata</button></div>
+      </div>
+      <div class="field ${s.due>0?"due":"ok"}" id="dueBox">
+        <label>${s.due<0?"Credito del cliente":"Ancora da saldare"}</label>
+        <div class="val">${eur(Math.abs(s.due))}</div>
+      </div>
+      <div class="field ok">
+        <label>Sedute ancora da fare</label>
+        <div class="val" id="leftVal">${s.left}</div>
+      </div>
+    </div>
+  </section>`;
+
+  const hasInfo = c.freq || c.days.length || c.training || c.notes;
+  h += `<section class="block info"><div class="bh"><h3>Allenamento e note</h3><button class="btn small" data-a="edit">Modifica</button></div>`;
+  if(!hasInfo) h += `<p class="none">Nessuna informazione aggiuntiva. Puoi indicare quante volte si allena, in quali giorni, il tipo di allenamento e delle note.</p>`;
+  else {
+    h += `<dl>`;
+    if(c.freq) h += `<dt>Volte a settimana</dt><dd>${c.freq}</dd>`;
+    if(c.days.length) h += `<dt>Giorni</dt><dd><div class="chips">${c.days.map(d=>`<span class="chip">${d}</span>`).join("")}</div></dd>`;
+    if(c.training) h += `<dt>Allenamento</dt><dd>${esc(c.training)}</dd>`;
+    if(c.notes) h += `<dt>Note</dt><dd>${esc(c.notes)}</dd>`;
+    h += `</dl>`;
+  }
+  h += `</section>`;
+
+  const hasPast = c.packages.length > 0;
+  h += `<section class="block"><div class="bh"><h3>Storico sedute${hasPast ? " del pacchetto in corso" : ""}</h3><button class="btn small" data-a="addSes">+ Seduta</button></div>`;
+  if(!c.sessionLog.length) h += `<p class="none">Qui compaiono le sedute segnate con il pulsante “Segna seduta”, con data e note.</p>`;
+  else {
+    h += `<div class="scroll"><table><thead><tr><th>Data</th><th>Note</th><th><span hidden>Azioni</span></th></tr></thead><tbody>`;
+    [...c.sessionLog].sort(byDate).forEach(x=>{ h += `<tr><td class="date">${itDate(x.date)}</td><td>${esc(x.note)}</td><td class="act">${rowBtns("Ses", x, "", `seduta del ${itDate(x.date)}`)}</td></tr>`; });
+    h += `</tbody></table></div>`;
+  }
+  h += `</section>`;
+
+  h += `<section class="block"><div class="bh"><h3>Storico pagamenti${hasPast ? " del pacchetto in corso" : ""}</h3><button class="btn small" data-a="addPay">+ Rata</button></div>`;
+  if(!c.payLog.length) h += `<p class="none">Qui compaiono le rate aggiunte con il pulsante “Aggiungi rata”.</p>`;
+  else {
+    h += `<div class="scroll"><table><thead><tr><th>Data</th><th class="num">Importo</th><th>Metodo</th><th>Note</th><th><span hidden>Azioni</span></th></tr></thead><tbody>`;
+    [...c.payLog].sort(byDate).forEach(x=>{ h += `<tr><td class="date">${itDate(x.date)}</td><td class="num">${eur(x.amount)}</td><td>${esc(x.method)}</td><td>${esc(x.note)}</td><td class="act">${rowBtns("Pay", x, "", `pagamento del ${itDate(x.date)}`)}</td></tr>`; });
+    h += `</tbody></table></div>`;
+  }
+  h += `</section>`;
+  return h + packagesHTML(c);
+}
+/* matita (modifica) e croce (elimina) su ogni riga; pkg = pacchetto vecchio a cui appartiene la riga */
+function rowBtns(kind, x, pkg, what){
+  const p = pkg ? ` data-pkg="${esc(pkg)}"` : "";
+  return `<button class="x ed" data-a="edit${kind}" data-id="${esc(x.id)}"${p} aria-label="Modifica ${what}">✎</button><button class="x" data-a="del${kind}" data-id="${esc(x.id)}"${p} aria-label="Elimina ${what}">✕</button>`;
+}
+/* i pacchetti aperti restano aperti anche quando la pagina si ridisegna */
+const openPkgs = new Set();
+document.addEventListener("toggle", e=>{
+  const d = e.target; if(!(d instanceof HTMLDetailsElement) || !d.dataset.pkg) return;
+  if(d.open) openPkgs.add(d.dataset.pkg); else openPkgs.delete(d.dataset.pkg);
+}, true);
+/* Pacchetti conclusi: uno sotto l'altro, dal più recente; si aprono per vedere sedute e pagamenti */
+function packagesHTML(c){
+  const past = pastPackages(c); if(!past.length) return "";
+  let h = `<section class="block"><h3>Pacchetti precedenti (${past.length})</h3>`;
+  past.forEach(p=>{
+    const pc = pkgClient(c, p), s = stats(pc);
+    h += `<details class="pkg" data-pkg="${esc(p.id)}"${openPkgs.has(p.id) ? " open" : ""}><summary><span class="pt">${esc(pkgTitle(p))}</span>
+      <span class="ps">${s.done} su ${s.total}${s.complete ? " · <b class=\"ok\">completato</b>" : ""} · pagato ${eur(s.paid)} su ${eur(s.price)}${s.due > 0 ? ` · <b class="due">da saldare ${eur(s.due)}</b>` : ""}${s.carriedOut ? " · saldo spostato nel pacchetto dopo" : ""}</span></summary><div class="pkg-body">`;
+    if(pc.sessionLog.length){
+      h += `<p class="lbl">Sedute</p><div class="scroll"><table><tbody>`;
+      [...pc.sessionLog].sort(byDateAsc).forEach((x,i)=>{ h += `<tr><td class="num">${i+1}</td><td class="date">${itDate(x.date)}</td><td>${esc(x.note)}</td><td class="act">${rowBtns("Ses", x, p.id, `seduta del ${itDate(x.date)}`)}</td></tr>`; });
+      h += `</tbody></table></div>`;
+    } else h += `<p class="none">Nessuna seduta registrata con la data.</p>`;
+    if(pc.payLog.length){
+      h += `<p class="lbl">Pagamenti</p><div class="scroll"><table><tbody>`;
+      [...pc.payLog].sort(byDateAsc).forEach(x=>{ h += `<tr><td class="date">${itDate(x.date)}</td><td class="num">${eur(x.amount)}</td><td>${esc(x.method)}</td><td>${esc(x.note)}</td><td class="act">${rowBtns("Pay", x, p.id, `pagamento del ${itDate(x.date)}`)}</td></tr>`; });
+      h += `</tbody></table></div>`;
+    }
+    h += `<div class="acts"><button class="btn small" data-a="editPkg" data-id="${esc(p.id)}">Modifica questo pacchetto</button><button class="btn small danger" data-a="delPkg" data-id="${esc(p.id)}">Elimina questo pacchetto</button></div></div></details>`;
+  });
+  return h + `</section>`;
+}
+function refreshSummary(c){
+  const s = stats(c);
+  const bc = $("bigCount"); if(bc) bc.textContent = countText(s);
+  const bd = $("bigDots"); if(bd) bd.innerHTML = dotsHTML(s.done,s.total,40,true);
+  const db = $("dueBox");
+  if(db){ db.className = "field " + (s.due>0?"due":"ok"); db.innerHTML = `<label>${s.due<0?"Credito del cliente":"Ancora da saldare"}</label><div class="val">${eur(Math.abs(s.due))}</div>`; }
+  const lv = $("leftVal"); if(lv) lv.textContent = s.left;
+  const pl = $("pkgLine"); if(pl) pl.innerHTML = pkgLineHTML(s);
+  const ht = $("headTicks"); if(ht) ht.innerHTML = ticksHTML(s);
+  const ha = $("headAlert"); if(ha) ha.innerHTML = headAlertHTML(c);
+  const nb = $("newPkgBtn"); if(nb) nb.classList.toggle("primary", s.complete);
+  const ab = $("addSesBtn"); if(ab) ab.classList.toggle("primary", !s.complete);
+}
+
+/* ======================= AZIONI ======================= */
+$("cDays").innerHTML = DAYS.map(d=>`<label><input type="checkbox" value="${d}"><span>${d}</span></label>`).join("");
+
+async function clientForm(existing){
+  const isNew = !existing;
+  $("dlgClientTitle").textContent = isNew ? "Nuova cartella" : "Modifica dati";
+  const v = existing || normalize({});
+  $("cName").value = isNew ? "" : v.name; $("cPhone").value = v.phone; $("cEmail").value = v.email;
+  $("cTotal").value = isNew ? "" : v.totalSessions; $("cDone").value = isNew ? "" : v.doneSessions;
+  $("cPrice").value = isNew ? "" : fmtIn(v.price); $("cPaid").value = isNew ? "" : fmtIn(v.paid);
+  $("cStart").value = isNew ? today() : v.start;
+  $("cFreq").value = v.freq || ""; $("cTraining").value = v.training; $("cNotes").value = v.notes;
+  $("cDays").querySelectorAll("input").forEach(i=>i.checked = v.days.includes(i.value));
+  if(await ask("dlgClient") !== "ok") return;
+  const name = $("cName").value.trim(); if(!name) return;
+  const freqRaw = $("cFreq").value.trim();
+  const data = {
+    name, phone:$("cPhone").value.trim(), email:$("cEmail").value.trim(),
+    totalSessions: toInt($("cTotal").value), doneSessions: toInt($("cDone").value),
+    price: Math.max(parseNum($("cPrice").value),0), paid: Math.max(parseNum($("cPaid").value),0),
+    freq: freqRaw==="" ? "" : Math.min(toInt(freqRaw), 7),
+    days: [...$("cDays").querySelectorAll("input:checked")].map(i=>i.value),
+    training:$("cTraining").value.trim(), notes:$("cNotes").value.trim(),
+    start: /^\d{4}-\d{2}-\d{2}$/.test($("cStart").value) ? $("cStart").value : ""
+  };
+  if(isNew){
+    const nc = normalize(data);
+    if(nc.paid > 0) nc.payLog.push({id:uid(), date:today(), amount:nc.paid, method:"", note:"Acconto"});
+    commit(nc, true); openId = nc.id; toast("Cartella creata");
+  } else {
+    const c = getClient(existing.id); if(!c) return;
+    commit(Object.assign(clone(c), data), true); toast("Dati salvati");
+  }
+  render(); window.scrollTo({top:0});
+}
+
+const MIME = {pdf:"application/pdf", docx:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"};
+async function saveFile(blob, filename, share){
+  if(store.downloads){
+    try{ await store.downloads.save({filename, data:blob}); return true; }
+    catch(e){
+      if(e && e.code === "declined") return false;
+      if(e && e.code === "rate_limited"){ toast("Attendi un momento e riprova."); return false; }
+      console.error(e);
+    }
+  }
+  if(share && navigator.canShare && navigator.share){
+    try{
+      const ext = filename.split(".").pop();
+      const file = new File([blob], filename, {type: MIME[ext] || blob.type});
+      if(navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:filename}); return true; }
+    }catch(e){ if(e && e.name === "AbortError") return false; console.warn(e); }
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 10000);
+  return true;
+}
+const safeName = n => n.replace(/[\\/:*?"<>|\u0000-\u001f]/g,"_").trim() || "Cliente";
+
+let exporting = false;
+const EXPORT_NOTE = "È la scheda completa, con tutti i dati e anche le note private: serve a te come copia di sicurezza e per reimportarla. Per mandare qualcosa al cliente usa “Invia al cliente”.";
+async function makeFullFile(c, kind){
+  if(kind === "docx"){
+    const JSZip = await lib("jszip");
+    return (await buildDocx(c, JSZip)).generateAsync({type:"blob", mimeType:MIME.docx});
+  }
+  const jsPDF = await lib("jspdf");
+  return buildPdf(c, jsPDF).output("blob");
+}
+/* Finestra "Esporta": dove salvare (dispositivo, Drive, Dropbox) e in che formato */
+function syncDest(){
+  const el = document.querySelector('input[name="dest"]:checked');
+  const dest = el ? el.value : "device";
+  const dbx = dest === "dropbox";
+  $("chDocx").hidden = dbx; $("chPdf").hidden = dbx; $("chTxt").hidden = !dbx;
+  $("destHint").textContent = dbx ? "Dropbox da qui accetta solo file di testo: niente Word o PDF. Il file si apre dal telefono e si può reimportare nel gestionale."
+    : dest === "drive" ? `Il file va nella cartella “${DRIVE_FOLDER}” del tuo Google Drive, identico a quello scaricato.` : "";
+}
+document.querySelectorAll('input[name="dest"]').forEach(r=>r.addEventListener("change", syncDest));
+function setDest(value, allowDevice){
+  $("destDeviceL").hidden = !allowDevice;
+  const v = !allowDevice && value === "device" ? "drive" : value;
+  document.querySelectorAll('input[name="dest"]').forEach(r=>r.checked = r.value === v);
+  syncDest();
+}
+function chosenDest(){
+  const el = document.querySelector('input[name="dest"]:checked');
+  return el ? el.value : "device";
+}
+
+async function exportClient(id){
+  const c = getClient(id); if(!c || exporting) return;
+  $("dlgExportTitle").textContent = `Scheda completa di ${c.name}`;
+  $("exportNote").textContent = EXPORT_NOTE;
+  $("destWrap").hidden = !cloudAvailable();
+  setDest(cloudAvailable() ? settings.exportDest : "device", true);
+  const kind = await ask("dlgExport");
+  if(!["docx","pdf","txt"].includes(kind)) return;
+  const dest = cloudAvailable() ? chosenDest() : "device";
+  if(cloudAvailable() && dest !== settings.exportDest){ settings.exportDest = dest; saveSettings(); }
+  if(dest === "drive" || dest === "dropbox") return exportToCloud(id, kind, dest);
+  exporting = true;
+  toast("Sto preparando il documento…");
+  try{
+    const fresh = getClient(id) || c;
+    const blob = kind === "txt" ? new Blob([buildFullText(fresh)], {type:"text/plain;charset=utf-8"}) : await makeFullFile(fresh, kind);
+    const ok = await saveFile(blob, `${safeName(fresh.name)}.${kind}`);
+    if(ok) toast(kind==="docx" ? "Documento Word pronto" : kind==="pdf" ? "Documento PDF pronto" : "File di testo pronto");
+  }catch(e){
+    console.error(e);
+    await messageBox("Esportazione non riuscita", e && e.message==="offline" ? OFFLINE_MSG : "Non sono riuscito a creare il documento. Riprova.");
+  }finally{ exporting = false; }
+}
+
+function fillShareChecks(inc){
+  $("shareChecks").innerHTML = SHARE_ITEMS.map(i=>`<label class="check${i.k==="noteSedute"?" sub":""}" data-k="${i.k}"><input type="checkbox" value="${i.k}"${inc[i.k]?" checked":""}><span>${esc(i.label)}</span></label>`).join("");
+  syncShareChecks();
+}
+function syncShareChecks(){
+  const hist = $("shareChecks").querySelector('input[value="storicoSedute"]');
+  const sub = $("shareChecks").querySelector('input[value="noteSedute"]');
+  if(hist && sub){ sub.disabled = !hist.checked; sub.closest(".check").classList.toggle("dis", !hist.checked); }
+  $("shareErr").textContent = "";
+}
+$("shareChecks").addEventListener("change", syncShareChecks);
+$("fShare").addEventListener("submit", e=>{
+  if(!e.submitter || e.submitter.value !== "ok") return;
+  const any = [...$("shareChecks").querySelectorAll("input:checked")].some(i=>!i.disabled && i.value!=="noteSedute");
+  if(!any && !$("shareMsg").value.trim()){ e.preventDefault(); $("shareErr").textContent = "Scegli almeno una cosa da includere."; }
+});
+
+async function shareClient(id){
+  const c = getClient(id); if(!c || exporting) return;
+  const d = shareDefaults(c);
+  $("shareTitle").textContent = `Invia a ${c.name}`;
+  fillShareChecks(d.inc);
+  $("shareMsg").value = "";
+  $("shareTrainer").value = settings.trainerName || "";
+  document.querySelectorAll('input[name="shareFmt"]').forEach(r=>r.checked = r.value===d.format);
+  if(await ask("dlgShare") !== "ok") return;
+
+  const inc = {};
+  $("shareChecks").querySelectorAll("input").forEach(i=>inc[i.value] = i.checked);
+  const fmtEl = document.querySelector('input[name="shareFmt"]:checked');
+  const format = fmtEl && fmtEl.value === "docx" ? "docx" : "pdf";
+  const message = $("shareMsg").value.trim();
+  const trainer = $("shareTrainer").value.trim();
+
+  if(trainer !== (settings.trainerName||"")){ settings.trainerName = trainer; saveSettings(); }
+  const cur = getClient(id); if(!cur) return;
+  const newShare = {inc, format};
+  if(JSON.stringify(cur.share) !== JSON.stringify(newShare)){ const n = clone(cur); n.share = newShare; commit(n, true); }
+
+  const opt = {inc: inc.storicoSedute ? inc : {...inc, noteSedute:false}, message, trainer};
+  exporting = true;
+  toast("Sto preparando il riepilogo…");
+  try{
+    const fresh = getClient(id) || cur;
+    let blob;
+    if(format === "docx"){
+      const JSZip = await lib("jszip");
+      blob = await (await buildClientDocx(fresh, JSZip, opt)).generateAsync({type:"blob", mimeType:MIME.docx});
+    } else {
+      const jsPDF = await lib("jspdf");
+      blob = buildClientPdf(fresh, jsPDF, opt).output("blob");
+    }
+    const ok = await saveFile(blob, `${safeName(fresh.name)} - riepilogo.${format}`, true);
+    if(ok) toast("Riepilogo per il cliente pronto");
+  }catch(e){
+    console.error(e);
+    await messageBox("Invio non riuscito", e && e.message==="offline" ? OFFLINE_MSG : "Non sono riuscito a creare il riepilogo. Riprova.");
+  }finally{ exporting = false; }
+}
+
+async function exportToCloud(id, kind, svc){
+  const c = getClient(id); if(!c) return;
+  exporting = true;
+  toast(`Sto salvando su ${SVC_NAME[svc]}…`);
+  try{
+    if(svc === "dropbox"){
+      try{
+        const r = await dbxSaveText(`${dbxName(c.name)}.txt`, buildFullText(c));
+        await showOpen("Salvato su Dropbox", `Il file “${r.path.split("/").pop()}” è nella cartella “${DRIVE_FOLDER}” di Dropbox.` + dbxAppHint(DRIVE_FOLDER), dbxOpenUrl(DBX_ROOT), dbxOpenLabel(), isIOS ? dbxWebUrl(DBX_ROOT) : "");
+      }catch(e){ console.error(e); await messageBox("Salvataggio su Dropbox non riuscito", cloudErrorText(e, "dropbox")); }
+      return;
+    }
+    let blob;
+    try{ blob = await makeFullFile(c, kind); }
+    catch(e){ console.error(e); await messageBox("Salvataggio non riuscito", e && e.message==="offline" ? OFFLINE_MSG : "Non sono riuscito a creare il documento. Riprova."); return; }
+    try{
+      await driveSave(blob, `${safeName(c.name)}.${kind}`);
+      await showOpen("Salvato su Google Drive", `Il file “${safeName(c.name)}.${kind}” è nella cartella “${DRIVE_FOLDER}” del tuo Drive.`, driveWebUrl(settings.driveFolderId), "Apri la cartella su Drive");
+    }catch(e){ console.error(e); await messageBox("Salvataggio su Drive non riuscito", driveErrorText(e)); }
+  } finally { exporting = false; }
+}
+
+async function backupToCloud(){
+  if(exporting || !clients.length || !cloudAvailable()) return;
+  $("dlgExportTitle").textContent = "Backup di tutti i clienti";
+  $("exportNote").textContent = `Salva la scheda completa di ogni cliente (${clients.length}) in una nuova cartella con la data di oggi, dentro “${DRIVE_FOLDER}”. Da lì potrai riprenderle e reimportarle quando vuoi.`;
+  $("destWrap").hidden = false;
+  setDest(settings.backupDest || "drive", false);
+  const kind = await ask("dlgExport");
+  if(!["docx","pdf","txt"].includes(kind)) return;
+  const svc = chosenDest() === "dropbox" ? "dropbox" : "drive";
+  if(settings.backupDest !== svc){ settings.backupDest = svc; saveSettings(); }
+  exporting = true;
+  const list = [...clients].sort((a,b)=>a.name.localeCompare(b.name,"it"));
+  let saved = 0; const failed = [];
+  const folderName = `Backup ${stampNow()}`;
+  let openUrl = "";
+  try{
+    let sub;
+    try{
+      if(svc === "drive"){ sub = await driveSubOfMain(folderName); openUrl = driveWebUrl(sub); }
+      else {
+        await dbxRoot();
+        sub = `${DBX_ROOT}/${folderName}`; openUrl = dbxOpenUrl(sub);
+        try{ await dbxEnsureFolder(sub); }
+        catch(e){ if(errHas(e, "PARENT_NOT_FOUND")){ await dbxRoot(true); await dbxEnsureFolder(sub); } else throw e; }
+      }
+    }catch(e){ console.error(e); await messageBox("Backup non riuscito", cloudErrorText(e, svc)); return; }
+
+    for(let i=0;i<list.length;i++){
+      const c = list[i];
+      toast(`Backup su ${SVC_NAME[svc]}: ${i+1} di ${list.length}…`);
+      try{
+        if(svc === "drive"){ const blob = await makeFullFile(c, kind); await driveUpload(blob, `${safeName(c.name)}.${kind}`, sub); }
+        else await dbxWriteText(sub, `${dbxName(c.name)}.txt`, buildFullText(c));
+        saved++;
+      }catch(e){
+        console.error(e);
+        if(e && e.message === "offline"){ failed.push(`${c.name}: ${OFFLINE_MSG}`); break; }
+        failed.push(`${c.name}: ${cloudErrorText(e, svc)}`);
+        if(e && STOP_CODES.includes(e.code)) break;
+      }
+    }
+  } finally { exporting = false; }
+  if(!failed.length) await showOpen("Backup completato", `${saved} ${saved===1?"cliente salvato":"clienti salvati"} su ${SVC_NAME[svc]}, nella cartella “${folderName}” dentro “${DRIVE_FOLDER}”.` + (svc === "dropbox" ? dbxAppHint(`${DRIVE_FOLDER} → ${folderName}`) : ""),
+    openUrl, svc === "dropbox" ? dbxOpenLabel() : "Apri la cartella su Drive", svc === "dropbox" && isIOS ? dbxWebUrl(`${DBX_ROOT}/${folderName}`) : "");
+  else await messageBox(saved ? `Backup parziale: ${saved} di ${list.length} salvati` : "Backup non riuscito", failed.slice(0,4).join("\n\n") + (failed.length>4 ? `\n\n…e altri ${failed.length-4}.` : ""));
+}
+
+/* ======================= SEGUI L'ANDAMENTO CON IL CLIENTE ======================= */
+/* Per ogni cliente una cartella su Google Drive, su Dropbox o su entrambi, condivisa in sola lettura
+   con la sua email. Le cartelle si riconoscono dal loro codice interno: si possono rinominare
+   (dal gestionale o dalle app) senza perdere il collegamento né il link del cliente. */
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const SVCS = ["drive","dropbox"];
+function hashStr(s){ let h = 5381; for(let i=0;i<s.length;i++) h = ((h<<5) + h + s.charCodeAt(i)) | 0; return (h>>>0).toString(36); }
+function followSig(c, f){
+  return hashStr(JSON.stringify([c.name, c.totalSessions, c.doneSessions, c.price, c.paid, c.freq, c.days, c.training, c.notes,
+    c.sessionLog, c.payLog, c.start, c.carriedIn, c.packages, f.inc, f.message, settings.trainerName || "", SVCS.filter(s=>f[s].on)]));
+}
+const svcOn = (f, s) => !!(f && f[s] && f[s].on);
+const activeSvcs = f => SVCS.filter(s=>svcOn(f, s));
+const followStale = c => !!(c.follow && c.follow.updated && c.follow.sig !== followSig(c, c.follow));
+const followNeeds = c => !!(c.follow && activeSvcs(c.follow).length && (!c.follow.updated || followStale(c)));
+const hasFolder = (f, s) => !!(f && f[s] && (s === "drive" ? f[s].folderId : (f[s].id || f[s].path)));
+function followLinks(f){
+  const out = [];
+  if(svcOn(f,"drive") && f.drive.folderId) out.push({svc:"drive", url:`https://drive.google.com/drive/folders/${f.drive.folderId}`});
+  if(svcOn(f,"dropbox") && f.dropbox.url) out.push({svc:"dropbox", url:f.dropbox.url});
+  return out;
+}
+function fmtWhen(iso){
+  const d = new Date(iso); if(isNaN(d)) return "";
+  const p = n => String(n).padStart(2,"0");
+  return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} alle ${p(d.getHours())}.${p(d.getMinutes())}`;
+}
+const itemText = x => typeof x === "string" ? x : (x && (x.message || x.error || x.reason)) || JSON.stringify(x);
+
+/* Nome della cartella: lo scegli tu (es. "Personal Francesco"); il gestionale propone lo stesso schema ai clienti successivi */
+const firstName = n => String(n||"").trim().split(/\s+/)[0] || "";
+function suggestFolder(c){
+  const pat = settings.folderPattern && typeof settings.folderPattern === "object" ? settings.folderPattern : {prefix:"Cliente - ", part:"full"};
+  return `${pat.prefix || ""}${pat.part === "first" ? firstName(c.name) : c.name}`.trim();
+}
+function learnFolderPattern(c, folder){
+  const f = folder.trim(), low = f.toLowerCase(), full = c.name.trim(), first = firstName(c.name);
+  let pat = null;
+  if(full && low.endsWith(full.toLowerCase())) pat = {prefix: f.slice(0, f.length - full.length), part:"full"};
+  else if(first && low.endsWith(first.toLowerCase())) pat = {prefix: f.slice(0, f.length - first.length), part:"first"};
+  if(pat) settings.folderPattern = pat;
+}
+/* nome attuale della cartella (quello visto l'ultima volta sul servizio) */
+function currentFolder(c){
+  const f = c.follow; if(!f) return suggestFolder(c);
+  for(const s of [...activeSvcs(f), ...SVCS]) if(hasFolder(f, s) && f[s].folderName) return f[s].folderName;
+  return f.folderName || suggestFolder(c);
+}
+
+function followHTML(c){
+  if(!cloudAvailable()) return "";
+  const f = c.follow;
+  let h = `<section class="block follow"><h3>Segui l'andamento con il cliente</h3>`;
+  if(!f || !activeSvcs(f).length){
+    return h + `<p class="sub">Condividi con ${esc(c.name)} una cartella su Google Drive, su Dropbox o su tutti e due, con il suo riepilogo. Dopo le sedute la aggiorni con un tocco, e lui vede sempre i dati nuovi dallo stesso link.</p>
+      <div class="acts"><button class="btn primary" data-a="follow">Condividi con il cliente</button></div></section>`;
+  }
+  const chips = activeSvcs(f).map(s=>s === "dropbox" ? `<span class="svc dbx">Dropbox</span>` : `<span class="svc">Google Drive</span>`).join("");
+  const stale = followStale(c);
+  const when = !f.updated ? `<span class="stale">Non ancora inviato</span>`
+    : stale ? `<span class="stale">Ci sono novità da mandare</span>`
+    : `<span class="fresh">Aggiornato il ${esc(fmtWhen(f.updated))}</span>`;
+  const names = [...new Set(activeSvcs(f).filter(s=>hasFolder(f,s) && f[s].folderName).map(s=>f[s].folderName))];
+  h += `<div class="state">${chips}<span>${esc(f.email)}</span>${when}</div>
+    <p class="hint" style="margin:-6px 0 10px">Cartella: ${names.length ? names.map(n=>`“${esc(n)}”`).join(" e ") : `“${esc(f.folderName || suggestFolder(c))}” (sarà creata al primo invio)`}${stale && f.updated ? ` · ultimo invio ${esc(fmtWhen(f.updated))}` : ""}</p>`;
+  h += `<div class="acts">
+    <button class="btn ${!f.updated || stale ? "primary" : ""}" data-a="followUpdate">Aggiorna per il cliente</button>
+    ${followLinks(f).length ? `<button class="btn" data-a="followLink">Manda il link al cliente</button>` : ""}
+    ${svcOn(f,"dropbox") && f.dropbox.path ? `<a class="btn" id="openCliDbx" href="${isIOS ? (f.dropbox.url || DBX_APP) : dbxWebUrl(f.dropbox.path)}" target="_blank" rel="noopener">Apri su Dropbox</a>` : ""}
+    ${svcOn(f,"drive") && f.drive.folderId ? `<a class="btn" id="openCliDrive" href="${driveWebUrl(f.drive.folderId)}" target="_blank" rel="noopener">Apri su Drive</a>` : ""}
+    ${SVCS.some(s=>hasFolder(f, s)) ? `<button class="btn ghost" data-a="followRename">Rinomina cartella</button>` : ""}
+    <button class="btn ghost" data-a="follow">Impostazioni</button>
+    <button class="btn ghost" data-a="followStop">Smetti di condividere</button>
+  </div></section>`;
+  return h;
+}
+
+/* ---- finestra impostazioni ---- */
+let followCtx = null;
+function followChecks(inc){
+  $("followChecks").innerHTML = SHARE_ITEMS.map(i=>`<label class="check${i.k==="noteSedute"?" sub":""}"><input type="checkbox" value="${i.k}"${inc[i.k]?" checked":""}><span>${esc(i.label)}</span></label>`).join("");
+  syncFollowChecks();
+}
+function syncFollowChecks(){
+  const hist = $("followChecks").querySelector('input[value="storicoSedute"]');
+  const sub = $("followChecks").querySelector('input[value="noteSedute"]');
+  if(hist && sub){ sub.disabled = !hist.checked; sub.closest(".check").classList.toggle("dis", !hist.checked); }
+  $("followErr").textContent = "";
+}
+const chosenSvcs = () => [...document.querySelectorAll('input[name="followSvc"]:checked')].map(i=>i.value);
+function syncFollowSvc(){
+  const on = chosenSvcs(), t = [];
+  if(on.includes("drive")) t.push("Google Drive: il cliente riceve un PDF e lo apre con un account Google collegato a questa email (Gmail o telefono Android vanno bene).");
+  if(on.includes("dropbox")) t.push("Dropbox: il cliente riceve un file di testo (da qui Dropbox non accetta Word o PDF) ed entra con un account Dropbox di questa email; se non ce l'ha, lo crea gratis dall'invito.");
+  if(!on.length) t.push("Scegli Google Drive, Dropbox o tutti e due.");
+  $("followSvcHint").textContent = t.join("\n");
+  const f = followCtx && followCtx.follow;
+  const exists = !!f && on.some(s=>hasFolder(f, s));
+  $("followFolderHint").textContent = exists
+    ? "Puoi rinominarla quando vuoi: il link del cliente resta lo stesso. Puoi anche rinominarla dall'app Drive o Dropbox, il gestionale la ritrova lo stesso."
+    : "Verrà creata con questo nome dentro “Gestionale PT”. Il cliente vede solo questa cartella.";
+  $("followErr").textContent = "";
+}
+$("followChecks").addEventListener("change", syncFollowChecks);
+document.querySelectorAll('input[name="followSvc"]').forEach(r=>r.addEventListener("change", syncFollowSvc));
+$("followEmail").addEventListener("input", ()=>{ $("followErr").textContent = ""; });
+$("followFolder").addEventListener("input", ()=>{ $("followErr").textContent = ""; });
+$("fFollow").addEventListener("submit", e=>{
+  if(!e.submitter || e.submitter.value !== "ok") return;
+  const stop = (msg, el) => { e.preventDefault(); $("followErr").textContent = msg; if(el) el.focus(); };
+  if(!chosenSvcs().length) return stop("Scegli dove condividere: Google Drive, Dropbox o tutti e due.");
+  if(!EMAIL_RE.test($("followEmail").value.trim())) return stop("Scrivi l'email del cliente: serve per dargli accesso alla cartella.", $("followEmail"));
+  const fn = $("followFolder").value.trim();
+  if(!fn || !safeName(fn).replace(/[._\s]/g,"")) return stop("Scrivi il nome della cartella, ad esempio “Personal Francesco”.", $("followFolder"));
+  const any = [...$("followChecks").querySelectorAll("input:checked")].some(i=>!i.disabled && i.value!=="noteSedute");
+  if(!any && !$("followMsg").value.trim()) return stop("Scegli almeno una cosa da mostrare al cliente.");
+});
+
+async function followSetup(id, focusFolder){
+  const c = getClient(id); if(!c || exporting) return;
+  const f = c.follow && activeSvcs(c.follow).length ? c.follow : (c.follow || null);
+  const active = f && activeSvcs(f).length ? activeSvcs(f)
+    : (Array.isArray(settings.followSvcs) && settings.followSvcs.length ? settings.followSvcs : ["drive"]);
+  $("followTitle").textContent = focusFolder ? `Rinomina la cartella di ${c.name}` : (f && activeSvcs(f).length ? `Condivisione con ${c.name}` : `Condividi con ${c.name}`);
+  document.querySelectorAll('input[name="followSvc"]').forEach(r=>r.checked = active.includes(r.value));
+  const initialFolder = currentFolder(c);
+  followCtx = {follow: f, initialFolder};
+  $("followFolder").value = initialFolder;
+  $("followEmail").value = f && f.email ? f.email : (c.email || "");
+  followChecks(f && f.inc ? {...shareDefaults(c).inc, ...f.inc} : shareDefaults(c).inc);
+  $("followMsg").value = f ? f.message : "";
+  $("followTrainer").value = settings.trainerName || "";
+  $("followOk").textContent = f && f.updated ? "Salva e aggiorna" : "Condividi e aggiorna";
+  syncFollowSvc();
+  if(focusFolder) setTimeout(()=>{ const i = $("followFolder"); i.focus(); i.select(); }, 60);
+  const answer = await ask("dlgFollow");
+  followCtx = null;
+  if(answer !== "ok") return;
+
+  const inc = {}; $("followChecks").querySelectorAll("input").forEach(i=>inc[i.value] = i.checked);
+  const svcs = chosenSvcs(), email = $("followEmail").value.trim();
+  const folder = $("followFolder").value.trim().replace(/\s+/g," ");
+  const renamed = folder !== initialFolder;
+  const trainer = $("followTrainer").value.trim();
+  if(trainer !== (settings.trainerName||"")) settings.trainerName = trainer;
+  settings.followSvcs = svcs;
+  if(!f || !f.updated || renamed) learnFolderPattern(c, folder);
+  saveSettings();
+
+  const cur = getClient(id); if(!cur) return;
+  const n = clone(cur);
+  const base = n.follow || normFollow({});
+  const nf = {...base, email, inc, message:$("followMsg").value.trim(), folderName: folder};
+  const notes = [];
+  for(const s of SVCS){
+    const was = svcOn(base, s);
+    nf[s] = {...base[s], on: svcs.includes(s)};
+    if(renamed && hasFolder(base, s)) nf[s].renameTo = folder;
+    if(was && !nf[s].on && hasFolder(base, s) && base[s].sharedWith)
+      notes.push(`Non aggiorno più la cartella su ${SVC_NAME[s]}, ma ${base[s].sharedWith} la vede ancora con l'ultimo riepilogo. Se vuoi, togli la condivisione dall'app ${SVC_NAME[s]}.`);
+  }
+  n.follow = nf;
+  if(!n.email) n.email = email;               // la ricordo anche nei dati del cliente
+  commit(n, true); render();
+  await runFollowUpdate(id, true, notes);
+}
+
+/* ---- aggiornamento: Google Drive ---- */
+async function driveFollowStep(c0, f, opt, notes, save){
+  const d = f.drive, want = safeName(f.folderName || suggestFolder(c0));
+  let blob;
+  try{ blob = buildClientPdf(c0, await lib("jspdf"), opt).output("blob"); }
+  catch(e){ throw {code:"build", message: e && e.message === "offline" ? OFFLINE_MSG : "Non sono riuscito a creare il PDF. Riprova."}; }
+  const create = async name => { const t = safeName(name); d.folderId = await driveSubOfMain(t); d.folderName = t; d.sharedWith = ""; d.fileId = ""; d.renameTo = ""; save(); };
+  if(d.folderId){
+    const cur = await driveResolve(d.folderId);
+    if(cur){ if(cur.name) d.folderName = cur.name; }        // se l'hai rinominata dall'app Drive
+    else {                                                   // eliminata o nel cestino: la ricreo
+      const had = !!d.sharedWith;
+      await create(d.renameTo || d.folderName || want);
+      if(had) notes.push("Su Google Drive la cartella del cliente non c'era più: l'ho ricreata e condivisa di nuovo. Il vecchio link non funziona più, mandagli quello nuovo.");
+    }
+  } else await create(want);
+  if(d.renameTo){
+    const t = safeName(d.renameTo);
+    if(t !== d.folderName){
+      const r = await driveCall("update_file", {fileId:d.folderId, title:t});
+      d.folderName = String(r.title || t);
+    }
+    d.renameTo = ""; save();
+  }
+  const up = await driveUpload(blob, `Riepilogo ${safeName(c0.name)} (agg. ${stampNow()}).pdf`, d.folderId);
+  const oldFile = d.fileId; d.fileId = up.id; save();
+  if(oldFile){ try{ await driveCall("trash_file", {fileId:oldFile}); }catch(e){ console.warn(e); } }
+  if(d.sharedWith.toLowerCase() !== f.email.toLowerCase()){
+    const prev = d.sharedWith;
+    await driveCall("share_file", {fileId:d.folderId, emailAddress:f.email, role:"reader"});
+    d.sharedWith = f.email; save();
+    if(prev) notes.push(`${prev} può ancora vedere la cartella su Google Drive. Se non deve più vederla, apri la cartella, Condividi, e rimuovi quell'indirizzo.`);
+    return true;
+  }
+  return false;
+}
+
+/* ---- aggiornamento: Dropbox ---- */
+async function dbxFollowStep(c0, f, opt, notes, save){
+  const x = f.dropbox, want = dbxName(f.folderName || suggestFolder(c0)), text = buildClientText(c0, opt);
+  await dbxRoot();
+  const create = async name => {
+    const base = dbxName(name); let cand = base, i = 2, made = null;
+    for(let tries = 0; !made && tries < 30; tries++){
+      try{ const r = await dbxCall("create_folder", {path:`${DBX_ROOT}/${cand}`}); made = r.folder || {}; }
+      catch(e){
+        if(errHas(e, "ALREADY_EXISTS")) cand = `${base} (${i++})`;
+        else if(errHas(e, "PARENT_NOT_FOUND") && tries === 0) await dbxRoot(true);
+        else throw e;
+      }
+    }
+    if(!made) throw {code:"tool_error", message:"esistono già troppe cartelle con questo nome"};
+    x.id = String(made.file_id || ""); x.path = String(made.path_display || `${DBX_ROOT}/${cand}`); x.folderName = String(made.name || cand);
+    x.sharedWith = ""; x.url = ""; x.fileId = ""; x.filePath = ""; x.renameTo = ""; save();
+    if(cand !== base) notes.push(`Su Dropbox esisteva già una cartella “${base}”: ho creato “${cand}”. Puoi rinominarla quando vuoi.`);
+  };
+  if(x.id || x.path){
+    const cur = await dbxResolve(x.id || x.path);           // dal codice: funziona anche se rinominata dall'app
+    if(cur){ x.id = cur.id || x.id; x.path = cur.path; x.folderName = cur.name; }
+    else {                                                   // eliminata: la ricreo
+      const had = !!x.url;
+      await create(x.renameTo || x.folderName || want);
+      if(had) notes.push("Su Dropbox la cartella del cliente non c'era più: l'ho ricreata e condivisa di nuovo. Il vecchio link non funziona più, mandagli quello nuovo.");
+    }
+  } else await create(want);
+  if(x.renameTo){
+    const t = dbxName(x.renameTo);
+    if(t !== x.folderName){
+      const parent = x.path.slice(0, x.path.lastIndexOf("/"));
+      try{ const r = await dbxRenameFolder(x.id || x.path, parent, t); x.path = r.path; x.folderName = r.name; }
+      catch(e){
+        if(!(e && e.code === "tool_error")) throw e;
+        notes.push(`Non ho potuto rinominare la cartella su Dropbox in “${t}”${e.conflict ? ": esiste già una cartella con questo nome" : ""}. Ho lasciato “${x.folderName}”.`);
+      }
+    }
+    x.renameTo = ""; save();
+  }
+  const w = await dbxWriteText(x.path, `Riepilogo ${dbxName(c0.name)} (agg. ${stampNow()}).txt`, text);
+  const oldFile = x.fileId || x.filePath;
+  x.fileId = w.id || ""; x.filePath = w.path; save();
+  if(oldFile && oldFile !== x.fileId && oldFile.toLowerCase() !== w.path.toLowerCase()){ try{ await dbxDelete(oldFile); }catch(e){ console.warn(e); } }
+  if(x.sharedWith.toLowerCase() !== f.email.toLowerCase() || !x.url){
+    const prev = x.sharedWith;
+    const r = await dbxCall("create_shared_link", {path_or_file_id: x.id || x.path, emails:[f.email]});
+    if(r.url) x.url = String(r.url);
+    const okList = Array.isArray(r.shared_with) ? r.shared_with.map(s=>itemText(s).toLowerCase()) : null;
+    const errs = Array.isArray(r.share_errors) ? r.share_errors.map(itemText).filter(Boolean) : [];
+    const invited = okList ? okList.some(s=>s.includes(f.email.toLowerCase())) : !errs.length;
+    save();
+    if(invited && !r.warning){
+      x.sharedWith = f.email; save();
+      if(prev && prev.toLowerCase() !== f.email.toLowerCase()) notes.push(`${prev} può ancora vedere la cartella su Dropbox. Se non deve più vederla, apri la cartella, Condividi, e rimuovi quell'indirizzo.`);
+      return true;
+    }
+    notes.push(`Il riepilogo su Dropbox è aggiornato, ma Dropbox non ha invitato ${f.email}${errs.length ? ": " + errs.join("; ") : "."} Puoi invitarlo tu dall'app Dropbox: apri la cartella “${x.folderName}” e tocca Condividi.`);
+    return !!x.url;
+  }
+  return false;
+}
+
+async function followUpdate(id){
+  const c0 = getClient(id); if(!c0 || !c0.follow) return {ok:false, error:"Condivisione non impostata."};
+  const f = clone(c0.follow), svcs = activeSvcs(f), notes = [], errors = [];
+  if(!svcs.length) return {ok:false, error:"Scegli almeno un servizio nelle impostazioni di condivisione."};
+  const inc = {...shareDefaults(c0).inc, ...(f.inc || {})};
+  const opt = {inc: inc.storicoSedute ? inc : {...inc, noteSedute:false}, message:f.message, trainer:settings.trainerName || ""};
+  const sig = followSig(c0, f);
+  const save = done => {
+    const cur = getClient(id); if(!cur || !cur.follow) return;
+    const n = clone(cur);
+    n.follow = {...n.follow, drive:{...f.drive, on:n.follow.drive.on}, dropbox:{...f.dropbox, on:n.follow.dropbox.on}};
+    if(done){ n.follow.updated = new Date().toISOString(); n.follow.sig = sig; }
+    commit(n, true);
+  };
+  let newShare = false, stop = false;
+  for(const s of svcs){
+    try{ if(await (s === "drive" ? driveFollowStep : dbxFollowStep)(c0, f, opt, notes, ()=>save(false))) newShare = true; }
+    catch(e){
+      console.error(e); save(false);
+      errors.push(`${SVC_NAME[s]}: ${e && e.code === "build" ? e.message : e && e.message === "offline" ? OFFLINE_MSG : cloudErrorText(e, s)}`);
+      if(e && STOP_CODES.includes(e.code)) stop = true;
+    }
+  }
+  if(errors.length){
+    const partial = errors.length < svcs.length;
+    return {ok:false, partial, stop, notes, newShare, error: (partial ? "Una delle cartelle è aggiornata, l'altra no.\n\n" : "") + errors.join("\n\n")};
+  }
+  save(true);
+  return {ok:true, notes, newShare};
+}
+
+async function runFollowUpdate(id, fromSetup, extraNotes){
+  if(exporting) return;
+  const c = getClient(id); if(!c || !c.follow) return;
+  exporting = true;
+  const where = activeSvcs(c.follow).map(s=>SVC_NAME[s]).join(" e ");
+  toast(`Sto aggiornando la cartella di ${c.name} su ${where}…`);
+  let r;
+  try{ r = await followUpdate(id); } finally { exporting = false; }
+  render();
+  $("toast").classList.remove("show");
+  const notes = [...(extraNotes || []), ...(r.notes || [])];
+  if(!r.ok){
+    await messageBox(r.partial ? "Aggiornamento solo in parte" : "Aggiornamento non riuscito", r.error + (notes.length ? "\n\n" + notes.join("\n\n") : ""));
+    if(r.newShare) return showFollowLink(id, []);
+    return;
+  }
+  if(r.newShare || fromSetup) return showFollowLink(id, notes);
+  if(notes.length) await messageBox("Riepilogo aggiornato", notes.join("\n\n"));
+  else toast(`Riepilogo aggiornato per ${c.name}`);
+}
+
+async function updateAllFollow(){
+  if(exporting) return;
+  const list = clients.filter(followNeeds).sort((a,b)=>a.name.localeCompare(b.name,"it"));
+  if(!list.length){ toast("Tutti i clienti condivisi sono già aggiornati"); return; }
+  exporting = true;
+  let ok = 0; const failed = [], notes = [];
+  try{
+    for(let i=0;i<list.length;i++){
+      toast(`Aggiorno i clienti: ${i+1} di ${list.length}…`);
+      const r = await followUpdate(list[i].id);
+      (r.notes || []).forEach(n=>notes.push(`${list[i].name}: ${n}`));
+      if(r.ok) ok++;
+      else { failed.push(`${list[i].name}: ${r.error}`); if(r.stop) break; }
+    }
+  } finally { exporting = false; }
+  render();
+  if(!failed.length && !notes.length){ toast(`Aggiornati ${ok} ${ok===1?"cliente":"clienti"}`); return; }
+  await messageBox(failed.length ? `Aggiornati ${ok} di ${list.length}` : `Aggiornati ${ok} ${ok===1?"cliente":"clienti"}`, [...failed, ...notes].slice(0,5).join("\n\n"));
+}
+
+/* ---- link da mandare al cliente ---- */
+function waNumber(phone){
+  let d = String(phone||"").replace(/[^\d+]/g,"");
+  if(d.startsWith("+")) return d.slice(1);
+  if(d.startsWith("00")) return d.slice(2);
+  if(/^3\d{8,9}$/.test(d)) return "39" + d;      // cellulare italiano senza prefisso
+  return d;
+}
+async function showFollowLink(id, notes){
+  const c = getClient(id); if(!c || !c.follow) return;
+  const f = c.follow, links = followLinks(f);
+  if(!links.length){ if(notes && notes.length) await messageBox("Riepilogo aggiornato", notes.join("\n\n")); return; }
+  const first = firstName(c.name);
+  $("linkTitle").textContent = links.length > 1 ? `Cartelle di ${c.name}` : `Cartella di ${c.name}`;
+  const t = [];
+  if(links.some(l=>l.svc==="drive")) t.push(`Google Drive: ${f.email} può vedere la cartella in sola lettura, con l'account Google di questa email. Google di solito gli manda anche un'email.`);
+  if(links.some(l=>l.svc==="dropbox")) t.push(`Dropbox: ${f.email} è invitato in sola lettura. Deve entrare in Dropbox con questa email (se non ha un account, lo crea gratis).`);
+  t.push("Mandagli il link una volta sola: ogni volta che premi “Aggiorna per il cliente”, dentro trova il riepilogo nuovo. Anche se rinomini la cartella, il link resta lo stesso.");
+  $("linkText").textContent = t.join("\n\n");
+  $("linkRows").innerHTML = links.map(l=>`<p class="lk-t">${SVC_NAME[l.svc]}</p>
+    <div class="linkbox"><input readonly value="${esc(l.url)}" aria-label="Link ${SVC_NAME[l.svc]}"><button type="button" class="btn small" data-copy="${esc(l.url)}">Copia</button></div>`).join("");
+  const body = links.length > 1 ? links.map(l=>`${SVC_NAME[l.svc]}: ${l.url}`).join("\n") : links[0].url;
+  const msg = `Ciao ${first}! Qui trovi il riepilogo dei tuoi allenamenti: lo aggiorno io dopo le sedute, quindi il link resta sempre lo stesso.\n${body}`;
+  $("linkWa").href = `https://wa.me/${waNumber(c.phone)}?text=${encodeURIComponent(msg)}`;
+  $("linkMail").href = `mailto:${encodeURIComponent(f.email)}?subject=${encodeURIComponent("Il riepilogo dei tuoi allenamenti")}&body=${encodeURIComponent(msg)}`;
+  $("linkWarn").hidden = !(notes && notes.length);
+  $("linkWarn").textContent = notes && notes.length ? notes.join("\n\n") : "";
+  await ask("dlgLink");
+}
+$("linkRows").addEventListener("click", async e=>{
+  const b = e.target.closest("button[data-copy]"); if(!b) return;
+  const v = b.dataset.copy;
+  try{ await navigator.clipboard.writeText(v); toast("Link copiato"); }
+  catch(_){ const i = b.previousElementSibling; i.focus(); i.select(); try{ document.execCommand("copy"); toast("Link copiato"); }catch(__){ toast("Tieni premuto il link per copiarlo"); } }
+});
+
+/* ---- rinomina subito, senza aggiornare il riepilogo ---- */
+$("renameInput").addEventListener("input", ()=>{ $("renameErr").textContent = ""; });
+$("fRename").addEventListener("submit", e=>{
+  if(!e.submitter || e.submitter.value !== "ok") return;
+  const v = $("renameInput").value.trim();
+  if(!v || !safeName(v).replace(/[._\s]/g,"")){ e.preventDefault(); $("renameErr").textContent = "Scrivi il nuovo nome, ad esempio “Personal Francesco”."; $("renameInput").focus(); }
+});
+async function followRename(id){
+  const c = getClient(id); if(!c || !c.follow || exporting) return;
+  const before = currentFolder(c);
+  $("renameInput").value = before; $("renameErr").textContent = "";
+  setTimeout(()=>{ const i = $("renameInput"); i.focus(); i.select(); }, 60);
+  if(await ask("dlgRename") !== "ok") return;
+  const name = $("renameInput").value.trim().replace(/\s+/g," ");
+  if(!name || name === before) return;
+  await renameFolders(id, name, true);
+}
+/* rinomina le cartelle del cliente su Drive e Dropbox (stesso codice, stesso link) */
+async function renameFolders(id, name, report){
+  const c = getClient(id); if(!c || !c.follow) return {errs:[], notes:[]};
+  learnFolderPattern(c, name); saveSettings();
+  const f = clone(c.follow), notes = [], errs = [];
+  f.folderName = name;
+  exporting = true;
+  toast(`Rinomino la cartella in “${name}”…`);
+  try{
+    for(const s of SVCS){
+      if(!hasFolder(f, s)) continue;
+      try{
+        if(s === "drive"){
+          if(!(await driveResolve(f.drive.folderId))){ f.drive.renameTo = name; notes.push("Su Google Drive la cartella non c'è più: la ricreo con il nuovo nome al prossimo aggiornamento."); continue; }
+          const r = await driveCall("update_file", {fileId:f.drive.folderId, title:safeName(name)});
+          f.drive.folderName = String(r.title || safeName(name)); f.drive.renameTo = "";
+        } else {
+          const cur = await dbxResolve(f.dropbox.id || f.dropbox.path);
+          if(!cur){ f.dropbox.renameTo = name; notes.push("Su Dropbox la cartella non c'è più: la ricreo con il nuovo nome al prossimo aggiornamento."); continue; }
+          const r = await dbxRenameFolder(cur.id || f.dropbox.id, cur.path.slice(0, cur.path.lastIndexOf("/")), dbxName(name));
+          f.dropbox.id = cur.id || f.dropbox.id; f.dropbox.path = r.path; f.dropbox.folderName = r.name; f.dropbox.renameTo = "";
+        }
+      }catch(e){
+        console.error(e);
+        errs.push(e && e.conflict ? `${SVC_NAME[s]}: esiste già una cartella con questo nome. Scegline un altro.` : `${SVC_NAME[s]}: ${cloudErrorText(e, s)}`);
+      }
+    }
+  } finally { exporting = false; }
+  const cur = getClient(id);
+  if(cur && cur.follow){
+    const n = clone(cur);
+    n.follow = {...n.follow, folderName: errs.length && !notes.length && errs.length >= SVCS.filter(s=>hasFolder(f,s)).length ? n.follow.folderName : name,
+      drive:{...f.drive, on:n.follow.drive.on}, dropbox:{...f.dropbox, on:n.follow.dropbox.on}};
+    commit(n, true);
+  }
+  render(); $("toast").classList.remove("show");
+  if(!report) return {errs, notes};
+  if(errs.length) await messageBox("Rinomina non completata", [...errs, ...notes].join("\n\n"));
+  else if(notes.length) await messageBox("Cartella rinominata", notes.join("\n\n"));
+  else toast(`Cartella rinominata in “${name}”. Il link del cliente non cambia.`);
+  return {errs, notes};
+}
+
+async function followStop(id){
+  const c = getClient(id); if(!c || !c.follow) return;
+  const f = c.follow, on = activeSvcs(f).filter(s=>hasFolder(f, s));
+  const where = on.map(s=>`${SVC_NAME[s]} (cartella “${f[s].folderName || currentFolder(c)}”)`).join(" e ") || "Drive o Dropbox";
+  if(!(await messageBox(`Smettere di condividere con ${c.name}?`,
+    `Il gestionale non aggiornerà più le sue cartelle. Attenzione: il cliente continua a vedere l'ultimo riepilogo finché non togli la condivisione da ${where}: apri la cartella, Condividi, e rimuovi la sua email. Oppure elimini la cartella.`,
+    {ok:"Smetti di condividere", cancel:"Annulla", danger:true}))) return;
+  const cur = getClient(id); if(!cur) return;
+  const n = clone(cur); n.follow = null; commit(n, true); render();
+  toast("Condivisione tolta dal gestionale");
+}
+
+async function handle(a, el){
+  const id = openId;
+  const c = id ? getClient(id) : null;
+  switch(a){
+    case "newClient": return clientForm(null);
+    case "edit": return c && clientForm(c);
+    case "open": openId = el.dataset.id; render(); window.scrollTo({top:0}); return;
+    case "doSearch": return runSearch();
+    case "exportAll": return exportAll();
+    case "clearSearch": { query = ""; render(); const s = $("search"); if(s) s.focus(); return; }
+    case "quickEdit": { const q = getClient(el.dataset.id); return q && clientForm(q); }
+    case "quickDel": return getClient(el.dataset.id) && deleteClient(el.dataset.id);
+    case "renameClient": return getClient(el.dataset.id) && renameClient(el.dataset.id);
+    case "back": openId = null; render(); window.scrollTo({top:0}); return;
+    case "export": return c && exportClient(c.id);
+    case "share": return c && shareClient(c.id);
+    case "backup": return backupToCloud();
+    case "follow": return c && followSetup(c.id);
+    case "followUpdate": return c && runFollowUpdate(c.id, false);
+    case "followLink": return c && showFollowLink(c.id, []);
+    case "followRename": return c && followRename(c.id);
+    case "followStop": return c && followStop(c.id);
+    case "followAll": return updateAllFollow();
+    case "import": $("importInput").value=""; $("importInput").click(); return;
+    case "addSes": return c && addSession(c.id);
+    case "editSes": return c && editSession(c.id, el.dataset.id, el.dataset.pkg || "");
+    case "editPay": return c && editPayment(c.id, el.dataset.id, el.dataset.pkg || "");
+    case "editPkg": return c && editPackage(c.id, el.dataset.id);
+    case "wipeAll": return wipeAll();
+    case "newPkg": return c && newPackage(c.id, false);
+    case "delPkg": {
+      if(!c) return;
+      const pid = el.dataset.id, p = c.packages.find(x=>x.id===pid); if(!p) return;
+      if(!(await messageBox("Eliminare questo pacchetto?", `${pkgTitle(p)}: verrà tolto dallo storico della cartella, con le sue sedute e i suoi pagamenti. Il pacchetto in corso non cambia.`, {ok:"Elimina", cancel:"Annulla", danger:true}))) return;
+      const cur = getClient(id); if(!cur) return;
+      const n = clone(cur); n.packages = n.packages.filter(x=>x.id!==pid);
+      commit(n, true); render(); toast("Pacchetto eliminato");
+      return;
+    }
+    case "addPay": {
+      if(!c) return;
+      payDialogMode(false);
+      $("yAmount").value = ""; $("yDate").value = today(); $("yNote").value = ""; $("yMethod").value = "Contanti";
+      if(await ask("dlgPay") !== "ok") return;
+      const amt = round2(Math.max(parseNum($("yAmount").value),0));
+      if(!amt) return;
+      const cur = getClient(id); if(!cur) return;
+      const n = clone(cur);
+      n.payLog.push({id:uid(), date:$("yDate").value || today(), amount:amt, method:$("yMethod").value.trim(), note:$("yNote").value.trim()});
+      n.paid = round2(n.paid + amt);
+      commit(n, true); render();
+      toast(`Rata aggiunta: pagato ${eur(n.paid)} su ${eur(n.price)}`);
+      return;
+    }
+    case "delSes": {
+      if(!c) return;
+      const sid = el.dataset.id, pkg = el.dataset.pkg || "";
+      if(!(await messageBox("Eliminare la seduta?", "Verrà tolta dallo storico e le sedute fatte scenderanno di 1.", {ok:"Elimina", cancel:"Annulla", danger:true}))) return;
+      const cur = getClient(id); if(!cur) return;
+      const n = clone(cur), o = logOwner(n, pkg); if(!o) return;
+      if(!o.sessionLog.some(x=>x.id===sid)) return;
+      o.sessionLog = o.sessionLog.filter(x=>x.id!==sid);
+      o.doneSessions = Math.max(o.doneSessions-1,0);
+      commit(n, true); render();
+      return;
+    }
+    case "delPay": {
+      if(!c) return;
+      const pid = el.dataset.id, pkg = el.dataset.pkg || "", own = logOwner(c, pkg);
+      const p = own && own.payLog.find(x=>x.id===pid); if(!p) return;
+      if(!(await messageBox("Eliminare il pagamento?", `Il pagamento di ${eur(p.amount)} verrà tolto dallo storico e dal “già pagato”.`, {ok:"Elimina", cancel:"Annulla", danger:true}))) return;
+      const cur = getClient(id); if(!cur) return;
+      const n = clone(cur), o = logOwner(n, pkg); if(!o) return;
+      const pp = o.payLog.find(x=>x.id===pid); if(!pp) return;
+      o.payLog = o.payLog.filter(x=>x.id!==pid);
+      o.paid = Math.max(round2(o.paid - (Number(pp.amount)||0)),0);
+      commit(n, true); render();
+      return;
+    }
+    case "delClient": return c && deleteClient(c.id);
+  }
+}
+
+document.addEventListener("click", e=>{
+  const st = e.target.closest("[data-step]");
+  if(st){
+    const cur = getClient(openId); if(!cur) return;
+    const f = st.dataset.step, n = clone(cur);
+    n[f] = Math.max((Number(n[f])||0) + Number(st.dataset.d), 0);
+    const inp = document.querySelector(`input[data-f="${f}"]`); if(inp) inp.value = n[f];
+    commit(n); refreshSummary(n); return;
+  }
+  const el = e.target.closest("[data-a]");
+  if(el && !el.disabled) handle(el.dataset.a, el);
+});
+document.addEventListener("input", e=>{
+  const t = e.target;
+  if(t.id==="search"){
+    query = t.value; const pos = t.selectionStart; render();
+    const s = $("search"); if(s){ s.focus(); try{ s.setSelectionRange(pos,pos); }catch(_){} } return;
+  }
+  if(t.id === "fStart"){
+    const cur = getClient(openId); if(!cur) return;
+    const n = clone(cur); n.start = /^\d{4}-\d{2}-\d{2}$/.test(t.value) ? t.value : "";
+    commit(n); refreshSummary(n); return;
+  }
+  const f = t.dataset && t.dataset.f;
+  if(f){
+    const cur = getClient(openId); if(!cur) return;
+    const n = clone(cur);
+    n[f] = (f==="totalSessions" || f==="doneSessions") ? toInt(t.value) : round2(Math.max(parseNum(t.value),0));
+    commit(n); refreshSummary(n);
+  }
+});
+/* Quando esci da un campo, lo riscrivo in modo pulito (es. "250,5") */
+document.addEventListener("focusout", e=>{
+  const t = e.target, f = t.dataset && t.dataset.f;
+  if(!f) return;
+  const c = getClient(openId); if(!c) return;
+  t.value = (f==="totalSessions" || f==="doneSessions") ? c[f] : fmtIn(c[f]);
+});
+document.addEventListener("keydown", e=>{
+  if(e.key==="Enter" && e.target.dataset && e.target.dataset.f) e.target.blur();
+});
+
+/* ======================= PACCHETTI ======================= */
+async function addSession(id){
+  const c = getClient(id); if(!c) return;
+  const s = stats(c);
+  if(s.complete){
+    const go = await messageBox("Pacchetto completato",
+      `${c.name} ha già fatto ${s.done} su ${s.total}. Vuoi iniziare un nuovo pacchetto? La seduta sarà la prima del nuovo.\n\nSe invece è una seduta in più di questo pacchetto, usa il + di “Sedute fatte”.`,
+      {ok:"Nuovo pacchetto", cancel:"Annulla"});
+    if(go) return newPackage(id, true);
+    return;
+  }
+  sesDialogMode(false);
+  $("sDate").value = today(); $("sNote").value = "";
+  if(await ask("dlgSes") !== "ok") return;
+  const cur = getClient(id); if(!cur) return;
+  const n = clone(cur);
+  n.sessionLog.push({id:uid(), date:$("sDate").value || today(), note:$("sNote").value.trim()});
+  n.doneSessions += 1;
+  commit(n, true); render();
+  const ns = stats(n);
+  toast(ns.complete ? `Pacchetto completato: ${n.doneSessions} su ${n.totalSessions}` : `Seduta segnata: ${n.doneSessions} su ${n.totalSessions}`);
+}
+$("fPkg").addEventListener("submit", e=>{
+  if(!e.submitter || e.submitter.value !== "ok") return;
+  const bad = (m, el) => { e.preventDefault(); $("pkgErr").textContent = m; if(el) el.focus(); };
+  if(!/^\d{4}-\d{2}-\d{2}$/.test($("pStart").value)) return bad("Scegli la data di inizio del nuovo pacchetto.", $("pStart"));
+  if(toInt($("pTotal").value) < 1) return bad("Scrivi quante sedute ha il nuovo pacchetto, ad esempio 10.", $("pTotal"));
+});
+["pStart","pTotal","pPrice"].forEach(i=>$(i).addEventListener("input", ()=>{ $("pkgErr").textContent = ""; }));
+async function newPackage(id, thenSession){
+  const c = getClient(id); if(!c) return;
+  const s = stats(c);
+  const active = !!(c.doneSessions || c.paid || c.sessionLog.length || c.payLog.length);
+  $("pStart").value = today(); $("pkgErr").textContent = "";
+  $("pTotal").value = c.totalSessions || "";
+  const base = round2(c.price - c.carriedIn);
+  $("pPrice").value = base > 0 ? fmtIn(base) : "";
+  let note = active
+    ? `Il pacchetto attuale${s.start ? ` (iniziato il ${itDate(s.start)})` : ""}, ${s.done} su ${s.total}${s.complete ? ", completato" : ""}, va nello storico della cartella con le sue sedute e i suoi pagamenti. Il nuovo parte da 0 sedute fatte e 0 € pagati.`
+    : "Il pacchetto attuale non ha ancora sedute né pagamenti: viene semplicemente sostituito da quello nuovo.";
+  if(active && !s.complete && s.total > 0) note += `\n\nAttenzione: il pacchetto attuale non è completato (mancano ${s.left} sedute).`;
+  $("pkgNote").textContent = note;
+  const canCarry = active && s.due !== 0;
+  $("pCarryL").hidden = !canCarry; $("pCarry").checked = true;
+  $("pCarryText").textContent = s.due > 0 ? `Aggiungi al nuovo pacchetto i ${eur(s.due)} ancora da saldare`
+    : `Scala dal nuovo pacchetto il credito di ${eur(-s.due)}`;
+  $("pkgTitle").textContent = `Nuovo pacchetto per ${c.name}`;
+  if(await ask("dlgPkg") !== "ok") return;
+
+  const cur = getClient(id); if(!cur) return;
+  const cs = stats(cur), n = clone(cur);
+  const carry = canCarry && $("pCarry").checked ? cs.due : 0;
+  if(active){
+    const last = [...cur.sessionLog].sort(byDateAsc).pop();
+    n.packages.push(normPackage({start:cur.start, end: last ? last.date : "", totalSessions:cur.totalSessions, doneSessions:cur.doneSessions,
+      price:cur.price, paid:cur.paid, carriedIn:cur.carriedIn, carriedOut:carry, sessionLog:cur.sessionLog, payLog:cur.payLog}));
+  }
+  const newBase = round2(Math.max(parseNum($("pPrice").value), 0));
+  n.start = $("pStart").value; n.totalSessions = toInt($("pTotal").value); n.doneSessions = 0;
+  n.price = round2(newBase + carry); n.paid = 0; n.carriedIn = carry;
+  n.sessionLog = []; n.payLog = [];
+  commit(n, true); render(); window.scrollTo({top:0});
+  toast(`Nuovo pacchetto dal ${itDate(n.start)}: 0 su ${n.totalSessions}`);
+  if(thenSession) await addSession(id);
+}
+
+/* ======================= CANCELLAZIONE ======================= */
+let delNeedWord = false;
+function delDialog(o){
+  $("delTitle").textContent = o.title; $("delText").textContent = o.text;
+  $("delOpts").innerHTML = (o.opts || []).map(x=>`<label class="check"><input type="checkbox" value="${x.k}"${x.on ? " checked" : ""}${x.lock ? " disabled" : ""}><span>${esc(x.label)}</span></label>`).join("");
+  $("delOpts").hidden = !(o.opts && o.opts.length);
+  delNeedWord = !!o.typeWord; $("delTypeWrap").hidden = !delNeedWord; $("delType").value = "";
+  $("delErr").textContent = ""; $("delOk").textContent = o.ok || "Elimina";
+  return ask("dlgDel").then(r => r === "ok" ? [...$("delOpts").querySelectorAll("input:checked")].map(i=>i.value) : null);
+}
+$("fDel").addEventListener("submit", e=>{
+  if(!e.submitter || e.submitter.value !== "ok" || !delNeedWord) return;
+  if($("delType").value.trim().toUpperCase() !== "CANCELLA"){ e.preventDefault(); $("delErr").textContent = "Scrivi CANCELLA per confermare."; $("delType").focus(); }
+});
+$("delType").addEventListener("input", ()=>{ $("delErr").textContent = ""; });
+/* elimina su Dropbox e aspetta l'esito; se non esiste già più, va bene lo stesso */
+async function dbxDeleteWait(ref){
+  const r = await dbxWaitJob(await dbxDelete(ref));
+  const e = ((r && (r.delete_result || r).entries) || [])[0];
+  if((r && r.status === "failed") || (e && e.entry_status && e.entry_status !== "success")){
+    if(await dbxResolve(ref)) throw {code:"tool_error", message:"Dropbox non ha eliminato la cartella"};
+  }
+}
+async function driveTrashFolder(id){
+  try{ await driveCall("trash_file", {fileId:id}); }
+  catch(e){ if(await driveResolve(id)) throw e; }            // già eliminata: va bene
+}
+async function driveFindMain(){
+  const found = await driveCall("search_files", {query:`title = '${DRIVE_FOLDER}' and mimeType = 'application/vnd.google-apps.folder'`, pageSize:5, excludeContentSnippets:true});
+  const f = Array.isArray(found.files) ? found.files.find(x=>x && x.id) : null;
+  return f ? f.id : "";
+}
+async function deleteClient(id){
+  const c = getClient(id); if(!c || exporting) return;
+  const f = c.follow, opts = [];
+  if(cloudAvailable() && f){
+    if(hasFolder(f, "dropbox")) opts.push({k:"dropbox", label:`Elimina anche la sua cartella su Dropbox (“${f.dropbox.folderName || currentFolder(c)}”)`});
+    if(hasFolder(f, "drive")) opts.push({k:"drive", label:`Elimina anche la sua cartella su Google Drive (“${f.drive.folderName || currentFolder(c)}”, va nel cestino)`});
+  }
+  const sel = await delDialog({title:`Eliminare la cartella di ${c.name}?`,
+    text:"Tutti i suoi dati nel gestionale verranno cancellati: sedute, pagamenti e pacchetti. Se vuoi tenerne una copia, esportala prima." +
+      (opts.length ? "\n\nLe sue cartelle nel cloud restano, a meno che tu non le spunti qui sotto. Se le elimini, il cliente non potrà più vederle." : ""),
+    opts, ok:"Elimina cartella"});
+  if(!sel) return;
+  const errs = [];
+  if(sel.length){
+    exporting = true; toast("Elimino le cartelle nel cloud…");
+    try{
+      if(sel.includes("dropbox")){ try{ await dbxDeleteWait(f.dropbox.id || f.dropbox.path); }catch(e){ console.error(e); errs.push("Dropbox: " + cloudErrorText(e, "dropbox")); } }
+      if(sel.includes("drive")){ try{ await driveTrashFolder(f.drive.folderId); }catch(e){ console.error(e); errs.push("Google Drive: " + cloudErrorText(e, "drive")); } }
+    } finally { exporting = false; }
+  }
+  openId = null;
+  await removeClient(id);
+  render(); window.scrollTo({top:0});
+  if(errs.length) await messageBox("Cartella eliminata dal gestionale", "Non sono riuscito a eliminare tutto nel cloud:\n\n" + errs.join("\n\n"));
+  else toast(sel.length ? "Cartella eliminata, anche nel cloud" : "Cartella eliminata");
+}
+async function wipeAll(){
+  if(exporting) return;
+  const opts = [{k:"data", label:`Tutti i clienti e i dati del gestionale (${clients.length} ${clients.length === 1 ? "cartella" : "cartelle"})`, on:true, lock:true}];
+  if(cloudAvailable()){
+    opts.push({k:"dropbox", label:`Anche la cartella “${DRIVE_FOLDER}” su Dropbox, con tutto quello che contiene`});
+    opts.push({k:"drive", label:`Anche la cartella “${DRIVE_FOLDER}” su Google Drive, con tutto quello che contiene (va nel cestino)`});
+  }
+  const sel = await delDialog({title:"Cancellare tutto?",
+    text:"Il gestionale torna vuoto come il primo giorno. Non si può annullare: se vuoi tenere una copia, fai prima un backup." +
+      (cloudAvailable() ? "\n\nSe elimini anche le cartelle nel cloud, i clienti con cui le hai condivise non le vedranno più." : ""),
+    opts, ok:"Cancella tutto", typeWord:true});
+  if(!sel) return;
+  exporting = true; toast("Sto cancellando…");
+  const errs = [];
+  try{
+    if(sel.includes("dropbox")){
+      try{ await dbxDeleteWait(DBX_ROOT); dbxRootOk = false; }
+      catch(e){ console.error(e); errs.push("Dropbox: " + cloudErrorText(e, "dropbox")); }
+    }
+    if(sel.includes("drive")){
+      try{ const fid = settings.driveFolderId || await driveFindMain(); if(fid) await driveTrashFolder(fid); settings.driveFolderId = ""; }
+      catch(e){ console.error(e); errs.push("Google Drive: " + cloudErrorText(e, "drive")); }
+    }
+    for(const cid of clients.map(x=>x.id)) await removeClient(cid);
+    settings = {trainerName:"", driveFolderId: settings.driveFolderId || "", exportDest:"device", backupDest:"drive", followSvcs:["drive"]};
+    await saveSettings();
+  } finally { exporting = false; }
+  openId = null; query = ""; openPkgs.clear();
+  render(); window.scrollTo({top:0});
+  if(errs.length) await messageBox("Dati cancellati, cloud solo in parte", "I dati del gestionale sono stati cancellati, ma:\n\n" + errs.join("\n\n"));
+  else toast("Tutto cancellato");
+}
+
+/* ======================= RINOMINA CLIENTE ======================= */
+function syncNameDlg(){
+  const c = nameCtx && getClient(nameCtx); if(!c) return;
+  const nn = $("nName").value.trim().replace(/\s+/g," ");
+  const f = c.follow, has = !!(f && SVCS.some(s=>hasFolder(f, s)) && cloudAvailable());
+  $("nFolderL").hidden = !has;
+  if(has){
+    const target = suggestFolder({name: nn || c.name});
+    $("nFolderText").textContent = `Rinomina anche la sua cartella condivisa (“${currentFolder(c)}” → “${target}”). Il link del cliente non cambia.`;
+  }
+  $("nErr").textContent = "";
+}
+let nameCtx = null;
+$("nName").addEventListener("input", syncNameDlg);
+$("fName").addEventListener("submit", e=>{
+  if(!e.submitter || e.submitter.value !== "ok") return;
+  if(!$("nName").value.trim()){ e.preventDefault(); $("nErr").textContent = "Scrivi il nome del cliente."; $("nName").focus(); }
+});
+async function renameClient(id){
+  const c = getClient(id); if(!c || exporting) return;
+  nameCtx = id; $("nName").value = c.name; $("nFolder").checked = true; syncNameDlg();
+  setTimeout(()=>{ const i = $("nName"); i.focus(); i.select(); }, 60);
+  const r = await ask("dlgName"); nameCtx = null;
+  if(r !== "ok") return;
+  const name = $("nName").value.trim().replace(/\s+/g," ");
+  const cur = getClient(id); if(!cur || !name) return;
+  const alsoFolder = !$("nFolderL").hidden && $("nFolder").checked;
+  const folderTarget = suggestFolder({name});
+  if(name !== cur.name){ const n = clone(cur); n.name = name; commit(n, true); render(); }
+  if(alsoFolder && folderTarget !== currentFolder(getClient(id))){
+    const res = await renameFolders(id, folderTarget, false);
+    if(res.errs.length){ await messageBox("Nome cambiato, cartella no", [...res.errs, ...res.notes].join("\n\n")); return; }
+    if(res.notes.length){ await messageBox("Nome cambiato", res.notes.join("\n\n")); return; }
+    toast(`Rinominato in “${name}”, anche la cartella condivisa`); return;
+  }
+  toast(name !== c.name ? `Rinominato in “${name}”` : "Nome invariato");
+}
+
+/* ======================= MODIFICA DI TUTTO ======================= */
+const logOwner = (c, pkg) => pkg ? (c.packages || []).find(p=>p.id===pkg) : c;
+function sesDialogMode(edit){
+  $("sesTitle").textContent = edit ? "Modifica seduta" : "Segna seduta";
+  $("sesOk").textContent = edit ? "Salva" : "Segna seduta";
+  $("sesHint").textContent = edit ? "Cambi data e note: il numero di sedute fatte non cambia." : "Le sedute fatte aumentano di 1.";
+}
+function payDialogMode(edit){
+  $("payTitle").textContent = edit ? "Modifica pagamento" : "Aggiungi rata";
+  $("payOk").textContent = edit ? "Salva" : "Aggiungi rata";
+  $("payHint").textContent = edit ? "Il “già pagato” si aggiorna con la differenza." : "L'importo viene sommato al “già pagato”.";
+  $("payErr").textContent = "";
+}
+$("fPay").addEventListener("submit", e=>{
+  if(!e.submitter || e.submitter.value !== "ok") return;
+  if(!(parseNum($("yAmount").value) > 0)){ e.preventDefault(); $("payErr").textContent = "Scrivi l'importo, ad esempio 50 oppure 50,50."; $("yAmount").focus(); }
+});
+$("yAmount").addEventListener("input", ()=>{ $("payErr").textContent = ""; });
+async function editSession(id, sid, pkg){
+  const c = getClient(id), own = c && logOwner(c, pkg), x = own && own.sessionLog.find(s=>s.id===sid); if(!x) return;
+  sesDialogMode(true); $("sDate").value = x.date; $("sNote").value = x.note || "";
+  const r = await ask("dlgSes"); sesDialogMode(false);
+  if(r !== "ok") return;
+  const cur = getClient(id); if(!cur) return;
+  const n = clone(cur), o = logOwner(n, pkg), y = o && o.sessionLog.find(s=>s.id===sid); if(!y) return;
+  y.date = $("sDate").value || y.date; y.note = $("sNote").value.trim();
+  commit(n, true); render(); toast("Seduta modificata");
+}
+async function editPayment(id, pid, pkg){
+  const c = getClient(id), own = c && logOwner(c, pkg), x = own && own.payLog.find(p=>p.id===pid); if(!x) return;
+  payDialogMode(true);
+  $("yAmount").value = fmtIn(x.amount); $("yDate").value = x.date; $("yMethod").value = x.method || ""; $("yNote").value = x.note || "";
+  const r = await ask("dlgPay"); payDialogMode(false);
+  if(r !== "ok") return;
+  const amt = round2(Math.max(parseNum($("yAmount").value), 0)); if(!amt) return;
+  const cur = getClient(id); if(!cur) return;
+  const n = clone(cur), o = logOwner(n, pkg), y = o && o.payLog.find(p=>p.id===pid); if(!y) return;
+  o.paid = round2(Math.max(o.paid - (Number(y.amount)||0) + amt, 0));
+  y.amount = amt; y.date = $("yDate").value || y.date; y.method = $("yMethod").value.trim(); y.note = $("yNote").value.trim();
+  commit(n, true); render(); toast("Pagamento modificato");
+}
+async function editPackage(id, pkgId){
+  const c = getClient(id), p = c && c.packages.find(x=>x.id===pkgId); if(!p) return;
+  $("eStart").value = p.start; $("eEnd").value = p.end;
+  $("eTotal").value = p.totalSessions; $("eDone").value = p.doneSessions;
+  $("ePrice").value = fmtIn(p.price); $("ePaid").value = fmtIn(p.paid);
+  if(await ask("dlgPkgEdit") !== "ok") return;
+  const cur = getClient(id); if(!cur) return;
+  const n = clone(cur), q = n.packages.find(x=>x.id===pkgId); if(!q) return;
+  const D = v => /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : "";
+  q.start = D($("eStart").value); q.end = D($("eEnd").value);
+  q.totalSessions = toInt($("eTotal").value); q.doneSessions = toInt($("eDone").value);
+  q.price = round2(Math.max(parseNum($("ePrice").value),0)); q.paid = round2(Math.max(parseNum($("ePaid").value),0));
+  commit(n, true); render(); toast("Pacchetto modificato");
+}
+
+/* ======================= IMPORT ======================= */
+function nameFromFile(fn){
+  return fn.replace(/\.[^.]+$/,"").replace(/_+/g," ").replace(/\s*\(\d+\)\s*$/,"").replace(/\s+/g," ").trim() || "Senza nome";
+}
+const CLIENT_COPY_MSG = "Questo è il riepilogo per il cliente: non contiene tutti i dati, quindi non si può reimportare. Usa una scheda creata con “Esporta”.";
+function pdfSubject(buf){
+  const txt = new TextDecoder("latin1").decode(new Uint8Array(buf));
+  const m = txt.match(/\/Subject\s*\((PTGEST1:[A-Za-z0-9+\/=\\\r\n]+)\)/);
+  return m ? m[1].replace(/\\\r?\n/g,"").replace(/\\(.)/g,"$1").replace(/[\r\n]/g,"") : "";
+}
+async function readFile(f){
+  const name = nameFromFile(f.name);
+  const buf = await f.arrayBuffer();
+  const head = new Uint8Array(buf.slice(0,4));
+  const isZip = head[0]===0x50 && head[1]===0x4B;
+  const isPdf = head[0]===0x25 && head[1]===0x50 && head[2]===0x44 && head[3]===0x46;
+  const isOldDoc = head[0]===0xD0 && head[1]===0xCF;
+
+  if(isPdf){
+    if(/\/Subject\s*\(PTCLIENT\)/.test(new TextDecoder("latin1").decode(new Uint8Array(buf)))) throw new Error(CLIENT_COPY_MSG);
+    const subj = pdfSubject(buf);
+    if(!subj) throw new Error("Questo PDF non è stato creato dal gestionale (oppure è stato modificato), quindi non posso leggerne i dati. Usa un PDF esportato da qui o un file Word.");
+    const c = normalize(JSON.parse(b64dec(subj.slice(8))));
+    c.id = uid(); c.name = name; return c;
+  }
+  if(isZip){
+    const JSZip = await lib("jszip");
+    let z; try{ z = await JSZip.loadAsync(buf); }catch(e){ throw new Error("Il file è danneggiato o non è un documento Word."); }
+    const docXml = z.file("word/document.xml");
+    if(!docXml) throw new Error("Il file non è un documento Word (.docx).");
+    const core = z.file("docProps/core.xml");
+    if(core && /<dc:subject>PTCLIENT<\/dc:subject>/.test(await core.async("string"))) throw new Error(CLIENT_COPY_MSG);
+    const c = clientFromTables(docxTables(await docXml.async("string")), name);
+    if(!c) throw new Error("Nel documento non ho trovato le tabelle della scheda cliente. Usa un file esportato da questo gestionale.");
+    return c;
+  }
+  if(isOldDoc) throw new Error("Questo è un vecchio file .doc: aprilo con Word, salvalo come .docx e poi importalo.");
+  const html = new TextDecoder().decode(new Uint8Array(buf));
+  const code = html.match(/PTGEST1:([A-Za-z0-9+\/=]+)/);
+  if(code){
+    let data; try{ data = JSON.parse(b64dec(code[1])); }catch(e){ throw new Error("Il codice in fondo al file è stato modificato o è incompleto, quindi non posso leggere i dati."); }
+    const c = normalize(data); c.id = uid(); c.name = name; return c;
+  }
+  if(/^\uFEFF?\s*RIEPILOGO ALLENAMENTI/.test(html)) throw new Error(CLIENT_COPY_MSG);
+  const dom = new DOMParser().parseFromString(html, "text/html");
+  const tables = [...dom.querySelectorAll("table")].map(t=>[...t.querySelectorAll("tr")].map(tr=>[...tr.querySelectorAll("th,td")].map(td=>td.textContent.replace(/\s+/g," ").trim())));
+  const c = clientFromTables(tables, name);
+  if(!c) throw new Error("Non ho trovato i dati del cliente in questo file.");
+  return c;
+}
+
+let importing = false;
+$("importInput").addEventListener("change", async e=>{
+  let files = [...e.target.files]; e.target.value = "";
+  if(!files.length || importing) return;
+  const fulls = files.filter(f=>/\.json$/i.test(f.name) || f.type === "application/json");
+  files = files.filter(f=>!fulls.includes(f));
+  for(const f of fulls){ await importFull(f); }
+  if(!files.length) return;
+  importing = true;
+  let done = 0, lastId = null; const errors = [];
+  try{
+    for(const f of files){
+      try{
+        const nc = await readFile(f);
+        const ex = clients.find(c=>c.name.toLowerCase()===nc.name.toLowerCase());
+        if(ex){
+          $("conflictText").textContent = `Esiste già una cartella chiamata “${ex.name}”. Vuoi aggiornarla con i dati del file “${f.name}”, oppure creare una nuova cartella separata?`;
+          const r = await ask("dlgConflict");
+          if(r==="update"){ nc.id = ex.id; nc.follow = ex.follow; }
+          else if(r==="new"){ nc.follow = null; let i=2; while(clients.some(c=>c.name.toLowerCase()===`${nc.name} (${i})`.toLowerCase())) i++; nc.name = `${nc.name} (${i})`; }
+          else continue;
+        }
+        commit(nc, true); done++; lastId = nc.id;
+      }catch(err){
+        console.error(err);
+        errors.push(`${f.name}: ${err && err.message==="offline" ? OFFLINE_MSG : (err && err.message) || "non sono riuscito a leggerlo."}`);
+      }
+    }
+  } finally { importing = false; }
+  if(done){
+    openId = done===1 ? lastId : null; render(); window.scrollTo({top:0});
+    toast(done===1 ? "Cartella importata" : `${done} cartelle importate`);
+  }
+  if(errors.length) await messageBox(errors.length===1 ? "Un file non è stato importato" : "Alcuni file non sono stati importati", errors.join("\n\n"));
+});
+
+/* ======================= ESPORTA TUTTO / IMPORTA TUTTO ======================= */
+/* Un unico file con clienti, pacchetti, sedute, pagamenti e impostazioni:
+   serve per spostare il gestionale su un altro browser o sulla versione GitHub */
+const FULL_FMT = "gestionale-pt-backup";
+function fullBackup(){
+  const keep = {};
+  ["trainerName","folderPattern","alertLeft","exportDest","backupDest","followSvcs"].forEach(k=>{ if(settings[k] !== undefined) keep[k] = clone(settings[k]); });
+  return {format:FULL_FMT, version:1, exported:new Date().toISOString(), app:"Gestionale Personal Trainer",
+          settings:keep, clients:[...clients].sort((a,b)=>a.name.localeCompare(b.name,"it")).map(clone)};
+}
+async function exportAll(){
+  if(!clients.length){ toast("Non ci sono ancora clienti da esportare"); return; }
+  const d = new Date(), p = n => String(n).padStart(2,"0");
+  const name = `Gestionale PT - backup completo ${p(d.getDate())}-${p(d.getMonth()+1)}-${d.getFullYear()}.json`;
+  const blob = new Blob([JSON.stringify(fullBackup(), null, 1)], {type:"application/json"});
+  const ok = await saveFile(blob, name);
+  if(ok) toast(`Backup completo pronto: ${clients.length} ${clients.length === 1 ? "cliente" : "clienti"}`);
+}
+async function importFull(file){
+  let data;
+  try{ data = JSON.parse(await file.text()); }catch(_){ data = null; }
+  if(!data || data.format !== FULL_FMT || !Array.isArray(data.clients)){
+    await messageBox("File non riconosciuto", `“${file.name}” non è un backup completo del gestionale. Usa un file creato con “Esporta tutto”.`); return;
+  }
+  const incoming = data.clients.filter(x=>x && typeof x === "object").map(normalize);
+  const when = data.exported ? new Date(data.exported) : null;
+  const whenTxt = when && !isNaN(when) ? ` del ${itDate(when.toISOString().slice(0,10))}` : "";
+  let mode = "add";
+  if(clients.length){
+    $("fullText").textContent = `Il backup${whenTxt} contiene ${incoming.length} ${incoming.length === 1 ? "cliente" : "clienti"}. Nel gestionale ne hai già ${clients.length}.\n\n“Sostituisci tutto” cancella quelli attuali e mette quelli del backup.\n“Aggiungi” tiene i tuoi e aggiunge quelli del backup: se un cliente c'è già, viene aggiornato con i dati del backup.`;
+    mode = await ask("dlgFull");
+    if(mode !== "replace" && mode !== "add") return;
+  }
+  importing = true; toast("Sto importando il backup…");
+  try{
+    if(mode === "replace") for(const cid of clients.map(x=>x.id)) await removeClient(cid);
+    for(const nc of incoming){
+      const same = clients.find(x=>x.id === nc.id);
+      if(!same){
+        let base = nc.name, i = 2;
+        while(clients.some(x=>x.name.toLowerCase() === nc.name.toLowerCase())) nc.name = `${base} (${i++})`;
+      }
+      commit(nc, true);
+    }
+    const s = data.settings && typeof data.settings === "object" ? data.settings : {};
+    ["trainerName","folderPattern","alertLeft"].forEach(k=>{ if(s[k] !== undefined && s[k] !== "") settings[k] = clone(s[k]); });
+    await saveSettings();
+  } finally { importing = false; }
+  openId = null; query = ""; render(); window.scrollTo({top:0});
+  toast(`Backup importato: ${incoming.length} ${incoming.length === 1 ? "cliente" : "clienti"}`);
+}
+
+/* ======================= AVVIO ======================= */
+try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{}); }catch(_){}
+initStore().catch(e=>{ console.error(e); store.mode="local"; loadLocalSettings(); clients = loadLocal(); loaded = true; render(); });
+</script>
+<script>
+/* app web: funziona anche offline e si installa sulla schermata Home */
+if("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")){
+  window.addEventListener("load", ()=>{ navigator.serviceWorker.register("sw.js").catch(e=>console.warn("service worker", e)); });
+}
+</script>
+</body>
+</html>
