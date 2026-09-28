@@ -49,6 +49,23 @@ Clienti, pacchetti, sedute e pagamenti. Funziona nel browser e si installa sulla
 - Ogni volta che ne paghi una premi **Segna pagata**: le statistiche la tolgono dagli incassi nel mese del pagamento e mostrano il **guadagno netto**.
 - Le spese sono dati tuoi (non dei clienti): finiscono nel backup di **⚙ Dati**, anche in "solo dati del programma".
 
+## Sincronizzazione con Vercel (iPhone ⇄ computer)
+
+Pubblicato su **Vercel**, il gestionale salva i dati in un piccolo database (Upstash Redis, piano gratuito) e li sincronizza su tutti i dispositivi dove fai l'accesso con la tua password. Su GitHub Pages invece resta "dati in questo browser".
+
+1. **Vercel → Add New → Project** → importa il repository `Gestionale-Pt` → Framework Preset **Other** → **Deploy**.
+2. Nel progetto: **Storage → Create Database → Upstash for Redis** → piano **Free** → regione **Frankfurt** → collegalo al progetto. Le chiavi del database le inserisce Vercel da solo.
+3. **Settings → Environment Variables** → aggiungi `APP_PASSWORD` con la password che vuoi usare (almeno 10 caratteri) → **Save**.
+4. **Deployments** → menu **⋯** dell'ultimo → **Redeploy**.
+5. Apri l'indirizzo `https://….vercel.app`, scrivi la password e porta dentro i dati con **⚙ Dati → Importa dati**.
+6. Sull'iPhone apri lo stesso indirizzo con Safari → **Aggiungi alla schermata Home** → password (una volta sola).
+
+- Le modifiche arrivano sugli altri dispositivi entro 15 secondi, e subito quando riapri l'app.
+- Senza internet si lavora lo stesso: una fascia arancione avvisa che le modifiche sono in coda e partono da sole.
+- **⚙ Dati → Esci da questo dispositivo** scollega un dispositivo. Cambiando `APP_PASSWORD` su Vercel (e facendo Redeploy) tutti i dispositivi devono rientrare.
+- Il database gratuito viene archiviato dopo 30 giorni senza utilizzo: se lo usi regolarmente non succede.
+- La cartella `api/` contiene le funzioni per Vercel: nessuna password o chiave è scritta nei file.
+
 ## Aggiornare l'app
 
 Carica il nuovo `index.html` (e gli altri file cambiati) sopra quelli vecchi, poi in `sw.js` cambia `gestionale-pt-v1` in `gestionale-pt-v2`. Apri l'app con internet: si aggiorna da sola.

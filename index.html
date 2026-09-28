@@ -281,6 +281,18 @@ svg.bars .val.negv{fill:var(--danger)}
 .exp-card.quiet .exp-state{color:var(--muted)}
 .exp-note{margin:-4px 0 8px;font-size:.88rem;color:var(--muted)}
 .exp-card .acts{display:flex;flex-wrap:wrap;gap:8px}
+.login{max-width:420px;margin:12vh auto 0;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:24px}
+.login h1{margin-bottom:6px}
+.login h2{font-size:1.2rem;margin:10px 0}
+.login input{width:100%}
+.login .btn{width:100%;margin-top:10px}
+.login ol{padding-left:20px;line-height:1.5}
+.status.offline{color:var(--owed)}
+.status.offline::before{background:var(--owed)}
+#dataDevice[hidden]{display:none}
+#syncBar{position:fixed;top:0;left:0;right:0;z-index:50;padding:calc(6px + env(safe-area-inset-top,0px)) 12px 6px;background:var(--owed);color:#fff;font-size:.85rem;font-weight:600;text-align:center}
+#syncBar[hidden]{display:none}
+body.has-syncbar{padding-top:calc(34px + env(safe-area-inset-top,0px))}
 .data-row{margin:4px 0 6px}
 #dlgData h4{margin-top:18px}
 .bk-line{margin:-6px 0 12px;font-size:.88rem;font-weight:600;color:var(--moss)}
@@ -499,6 +511,11 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
   <h4>Importa</h4>
   <p class="hint">Scegli un file creato con “Esporta dati” (ZIP o .json). Il gestionale riconosce da solo se contiene anche i clienti: in quel caso ti chiede se aggiungerli o sostituire quelli attuali.</p>
   <div class="data-row"><button type="button" class="btn" id="dataImportBtn">Importa dati</button></div>
+  <div id="dataDevice" hidden>
+    <h4>Questo dispositivo</h4>
+    <p class="hint">I dati sono nel database e si sincronizzano su tutti i dispositivi dove hai fatto l'accesso.</p>
+    <div class="data-row"><button type="button" class="btn ghost danger" id="dataLogout">Esci da questo dispositivo</button></div>
+  </div>
   <div class="dlg-actions"><button class="btn ghost" value="cancel" formnovalidate>Chiudi</button></div>
 </form></dialog>
 
@@ -1371,6 +1388,165 @@ function saveLocal(){
   catch(e){ setStatus("error", "Il browser non permette di salvare: esporta le cartelle per non perdere i dati."); }
 }
 
+/* ======================= SINCRONIZZAZIONE CON VERCEL ======================= */
+/* Solo quando il gestionale è pubblicato su Vercel con il database collegato.
+   Ogni modifica si salva subito sul dispositivo e parte verso il database; senza internet resta
+   in coda e parte appena torna la rete. Le novità degli altri dispositivi arrivano ogni 15 secondi
+   e ogni volta che riapri l'app. */
+const SYNC_KEYS = {token:"gpt_token", cache:"gpt_sync_cache", out:"gpt_sync_out"};
+const SYNC_MS = Number(window.__syncMs) || 15000;
+const lsGet = k => { try{ return JSON.parse(localStorage.getItem(k) || "null"); }catch(_){ return null; } };
+const lsSet = (k, v) => { try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){ console.warn(e); } };
+let sync = null;
+
+function updateSyncStatus(){
+  if(store.mode !== "sync") return;
+  let bar = $("syncBar");                                  // fascia visibile in tutte le pagine quando sei offline
+  if(!bar){ bar = document.createElement("div"); bar.id = "syncBar"; bar.setAttribute("role","status"); document.body.appendChild(bar); }
+  bar.hidden = sync.online;
+  document.body.classList.toggle("has-syncbar", !sync.online);    // la pagina scende: la fascia non copre niente
+  bar.textContent = sync.online ? "" : (sync.pending ? `Offline: ${sync.pending} ${sync.pending === 1 ? "modifica in attesa, parte" : "modifiche in attesa, partono"} appena torna internet` : "Offline: lavori sui dati di questo dispositivo");
+  const el = $("saveStatus"); if(!el) return;
+  el.className = "status " + (!sync.online ? "offline" : sync.pending ? "saving" : "");
+  el.textContent = statusText();
+}
+function makeSyncCol(token){
+  let cache = lsGet(SYNC_KEYS.cache) || {rev:0, docs:{}};
+  const out = lsGet(SYNC_KEYS.out) || {};                 // modifiche non ancora arrivate al database
+  const listeners = []; let seq = 0, pushing = false, pulling = false, timer = null;
+  const hdr = {"Authorization":"Bearer " + token};
+  const view = () => {
+    const m = new Map();
+    Object.entries(cache.docs).forEach(([id, d])=>{ if(d && !d.deleted && d.data) m.set(id, d.data); });
+    Object.entries(out).forEach(([id, o])=>{ if(o.data === null) m.delete(id); else m.set(id, o.data); });
+    return m;
+  };
+  const emit = () => { const docs = [...view()].map(([id, data])=>({id, data:()=>clone(data)})); listeners.forEach(l=>{ try{ l({docs}); }catch(e){ console.error(e); } }); };
+  const state = () => { sync.pending = Object.keys(out).length; updateSyncStatus(); };
+  async function api(method, url, body){
+    const r = await fetch(url, {method, cache:"no-store", headers: body ? {...hdr, "Content-Type":"application/json"} : hdr, body: body ? JSON.stringify(body) : undefined});
+    if(r.status === 401){ syncAuthLost(); throw {code:"login"}; }
+    if(!r.ok) throw {code:"http", status:r.status};
+    return r.json();
+  }
+  async function push(){
+    const ids = Object.keys(out); if(pushing || !ids.length) return;
+    pushing = true;
+    const sent = ids.slice(0, 150).map(id=>({id, n:out[id].n, data:out[id].data}));
+    try{
+      const r = await api("POST", "api/data", {ops: sent.map(o=>({id:o.id, data:o.data}))});
+      sent.forEach(o=>{
+        const rev = (r.revs && r.revs[o.id]) || 0;
+        cache.docs[o.id] = o.data === null ? {rev, deleted:true} : {rev, data:o.data};
+        if(out[o.id] && out[o.id].n === o.n) delete out[o.id];   // se l'hai cambiato di nuovo nel frattempo, resta in coda
+      });
+      lsSet(SYNC_KEYS.cache, cache); lsSet(SYNC_KEYS.out, out);
+      sync.online = true;
+    }catch(e){ if(!e || e.code !== "login") sync.online = false; }
+    finally{ pushing = false; state(); }
+    if(Object.keys(out).length && sync.online) setTimeout(push, 150);
+  }
+  async function pull(){
+    if(pulling) return; pulling = true;
+    try{
+      await push();
+      for(let round = 0; round < 2; round++){
+        const r = await api("GET", `api/data?since=${cache.rev || 0}`);
+        if((Number(r.rev) || 0) < (cache.rev || 0)){ cache = {rev:0, docs:{}}; continue; }   // database ricreato: riparto da capo
+        let changed = false;
+        Object.entries(r.docs || {}).forEach(([id, d])=>{ if(!cache.docs[id] || (cache.docs[id].rev || 0) < (d.rev || 0)){ cache.docs[id] = d; changed = true; } });
+        cache.rev = Number(r.rev) || 0; lsSet(SYNC_KEYS.cache, cache);
+        sync.online = true; sync.lastPull = Date.now();
+        if(changed) emit();
+        break;
+      }
+    }catch(e){ if(!e || e.code !== "login") sync.online = false; }
+    finally{ pulling = false; state(); }
+  }
+  document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState === "visible") pull(); });
+  window.addEventListener("focus", ()=>pull());
+  window.addEventListener("online", ()=>{ sync.online = true; pull(); });
+  window.addEventListener("offline", ()=>{ sync.online = false; state(); });
+  sync.pullNow = pull; sync.pushNow = push;
+  return {
+    doc: id => ({
+      set: async data => { out[id] = {data:clone(data), n:`${Date.now()}-${++seq}`}; lsSet(SYNC_KEYS.out, out); state(); push(); },
+      delete: async () => { out[id] = {data:null, n:`${Date.now()}-${++seq}`}; lsSet(SYNC_KEYS.out, out); state(); push(); }
+    }),
+    onSnapshot(cb){ listeners.push(cb); setTimeout(emit, 0); pull(); clearInterval(timer); timer = setInterval(()=>{ if(document.visibilityState !== "hidden") pull(); }, SYNC_MS); return ()=>{}; }
+  };
+}
+function startSync(token){
+  store.mode = "sync";
+  sync = {pending:0, online: navigator.onLine !== false};
+  store.col = makeSyncCol(token);
+  store.col.onSnapshot(applySnapshot);
+}
+/* la password su Vercel è cambiata: si rientra (le modifiche in coda restano e partono dopo l'accesso) */
+function syncAuthLost(){
+  if(store.mode !== "sync") return;
+  try{ localStorage.removeItem(SYNC_KEYS.token); }catch(_){}
+  showLogin("La password è cambiata o l'accesso è scaduto: accedi di nuovo. Le modifiche non ancora inviate restano su questo dispositivo.");
+}
+async function fetchJson(url, ms){
+  const ctl = new AbortController(), t = setTimeout(()=>ctl.abort(), ms);
+  try{ const r = await fetch(url, {cache:"no-store", signal:ctl.signal}); return r.ok ? await r.json() : null; }
+  catch(_){ return null; } finally{ clearTimeout(t); }
+}
+/* è la versione su Vercel? (su GitHub Pages o aperto come file il gestionale resta “in questo browser”) */
+async function detectSync(){
+  if(!/^https?:$/.test(location.protocol)) return false;
+  let token = null; try{ token = localStorage.getItem(SYNC_KEYS.token); }catch(_){}
+  if(token && localStorage.getItem(SYNC_KEYS.cache)){ startSync(token); return true; }   // parte subito, anche senza internet
+  const ping = await fetchJson("api/data?ping=1", 5000);
+  if(!ping || ping.app !== "gestionale-pt") return false;
+  if(!ping.configured){ showSetup(ping.missing || []); return true; }
+  if(token){ startSync(token); return true; }
+  showLogin(""); return true;
+}
+function showSetup(missing){
+  store.mode = "sync-setup";
+  const need = [];
+  if(missing.includes("database")) need.push("<li><b>Database</b>: nel progetto su Vercel apri <b>Storage</b> → <b>Create</b> → <b>Upstash for Redis</b> (piano Free) e collegalo a questo progetto.</li>");
+  if(missing.includes("APP_PASSWORD")) need.push("<li><b>Password</b>: in <b>Settings → Environment Variables</b> aggiungi <code>APP_PASSWORD</code> con la password che vuoi usare.</li>");
+  $("app").innerHTML = `<div class="login"><h1>Gestionale PT</h1><h2>Manca un ultimo passo su Vercel</h2><ol>${need.join("")}</ol>
+    <p class="sub">Poi, in Vercel → <b>Deployments</b>, apri il menu “⋯” dell'ultimo e premi <b>Redeploy</b>, e ricarica questa pagina.</p>
+    <button class="btn primary" onclick="location.reload()">Ricarica</button></div>`;
+}
+function showLogin(msg){
+  store.mode = "sync-login";
+  $("app").innerHTML = `<form class="login" id="loginForm"><h1>Gestionale PT</h1>
+    <p class="sub">Accedi con la password che hai impostato su Vercel. Serve una volta sola su questo dispositivo.</p>
+    ${msg ? `<p class="warn">${esc(msg)}</p>` : ""}
+    <label for="loginPw">Password</label>
+    <input id="loginPw" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false">
+    <p class="err" id="loginErr" role="alert"></p>
+    <button class="btn primary" id="loginBtn" type="submit">Accedi</button></form>`;
+  $("loginForm").addEventListener("submit", async e=>{
+    e.preventDefault();
+    const pw = $("loginPw").value; if(!pw){ $("loginErr").textContent = "Scrivi la password."; return; }
+    $("loginBtn").disabled = true; $("loginErr").textContent = "";
+    let r = null, code = 0;
+    try{ const res = await fetch("api/login", {method:"POST", cache:"no-store", headers:{"Content-Type":"application/json"}, body:JSON.stringify({password:pw})}); code = res.status; r = await res.json().catch(()=>null); }catch(_){ code = -1; }
+    $("loginBtn").disabled = false;
+    if(code === 200 && r && r.token){
+      try{ localStorage.setItem(SYNC_KEYS.token, r.token); }catch(_){}
+      startSync(r.token); render(); return;
+    }
+    $("loginErr").textContent = code === 401 ? "Password sbagliata." : code === 429 ? "Troppi tentativi sbagliati: riprova tra 15 minuti." : code === -1 ? "Non riesco a collegarmi: controlla internet e riprova." : "Il database non risponde: riprova tra poco.";
+  });
+  setTimeout(()=>{ const i = $("loginPw"); if(i) i.focus(); }, 50);
+}
+async function syncLogout(){
+  if(store.mode !== "sync") return;
+  const n = sync ? sync.pending : 0;
+  if(!(await messageBox("Uscire da questo dispositivo?",
+    (n ? `Attenzione: ${n} ${n === 1 ? "modifica non è ancora arrivata" : "modifiche non sono ancora arrivate"} al database (sei offline?). Uscendo andrebbero perse.\n\n` : "") +
+    "I dati restano nel database e li ritrovi facendo di nuovo l'accesso, qui o su un altro dispositivo.", {ok:"Esci", cancel:"Annulla", danger: n > 0}))) return;
+  try{ Object.values(SYNC_KEYS).forEach(k=>localStorage.removeItem(k)); }catch(_){}
+  location.reload();
+}
+
 async function initStore(){
   let db = null, user = null, uidv = null;
   if(window.claude && typeof window.claude.use === "function"){
@@ -1388,7 +1564,7 @@ async function initStore(){
       console.error(err);
       setStatus("error", "Connessione interrotta. Ricarica la pagina per vedere i dati aggiornati.");
     });
-  } else {
+  } else if(!(await detectSync())) {
     store.mode = "local";
     loadLocalSettings();
     clients = loadLocal(); loaded = true; render();
@@ -1470,6 +1646,11 @@ function commit(c, now){
 
 function statusText(){
   if(store.status === "error") return store.lastError;
+  if(store.mode === "sync" && sync){
+    if(!sync.online) return sync.pending ? `Offline: ${sync.pending} ${sync.pending === 1 ? "modifica in attesa, parte" : "modifiche in attesa, partono"} appena torna internet` : "Offline: lavori sui dati di questo dispositivo";
+    if(sync.pending) return "Sincronizzazione in corso…";
+    return "Dati sincronizzati su tutti i tuoi dispositivi";
+  }
   if(store.status === "saving") return "Salvataggio in corso…";
   return store.mode === "cloud" ? "Dati salvati nel tuo account" : "Dati salvati in questo browser";
 }
@@ -1477,6 +1658,7 @@ function setStatus(s, msg){
   store.status = s; if(msg) store.lastError = msg;
   const el = $("saveStatus");
   if(el){ el.className = "status " + (s==="ok" ? "" : s); el.textContent = statusText(); }
+  if(store.mode === "sync") updateSyncStatus();
 }
 document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState === "hidden") flushAll(); });
 window.addEventListener("pagehide", flushAll);
@@ -1746,7 +1928,7 @@ function dotsHTML(done,total,max,big){
   return h + "</span>";
 }
 function render(){
-  if(!loaded) return;
+  if(!loaded || store.mode === "sync-login" || store.mode === "sync-setup") return;   // non coprire la schermata di accesso
   const app = $("app");
   if(openId && getClient(openId)) app.innerHTML = detailHTML(getClient(openId));
   else if(expOpen){ openId = null; app.innerHTML = expHTML(); }
@@ -3997,7 +4179,9 @@ $("dataInput").addEventListener("change", async e=>{
   const files = [...e.target.files]; e.target.value = "";
   for(const f of files) await importFull(f);
 });
+$("dataLogout").addEventListener("click", ()=>{ $("dlgData").close("cancel"); syncLogout(); });
 async function dataMenu(){
+  $("dataDevice").hidden = store.mode !== "sync";
   const n = clients.length;
   $("dataInclude").checked = n > 0; $("dataInclude").disabled = n === 0;
   $("dataStats").checked = n > 0; $("dataStats").disabled = n === 0;
