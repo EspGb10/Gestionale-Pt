@@ -293,6 +293,24 @@ svg.bars .val.negv{fill:var(--danger)}
 #syncBar{position:fixed;top:0;left:0;right:0;z-index:50;padding:calc(6px + env(safe-area-inset-top,0px)) 12px 6px;background:var(--owed);color:#fff;font-size:.85rem;font-weight:600;text-align:center}
 #syncBar[hidden]{display:none}
 body.has-syncbar{padding-top:calc(34px + env(safe-area-inset-top,0px))}
+.pt-title{margin:16px 0 4px}
+.period-table{width:100%;border-collapse:collapse;font-size:.88rem}
+.seg.metric{flex-wrap:wrap}
+.seg.metric label{flex:0 1 auto}
+.period-table th{text-align:left;font-size:.78rem;color:var(--muted);font-weight:600;padding:6px 5px;border-bottom:1px solid var(--line)}
+.period-table th:not(:first-child){text-align:right}
+.period-table td{padding:8px 5px;border-bottom:1px solid var(--line)}
+.period-table td.num{text-align:right;white-space:nowrap}
+.period-table td.neg{color:var(--danger);font-weight:600}
+.period-table tr.now td{font-weight:700}
+.period-table tr.clickrow{cursor:pointer}
+.period-table tr.clickrow:hover td{background:var(--moss-soft)}
+.period-table tfoot td{font-weight:700;border-top:2px solid var(--line);border-bottom:none}
+.period-table th:last-child{position:static;background:none}
+.l-short{display:none}
+@media (max-width:389px){ .period-table{font-size:.74rem!important;letter-spacing:-.01em} .period-table td,.period-table th{padding:7px 2px!important} .period-table th{font-size:.7rem} }
+@media (max-width:440px){ .period-table{font-size:.82rem} .period-table td,.period-table th{padding:7px 3px} .l-long{display:none} .l-short{display:inline} }
+#dueClients.owed b{color:var(--owed)}
 .data-row{margin:4px 0 6px}
 #dlgData h4{margin-top:18px}
 .bk-line{margin:-6px 0 12px;font-size:.88rem;font-weight:600;color:var(--moss)}
@@ -1962,7 +1980,6 @@ function listHTML(){
     c.packages.forEach(p=>{ const ps=stats(pkgClient(c,p)); sDone+=ps.done; paid+=ps.paid; due+=Math.max(ps.due,0); });   // anche i pacchetti vecchi
   });
   const needCount = clients.filter(followNeeds).length;
-  const bk = backupInfo();
   const q = query.trim();
   const found = clients.filter(c=>nameMatches(c.name, q));
   const list = found.filter(FILTERS[listFilter] ? FILTERS[listFilter].test : ()=>true).sort((a,b)=>a.name.localeCompare(b.name,"it"));
@@ -1987,10 +2004,10 @@ function listHTML(){
       <p>Crea la cartella del tuo primo cliente, oppure importa una scheda (Word, PDF o testo): la cartella prende il nome del file.</p>
       <div class="actions"><button class="btn ghost" data-a="import">Importa documenti</button><button class="btn primary" data-a="newClient">Crea la prima cartella</button></div></div>` + dangerZoneHTML();
   }
-  if(bk) h += `<p class="bk-line${bk.old ? " old" : ""}">${esc(bk.text)}</p>`;
+  const nDueClients = clients.filter(owesMoney).length;
   h += alertsPanelHTML() + `<div class="totals">
     <div><b>${clients.length}</b><span>clienti</span></div>
-    <div><b>${sDone}</b><span>sedute svolte</span></div>
+    <div class="${nDueClients ? "owed" : ""}" id="dueClients"><b>${nDueClients}</b><span>${nDueClients === 1 ? "cliente da regolarizzare" : "clienti da regolarizzare"}</span></div>
     <div><b>${sLeft}</b><span>sedute da fare</span></div>
     <div><b>${eur(paid)}</b><span>incassato</span></div>
     <div class="owed"><b>${eur(due)}</b><span>da incassare</span></div>
@@ -2992,6 +3009,7 @@ async function handle(a, el){
     case "closeStats": statsOpen = false; render(); window.scrollTo({top:0}); return;
     case "statsHide": settings.statsHideMoney = !settings.statsHideMoney; if(settings.statsHideMoney && settings.statsSort === "earned") settings.statsSort = "renewals"; saveSettings(); render(); return;
     case "statsYear": if(el.dataset.y){ statsYear = el.dataset.y; render(); } return;
+    case "statsOpenYear": if(el.dataset.y){ statsYear = el.dataset.y; settings.statsMode = "month"; saveSettings(); render(); const c = document.querySelector(".chart-wrap"); if(c) c.scrollIntoView({block:"center"}); } return;
     case "clearSearch": { query = ""; render(); const s = $("search"); if(s) s.focus(); return; }
     case "quickEdit": { const q = getClient(el.dataset.id); return q && clientForm(q); }
     case "quickDel": return getClient(el.dataset.id) && deleteClient(el.dataset.id);
@@ -3798,7 +3816,7 @@ const shortEur = (v, short) => { if(!short) return eur(v); const a = Math.abs(v)
 function statsHTML(){
   const D = statsData(), hide = !!settings.statsHideMoney;
   const mode = settings.statsMode === "year" ? "year" : "month";
-  const useExp = hasExpenses();                              // le spese sono facoltative: senza spese le statistiche restano come prima
+  const useExp = true;                                        // entrate, uscite e guadagno netto sempre visibili (uscite a 0 se non hai spese)
   const metricsOn = useExp ? ["net","income","expense","sessions"] : ["income","sessions"];
   const metric = hide ? "sessions" : (metricsOn.includes(settings.statsMetric) ? settings.statsMetric : metricsOn[0]);
   const yNow = today().slice(0,4);
@@ -3816,23 +3834,25 @@ function statsHTML(){
   const pInc = round2(inPeriod.reduce((a,k)=>a + D.month(k).income, 0)), pSes = inPeriod.reduce((a,k)=>a + D.month(k).sessions, 0);
   const pExp = round2(inPeriod.reduce((a,k)=>a + D.month(k).expense, 0)), pNet = round2(pInc - pExp);
   const nMonths = inPeriod.filter(k=>k <= today().slice(0,7)).length || 1;
+  const allDone = clients.reduce((s,c)=>s + (Number(c.doneSessions)||0) + c.packages.reduce((t,p)=>t + (Number(p.doneSessions)||0), 0), 0);
   h += `<div class="totals stats-kpi">
     <div><b>${act.length}</b><span>clienti attivi</span></div>
     <div><b>${inact.length}</b><span>non attivi</span></div>
     <div><b>${pkgs}</b><span>pacchetti venduti</span></div>
     <div><b>${D.per.length ? Math.round(renewed / D.per.length * 100) : 0}%</b><span>ha rinnovato almeno una volta</span></div>
-    <div><b id="kpiIncome">${money(pInc)}</b><span>incassato ${mode === "month" ? `nel ${year}` : "in totale"}</span></div>
-    <div><b>${pSes}</b><span>sedute ${mode === "month" ? `nel ${year}` : "in totale"}</span></div>
-    ${useExp ? `<div class="owed"><b id="kpiExpense">${money(pExp)}</b><span>spese di gestione ${mode === "month" ? `nel ${year}` : "in totale"}</span></div>
-    <div class="${pNet < 0 ? "loss" : "net"}"><b id="kpiNet">${money(pNet)}</b><span>guadagno netto (incassi − spese)</span></div>
+    <div><b id="kpiIncome">${money(pInc)}</b><span>entrate ${mode === "month" ? `nel ${year}` : "in totale"}</span></div>
+    <div><b id="kpiSes">${pSes}</b><span>sedute svolte ${mode === "month" ? `nel ${year}` : "in totale"} (con la data)</span></div>
+    ${useExp ? `<div class="owed"><b id="kpiExpense">${money(pExp)}</b><span>uscite (spese di gestione) ${mode === "month" ? `nel ${year}` : "in totale"}</span></div>
+    <div class="${pNet < 0 ? "loss" : "net"}"><b id="kpiNet">${money(pNet)}</b><span>guadagno netto (entrate − uscite)</span></div>
     <div><b id="kpiNetAvg">${money(round2(pNet / nMonths))}</b><span>netto medio al mese</span></div>` : ""}
+    <div><b id="kpiSesAll">${allDone}</b><span>sedute svolte in totale (tutti i pacchetti)</span></div>
   </div>
   <p class="hint">Attivo = almeno una seduta o un pagamento negli ultimi ${ACTIVE_DAYS} giorni.</p>`;
 
   // andamento
   h += `<section class="block stats-block"><div class="bh"><h3>Andamento</h3>
     <div class="seg small"><label><input type="radio" name="statsMode" value="month"${mode==="month"?" checked":""}><span>Mensile</span></label><label><input type="radio" name="statsMode" value="year"${mode==="year"?" checked":""}><span>Annuale</span></label></div></div>`;
-  const MLAB = {net:"Netto", income:"Incassi", expense:"Spese", sessions:"Sedute"};
+  const MLAB = {net:"Guadagno netto", income:"Entrate", expense:"Uscite", sessions:"Sedute"};
   if(!hide) h += `<div class="seg small metric">` + metricsOn.map(v=>`<label><input type="radio" name="statsMetric" value="${v}"${metric===v?" checked":""}><span>${MLAB[v]}</span></label>`).join("") + `</div>`;
   else h += `<p class="hint">Importi nascosti: il grafico mostra le sedute.</p>`;
   if(mode === "month"){
@@ -3843,9 +3863,9 @@ function statsHTML(){
     ? MONTHS.map((l,i)=>{ const k = `${year}-${String(i+1).padStart(2,"0")}`, m = D.month(k); return {label:l, full:monthLabel(k), v: m[metric], hi: k === today().slice(0,7)}; })
     : D.years.map(y=>{ const ks = D.span.filter(k=>k.startsWith(y)); return {label:y, full:y, v: round2(ks.reduce((a,k)=>a+D.month(k)[metric],0)), hi: y === yNow}; });
   h += `<div class="chart-wrap">${barsSVG(items, metric === "sessions" ? (v=>String(v)) : shortEur)}</div>`;
-  if(!hide && metric === "net") h += `<p class="hint">Netto = incassi meno spese di gestione pagate in quel ${mode === "month" ? "mese" : "anno"}. Le barre rosse sono periodi in perdita.</p>`;
+  if(!hide && metric === "net") h += `<p class="hint">Guadagno netto = entrate meno uscite (spese di gestione) di quel ${mode === "month" ? "mese" : "anno"}. Le barre rosse sono periodi in perdita.</p>`;
   if(!hide && D.noDate > 0) h += `<p class="hint">${eur(D.noDate)} incassati non hanno una data (pacchetti senza data di inizio): contano nei totali ma non nel grafico.</p>`;
-  h += `</section>`;
+  h += periodTableHTML(D, mode, year, hide) + `</section>`;
 
   // mesi migliori e peggiori
   const withAct = D.span;   // anche i mesi vuoti contano: un mese senza incassi è un mese “peggiore”
@@ -3892,6 +3912,34 @@ function statsHTML(){
   return h;
 }
 let statsYear = "";
+/* riepilogo sotto il grafico: mese per mese (dell'anno scelto) o anno per anno; toccando un anno si aprono i suoi mesi */
+function periodTableHTML(D, mode, year, hide){
+  /* nella tabella gli importi tondi senza ",00" così sul telefono ci stanno tutte le colonne */
+  const M = v => hide ? "•••" : `${Math.round(v).toLocaleString("it-IT")} €`;     // arrotondati all'euro: così la tabella sta sul telefono
+  const nowK = today().slice(0,7);
+  const sum = ks => ks.reduce((t,k)=>{ const m = D.month(k); t.income += m.income; t.expense += m.expense; t.sessions += m.sessions; return t; }, {income:0, expense:0, sessions:0});
+  let rows;
+  if(mode === "month"){
+    rows = MONTHS_LONG.map((l,i)=>{ const k = `${year}-${String(i+1).padStart(2,"0")}`; return {k, label: l.charAt(0).toUpperCase() + l.slice(1), short: MONTHS[i], ...sum([k])}; })
+      .filter(r=>r.k <= nowK || r.income || r.expense || r.sessions);            // i mesi futuri solo se hanno già qualcosa
+  } else {
+    rows = D.years.map(y=>({k:y, label:y, year:y, ...sum(D.span.filter(k=>k.startsWith(y)))}));
+  }
+  if(!rows.length) return "";
+  const tot = rows.reduce((t,r)=>({income:t.income + r.income, expense:t.expense + r.expense, sessions:t.sessions + r.sessions}), {income:0, expense:0, sessions:0});
+  const cell = v => { const n = round2(v); return `<td class="num${n < 0 ? " neg" : ""}">${M(n)}</td>`; };
+  let h = `<h4 class="pt-title">Riepilogo ${mode === "month" ? `mese per mese · ${esc(year)}` : "anno per anno"}</h4>
+    ${mode === "year" ? `<p class="hint">Tocca un anno per vedere i suoi mesi.</p>` : ""}
+    <div class="scroll"><table class="period-table"><thead><tr><th>${mode === "month" ? "Mese" : "Anno"}</th><th>Entrate</th><th>Uscite</th><th>Netto</th><th>Sedute</th></tr></thead><tbody>`;
+  rows.forEach(r=>{
+    const now = mode === "month" ? r.k === nowK : r.k === nowK.slice(0,4);
+    h += `<tr class="${now ? "now" : ""}${mode === "year" ? " clickrow" : ""}"${mode === "year" ? ` data-a="statsOpenYear" data-y="${esc(r.k)}" tabindex="0" role="button" aria-label="Apri i mesi del ${esc(r.k)}"` : ""}>
+      <td>${r.short ? `<span class="l-long">${esc(r.label)}</span><span class="l-short">${esc(r.short)}</span>` : esc(r.label)}${mode === "year" ? " ›" : ""}</td>${cell(r.income)}${cell(r.expense)}${cell(r.income - r.expense)}<td class="num">${r.sessions}</td></tr>`;
+  });
+  h += `</tbody><tfoot><tr><td>Totale</td>${cell(tot.income)}${cell(tot.expense)}${cell(tot.income - tot.expense)}<td class="num">${tot.sessions}</td></tr></tfoot></table></div>
+    ${hide ? "" : `<p class="hint">Importi arrotondati all'euro; i valori esatti sono nei riquadri in alto.</p>`}`;
+  return h;
+}
 document.addEventListener("change", e=>{
   const t = e.target;
   if(t.name === "statsMode"){ settings.statsMode = t.value; saveSettings(); render(); }
