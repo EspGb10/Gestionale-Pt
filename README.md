@@ -37,6 +37,18 @@ Clienti, pacchetti, sedute e pagamenti. Funziona nel browser e si installa sulla
 - Funziona anche senza internet (compresi Word e PDF, dopo la prima apertura con internet).
 - In questa versione non ci sono i pulsanti Google Drive / Dropbox / condivisione con il cliente: servono il collegamento con claude.ai o una versione con account (si può aggiungere più avanti).
 
+## Filtri e statistiche
+
+- Sotto la ricerca, il tasto **Filtri** mostra: tutti i clienti, saldo in sospeso, saldo completato, lezioni 1 to 1 da finire.
+- **📊 Statistiche andamento**: incassi e sedute mese per mese o anno per anno, mesi migliori e peggiori, recap di ogni cliente (rinnovi, pacchetto tipico, ogni quanto rinnova). Solo da vedere: non si esporta. Con **🙈 Nascondi importi** gli importi spariscono dallo schermo.
+- Le statistiche finiscono in un file solo se, in **⚙ Dati → Esporta dati**, lasci la spunta **Includi le statistiche**.
+
+## Spese di gestione
+
+- **💸 Spese di gestione** (facoltative): le spese per lavorare (struttura, affitto sala, assicurazione…), **mensili**, **annuali** o **una tantum**. Per mensili e annuali il promemoria "da pagare" si può spegnere, e con **⏭ Salta** puoi saltare un mese (o un anno), anche in anticipo: in quel periodo niente avviso e niente sottratto. Una spesa entra nelle statistiche solo quando premi **Segna pagata**. Se non inserisci spese, le statistiche restano come sono.
+- Ogni volta che ne paghi una premi **Segna pagata**: le statistiche la tolgono dagli incassi nel mese del pagamento e mostrano il **guadagno netto**.
+- Le spese sono dati tuoi (non dei clienti): finiscono nel backup di **⚙ Dati**, anche in "solo dati del programma".
+
 ## Aggiornare l'app
 
 Carica il nuovo `index.html` (e gli altri file cambiati) sopra quelli vecchi, poi in `sw.js` cambia `gestionale-pt-v1` in `gestionale-pt-v2`. Apri l'app con internet: si aggiorna da sola.

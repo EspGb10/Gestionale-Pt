@@ -146,6 +146,21 @@ td.date{white-space:nowrap}
 .none{color:var(--muted);font-size:.95rem;margin:4px 0}
 
 dialog{border:none;border-radius:14px;padding:0;width:min(480px,94vw);max-height:90vh;overflow:auto;background:var(--paper);color:var(--pine)}
+dialog{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+@supports (height:100dvh){ dialog{max-height:90dvh} }
+dialog::backdrop{overscroll-behavior:contain}
+html.modal-open{overflow:hidden}
+html.modal-open body{position:fixed;left:0;right:0;width:100%;overflow:hidden}
+.filterbar{display:flex;flex-wrap:wrap;gap:8px;margin:-12px 0 14px}
+.filt-btn{border-color:var(--line);background:var(--paper)}
+.filt-btn.on{background:var(--moss);border-color:var(--moss);color:var(--on-moss)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--paper)}
+.filters label{position:relative;margin:0}
+.filters input{position:absolute;opacity:0;width:1px;height:1px}
+.filters span{display:inline-block;padding:7px 13px;border:1.5px solid var(--line);border-radius:999px;font-weight:600;font-size:.88rem;background:var(--paper);cursor:pointer}
+.filters input:checked + span{background:var(--moss);border-color:var(--moss);color:var(--on-moss)}
+.filters input:checked + span::before{content:"✓ "}
+.filters input:focus-visible + span{outline:3px solid var(--moss);outline-offset:2px}
 dialog::backdrop{background:rgba(10,20,15,.5)}
 dialog form{padding:20px}
 .dlg-x{position:sticky;top:0;float:right;z-index:3;width:42px;height:42px;margin:-8px -8px 4px 10px;padding:0;border-radius:50%;border:1px solid var(--line);background:var(--paper);color:var(--pine);font-size:1.15rem;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);cursor:pointer}
@@ -208,6 +223,64 @@ button.x.ed{color:var(--moss)}
 .docs-head{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-top:14px}
 .docs-head label{margin:0}
 #docsList{max-height:40vh;overflow:auto}
+.stats-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px;margin-top:6px}
+.stats-kpi{grid-template-columns:repeat(3,1fr)}
+@media (max-width:640px){ .stats-kpi{grid-template-columns:repeat(2,1fr)} }
+.stats-block .bh{align-items:center}
+.seg.small span{padding:6px 12px;font-size:.88rem}
+.seg.small input{position:absolute;opacity:0;width:1px;height:1px}
+.seg.small label{margin:0;position:relative}
+.seg.metric{margin:0 0 10px}
+.yearnav{display:flex;align-items:center;gap:12px;margin:6px 0 4px}
+.yearnav b{font-size:1.1rem;min-width:3.5em;text-align:center}
+.chart-wrap{overflow-x:auto;margin-top:6px}
+svg.bars{width:100%;min-width:320px;height:auto;display:block}
+svg.bars .bar{fill:var(--moss);opacity:.85}
+svg.bars .bar.hi{fill:var(--owed);opacity:1}
+svg.bars .axis{stroke:var(--line);stroke-width:1.5}
+svg.bars .val{font-size:11px;font-weight:700;fill:var(--pine);text-anchor:middle}
+svg.bars .lab{font-size:11px;fill:var(--muted);text-anchor:middle}
+.bw{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.bw h4{margin:4px 0}
+.bw ol{margin:4px 0 10px;padding-left:22px}
+.bw li{display:flex;justify-content:space-between;gap:10px;padding:3px 0}
+.bw .lbl{font-weight:700;font-size:.85rem;margin:8px 0 0}
+.bw .lbl.ok{color:var(--moss)} .bw .lbl.bad{color:var(--owed)}
+.recap{display:grid;gap:8px}
+.recap-row{display:block;width:100%;text-align:left;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer}
+.recap-row:hover{border-color:var(--pine)}
+.rr-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.pill{font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.pill.on{background:var(--moss);border-color:var(--moss);color:var(--on-moss)}
+.rr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 10px;font-weight:600;font-size:.92rem}
+@media (max-width:520px){ .rr-grid{grid-template-columns:repeat(2,1fr)} }
+.rr-grid i{display:block;font-style:normal;font-weight:500;font-size:.75rem;color:var(--muted)}
+#statsSort{width:auto;min-height:38px;padding:6px 10px;font-size:.9rem}
+.badge{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:var(--owed);color:#fff;font-size:.75rem;font-weight:700;vertical-align:middle}
+.head-btns{display:flex;flex-wrap:wrap;gap:8px}
+.stats-kpi .owed b{color:var(--owed)}
+.stats-kpi .net b{color:var(--moss)}
+.stats-kpi .loss b{color:var(--danger)}
+svg.bars .bar.neg{fill:var(--danger);opacity:.85}
+svg.bars .val.negv{fill:var(--danger)}
+.exp-kpi{grid-template-columns:repeat(2,1fr)}
+.exp-list{display:grid;gap:10px}
+.exp-card{border:1px solid var(--line);border-left:5px solid var(--moss);border-radius:10px;padding:12px 14px;background:var(--paper)}
+.exp-card.due{border-left-color:var(--owed)}
+.exp-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.exp-top b{font-size:1.05rem}
+.exp-top .amt{font-weight:700}
+.exp-state{margin:4px 0 8px;font-weight:600;font-size:.9rem;color:var(--moss)}
+.exp-card.due .exp-state{color:var(--owed)}
+.exp-card.quiet{border-left-color:var(--line)}
+.skips{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 8px;font-size:.85rem}
+.skips > span:first-child{color:var(--muted);font-weight:600}
+.skip{display:inline-flex;align-items:center;gap:2px;padding:1px 4px 1px 10px;border:1px solid var(--line);border-radius:999px;font-weight:600;background:var(--chalk)}
+.skip .x{min-height:28px;min-width:28px;padding:0}
+#skYearW[hidden],#skMonthW[hidden]{display:none}
+.exp-card.quiet .exp-state{color:var(--muted)}
+.exp-note{margin:-4px 0 8px;font-size:.88rem;color:var(--muted)}
+.exp-card .acts{display:flex;flex-wrap:wrap;gap:8px}
 .data-row{margin:4px 0 6px}
 #dlgData h4{margin-top:18px}
 .bk-line{margin:-6px 0 12px;font-size:.88rem;font-weight:600;color:var(--moss)}
@@ -365,11 +438,62 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
   </div>
 </form></dialog>
 
+<dialog id="dlgExp"><form method="dialog" id="fExp">
+  <h3 id="expTitle">Nuova spesa</h3>
+  <label for="xName">Nome della spesa</label>
+  <input id="xName" autocomplete="off" placeholder="es. Affitto sala, Struttura, Assicurazione">
+  <label>Ogni quanto si paga</label>
+  <div class="seg"><label><input type="radio" name="xKind" value="monthly" checked><span>Mensile</span></label><label><input type="radio" name="xKind" value="yearly"><span>Annuale</span></label><label><input type="radio" name="xKind" value="once"><span>Una tantum</span></label></div>
+  <p class="hint" id="xKindHint"></p>
+  <div class="two">
+    <div><label for="xAmount" id="xAmountL">Importo (€ al mese)</label><input id="xAmount" type="text" autocomplete="off" placeholder="es. 300"></div>
+    <div><label for="xStart" id="xStartL">Dal (facoltativo)</label><input id="xStart" type="date"></div>
+  </div>
+  <label for="xNote">Note (facoltativo)</label>
+  <input id="xNote" autocomplete="off" placeholder="es. palestra Via Roma, si paga entro il 5">
+  <label class="check carry" id="xRemindL"><input type="checkbox" id="xRemind" checked><span>Ricordamelo quando è da pagare</span></label>
+  <label class="check carry" id="xPayNowL"><input type="checkbox" id="xPayNow"><span id="xPayNowText">L'ho già pagata questo mese (oggi)</span></label>
+  <p class="err" id="expErr" role="alert"></p>
+  <div class="dlg-actions">
+    <button class="btn ghost" value="cancel" formnovalidate>Annulla</button>
+    <button class="btn primary" value="ok">Salva</button>
+  </div>
+</form></dialog>
+
+<dialog id="dlgSkip"><form method="dialog" id="fSkip">
+  <h3 id="skTitle">Salta</h3>
+  <div id="skMonthW"><label for="skMonth">Mese da saltare</label><input id="skMonth" type="month"></div>
+  <div id="skYearW" hidden><label for="skYear">Anno da saltare</label><input id="skYear" type="text" autocomplete="off" placeholder="es. 2026"></div>
+  <p class="hint" id="skHint"></p>
+  <p class="err" id="skErr" role="alert"></p>
+  <div class="dlg-actions">
+    <button class="btn ghost" value="cancel" formnovalidate>Annulla</button>
+    <button class="btn primary" value="ok">Salta</button>
+  </div>
+</form></dialog>
+
+<dialog id="dlgExpPay"><form method="dialog" id="fExpPay">
+  <h3 id="xpTitle">Pagamento</h3>
+  <div class="two">
+    <div><label for="xpDate">Data</label><input id="xpDate" type="date"></div>
+    <div><label for="xpAmount">Importo (€)</label><input id="xpAmount" type="text" autocomplete="off"></div>
+  </div>
+  <label for="xpNote">Note (facoltativo)</label>
+  <input id="xpNote" autocomplete="off" placeholder="es. bonifico, ricevuta n. 12">
+  <p class="hint" id="xpHint"></p>
+  <p class="err" id="xpErr" role="alert"></p>
+  <div class="dlg-actions">
+    <button class="btn ghost" value="cancel" formnovalidate>Annulla</button>
+    <button class="btn primary" value="ok">Salva pagamento</button>
+  </div>
+</form></dialog>
+
 <dialog id="dlgData"><form method="dialog">
   <h3>⚙ Dati del programma</h3>
   <p class="hint" id="dataLast"></p>
   <h4>Esporta</h4>
   <label class="check carry"><input type="checkbox" id="dataInclude" checked><span id="dataIncludeText">Includi le cartelle dei clienti</span></label>
+  <label class="check carry"><input type="checkbox" id="dataStats" checked><span>Includi le statistiche (un file leggibile con andamento, mesi e recap clienti)</span></label>
   <p class="hint" id="dataHint"></p>
   <div class="data-row"><button class="btn primary" value="export" id="dataExportBtn">Esporta dati</button></div>
   <h4>Importa</h4>
@@ -1577,6 +1701,24 @@ document.querySelectorAll("dialog > form[method=dialog]").forEach(f=>{
   b.setAttribute("aria-label", "Chiudi"); b.title = "Chiudi";
   f.prepend(b);
 });
+/* Con una finestra aperta la pagina sotto resta ferma: su iPhone (Safari e app dalla Home)
+   altrimenti scorrendo la finestra a volte scorre la pagina dietro */
+let scrollLockY = 0, scrollLocked = false;
+function syncScrollLock(){
+  const anyOpen = [...document.querySelectorAll("dialog")].some(d=>d.open);
+  if(anyOpen && !scrollLocked){
+    scrollLockY = window.scrollY || document.documentElement.scrollTop || 0;
+    document.body.style.top = `-${scrollLockY}px`;
+    document.documentElement.classList.add("modal-open");
+    scrollLocked = true;
+  } else if(!anyOpen && scrollLocked){
+    document.documentElement.classList.remove("modal-open");
+    document.body.style.top = "";
+    scrollLocked = false;
+    window.scrollTo(0, scrollLockY);
+  }
+}
+document.querySelectorAll("dialog").forEach(d=>new MutationObserver(syncScrollLock).observe(d, {attributes:true, attributeFilter:["open"]}));
 function ask(dlgId){
   return new Promise(res=>{
     const d = $(dlgId);
@@ -1607,6 +1749,8 @@ function render(){
   if(!loaded) return;
   const app = $("app");
   if(openId && getClient(openId)) app.innerHTML = detailHTML(getClient(openId));
+  else if(expOpen){ openId = null; app.innerHTML = expHTML(); }
+  else if(statsOpen){ openId = null; app.innerHTML = statsHTML(); }
   else { openId = null; app.innerHTML = listHTML(); }
 }
 /* Aggiorna senza disturbare mentre stai scrivendo in un campo */
@@ -1638,7 +1782,8 @@ function listHTML(){
   const needCount = clients.filter(followNeeds).length;
   const bk = backupInfo();
   const q = query.trim();
-  const list = clients.filter(c=>nameMatches(c.name, q)).sort((a,b)=>a.name.localeCompare(b.name,"it"));
+  const found = clients.filter(c=>nameMatches(c.name, q));
+  const list = found.filter(FILTERS[listFilter] ? FILTERS[listFilter].test : ()=>true).sort((a,b)=>a.name.localeCompare(b.name,"it"));
 
   let h = `<header class="top">
     <div><div class="title-row"><h1>I miei clienti</h1><button class="data-btn" data-a="dataMenu" title="Esporta o importa i dati del programma" aria-label="Dati del programma: esporta o importa">⚙ Dati</button></div><p>Sedute one to one e pagamenti, una cartella per persona.</p>
@@ -1646,6 +1791,8 @@ function listHTML(){
     <div class="actions">
       <button class="btn ghost" data-a="import">Importa documenti</button>
       ${clients.length ? `<button class="btn ghost" data-a="exportDocs">Esporta documenti</button>` : ""}
+      ${clients.length ? `<button class="btn ghost" data-a="openStats">📊 Statistiche andamento</button>` : ""}
+      <button class="btn ghost" data-a="openExp" id="expBtn">💸 Spese di gestione${expDueCount() ? ` <span class="badge">${expDueCount()} da pagare</span>` : ""}</button>
       ${cloudAvailable() && clients.length ? `<button class="btn ghost" data-a="backup">Backup su Drive o Dropbox</button>` : ""}
       ${cloudAvailable() ? `<a class="btn ghost" id="openDbx" href="${dbxOpenUrl(DBX_ROOT)}" target="_blank" rel="noopener">${isIOS ? "Apri l'app Dropbox" : "Apri su Dropbox"}</a>
         <a class="btn ghost" id="openDrive" href="${driveWebUrl(settings.driveFolderId)}" target="_blank" rel="noopener">Apri su Drive</a>` : ""}
@@ -1671,8 +1818,12 @@ function listHTML(){
     ${q ? `<button class="s-btn s-clear" data-a="clearSearch" aria-label="Cancella la ricerca" title="Cancella">✕</button>` : ""}
     <button class="s-btn s-go" data-a="doSearch" aria-label="Cerca" title="Cerca"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.4"/><line x1="15.4" y1="15.4" x2="21" y2="21" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
   </div>
-  ${q ? `<p class="found" id="found">${list.length ? `${list.length} ${list.length === 1 ? "cliente trovato" : "clienti trovati"} per “${esc(q)}”` : ""}</p>` : ""}`;
-  if(!list.length) return h + `<p class="none">Nessun cliente trovato con “${esc(q)}”.</p>` + dangerZoneHTML();
+  ${filterBarHTML(found)}
+  ${(q || listFilter !== "all") && list.length ? `<p class="found" id="found">${list.length} ${list.length === 1 ? (q ? "cliente trovato" : "cliente") : (q ? "clienti trovati" : "clienti")}${q ? ` per “${esc(q)}”` : ""}${listFilter !== "all" ? ` · ${esc(FILTERS[listFilter].label)}` : ""}</p>` : ""}`;
+  if(!list.length){
+    const why = !found.length ? `Nessun cliente trovato con “${esc(q)}”.` : FILTERS[listFilter].none;
+    return h + `<p class="none">${why}</p>` + dangerZoneHTML();
+  }
   h += `<div class="folders">`;
   list.forEach(c=>{
     const s = stats(c), f = freqText(c);
@@ -1740,6 +1891,34 @@ document.addEventListener("change", e=>{
   settings.alertLeft = Math.min(toInt(e.target.value), 50); saveSettings(); render();
 });
 
+/* Filtri sotto la ricerca: si aprono con il tasto “Filtri”, una scelta alla volta.
+   Il saldo guarda il pacchetto in corso e anche quelli precedenti. */
+let listFilter = "all", filtersOpen = false;
+const owesMoney = c => stats(c).due > 0 || c.packages.some(p=>stats(pkgClient(c,p)).due > 0);
+const hasPrice = c => stats(c).price > 0 || c.packages.some(p=>Number(p.price) > 0);
+const FILTERS = {
+  all:     {label:"Tutti i clienti",           test:()=>true,                                         none:"Nessun cliente."},
+  due:     {label:"Saldo in sospeso",          test:c=>owesMoney(c),                                  none:"Nessun cliente con saldo in sospeso: tutti in regola."},
+  paid:    {label:"Saldo completato",          test:c=>hasPrice(c) && !owesMoney(c),                  none:"Nessun cliente ha ancora completato il saldo."},
+  lessons: {label:"Lezioni 1 to 1 da finire",  test:c=>{ const s = stats(c); return s.total > 0 && s.left > 0; }, none:"Nessun cliente con lezioni ancora da fare: pacchetti tutti completati."}
+};
+function filterBarHTML(found){
+  const on = listFilter !== "all";
+  let h = `<div class="filterbar">
+    <button class="btn small filt-btn${on ? " on" : ""}" data-a="toggleFilters" aria-expanded="${filtersOpen}" aria-controls="filtersPanel">Filtri${on ? `: ${esc(FILTERS[listFilter].label)}` : ""} ${filtersOpen ? "▴" : "▾"}</button>
+    ${on ? `<button class="btn small ghost" data-a="clearFilter" aria-label="Togli il filtro">✕ Togli filtro</button>` : ""}
+  </div>`;
+  if(filtersOpen){
+    h += `<div class="filters" id="filtersPanel" role="radiogroup" aria-label="Mostra">` +
+      Object.entries(FILTERS).map(([k,f])=>`<label><input type="radio" name="listFilter" value="${k}"${listFilter === k ? " checked" : ""}><span>${esc(f.label)} (${found.filter(f.test).length})</span></label>`).join("") +
+      `</div>`;
+  }
+  return h;
+}
+document.addEventListener("change", e=>{
+  if(e.target.name !== "listFilter") return;
+  listFilter = e.target.value; filtersOpen = false; render();
+});
 /* ricerca: contiene il testo in qualsiasi punto del nome, senza badare a maiuscole e accenti;
    con più parole, devono esserci tutte ("mar ros" trova "Marco Rossi") */
 const plain = s => String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
@@ -1771,7 +1950,7 @@ function ticksHTML(s){
 function detailHTML(c){
   const s = stats(c);
   const contact = [c.phone,c.email].filter(Boolean).map(esc).join("  |  ");
-  let h = `<button class="back" data-a="back">‹ Tutte le cartelle</button>
+  let h = `<button class="back" data-a="back">${statsOpen ? "‹ Statistiche andamento" : "‹ Tutte le cartelle"}</button>
   <div class="detail-head">
     <h2>${esc(c.name)}</h2>
     ${contact?`<p class="contact">${contact}</p>`:`<div style="height:10px"></div>`}
@@ -2612,9 +2791,25 @@ async function handle(a, el){
     case "edit": return c && clientForm(c);
     case "open": openId = el.dataset.id; render(); window.scrollTo({top:0}); return;
     case "doSearch": return runSearch();
+    case "toggleFilters": filtersOpen = !filtersOpen; render(); return;
+    case "clearFilter": listFilter = "all"; filtersOpen = false; render(); return;
     case "exportAll": return exportAll();
     case "dataMenu": return dataMenu();
     case "exportDocs": return exportDocs();
+    case "openStats": statsOpen = true; openId = null; render(); window.scrollTo({top:0}); return;
+    case "openExp": expOpen = true; openId = null; render(); window.scrollTo({top:0}); return;
+    case "closeExp": expOpen = false; render(); window.scrollTo({top:0}); return;
+    case "newExp": return expForm(null);
+    case "editExp": return expForm(el.dataset.id);
+    case "payExp": return expPayForm(el.dataset.id, null);
+    case "editExpPay": return expPayForm(null, el.dataset.id);
+    case "delExp": return delExp(el.dataset.id);
+    case "delExpPay": return delExpPay(el.dataset.id);
+    case "skipExp": return skipExp(el.dataset.id);
+    case "unskipExp": return unskipExp(el.dataset.id);
+    case "closeStats": statsOpen = false; render(); window.scrollTo({top:0}); return;
+    case "statsHide": settings.statsHideMoney = !settings.statsHideMoney; if(settings.statsHideMoney && settings.statsSort === "earned") settings.statsSort = "renewals"; saveSettings(); render(); return;
+    case "statsYear": if(el.dataset.y){ statsYear = el.dataset.y; render(); } return;
     case "clearSearch": { query = ""; render(); const s = $("search"); if(s) s.focus(); return; }
     case "quickEdit": { const q = getClient(el.dataset.id); return q && clientForm(q); }
     case "quickDel": return getClient(el.dataset.id) && deleteClient(el.dataset.id);
@@ -3095,7 +3290,7 @@ $("importInput").addEventListener("change", async e=>{
 const FULL_FMT = "gestionale-pt-backup";
 function fullBackup(){
   const keep = {};
-  ["trainerName","folderPattern","alertLeft","exportDest","backupDest","followSvcs"].forEach(k=>{ if(settings[k] !== undefined) keep[k] = clone(settings[k]); });
+  ["trainerName","folderPattern","alertLeft","exportDest","backupDest","followSvcs","expenses"].forEach(k=>{ if(settings[k] !== undefined) keep[k] = clone(settings[k]); });
   return {format:FULL_FMT, version:1, exported:new Date().toISOString(), app:"Gestionale Personal Trainer",
           settings:keep, clients:[...clients].sort((a,b)=>a.name.localeCompare(b.name,"it")).map(clone)};
 }
@@ -3145,7 +3340,7 @@ Dallo solo a persone di fiducia e non pubblicarlo online.
 `;
 }
 let backingUp = false;
-async function exportAll(){
+async function exportAll(withStats = true){
   if(backingUp) return false;
   if(!clients.length){ toast("Non ci sono ancora clienti da salvare"); return false; }
   backingUp = true; toast("Preparo il backup…");
@@ -3156,6 +3351,7 @@ async function exportAll(){
     const day = `${p(d.getDate())}-${p(d.getMonth()+1)}-${d.getFullYear()}`;
     zip.file("Gestionale PT - dati completi.json", JSON.stringify(fullBackup(), null, 1));
     zip.file("Riepilogo clienti.csv", csvSummary());
+    if(withStats) zip.file("Statistiche andamento.txt", statsText());
     zip.file("LEGGIMI.txt", readmeText(clients.length, `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} alle ${p(d.getHours())}.${p(d.getMinutes())}`));
     let pdfOk = 0;
     try{
@@ -3200,9 +3396,12 @@ async function importFull(file){
     await messageBox("File non riconosciuto", `“${file.name}” non è un file di dati del gestionale. Usa un file creato con “⚙ Dati” → “Esporta dati”.`); return;
   }
   const S_KEYS = ["trainerName","folderPattern","alertLeft","exportDest","backupDest","followSvcs"];
+  let replaceExp = false;
   const applySettings = async ()=>{
     const s = data.settings && typeof data.settings === "object" ? data.settings : {};
     S_KEYS.forEach(k=>{ if(s[k] !== undefined && s[k] !== "") settings[k] = clone(s[k]); });
+    if(s.expenses && typeof s.expenses === "object")                  // spese di gestione: con “Sostituisci tutto” prendo quelle del file, altrimenti unisco
+      settings.expenses = replaceExp ? mergeExp({}, s.expenses) : mergeExp(settings.expenses, s.expenses);
     await saveSettings();
   };
   if(!Array.isArray(data.clients)){                     // solo dati del programma, senza clienti
@@ -3220,7 +3419,7 @@ async function importFull(file){
   }
   importing = true; toast("Sto importando il backup…");
   try{
-    if(mode === "replace") for(const cid of clients.map(x=>x.id)) await removeClient(cid);
+    if(mode === "replace"){ replaceExp = true; for(const cid of clients.map(x=>x.id)) await removeClient(cid); }
     for(const nc of incoming){
       const same = clients.find(x=>x.id === nc.id);
       if(!same){
@@ -3316,16 +3515,471 @@ async function exportDocs(){
   if(ok) toast(list.length > 1 ? `${list.length} schede ${kind === "docx" ? "Word" : "PDF"} pronte` : `Scheda ${kind === "docx" ? "Word" : "PDF"} pronta`);
 }
 
+/* ======================= 📊 STATISTICHE ANDAMENTO ======================= */
+/* Sezione a parte, solo da vedere (nessun pulsante per esportarla).
+   Si calcola dai dati delle cartelle: pacchetto in corso + pacchetti precedenti. */
+let statsOpen = false;
+const ACTIVE_DAYS = 30;
+const MONTHS = ["Gen","Feb","Mar","Apr","Mag","Giu","Lug","Ago","Set","Ott","Nov","Dic"];
+const MONTHS_LONG = ["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+const isDate = v => /^\d{4}-\d{2}-\d{2}$/.test(v || "");
+const daysBetween = (a, b) => Math.round((new Date(b + "T12:00:00") - new Date(a + "T12:00:00")) / 86400000);
+const monthLabel = k => `${MONTHS_LONG[Number(k.slice(5,7)) - 1]} ${k.slice(0,4)}`;
+
+/* tutti i pacchetti di un cliente, dal più vecchio; il pacchetto in corso per ultimo */
+function allPackages(c){
+  const past = [...c.packages].sort((a,b)=>(a.start||a.end||"").localeCompare(b.start||b.end||""));
+  return [...past, {start:c.start, end:"", totalSessions:c.totalSessions, doneSessions:c.doneSessions, price:c.price, paid:c.paid,
+                    sessionLog:c.sessionLog, payLog:c.payLog, current:true}];
+}
+const pkgUsed = p => !!(p.doneSessions || p.paid || p.sessionLog.length || p.payLog.length || (p.current && p.start));
+/* soldi incassati con la data: le rate registrate; quello scritto a mano in “già pagato” senza rata
+   lo metto alla data d'inizio del pacchetto (se non c'è, resta “senza data”) */
+function payEvents(c){
+  const out = [];
+  allPackages(c).forEach(p=>{
+    let logged = 0;
+    p.payLog.forEach(x=>{ const a = Number(x.amount)||0; logged += a; if(a) out.push({date: isDate(x.date) ? x.date : "", amount:a}); });
+    const rest = round2((Number(p.paid)||0) - logged);
+    if(rest > 0.004) out.push({date: isDate(p.start) ? p.start : "", amount:rest, guess:true});
+  });
+  return out;
+}
+function sessionDates(c){ const out = []; allPackages(c).forEach(p=>p.sessionLog.forEach(x=>{ if(isDate(x.date)) out.push(x.date); })); return out; }
+function lastActivity(c){
+  const d = [...sessionDates(c), ...payEvents(c).map(e=>e.date), ...allPackages(c).map(p=>p.start)].filter(isDate).sort();
+  return d.length ? d[d.length - 1] : "";
+}
+function clientStats(c){
+  const pk = allPackages(c).filter(pkgUsed);
+  const starts = pk.map(p=>p.start).filter(isDate).sort();
+  const gaps = []; for(let i=1;i<starts.length;i++) gaps.push(daysBetween(starts[i-1], starts[i]));
+  const kinds = {}; pk.forEach(p=>{ const k = `${p.totalSessions}|${round2(p.price - (p.current ? (c.carriedIn||0) : (p.carriedIn||0)))}`; kinds[k] = (kinds[k]||0) + 1; });
+  const top = Object.entries(kinds).sort((a,b)=>b[1]-a[1])[0];
+  const last = lastActivity(c), age = last ? daysBetween(last, today()) : null;
+  const earned = round2(payEvents(c).reduce((a,e)=>a+e.amount, 0));
+  const sessions = pk.reduce((a,p)=>a + (Number(p.doneSessions)||0), 0);
+  return {
+    c, packages: pk.length, renewals: Math.max(pk.length - 1, 0),
+    typical: top ? {sessions: Number(top[0].split("|")[0]), price: Number(top[0].split("|")[1])} : null,
+    every: gaps.length ? Math.round(gaps.reduce((a,b)=>a+b,0) / gaps.length) : null,
+    earned, sessions, last, active: age !== null && age <= ACTIVE_DAYS
+  };
+}
+function statsData(){
+  const per = clients.map(clientStats);
+  const byMonth = {}, noDate = {amount:0};
+  const add = (k, f, v) => { byMonth[k] = byMonth[k] || {income:0, sessions:0, expense:0}; byMonth[k][f] += v; };
+  clients.forEach(c=>{
+    payEvents(c).forEach(e=>{ if(e.date) add(e.date.slice(0,7), "income", e.amount); else noDate.amount += e.amount; });
+    sessionDates(c).forEach(d=>add(d.slice(0,7), "sessions", 1));
+  });
+  Object.entries(expByMonth()).forEach(([k,v])=>add(k, "expense", v));     // spese di gestione pagate
+  Object.values(byMonth).forEach(m=>{ m.income = round2(m.income); m.expense = round2(m.expense); m.net = round2(m.income - m.expense); });
+  const keys = Object.keys(byMonth).sort();
+  /* mesi dal primo con attività a quello attuale, compresi quelli vuoti */
+  const span = [];
+  if(keys.length){
+    let y = Number(keys[0].slice(0,4)), m = Number(keys[0].slice(5,7));
+    const endK = [keys[keys.length-1], today().slice(0,7)].sort().pop();
+    for(let guard=0; guard<600; guard++){
+      const k = `${y}-${String(m).padStart(2,"0")}`; span.push(k);
+      if(k >= endK) break;
+      m++; if(m > 12){ m = 1; y++; }
+    }
+  }
+  const month = k => byMonth[k] || {income:0, sessions:0, expense:0, net:0};
+  return {per, byMonth, span, month, noDate: round2(noDate.amount),
+    years: [...new Set(span.map(k=>k.slice(0,4)))].sort()};
+}
+const money = v => settings.statsHideMoney ? "•••" : eur(v);
+
+/* barre verso l'alto per i valori positivi e verso il basso (rosse) per quelli negativi (mesi in perdita) */
+function barsSVG(items, fmt){
+  let max = Math.max(0, ...items.map(i=>i.v)), min = Math.min(0, ...items.map(i=>i.v));
+  if(max === 0 && min === 0) max = 1;
+  const W = Math.max(items.length * 46, 320), H = 200, top = 24, bot = H - 30, range = max - min;
+  const zero = top + (bot - top) * max / range, bw = 30;
+  let s = `<svg class="bars" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Grafico">`;
+  s += `<line x1="0" y1="${zero}" x2="${W}" y2="${zero}" class="axis"/>`;
+  items.forEach((it, i)=>{
+    const x = i * 46 + 8, hh = Math.round((bot - top) * Math.abs(it.v) / range), neg = it.v < 0;
+    const y = neg ? zero : zero - hh;
+    s += `<rect x="${x}" y="${y}" width="${bw}" height="${Math.max(hh, it.v ? 2 : 0)}" rx="4" class="bar${neg ? " neg" : it.hi ? " hi" : ""}"><title>${esc(it.full)}: ${esc(fmt(it.v))}</title></rect>`;
+    if(it.v) s += `<text x="${x + bw/2}" y="${neg ? y + hh + 12 : y - 6}" class="val${neg ? " negv" : ""}">${esc(fmt(it.v, true))}</text>`;
+    s += `<text x="${x + bw/2}" y="${H - 8}" class="lab">${esc(it.label)}</text>`;
+  });
+  return s + `</svg>`;
+}
+const shortEur = (v, short) => { if(!short) return eur(v); const a = Math.abs(v), sg = v < 0 ? "−" : ""; return sg + (a >= 1000 ? `${String(Math.round(a/100)/10).replace(".", ",")}k` : String(Math.round(a))); };
+
+function statsHTML(){
+  const D = statsData(), hide = !!settings.statsHideMoney;
+  const mode = settings.statsMode === "year" ? "year" : "month";
+  const useExp = hasExpenses();                              // le spese sono facoltative: senza spese le statistiche restano come prima
+  const metricsOn = useExp ? ["net","income","expense","sessions"] : ["income","sessions"];
+  const metric = hide ? "sessions" : (metricsOn.includes(settings.statsMetric) ? settings.statsMetric : metricsOn[0]);
+  const yNow = today().slice(0,4);
+  const year = D.years.includes(statsYear) ? statsYear : (D.years.includes(yNow) ? yNow : (D.years[D.years.length-1] || yNow));
+  let h = `<button class="back" data-a="closeStats">‹ Tutte le cartelle</button>
+  <div class="stats-head"><h1>📊 Statistiche andamento</h1>
+    <span class="head-btns"><button class="btn small ghost" data-a="openExp">💸 Spese di gestione</button><button class="btn small ghost" data-a="statsHide" aria-pressed="${hide}">${hide ? "👁 Mostra importi" : "🙈 Nascondi importi"}</button></span></div>
+  <p class="sub">Solo per te: questa sezione non si esporta. Si calcola dalle cartelle dei clienti, compresi i pacchetti precedenti.</p>`;
+  if(!clients.length) return h + `<div class="empty"><h2>Ancora nessun dato</h2><p>Le statistiche compaiono quando avrai clienti con sedute e pagamenti.</p></div>`;
+
+  // numeri generali
+  const act = D.per.filter(p=>p.active), inact = D.per.filter(p=>!p.active);
+  const pkgs = D.per.reduce((a,p)=>a+p.packages, 0), renewed = D.per.filter(p=>p.renewals > 0).length;
+  const inPeriod = mode === "month" ? D.span.filter(k=>k.startsWith(year)) : D.span;
+  const pInc = round2(inPeriod.reduce((a,k)=>a + D.month(k).income, 0)), pSes = inPeriod.reduce((a,k)=>a + D.month(k).sessions, 0);
+  const pExp = round2(inPeriod.reduce((a,k)=>a + D.month(k).expense, 0)), pNet = round2(pInc - pExp);
+  const nMonths = inPeriod.filter(k=>k <= today().slice(0,7)).length || 1;
+  h += `<div class="totals stats-kpi">
+    <div><b>${act.length}</b><span>clienti attivi</span></div>
+    <div><b>${inact.length}</b><span>non attivi</span></div>
+    <div><b>${pkgs}</b><span>pacchetti venduti</span></div>
+    <div><b>${D.per.length ? Math.round(renewed / D.per.length * 100) : 0}%</b><span>ha rinnovato almeno una volta</span></div>
+    <div><b id="kpiIncome">${money(pInc)}</b><span>incassato ${mode === "month" ? `nel ${year}` : "in totale"}</span></div>
+    <div><b>${pSes}</b><span>sedute ${mode === "month" ? `nel ${year}` : "in totale"}</span></div>
+    ${useExp ? `<div class="owed"><b id="kpiExpense">${money(pExp)}</b><span>spese di gestione ${mode === "month" ? `nel ${year}` : "in totale"}</span></div>
+    <div class="${pNet < 0 ? "loss" : "net"}"><b id="kpiNet">${money(pNet)}</b><span>guadagno netto (incassi − spese)</span></div>
+    <div><b id="kpiNetAvg">${money(round2(pNet / nMonths))}</b><span>netto medio al mese</span></div>` : ""}
+  </div>
+  <p class="hint">Attivo = almeno una seduta o un pagamento negli ultimi ${ACTIVE_DAYS} giorni.</p>`;
+
+  // andamento
+  h += `<section class="block stats-block"><div class="bh"><h3>Andamento</h3>
+    <div class="seg small"><label><input type="radio" name="statsMode" value="month"${mode==="month"?" checked":""}><span>Mensile</span></label><label><input type="radio" name="statsMode" value="year"${mode==="year"?" checked":""}><span>Annuale</span></label></div></div>`;
+  const MLAB = {net:"Netto", income:"Incassi", expense:"Spese", sessions:"Sedute"};
+  if(!hide) h += `<div class="seg small metric">` + metricsOn.map(v=>`<label><input type="radio" name="statsMetric" value="${v}"${metric===v?" checked":""}><span>${MLAB[v]}</span></label>`).join("") + `</div>`;
+  else h += `<p class="hint">Importi nascosti: il grafico mostra le sedute.</p>`;
+  if(mode === "month"){
+    const yi = D.years.indexOf(year);
+    h += `<div class="yearnav"><button class="btn small ghost" data-a="statsYear" data-y="${esc(D.years[yi-1]||"")}"${yi>0?"":" disabled"} aria-label="Anno precedente">‹</button><b id="statsYear">${esc(year)}</b><button class="btn small ghost" data-a="statsYear" data-y="${esc(D.years[yi+1]||"")}"${yi>=0 && yi<D.years.length-1?"":" disabled"} aria-label="Anno successivo">›</button></div>`;
+  }
+  const items = mode === "month"
+    ? MONTHS.map((l,i)=>{ const k = `${year}-${String(i+1).padStart(2,"0")}`, m = D.month(k); return {label:l, full:monthLabel(k), v: m[metric], hi: k === today().slice(0,7)}; })
+    : D.years.map(y=>{ const ks = D.span.filter(k=>k.startsWith(y)); return {label:y, full:y, v: round2(ks.reduce((a,k)=>a+D.month(k)[metric],0)), hi: y === yNow}; });
+  h += `<div class="chart-wrap">${barsSVG(items, metric === "sessions" ? (v=>String(v)) : shortEur)}</div>`;
+  if(!hide && metric === "net") h += `<p class="hint">Netto = incassi meno spese di gestione pagate in quel ${mode === "month" ? "mese" : "anno"}. Le barre rosse sono periodi in perdita.</p>`;
+  if(!hide && D.noDate > 0) h += `<p class="hint">${eur(D.noDate)} incassati non hanno una data (pacchetti senza data di inizio): contano nei totali ma non nel grafico.</p>`;
+  h += `</section>`;
+
+  // mesi migliori e peggiori
+  const withAct = D.span;   // anche i mesi vuoti contano: un mese senza incassi è un mese “peggiore”
+  if(withAct.length){
+    const rank = (f) => { const s = [...withAct].sort((a,b)=>D.month(b)[f]-D.month(a)[f] || a.localeCompare(b)); const n = Math.min(3, Math.floor(s.length/2) || 1); return {best:s.slice(0,n), worst:s.slice(-n).reverse().filter(k=>!s.slice(0,n).includes(k))}; };
+    const row = (k, f) => `<li><span>${esc(monthLabel(k))}</span><b>${f==="sessions" ? `${D.month(k).sessions} sedute` : money(D.month(k)[f])}</b></li>`;
+    h += `<section class="block stats-block"><h3>Mesi migliori e peggiori</h3><div class="bw">`;
+    const moneyF = useExp ? "net" : "income";
+    if(!hide){ const r = rank(moneyF); h += `<div><h4>${useExp ? "Per guadagno netto" : "Per incassi"}</h4><p class="lbl ok">▲ Migliori</p><ol>${r.best.map(k=>row(k,moneyF)).join("")}</ol>${r.worst.length ? `<p class="lbl bad">▼ Peggiori</p><ol>${r.worst.map(k=>row(k,moneyF)).join("")}</ol>` : ""}</div>`; }
+    const r2 = rank("sessions"); h += `<div><h4>Per sedute</h4><p class="lbl ok">▲ Migliori</p><ol>${r2.best.map(k=>row(k,"sessions")).join("")}</ol>${r2.worst.length ? `<p class="lbl bad">▼ Peggiori</p><ol>${r2.worst.map(k=>row(k,"sessions")).join("")}</ol>` : ""}</div>`;
+    h += `</div></section>`;
+  }
+
+  // recap clienti
+  const sort = settings.statsSort || "renewals";
+  const sorters = {
+    renewals:(a,b)=>b.renewals-a.renewals || b.earned-a.earned,
+    renewalsAsc:(a,b)=>a.renewals-b.renewals || a.earned-b.earned,
+    earned:(a,b)=>b.earned-a.earned,
+    last:(a,b)=>(b.last||"").localeCompare(a.last||"")
+  };
+  const rows = [...D.per].sort(sorters[sort] || sorters.renewals);
+  h += `<section class="block stats-block"><div class="bh"><h3>Recap clienti</h3>
+    <select id="statsSort" aria-label="Ordina">
+      <option value="renewals"${sort==="renewals"?" selected":""}>Chi rinnova di più</option>
+      <option value="renewalsAsc"${sort==="renewalsAsc"?" selected":""}>Chi rinnova di meno</option>
+      ${hide ? "" : `<option value="earned"${sort==="earned"?" selected":""}>Chi ha pagato di più</option>`}
+      <option value="last"${sort==="last"?" selected":""}>Attività più recente</option>
+    </select></div>
+    <div class="recap">`;
+  rows.forEach(p=>{
+    h += `<button class="recap-row" data-a="open" data-id="${esc(p.c.id)}">
+      <span class="rr-top"><b>${esc(p.c.name)}</b><span class="pill ${p.active ? "on" : ""}">${p.active ? "attivo" : "non attivo"}</span></span>
+      <span class="rr-grid">
+        <span><i>Rinnovi</i>${p.renewals}</span>
+        <span><i>Pacchetto tipico</i>${p.typical ? `${p.typical.sessions} sedute${hide ? "" : ` · ${eur(p.typical.price)}`}` : "—"}</span>
+        <span><i>Rinnova ogni</i>${p.every !== null ? `~${p.every} giorni` : "—"}</span>
+        <span><i>Incassato</i>${money(p.earned)}</span>
+        <span><i>Sedute fatte</i>${p.sessions}</span>
+        <span><i>Ultima attività</i>${p.last ? itDate(p.last) : "—"}</span>
+      </span></button>`;
+  });
+  h += `</div></section>`;
+  return h;
+}
+let statsYear = "";
+document.addEventListener("change", e=>{
+  const t = e.target;
+  if(t.name === "statsMode"){ settings.statsMode = t.value; saveSettings(); render(); }
+  else if(t.name === "statsMetric"){ settings.statsMetric = t.value; saveSettings(); render(); }
+  else if(t.id === "statsSort"){ settings.statsSort = t.value; saveSettings(); render(); }
+});
+
+/* versione leggibile per il backup (solo se scegli “Includi le statistiche”) */
+function statsText(){
+  const D = statsData(), L = [];
+  const d = new Date(), p = n => String(n).padStart(2,"0");
+  L.push("GESTIONALE PERSONAL TRAINER - STATISTICHE ANDAMENTO", `Create il ${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()}`, "");
+  const act = D.per.filter(x=>x.active).length;
+  L.push(`Clienti attivi: ${act}   Non attivi: ${D.per.length - act}   Pacchetti venduti: ${D.per.reduce((a,x)=>a+x.packages,0)}`, "");
+  L.push("PER ANNO");
+  D.years.forEach(y=>{ const ks = D.span.filter(k=>k.startsWith(y)), S = f => round2(ks.reduce((a,k)=>a+D.month(k)[f],0));
+    L.push(`  ${y}: incassato ${eur(S("income"))}, spese di gestione ${eur(S("expense"))}, guadagno netto ${eur(S("net"))}, sedute ${S("sessions")}`); });
+  if(D.noDate > 0) L.push(`  Senza data: ${eur(D.noDate)}`);
+  L.push("", "PER MESE");
+  D.span.forEach(k=>L.push(`  ${monthLabel(k)}: incassato ${eur(D.month(k).income)}, spese ${eur(D.month(k).expense)}, netto ${eur(D.month(k).net)}, sedute ${D.month(k).sessions}`));
+  const E = expData();
+  if(E.items.length || E.pays.length){
+    L.push("", "SPESE DI GESTIONE");
+    E.items.forEach(it=>L.push(`  ${it.name}: ${eur(it.amount)} ${KIND[it.kind === "yearly" ? "yearly" : "monthly"].al}`));
+    [...E.pays].sort((x,y)=>(x.date||"").localeCompare(y.date||"")).forEach(p=>{ const it = E.items.find(x=>x.id === p.itemId); L.push(`  ${itDate(p.date)}  ${it ? it.name : (p.name || "Spesa")}  ${eur(p.amount)}${p.note ? "  " + p.note : ""}`); });
+  }
+  L.push("", "CLIENTI");
+  [...D.per].sort((a,b)=>b.renewals-a.renewals || b.earned-a.earned).forEach(x=>{
+    L.push(`  ${x.c.name} (${x.active ? "attivo" : "non attivo"}): rinnovi ${x.renewals}, pacchetto tipico ${x.typical ? `${x.typical.sessions} sedute · ${eur(x.typical.price)}` : "—"}, rinnova ogni ${x.every !== null ? `~${x.every} giorni` : "—"}, incassato ${eur(x.earned)}, ultima attività ${x.last ? itDate(x.last) : "—"}`);
+  });
+  return L.join("\r\n") + "\r\n";
+}
+
+/* ======================= 💸 SPESE DI GESTIONE ======================= */
+/* Spese per lavorare (struttura, affitto sala, attrezzatura…), mensili o annuali.
+   Ogni pagamento ha una data: le statistiche lo tolgono dagli incassi in quel mese. */
+let expOpen = false;
+function expData(){
+  const e = settings.expenses && typeof settings.expenses === "object" ? settings.expenses : {};
+  return {items: Array.isArray(e.items) ? e.items : [], pays: Array.isArray(e.pays) ? e.pays : [], skips: Array.isArray(e.skips) ? e.skips : []};
+}
+function saveExp(d){ settings.expenses = {items:d.items, pays:d.pays, skips:d.skips || []}; saveSettings(); }
+function mergeExp(a, b){
+  const A = a && typeof a === "object" ? a : {}, B = b && typeof b === "object" ? b : {};
+  const by = (x, y) => { const m = new Map(); [...(Array.isArray(x) ? x : []), ...(Array.isArray(y) ? y : [])].forEach(o=>{ if(o && o.id) m.set(o.id, clone(o)); }); return [...m.values()]; };
+  return {items: by(A.items, B.items), pays: by(A.pays, B.pays), skips: by(A.skips, B.skips)};
+}
+const KIND = {monthly:{per:"mese", al:"al mese", adj:"Mensile", this:"questo mese"}, yearly:{per:"anno", al:"all'anno", adj:"Annuale", this:"quest'anno"},
+              once:{per:"", al:"", adj:"Una tantum", this:""}};
+const isRecurring = it => it.kind === "monthly" || it.kind === "yearly";
+const hasExpenses = () => { const d = expData(); return d.items.length > 0 || d.pays.length > 0; };
+const expPeriod = (it, date) => it.kind === "yearly" ? date.slice(0,4) : date.slice(0,7);
+const expPaidNow = (it, pays) => pays.filter(p=>p.itemId === it.id && isDate(p.date) && expPeriod(it, p.date) === expPeriod(it, today()));
+/* mesi (o anni) che hai scelto di saltare: niente avviso e niente sottratto */
+const expSkips = it => expData().skips.filter(s=>s.itemId === it.id);
+const expSkippedNow = it => expSkips(it).some(s=>s.period === expPeriod(it, today()));
+const periodLabel = (it, p) => it.kind === "yearly" ? p : monthLabel(p);
+/* “da pagare” solo per le spese ricorrenti con il promemoria acceso, non pagate e non saltate */
+const expDue = (it, pays) => isRecurring(it) && it.remind !== false && !(it.start && it.start > today()) && !expPaidNow(it, pays).length && !expSkippedNow(it);
+function expDueCount(){ const d = expData(); return d.items.filter(it=>expDue(it, d.pays)).length; }
+function expByMonth(){
+  const m = {};
+  expData().pays.forEach(p=>{ if(isDate(p.date)){ const k = p.date.slice(0,7); m[k] = round2((m[k]||0) + (Number(p.amount)||0)); } });
+  return m;
+}
+const monthlyCost = () => round2(expData().items.reduce((a,it)=>a + (it.kind === "yearly" ? (Number(it.amount)||0)/12 : it.kind === "monthly" ? (Number(it.amount)||0) : 0), 0));
+
+function expHTML(){
+  const d = expData(), hide = !!settings.statsHideMoney, M = v => hide ? "•••" : eur(v);
+  const nowM = today().slice(0,7), nowY = today().slice(0,4);
+  const paidM = round2(d.pays.filter(p=>(p.date||"").startsWith(nowM)).reduce((a,p)=>a+(Number(p.amount)||0),0));
+  const paidY = round2(d.pays.filter(p=>(p.date||"").startsWith(nowY)).reduce((a,p)=>a+(Number(p.amount)||0),0));
+  const due = d.items.filter(it=>expDue(it, d.pays));
+  let h = `<button class="back" data-a="closeExp">${statsOpen ? "‹ Statistiche andamento" : "‹ Tutte le cartelle"}</button>
+  <div class="stats-head"><h1>💸 Spese di gestione</h1><button class="btn primary" data-a="newExp">+ Nuova spesa</button></div>
+  <p class="sub">Facoltative: usale solo se ti servono. Le spese per lavorare (struttura, affitto sala, attrezzatura, assicurazione…) possono essere <b>mensili</b>, <b>annuali</b> o <b>una tantum</b>. Ogni pagamento viene tolto dagli incassi nelle statistiche, nel mese in cui l'hai pagato.</p>
+  <div class="totals stats-kpi exp-kpi">
+    <div><b id="expMonth">${M(paidM)}</b><span>pagate questo mese</span></div>
+    <div><b id="expYear">${M(paidY)}</b><span>pagate nel ${nowY}</span></div>
+    <div><b>${M(monthlyCost())}</b><span>costo fisso al mese (le annuali divise per 12)</span></div>
+    <div class="${due.length ? "owed" : ""}"><b id="expDue">${due.length}</b><span>da pagare adesso</span></div>
+  </div>`;
+  if(!d.items.length && !d.pays.length){
+    return h + `<div class="empty"><h2>Nessuna spesa</h2><p>Non è obbligatorio: se non hai spese, le statistiche restano come sono. Se vuoi, aggiungi ad esempio “Affitto sala” 300 € al mese, “Assicurazione” 250 € all'anno, oppure una spesa una tantum come un'attrezzatura.</p>
+      <div class="actions"><button class="btn primary" data-a="newExp">+ Nuova spesa</button></div></div>`;
+  }
+  const TITLES = {monthly:["Spese mensili","mensile"], yearly:["Spese annuali","annuale"], once:["Spese una tantum","una tantum"]};
+  for(const kind of ["monthly","yearly","once"]){
+    const list = d.items.filter(it=>(it.kind || "monthly") === kind).sort((a,b)=>a.name.localeCompare(b.name,"it"));
+    if(!list.length) continue;                                   // solo i gruppi che usi
+    h += `<section class="block"><h3>${TITLES[kind][0]}</h3><div class="exp-list">`;
+    list.forEach(it=>{
+      const mine = d.pays.filter(p=>p.itemId === it.id && isDate(p.date)).map(p=>p.date).sort();
+      const late = expDue(it, d.pays), now = expPaidNow(it, d.pays), future = it.start && it.start > today() && kind !== "once";
+      const state = kind === "once" ? (mine.length ? `Pagata il ${itDate(mine[mine.length-1])}` : "Nessun pagamento registrato")
+        : future ? `Parte dal ${itDate(it.start)}`
+        : now.length ? `✓ Pagata ${KIND[kind].this} il ${itDate(now.map(p=>p.date).sort().pop())}`
+        : expSkippedNow(it) ? `⏭ Saltata ${KIND[kind].this}`
+        : late ? `⚠ Da pagare ${KIND[kind].this}`
+        : `Senza promemoria${mine.length ? ` · ultimo pagamento il ${itDate(mine[mine.length-1])}` : ""}`;
+      const amt = kind === "once" ? M(it.amount) : `${M(it.amount)} / ${KIND[kind].per}`;
+      h += `<div class="exp-card${late ? " due" : ""}${it.remind === false || kind === "once" ? " quiet" : ""}" data-exp="${esc(it.id)}">
+        <div class="exp-top"><b>${esc(it.name)}</b><span class="amt">${amt}</span></div>
+        <p class="exp-state">${esc(state)}</p>
+        ${it.note ? `<p class="exp-note">${esc(it.note)}</p>` : ""}
+        ${kind !== "once" && expSkips(it).length ? `<p class="skips"><span>Saltati:</span> ${[...expSkips(it)].sort((x,y)=>x.period.localeCompare(y.period)).map(sk=>`<span class="skip">${esc(periodLabel(it, sk.period))}<button class="x" data-a="unskipExp" data-id="${esc(sk.id)}" aria-label="Annulla il salto di ${esc(periodLabel(it, sk.period))}" title="Annulla il salto">✕</button></span>`).join("")}</p>` : ""}
+        <div class="acts">
+          ${kind === "once" ? "" : `<button class="btn small ${late ? "primary" : ""}" data-a="payExp" data-id="${esc(it.id)}">Segna pagata</button>
+          <button class="btn small ghost" data-a="skipExp" data-id="${esc(it.id)}">⏭ Salta ${kind === "yearly" ? "un anno" : "un mese"}</button>`}
+          <button class="btn small ghost" data-a="editExp" data-id="${esc(it.id)}">✎ Modifica</button>
+          <button class="btn small ghost danger" data-a="delExp" data-id="${esc(it.id)}" aria-label="Elimina ${esc(it.name)}">🗑 Elimina</button>
+        </div></div>`;
+    });
+    h += `</div></section>`;
+  }
+  h += `<section class="block"><h3>Pagamenti delle spese</h3>`;
+  if(!d.pays.length) h += `<p class="none">Ancora nessun pagamento: premi “Segna pagata” su una spesa.</p>`;
+  else {
+    h += `<div class="scroll"><table><thead><tr><th>Data</th><th>Spesa</th><th>Importo</th><th>Note</th><th></th></tr></thead><tbody>`;
+    [...d.pays].sort((a,b)=>(b.date||"").localeCompare(a.date||"")).forEach(p=>{
+      const it = d.items.find(x=>x.id === p.itemId);
+      h += `<tr><td class="date">${itDate(p.date)}</td><td>${esc(it ? it.name : (p.name || "Spesa eliminata"))}</td><td class="num">${M(p.amount)}</td><td>${esc(p.note)}</td>
+        <td class="act"><button class="x ed" data-a="editExpPay" data-id="${esc(p.id)}" aria-label="Modifica pagamento del ${itDate(p.date)}">✎</button><button class="x" data-a="delExpPay" data-id="${esc(p.id)}" aria-label="Elimina pagamento del ${itDate(p.date)}">✕</button></td></tr>`;
+    });
+    h += `</tbody></table></div>`;
+  }
+  return h + `</section>`;
+}
+
+/* ---- finestre ---- */
+$("fExp").addEventListener("submit", e=>{
+  if(!e.submitter || e.submitter.value !== "ok") return;
+  const bad = (m, el) => { e.preventDefault(); $("expErr").textContent = m; if(el) el.focus(); };
+  if(!$("xName").value.trim()) return bad("Scrivi il nome della spesa, ad esempio “Affitto sala”.", $("xName"));
+  if(!(parseNum($("xAmount").value) > 0)) return bad("Scrivi l'importo, ad esempio 300.", $("xAmount"));
+});
+$("fExpPay").addEventListener("submit", e=>{
+  if(!e.submitter || e.submitter.value !== "ok") return;
+  if(!(parseNum($("xpAmount").value) > 0)){ e.preventDefault(); $("xpErr").textContent = "Scrivi l'importo pagato."; $("xpAmount").focus(); }
+  else if(!isDate($("xpDate").value)){ e.preventDefault(); $("xpErr").textContent = "Scegli la data del pagamento."; }
+});
+["xName","xAmount"].forEach(i=>$(i).addEventListener("input", ()=>{ $("expErr").textContent = ""; }));
+["xpAmount","xpDate"].forEach(i=>$(i).addEventListener("input", ()=>{ $("xpErr").textContent = ""; }));
+const xKind = () => { const el = document.querySelector('input[name="xKind"]:checked'); return el && KIND[el.value] ? el.value : "monthly"; };
+let expEditing = null;
+function syncExpDlg(){
+  const k = xKind(), once = k === "once";
+  $("xAmountL").textContent = once ? "Importo (€)" : `Importo (€ ${KIND[k].al})`;
+  $("xStartL").textContent = once ? "Data del pagamento" : "Dal (facoltativo)";
+  if(once && !$("xStart").value) $("xStart").value = today();
+  $("xRemindL").hidden = once;
+  $("xPayNowL").hidden = once || !!expEditing;
+  $("xPayNowText").textContent = once ? "" : `L'ho già pagata ${KIND[k].this} (oggi)`;
+  $("xKindHint").textContent = once ? "Una spesa che capita una volta sola: viene tolta dagli incassi nel mese di questa data, senza promemoria."
+    : `Si ripete ogni ${KIND[k].per}. Con il promemoria acceso ti avviso quando è da pagare; se non la paghi sempre, togli la spunta.`;
+}
+document.querySelectorAll('input[name="xKind"]').forEach(r=>r.addEventListener("change", syncExpDlg));
+
+async function expForm(id){
+  const d = expData(), it = id ? d.items.find(x=>x.id === id) : null;
+  if(id && !it) return;
+  $("expTitle").textContent = it ? "Modifica spesa" : "Nuova spesa";
+  $("xName").value = it ? it.name : ""; $("xAmount").value = it ? fmtIn(it.amount) : "";
+  $("xStart").value = it ? (it.start || "") : ""; $("xNote").value = it ? (it.note || "") : "";
+  document.querySelectorAll('input[name="xKind"]').forEach(r=>r.checked = r.value === (it ? (it.kind || "monthly") : "monthly"));
+  $("xRemind").checked = it ? it.remind !== false : true;
+  expEditing = it; $("xPayNow").checked = false; $("expErr").textContent = "";
+  syncExpDlg();
+  const answer = await ask("dlgExp"); expEditing = null;
+  if(answer !== "ok") return;
+  const kind = xKind(), once = kind === "once";
+  const nd = expData(), rec = {id: it ? it.id : uid(), name:$("xName").value.trim(), kind,
+    amount: round2(parseNum($("xAmount").value)), start: isDate($("xStart").value) ? $("xStart").value : (once ? today() : ""), note:$("xNote").value.trim()};
+  if(!once) rec.remind = $("xRemind").checked;
+  nd.items = it ? nd.items.map(x=>x.id === it.id ? rec : x) : [...nd.items, rec];
+  if(once){                                                   // una tantum: il pagamento è la spesa stessa
+    const mine = nd.pays.filter(p=>p.itemId === rec.id);
+    if(mine.length) nd.pays = nd.pays.map(p=>p.id === mine[0].id ? {...p, name:rec.name, date:rec.start, amount:rec.amount} : p);
+    else nd.pays = [...nd.pays, {id:uid(), itemId:rec.id, name:rec.name, date:rec.start, amount:rec.amount, note:""}];
+  } else if(!it && $("xPayNow").checked) nd.pays = [...nd.pays, {id:uid(), itemId:rec.id, name:rec.name, date:today(), amount:rec.amount, note:""}];
+  saveExp(nd); render();
+  toast(it ? "Spesa modificata" : `Spesa “${rec.name}” aggiunta`);
+}
+async function expPayForm(itemId, payId){
+  const d = expData();
+  const pay = payId ? d.pays.find(p=>p.id === payId) : null;
+  const it = d.items.find(x=>x.id === (pay ? pay.itemId : itemId));
+  if(payId && !pay) return; if(!payId && !it) return;
+  const name = it ? it.name : (pay.name || "Spesa");
+  $("xpTitle").textContent = pay ? `Modifica pagamento: ${name}` : `Pagamento: ${name}`;
+  $("xpDate").value = pay ? pay.date : today();
+  $("xpAmount").value = fmtIn(pay ? pay.amount : it.amount);
+  $("xpNote").value = pay ? (pay.note || "") : ""; $("xpErr").textContent = "";
+  $("xpHint").textContent = !pay && it && isRecurring(it) && expPaidNow(it, d.pays).length ? `Risulta già pagata ${KIND[it.kind].this}: se è un pagamento in più va bene, verrà sommato.` : "L'importo viene tolto dagli incassi nelle statistiche, nel mese di questa data.";
+  if(await ask("dlgExpPay") !== "ok") return;
+  const nd = expData(), rec = {id: pay ? pay.id : uid(), itemId: it ? it.id : pay.itemId, name, date:$("xpDate").value, amount: round2(parseNum($("xpAmount").value)), note:$("xpNote").value.trim()};
+  nd.pays = pay ? nd.pays.map(p=>p.id === pay.id ? rec : p) : [...nd.pays, rec];
+  saveExp(nd); render();
+  toast(pay ? "Pagamento modificato" : `${name}: pagata il ${itDate(rec.date)}`);
+}
+/* salta un mese (o un anno): scegli quale, di base quello attuale */
+async function skipExp(id){
+  const it = expData().items.find(x=>x.id === id); if(!it || !isRecurring(it)) return;
+  const yearly = it.kind === "yearly";
+  $("skTitle").textContent = `Salta: ${it.name}`;
+  $("skMonthW").hidden = yearly; $("skYearW").hidden = !yearly;
+  $("skMonth").value = today().slice(0,7); $("skYear").value = today().slice(0,4); $("skErr").textContent = "";
+  $("skHint").textContent = yearly
+    ? "In quell'anno la spesa non ti verrà ricordata e non viene tolto niente dalle statistiche. Puoi annullare quando vuoi."
+    : "In quel mese la spesa non ti verrà ricordata e non viene tolto niente dalle statistiche. Puoi scegliere anche un mese futuro (es. agosto per la chiusura) e annullare quando vuoi.";
+  if(await ask("dlgSkip") !== "ok") return;
+  const period = yearly ? String(toInt($("skYear").value)) : $("skMonth").value;
+  const d = expData();
+  if(d.skips.some(s=>s.itemId === id && s.period === period)){ toast(`${periodLabel(it, period)} era già saltato`); return; }
+  d.skips = [...d.skips, {id:uid(), itemId:id, period}];
+  saveExp(d); render();
+  toast(`${it.name}: ${periodLabel(it, period)} saltato`);
+}
+$("fSkip").addEventListener("submit", e=>{
+  if(!e.submitter || e.submitter.value !== "ok") return;
+  const yearly = !$("skYearW").hidden;
+  if(yearly ? !(toInt($("skYear").value) >= 2000 && toInt($("skYear").value) <= 2100) : !/^\d{4}-\d{2}$/.test($("skMonth").value)){
+    e.preventDefault(); $("skErr").textContent = yearly ? "Scrivi l'anno, ad esempio 2026." : "Scegli il mese da saltare.";
+  }
+});
+function unskipExp(skipId){
+  const d = expData(), sk = d.skips.find(s=>s.id === skipId); if(!sk) return;
+  const it = d.items.find(x=>x.id === sk.itemId);
+  d.skips = d.skips.filter(s=>s.id !== skipId); saveExp(d); render();
+  toast(`Salto annullato${it ? `: ${periodLabel(it, sk.period)}` : ""}`);
+}
+async function delExp(id){
+  const d = expData(), it = d.items.find(x=>x.id === id); if(!it) return;
+  const n = d.pays.filter(p=>p.itemId === id).length;
+  const sel = await delDialog({title:`Eliminare “${it.name}”?`,
+    text:`La spesa non comparirà più tra quelle da pagare.${n ? `\n\nI suoi ${n} pagamenti già fatti restano nelle statistiche, a meno che tu non spunti qui sotto.` : ""}`,
+    opts: n ? [{k:"pays", label:`Togli anche i suoi ${n} pagamenti dalle statistiche`}] : [], ok:"Elimina spesa"});
+  if(!sel) return;
+  const nd = expData(); nd.items = nd.items.filter(x=>x.id !== id);
+  if(sel.includes("pays")) nd.pays = nd.pays.filter(p=>p.itemId !== id);
+  nd.skips = nd.skips.filter(s=>s.itemId !== id);
+  saveExp(nd); render(); toast("Spesa eliminata");
+}
+async function delExpPay(id){
+  const d = expData(), p = d.pays.find(x=>x.id === id); if(!p) return;
+  if(!(await messageBox("Eliminare il pagamento?", `Il pagamento del ${itDate(p.date)} (${eur(p.amount)}) verrà tolto dallo storico e dalle statistiche.`, {ok:"Elimina", cancel:"Annulla", danger:true}))) return;
+  const nd = expData(); nd.pays = nd.pays.filter(x=>x.id !== id); saveExp(nd); render(); toast("Pagamento eliminato");
+}
+
 /* ======================= ⚙ DATI DEL PROGRAMMA ======================= */
 /* Esporta: con le cartelle dei clienti (ZIP completo) oppure solo i dati del programma (impostazioni).
    Importa: riconosce da solo che cosa contiene il file. */
-async function exportProgram(){
+async function exportProgram(withStats){
   const d = new Date(), p = n => String(n).padStart(2,"0");
+  const day = `${p(d.getDate())}-${p(d.getMonth()+1)}-${d.getFullYear()}`;
   const full = fullBackup();
   const data = {format:FULL_FMT, version:2, kind:"program", exported:full.exported, app:full.app, settings:full.settings};
-  const blob = new Blob([JSON.stringify(data, null, 1)], {type:"application/json"});
-  const ok = await saveFile(blob, `Gestionale PT - dati del programma ${p(d.getDate())}-${p(d.getMonth()+1)}-${d.getFullYear()}.json`);
-  if(ok) toast("Dati del programma esportati (senza le cartelle dei clienti)");
+  const json = JSON.stringify(data, null, 1);
+  let ok;
+  if(withStats && clients.length){                      // con le statistiche: uno ZIP con i dati del programma e il file delle statistiche
+    try{
+      const JSZip = await lib("jszip"), zip = new JSZip();
+      zip.file("Gestionale PT - dati del programma.json", json);
+      zip.file("Statistiche andamento.txt", statsText());
+      ok = await saveFile(await zip.generateAsync({type:"blob", mimeType:MIME.zip}), `Gestionale PT - dati del programma e statistiche ${day}.zip`);
+    }catch(e){ console.error(e); await messageBox("Esportazione non riuscita", e && e.message === "offline" ? OFFLINE_MSG : "Riprova tra poco."); return false; }
+  } else {
+    ok = await saveFile(new Blob([json], {type:"application/json"}), `Gestionale PT - dati del programma ${day}.json`);
+  }
+  if(ok) toast(withStats && clients.length ? "Dati del programma e statistiche esportati (senza le cartelle dei clienti)" : "Dati del programma esportati (senza le cartelle dei clienti)");
   return !!ok;
 }
 function syncDataDlg(){
@@ -3346,14 +4000,16 @@ $("dataInput").addEventListener("change", async e=>{
 async function dataMenu(){
   const n = clients.length;
   $("dataInclude").checked = n > 0; $("dataInclude").disabled = n === 0;
+  $("dataStats").checked = n > 0; $("dataStats").disabled = n === 0;
   $("dataIncludeText").textContent = n ? `Includi le cartelle dei clienti (${n} ${n === 1 ? "cliente" : "clienti"})` : "Includi le cartelle dei clienti (per ora non ce ne sono)";
   const bk = backupInfo();
   $("dataLast").textContent = !bk ? "" : settings.lastBackup ? bk.text : "⚠ Non hai ancora fatto un backup completo con le cartelle dei clienti.";
   $("dataLast").hidden = !bk;
   syncDataDlg();
   if(await ask("dlgData") !== "export") return;
-  if($("dataInclude").checked && clients.length) return exportAll();
-  return exportProgram();
+  const withStats = $("dataStats").checked && clients.length > 0;
+  if($("dataInclude").checked && clients.length) return exportAll(withStats);
+  return exportProgram(withStats);
 }
 
 /* ======================= AVVIO ======================= */
