@@ -71,6 +71,41 @@ a.btn[hidden]{display:none}
 .totals b{display:block;font-family:"Barlow Condensed",sans-serif;font-size:1.7rem;line-height:1}
 .totals span{color:var(--muted);font-size:.9rem}
 .totals .owed b{color:var(--owed)}
+.dot.miss{background:transparent;border-color:var(--owed);position:relative}
+.dot.miss::after{content:"✕";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.6em;font-weight:800;color:var(--owed)}
+.miss-st{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.8rem;font-weight:700;border:1px solid var(--line)}
+.miss-st.lost{background:var(--owed-soft);color:var(--owed);border-color:var(--owed)}
+.miss-st.recover{color:var(--owed)}
+.miss-st.recovered{background:var(--moss-soft);color:var(--moss);border-color:var(--moss)}
+.miss-list{display:grid;gap:8px}
+.miss-row{border:1px solid var(--line);border-left:4px solid var(--owed);border-radius:10px;padding:10px 12px}
+.miss-row.recovered{border-left-color:var(--moss)}
+.mr-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.mr-note{margin:6px 0 0;font-size:.92rem}
+.mr-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+#sMissOpts[hidden],#sMissL[hidden]{display:none}
+#sMissOpts .seg{margin:8px 0 4px}
+.money-eye{display:flex;justify-content:flex-end;margin:0 0 4px}
+.eye-btn{display:inline-flex;align-items:center;gap:4px;background:none;border:none;padding:4px 6px;min-height:28px;border-radius:8px;color:var(--muted);font-size:.72rem;font-weight:600;cursor:pointer;line-height:1}
+.eye-btn:hover{background:var(--moss-soft);color:var(--pine)}
+.eye-btn[aria-pressed="true"]{color:var(--owed)}
+.totals .month-pick{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:none;border-radius:0;background:var(--paper);padding:12px 14px;cursor:pointer;color:var(--pine);font:inherit;min-height:44px}
+.totals .month-pick b{font-family:"Barlow Condensed",sans-serif;font-size:1.35rem;line-height:1.1;color:var(--moss)}
+.totals .month-pick:hover,.totals .earn-val:hover{background:var(--moss-soft)}
+.totals .earn-val{cursor:pointer}
+.totals .earn-val b{color:var(--moss)}
+.totals .earn-val span{display:block;font-size:.85rem;overflow-wrap:anywhere}
+#dlgMonth .mp-nav{display:flex;align-items:center;justify-content:center;gap:18px;margin:6px 0 12px}
+#dlgMonth .mp-nav b{font-size:1.4rem;min-width:4em;text-align:center}
+#mpGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mp-m{display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 6px;min-height:72px;border:1.5px solid var(--line);border-radius:12px;background:var(--paper);color:var(--pine);font:inherit;cursor:pointer}
+.mp-m b{font-size:1rem}
+.mp-m span{font-size:.82rem;color:var(--muted);font-weight:600}
+.mp-m.now{border-color:var(--moss)}
+.mp-m.sel{background:var(--moss);border-color:var(--moss);color:var(--on-moss)}
+.mp-m.sel span{color:var(--on-moss)}
+.mp-m:disabled{opacity:.4;cursor:default}
+#mpNow{width:100%;margin-top:12px}
 
 .searchbar{position:relative;margin-bottom:22px}
 .search{width:100%;padding:12px 100px 12px 14px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper)}
@@ -518,6 +553,15 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
   </div>
 </form></dialog>
 
+<dialog id="dlgMonth"><form method="dialog">
+  <h3>Guadagnato nel mese</h3>
+  <p class="hint">Scegli un mese: i soldi contano nel mese d'inizio del pacchetto di ogni cliente.</p>
+  <div class="mp-nav"><button type="button" class="btn small ghost" id="mpPrev" aria-label="Anno precedente">‹</button><b id="mpYear">2026</b><button type="button" class="btn small ghost" id="mpNext" aria-label="Anno successivo">›</button></div>
+  <div id="mpGrid"></div>
+  <button type="button" class="btn" id="mpNow">Torna al mese corrente</button>
+  <div class="dlg-actions"><button class="btn ghost" value="cancel" formnovalidate>Chiudi</button></div>
+</form></dialog>
+
 <dialog id="dlgData"><form method="dialog">
   <h3>⚙ Dati del programma</h3>
   <p class="hint" id="dataLast"></p>
@@ -603,7 +647,11 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
   <h3 id="sesTitle">Segna seduta</h3>
   <label for="sDate">Data</label>
   <input id="sDate" type="date" required>
-  <label for="sNote">Cosa avete fatto (facoltativo)</label>
+  <label class="check carry miss-check" id="sMissL"><input type="checkbox" id="sMiss"><span>❌ Lezione saltata (il cliente non si è presentato o ha disdetto)</span></label>
+  <div id="sMissOpts" hidden>
+    <div class="seg"><label><input type="radio" name="sMissKind" value="lost" checked><span>Persa</span></label><label><input type="radio" name="sMissKind" value="recover"><span>Da recuperare</span></label></div>
+  </div>
+  <label for="sNote" id="sNoteL">Cosa avete fatto (facoltativo)</label>
   <input id="sNote" placeholder="es. Gambe + core" autocomplete="off">
   <p class="hint" id="sesHint">Le sedute fatte aumentano di 1.</p>
   <div class="dlg-actions">
@@ -746,7 +794,14 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
 /*BUILDERS-START*/
 const DAYS = ["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
-const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
+/* “oggi” secondo il calendario italiano (ora di Roma), qualunque sia il fuso del telefono o del computer */
+const ROME_DATE = (()=>{ try{ return new Intl.DateTimeFormat("en-CA", {timeZone:"Europe/Rome", year:"numeric", month:"2-digit", day:"2-digit"}); }catch(_){ return null; } })();
+const today = () => {
+  if(ROME_DATE){
+    try{ const p = {}; ROME_DATE.formatToParts(new Date()).forEach(x=>{ p[x.type] = x.value; }); if(p.year && p.month && p.day) return `${p.year}-${p.month}-${p.day}`; }catch(_){}
+  }
+  const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+};
 const eur = n => (Number(n)||0).toLocaleString("it-IT",{style:"currency",currency:"EUR"});
 const num2 = n => (Number(n)||0).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2});
 const eurDoc = n => "€ " + num2(n);
@@ -764,11 +819,12 @@ function normalize(c){
     freq: c.freq === "" || c.freq == null ? "" : Number(c.freq)||0,
     days: Array.isArray(c.days) ? DAYS.filter(d=>c.days.includes(d)) : [],
     training: c.training || "", notes: c.notes || "",
-    sessionLog: Array.isArray(c.sessionLog) ? c.sessionLog : [],
+    sessionLog: Array.isArray(c.sessionLog) ? c.sessionLog.filter(x=>!(x && x.auto)) : [],   // (le righe “auto” di una versione di prova non servono più)
     payLog: Array.isArray(c.payLog) ? c.payLog : [],
     start: /^\d{4}-\d{2}-\d{2}$/.test(c.start||"") ? c.start : "",      // inizio del pacchetto in corso
     carriedIn: round2(Number(c.carriedIn)||0),                               // saldo portato dal pacchetto precedente (già dentro "price")
     packages: Array.isArray(c.packages) ? c.packages.filter(p=>p && typeof p === "object").map(normPackage) : [],
+    missLog: normMisses(c.missLog),                                          // lezioni saltate
     share: c.share && typeof c.share === "object" && c.share.inc ? {inc:{...c.share.inc}, format:c.share.format==="docx"?"docx":"pdf"} : null,
     follow: normFollow(c.follow)
   };
@@ -789,19 +845,29 @@ function normFollow(f){
   };
 }
 /* Pacchetti conclusi, tenuti nello storico della cartella */
+/* Lezioni saltate: “lost” = persa (si scala dal pacchetto, non è una seduta fatta),
+   “recover” = da recuperare (non si scala), “recovered” = recuperata (è diventata una seduta fatta) */
+function normMisses(list){
+  return (Array.isArray(list) ? list : []).filter(x=>x && typeof x === "object").map(x=>({
+    id: x.id || uid(), date: /^\d{4}-\d{2}-\d{2}$/.test(x.date||"") ? x.date : "", note: String(x.note || ""),
+    status: ["lost","recover","recovered"].includes(x.status) ? x.status : "lost" }));
+}
+const missCount = (c, st) => (c.missLog || []).filter(x=>x.status === st).length;
 function normPackage(p){
   const D = v => /^\d{4}-\d{2}-\d{2}$/.test(v||"") ? v : "";
   return { id: p.id || uid(), start: D(p.start), end: D(p.end),
     totalSessions: Number(p.totalSessions)||0, doneSessions: Number(p.doneSessions)||0,
     price: Number(p.price)||0, paid: Number(p.paid)||0,
     carriedIn: round2(Number(p.carriedIn)||0), carriedOut: round2(Number(p.carriedOut)||0),
-    sessionLog: Array.isArray(p.sessionLog) ? p.sessionLog : [], payLog: Array.isArray(p.payLog) ? p.payLog : [] };
+    sessionLog: Array.isArray(p.sessionLog) ? p.sessionLog : [], payLog: Array.isArray(p.payLog) ? p.payLog : [],
+    missLog: normMisses(p.missLog) };
 }
 function stats(c){
   const total = c.totalSessions, done = c.doneSessions, carriedOut = Number(c.carriedOut)||0;
-  return { total, done, left:Math.max(total-done,0), price:c.price, paid:c.paid,
+  const lost = missCount(c, "lost"), toRecover = missCount(c, "recover");   // le perse consumano il pacchetto, le da recuperare no
+  return { total, done, lost, toRecover, left:Math.max(total-done-lost,0), price:c.price, paid:c.paid,
            due:round2(c.price - c.paid - carriedOut),          // se il saldo è stato spostato nel pacchetto dopo, qui non si conta più
-           start:c.start||"", end:c.end||"", complete: total>0 && done>=total,
+           start:c.start||"", end:c.end||"", complete: total>0 && done+lost>=total,
            carriedIn:Number(c.carriedIn)||0, carriedOut };
 }
 /* un pacchetto vecchio visto "come un cliente", per riusare le stesse tabelle nei documenti */
@@ -815,7 +881,10 @@ function pkgTitle(p){
 function sessRows(s){
   const r = [];
   if(s.start) r.push(s.end ? ["Periodo", `dal ${itDate(s.start)} al ${itDate(s.end)}`] : ["Inizio pacchetto", itDate(s.start)]);
-  r.push(["Sedute nel pacchetto", String(s.total)], ["Sedute fatte", String(s.done)], ["Sedute da fare", String(s.left)]);
+  r.push(["Sedute nel pacchetto", String(s.total)], ["Sedute fatte", String(s.done)]);
+  if(s.lost) r.push(["Lezioni saltate (perse)", String(s.lost)]);
+  if(s.toRecover) r.push(["Lezioni da recuperare", String(s.toRecover)]);
+  r.push(["Sedute da fare", String(s.left)]);
   if(s.total > 0) r.push(["Stato sedute", s.complete ? "Completato" : "In corso"]);
   return r;
 }
@@ -910,6 +979,15 @@ function dKv(rows){
 }
 function dHeadRow(cols, widths){ return wRow(cols.map((t,i)=>wCell(wPara(wRun(t,{bold:true,color:DC.MOSS,size:19})), widths[i], {fill:"D7E6DC"})), true); }
 function dEmpty(t){ return wPara(wRun(t,{italic:true,color:DC.MUTED}), {before:60}); }
+const MISS_DOC = {lost:"Persa", recover:"Da recuperare", recovered:"Recuperata"};
+const missSorted = c => [...(c.missLog || [])].sort(byDateAsc);
+/* tabella delle lezioni saltate (Data · Esito · Motivo): si rilegge all'importazione */
+function dMisses(c){
+  const W = DC.W, wd = [1900, 2200, W-4100];
+  const rows = [dHeadRow(["Data","Esito","Motivo"], wd)];
+  missSorted(c).forEach(x=>rows.push(wRow([wCell(wPara(wRun(itDate(x.date))), wd[0]), wCell(wPara(wRun(MISS_DOC[x.status])), wd[1]), wCell(wPara(wRun(x.note||"—")), wd[2])])));
+  return wTable(rows, wd);
+}
 function dSessions(c, withNotes){
   if(!c.sessionLog.length) return dEmpty("Nessuna seduta registrata nello storico.");
   const W = DC.W;
@@ -955,6 +1033,7 @@ function dPackages(c, o){
     const pc = pkgClient(c, p), s = stats(pc);
     b += dHeading(pkgTitle(p)) + dKv(wKvRows([...rowsSess(s), ...(o.pay ? rowsPay(s) : [])]));
     if(o.sessions && pc.sessionLog.length) b += dSessions(pc, o.notes);
+    if(o.sessions && (pc.missLog || []).length) b += dMisses(pc);
     if(o.payments && pc.payLog.length) b += dPayments(pc);
   });
   return b;
@@ -973,6 +1052,7 @@ function docxFullBody(c){
   b += dKv([["Telefono", c.phone], ["Email", c.email], ["Volte a settimana", c.freq===""?"":String(c.freq)],
             ["Giorni di allenamento", c.days.join(", ")], ["Allenamento", c.training], ["Note", c.notes]]);
   b += dHeading("Storico sedute") + dSessions(c, true);
+  if((c.missLog || []).length) b += dHeading("Lezioni saltate") + dMisses(c);
   b += dHeading("Storico pagamenti") + dPayments(c);
   b += dPackages(c, {pay:true, sessions:true, notes:true, payments:true});
   return b;
@@ -1146,6 +1226,7 @@ function pdfKit(jsPDF){
     if(withNotes) K.table([{t:"N°",w:14,muted:true},{t:"Data",w:32},{t:"Note seduta",w:CW-46}], list.map((x,i)=>[String(i+1), itDate(x.date), x.note||"—"]));
     else K.table([{t:"N°",w:14,muted:true},{t:"Data",w:CW-14}], list.map((x,i)=>[String(i+1), itDate(x.date)]));
   };
+  K.misses = c => K.table([{t:"Data",w:32},{t:"Esito",w:36},{t:"Motivo",w:CW-68}], missSorted(c).map(x=>[itDate(x.date), MISS_DOC[x.status], x.note||"—"]));
   K.payments = c => {
     if(!c.payLog.length) return K.empty("Nessun pagamento registrato nello storico.");
     const rows = [...c.payLog].sort(byDateAsc).map(x=>[itDate(x.date), eurDoc(x.amount), x.method||"—", x.note||"—"]);
@@ -1168,6 +1249,7 @@ function pdfKit(jsPDF){
     const pc = pkgClient(c, p), s = stats(pc);
     K.heading(pkgTitle(p)); K.kv([...K.rowsSess(s), ...(o.pay ? K.rowsPay(s) : [])]);
     if(o.sessions && pc.sessionLog.length) K.sessions(pc, o.notes);
+    if(o.sessions && (pc.missLog || []).length) K.misses(pc);
     if(o.payments && pc.payLog.length) K.payments(pc);
   });
   return K;
@@ -1185,6 +1267,7 @@ function buildPdf(c, jsPDF){
   K.kv([["Telefono", c.phone], ["Email", c.email], ["Volte a settimana", c.freq===""?"":String(c.freq)],
         ["Giorni di allenamento", c.days.join(", ")], ["Allenamento", c.training], ["Note", c.notes]]);
   K.heading("Storico sedute"); K.sessions(c, true);
+  if((c.missLog || []).length){ K.heading("Lezioni saltate"); K.misses(c); }
   K.heading("Storico pagamenti"); K.payments(c);
   K.packages(c, {pay:true, sessions:true, notes:true, payments:true});
   K.footer(c.name);
@@ -1227,6 +1310,9 @@ function tSessions(c, withNotes){
   if(!c.sessionLog.length) return "Nessuna seduta registrata.\n";
   return [...c.sessionLog].sort(byDateAsc).map((x,i)=>`${String(i+1).padStart(3," ")}.  ${itDate(x.date)}${withNotes && x.note ? "   " + x.note : ""}`).join("\n") + "\n";
 }
+function tMisses(c){
+  return missSorted(c).map(x=>`  ${itDate(x.date)}   ${MISS_DOC[x.status]}${x.note ? "   " + x.note : ""}`).join("\n") + "\n";
+}
 function tPayments(c){
   if(!c.payLog.length) return "Nessun pagamento registrato.\n";
   return [...c.payLog].sort(byDateAsc).map(x=>`${itDate(x.date)}   ${eurDoc(x.amount)}${x.method ? "   " + x.method : ""}${x.note ? "   " + x.note : ""}`).join("\n") + "\n";
@@ -1239,6 +1325,7 @@ function tPackages(c, o){
     const pc = pkgClient(c, p), s = stats(pc);
     t += tHead(pkgTitle(p)) + tKv([...tSess(s), ...(o.pay ? tPay(s) : [])]);
     if(o.sessions && pc.sessionLog.length) t += "Sedute:\n" + tSessions(pc, o.notes);
+    if(o.sessions && (pc.missLog || []).length) t += "Lezioni saltate:\n" + tMisses(pc);
     if(o.payments && pc.payLog.length) t += "Pagamenti:\n" + tPayments(pc);
   });
   return t;
@@ -1253,6 +1340,7 @@ function buildFullText(c){
   t += tHead("Dati cliente e allenamento") + tKv([["Telefono", c.phone], ["Email", c.email], ["Volte a settimana", c.freq===""?"":String(c.freq)],
        ["Giorni di allenamento", c.days.join(", ")], ["Allenamento", c.training], ["Note", c.notes]]);
   t += tHead("Storico sedute") + tSessions(c, true);
+  if((c.missLog || []).length) t += tHead("Lezioni saltate") + tMisses(c);
   t += tHead("Storico pagamenti") + tPayments(c);
   t += tPackages(c, {pay:true, sessions:true, notes:true, payments:true});
   const data = {...c}; delete data.id;
@@ -1317,7 +1405,7 @@ function clientFromTables(tables, name){
       found = true;
       let t;
       if(!seenCurrent){ t = c; seenCurrent = true; }
-      else { t = {start:"", end:"", sessionLog:[], payLog:[]}; c.packages.push(t); }
+      else { t = {start:"", end:"", sessionLog:[], payLog:[], missLog:[]}; c.packages.push(t); }
       t.totalSessions = parseInt(get("sedute nel pacchetto"))||0;
       t.doneSessions = parseInt(get("sedute fatte"))||0;
       t.price = parseNum(get("totale da pagare"));
@@ -1345,6 +1433,11 @@ function clientFromTables(tables, name){
         if(!r[iD] || /^totale/i.test(r[iD])) return;
         target.payLog.push({id:uid(), date:parseDate(r[iD]), amount:parseNum(r[iI]), method:iM>=0?clean(r[iM]):"", note:iN>=0?clean(r[iN]):""});
       });
+    } else if(head.some(h=>h.startsWith("esito"))){
+      found = true;
+      const iD = head.indexOf("data"), iE = head.findIndex(h=>h.startsWith("esito")), iN = head.findIndex(h=>h.startsWith("motivo") || h.startsWith("note"));
+      const st = v => { const s = String(v||"").toLowerCase(); return s.startsWith("recuperata") ? "recovered" : s.startsWith("da recuperare") ? "recover" : "lost"; };
+      rows.slice(1).forEach(r=>{ if(r[iD]) (target.missLog = target.missLog || []).push({id:uid(), date:parseDate(r[iD]), status:st(r[iE]), note:iN>=0?clean(r[iN]):""}); });
     } else if(head.includes("data")){
       found = true;
       const iD = head.indexOf("data"), iN = head.findIndex(h=>h.startsWith("note"));
@@ -1938,10 +2031,11 @@ let tt;
 function toast(t){ const el=$("toast"); el.textContent=t; el.classList.add("show"); clearTimeout(tt); tt=setTimeout(()=>el.classList.remove("show"),2800); }
 
 /* ======================= RENDER ======================= */
-function dotsHTML(done,total,max,big){
-  const n = Math.max(total,done), shown = Math.min(n,max);
+function dotsHTML(done,total,max,big,lost){
+  lost = lost || 0;
+  const n = Math.max(total, done + lost), shown = Math.min(n,max);
   let h = `<span class="dots${big?" big":""}" aria-hidden="true">`;
-  for(let i=0;i<shown;i++) h += `<span class="dot${i<done?" on":""}"></span>`;
+  for(let i=0;i<shown;i++) h += `<span class="dot${i<done?" on":i<done+lost?" miss":""}"></span>`;
   if(n > max) h += `<span class="more">+${n-max}</span>`;
   return h + "</span>";
 }
@@ -1963,10 +2057,13 @@ function softRender(){
   }
   render();
 }
+/* importi della pagina principale: con l'occhietto 🙈 diventano “•••” (la scelta si salva nel database) */
+const hm = v => settings.homeHideMoney ? "•••" : eur(v);
 function countText(s){
-  if(s.done > s.total) return `Fatte ${s.done} su ${s.total} (oltre il pacchetto)`;
-  if(s.complete) return `Completato: ${s.done} su ${s.total}`;
-  return `Fatte ${s.done} su ${s.total}, ne mancano ${s.left}`;
+  const sk = s.lost ? ` · ${s.lost} ${s.lost === 1 ? "saltata" : "saltate"}` : "";
+  if(s.done > s.total) return `Fatte ${s.done} su ${s.total} (oltre il pacchetto)${sk}`;
+  if(s.complete) return `Completato: ${s.done} su ${s.total}${sk}`;
+  return `Fatte ${s.done} su ${s.total}${sk}, ne mancano ${s.left}`;
 }
 function pkgLineHTML(s){
   const from = s.start ? `iniziato il ${itDate(s.start)}` : "";
@@ -2005,12 +2102,16 @@ function listHTML(){
       <div class="actions"><button class="btn ghost" data-a="import">Importa documenti</button><button class="btn primary" data-a="newClient">Crea la prima cartella</button></div></div>` + dangerZoneHTML();
   }
   const nDueClients = clients.filter(owesMoney).length;
-  h += alertsPanelHTML() + `<div class="totals">
+  const SD = statsData();                                           // una volta sola per il riquadro del mese
+  const hid = !!settings.homeHideMoney;
+  h += alertsPanelHTML() + `<div class="money-eye"><button type="button" class="eye-btn" id="moneyEye" data-a="toggleHomeMoney" aria-pressed="${hid}" title="${hid ? "Mostra gli importi" : "Nascondi gli importi"}">${hid ? "🙈" : "👁"}<span>${hid ? "Mostra importi" : "Nascondi importi"}</span></button></div>
+  <div class="totals">
     <div><b>${clients.length}</b><span>clienti</span></div>
     <div class="${nDueClients ? "owed" : ""}" id="dueClients"><b>${nDueClients}</b><span>${nDueClients === 1 ? "cliente da regolarizzare" : "clienti da regolarizzare"}</span></div>
     <div><b>${sLeft}</b><span>sedute da fare</span></div>
-    <div><b>${eur(paid)}</b><span>incassato</span></div>
-    <div class="owed"><b>${eur(due)}</b><span>da incassare</span></div>
+    ${earnPickHTML(SD)}
+    <div class="owed"><b>${hm(due)}</b><span>da incassare</span></div>
+    ${earnValueHTML(SD)}
   </div>
   <div class="searchbar" role="search">
     <input class="search" id="search" type="search" enterkeyhint="search" placeholder="Cerca un cliente…" value="${esc(query)}" aria-label="Cerca un cliente" autocomplete="off">
@@ -2029,10 +2130,10 @@ function listHTML(){
     h += `<div class="fwrap"><button class="folder" data-a="open" data-id="${esc(c.id)}">
       <span class="fname">${esc(c.name)}</span>
       ${s.start ? `<span class="pk">Pacchetto dal ${itDate(s.start)}</span>` : ""}
-      ${dotsHTML(s.done,s.total,20,false)}
+      ${dotsHTML(s.done,s.total,20,false,s.lost)}
       <span class="row"><span>Sedute</span><strong>${s.done} su ${s.total}</strong></span>
-      <span class="row"><span>Pagato</span><strong>${eur(s.paid)} su ${eur(s.price)}</strong></span>
-      <span class="row"><span>${s.due<0?"Credito":"Da saldare"}</span><strong class="${s.due>0?"due":""}">${eur(Math.abs(s.due))}</strong></span>
+      <span class="row"><span>Pagato</span><strong>${hm(s.paid)} su ${hm(s.price)}</strong></span>
+      <span class="row"><span>${s.due<0?"Credito":"Da saldare"}</span><strong class="${s.due>0?"due":""}">${hm(Math.abs(s.due))}</strong></span>
       ${f?`<span class="freq">${esc(f)}</span>`:""}
       ${ticksHTML(s)}
       ${alertsFor(c).length ? `<span class="alert">⚠ ${esc(alertText(c))}</span>` : ""}
@@ -2056,9 +2157,10 @@ function alertsFor(c){
     if(s.complete) out.push({k:"done", w:2, t:"Pacchetto finito"});
     else if(s.left <= th) out.push({k:"near", w:1, t: s.left === 1 ? "Manca 1 seduta" : `Mancano ${s.left} sedute`});
   }
-  if(s.due > 0 && ending) out.push({k:"due", w:3, t:`da saldare ${eur(s.due)}`});
+  if(s.toRecover) out.push({k:"recover", w:1, t: s.toRecover === 1 ? "1 lezione da recuperare" : `${s.toRecover} lezioni da recuperare`});
+  if(s.due > 0 && ending) out.push({k:"due", w:3, t:`da saldare ${hm(s.due)}`});
   const oldDue = round2(c.packages.reduce((a,p)=>a + Math.max(stats(pkgClient(c,p)).due, 0), 0));
-  if(oldDue > 0) out.push({k:"old", w:3, t:`pacchetti precedenti da saldare ${eur(oldDue)}`});
+  if(oldDue > 0) out.push({k:"old", w:3, t:`pacchetti precedenti da saldare ${hm(oldDue)}`});
   return out;
 }
 const alertWeight = c => alertsFor(c).reduce((a,x)=>a+x.w, 0);
@@ -2155,7 +2257,7 @@ function detailHTML(c){
     ${contact?`<p class="contact">${contact}</p>`:`<div style="height:10px"></div>`}
     <p class="pkg-line" id="pkgLine">${pkgLineHTML(s)}</p>
     <div class="big-count" id="bigCount">${countText(s)}</div>
-    <div id="bigDots">${dotsHTML(s.done,s.total,40,true)}</div>
+    <div id="bigDots">${dotsHTML(s.done,s.total,40,true,s.lost)}</div>
     <div id="headTicks">${ticksHTML(s)}</div>
     <div id="headAlert">${headAlertHTML(c)}</div>
     <div class="head-actions">
@@ -2224,6 +2326,7 @@ function detailHTML(c){
   h += `</section>`;
 
   const hasPast = c.packages.length > 0;
+  h += missHTML(c, hasPast);
   h += `<section class="block"><div class="bh"><h3>Storico sedute${hasPast ? " del pacchetto in corso" : ""}</h3><button class="btn small" data-a="addSes">+ Seduta</button></div>`;
   if(!c.sessionLog.length) h += `<p class="none">Qui compaiono le sedute segnate con il pulsante “Segna seduta”, con data e note.</p>`;
   else {
@@ -2243,6 +2346,23 @@ function detailHTML(c){
   h += `</section>`;
   return h + packagesHTML(c);
 }
+/* Lezioni saltate del pacchetto in corso */
+const MISS_LAB = {lost:"Persa", recover:"Da recuperare", recovered:"Recuperata"};
+function missHTML(c, hasPast){
+  if(!c.missLog.length) return "";
+  const s = stats(c);
+  let h = `<section class="block miss-block"><div class="bh"><h3>Lezioni saltate${hasPast ? " del pacchetto in corso" : ""}</h3></div>
+    <p class="sub">${s.lost} ${s.lost === 1 ? "persa (scalata dal pacchetto)" : "perse (scalate dal pacchetto)"}${s.toRecover ? ` · ${s.toRecover} da recuperare` : ""}</p>
+    <div class="miss-list">`;
+  [...c.missLog].sort((x,y)=>(y.date||"").localeCompare(x.date||"")).forEach(x=>{
+    h += `<div class="miss-row ${x.status}">
+      <div class="mr-top"><b>${itDate(x.date)}</b><span class="miss-st ${x.status}">${MISS_LAB[x.status]}</span></div>
+      ${x.note ? `<p class="mr-note">${esc(x.note)}</p>` : ""}
+      <div class="mr-acts">${x.status === "recover" ? `<button class="btn small primary" data-a="missRecovered" data-id="${esc(x.id)}">✓ Recuperata</button><button class="btn small ghost" data-a="missLost" data-id="${esc(x.id)}">Persa</button>` : ""}<button class="btn small ghost" data-a="delMiss" data-id="${esc(x.id)}" aria-label="Elimina lezione saltata del ${itDate(x.date)}">✕ Elimina</button></div>
+    </div>`;
+  });
+  return h + `</div></section>`;
+}
 /* matita (modifica) e croce (elimina) su ogni riga; pkg = pacchetto vecchio a cui appartiene la riga */
 function rowBtns(kind, x, pkg, what){
   const p = pkg ? ` data-pkg="${esc(pkg)}"` : "";
@@ -2261,7 +2381,7 @@ function packagesHTML(c){
   past.forEach(p=>{
     const pc = pkgClient(c, p), s = stats(pc);
     h += `<details class="pkg" data-pkg="${esc(p.id)}"${openPkgs.has(p.id) ? " open" : ""}><summary><span class="pt">${esc(pkgTitle(p))}</span>
-      <span class="ps">${s.done} su ${s.total}${s.complete ? " · <b class=\"ok\">completato</b>" : ""} · pagato ${eur(s.paid)} su ${eur(s.price)}${s.due > 0 ? ` · <b class="due">da saldare ${eur(s.due)}</b>` : ""}${s.carriedOut ? " · saldo spostato nel pacchetto dopo" : ""}</span></summary><div class="pkg-body">`;
+      <span class="ps">${s.done} su ${s.total}${s.lost ? ` · ${s.lost} ${s.lost === 1 ? "saltata" : "saltate"}` : ""}${s.complete ? " · <b class=\"ok\">completato</b>" : ""} · pagato ${eur(s.paid)} su ${eur(s.price)}${s.due > 0 ? ` · <b class="due">da saldare ${eur(s.due)}</b>` : ""}${s.carriedOut ? " · saldo spostato nel pacchetto dopo" : ""}</span></summary><div class="pkg-body">`;
     if(pc.sessionLog.length){
       h += `<p class="lbl">Sedute</p><div class="scroll"><table><tbody>`;
       [...pc.sessionLog].sort(byDateAsc).forEach((x,i)=>{ h += `<tr><td class="num">${i+1}</td><td class="date">${itDate(x.date)}</td><td>${esc(x.note)}</td><td class="act">${rowBtns("Ses", x, p.id, `seduta del ${itDate(x.date)}`)}</td></tr>`; });
@@ -2279,7 +2399,7 @@ function packagesHTML(c){
 function refreshSummary(c){
   const s = stats(c);
   const bc = $("bigCount"); if(bc) bc.textContent = countText(s);
-  const bd = $("bigDots"); if(bd) bd.innerHTML = dotsHTML(s.done,s.total,40,true);
+  const bd = $("bigDots"); if(bd) bd.innerHTML = dotsHTML(s.done,s.total,40,true,s.lost);
   const db = $("dueBox");
   if(db){ db.className = "field " + (s.due>0?"due":"ok"); db.innerHTML = `<label>${s.due<0?"Credito del cliente":"Ancora da saldare"}</label><div class="val">${eur(Math.abs(s.due))}</div>`; }
   const lv = $("leftVal"); if(lv) lv.textContent = s.left;
@@ -2993,6 +3113,8 @@ async function handle(a, el){
     case "toggleFilters": filtersOpen = !filtersOpen; render(); return;
     case "clearFilter": listFilter = "all"; filtersOpen = false; render(); return;
     case "exportAll": return exportAll();
+    case "pickMonth": return pickMonth();
+    case "toggleHomeMoney": settings.homeHideMoney = !settings.homeHideMoney; saveSettings(); render(); return;
     case "dataMenu": return dataMenu();
     case "exportDocs": return exportDocs();
     case "openStats": statsOpen = true; openId = null; render(); window.scrollTo({top:0}); return;
@@ -3026,6 +3148,30 @@ async function handle(a, el){
     case "followAll": return updateAllFollow();
     case "import": $("importInput").value=""; $("importInput").click(); return;
     case "addSes": return c && addSession(c.id);
+    case "missRecovered": {
+      if(!c) return;
+      const x = c.missLog.find(m=>m.id === el.dataset.id); if(!x) return;
+      const n = clone(c), m = n.missLog.find(y=>y.id === x.id);
+      m.status = "recovered";                                        // è diventata una seduta fatta
+      n.doneSessions += 1;
+      n.sessionLog.push({id:uid(), date:today(), note:`Recupero della lezione del ${itDate(x.date)}`});
+      commit(n, true); render(); toast("Lezione recuperata: conta come seduta fatta");
+      return;
+    }
+    case "missLost": {
+      if(!c) return;
+      const n = clone(c), m = n.missLog.find(y=>y.id === el.dataset.id); if(!m) return;
+      m.status = "lost"; commit(n, true); render(); toast("Lezione segnata come persa (scalata dal pacchetto)");
+      return;
+    }
+    case "delMiss": {
+      if(!c) return;
+      const x = c.missLog.find(m=>m.id === el.dataset.id); if(!x) return;
+      if(!(await messageBox("Eliminare la lezione saltata?", `La lezione saltata del ${itDate(x.date)} verrà tolta${x.status === "recovered" ? " (la seduta di recupero resta nello storico sedute)" : ""}.`, {ok:"Elimina", cancel:"Annulla", danger:true}))) return;
+      const cur = getClient(c.id); if(!cur) return;
+      const n = clone(cur); n.missLog = n.missLog.filter(m=>m.id !== x.id); commit(n, true); render(); toast("Lezione saltata eliminata");
+      return;
+    }
     case "editSes": return c && editSession(c.id, el.dataset.id, el.dataset.pkg || "");
     case "editPay": return c && editPayment(c.id, el.dataset.id, el.dataset.pkg || "");
     case "editPkg": return c && editPackage(c.id, el.dataset.id);
@@ -3139,10 +3285,18 @@ async function addSession(id){
   }
   sesDialogMode(false);
   $("sDate").value = today(); $("sNote").value = "";
+  $("sMiss").checked = false; document.querySelectorAll('input[name="sMissKind"]').forEach(r=>r.checked = r.value === "lost"); syncMissUI();
   if(await ask("dlgSes") !== "ok") return;
   const cur = getClient(id); if(!cur) return;
-  const n = clone(cur);
-  n.sessionLog.push({id:uid(), date:$("sDate").value || today(), note:$("sNote").value.trim()});
+  const n = clone(cur), date = $("sDate").value || today(), note = $("sNote").value.trim();
+  if($("sMiss").checked){                                          // lezione saltata: non è una seduta fatta
+    const kind = (document.querySelector('input[name="sMissKind"]:checked') || {}).value === "recover" ? "recover" : "lost";
+    n.missLog.push({id:uid(), date, note, status:kind});
+    commit(n, true); render();
+    toast(kind === "lost" ? `Lezione saltata segnata come persa (scalata dal pacchetto)` : `Lezione saltata da recuperare`);
+    return;
+  }
+  n.sessionLog.push({id:uid(), date, note});
   n.doneSessions += 1;
   commit(n, true); render();
   const ns = stats(n);
@@ -3158,7 +3312,7 @@ $("fPkg").addEventListener("submit", e=>{
 async function newPackage(id, thenSession){
   const c = getClient(id); if(!c) return;
   const s = stats(c);
-  const active = !!(c.doneSessions || c.paid || c.sessionLog.length || c.payLog.length);
+  const active = !!(c.doneSessions || c.paid || c.sessionLog.length || c.payLog.length || c.missLog.length);
   $("pStart").value = today(); $("pkgErr").textContent = "";
   $("pTotal").value = c.totalSessions || "";
   const base = round2(c.price - c.carriedIn);
@@ -3181,12 +3335,12 @@ async function newPackage(id, thenSession){
   if(active){
     const last = [...cur.sessionLog].sort(byDateAsc).pop();
     n.packages.push(normPackage({start:cur.start, end: last ? last.date : "", totalSessions:cur.totalSessions, doneSessions:cur.doneSessions,
-      price:cur.price, paid:cur.paid, carriedIn:cur.carriedIn, carriedOut:carry, sessionLog:cur.sessionLog, payLog:cur.payLog}));
+      price:cur.price, paid:cur.paid, carriedIn:cur.carriedIn, carriedOut:carry, sessionLog:cur.sessionLog, payLog:cur.payLog, missLog:cur.missLog}));
   }
   const newBase = round2(Math.max(parseNum($("pPrice").value), 0));
   n.start = $("pStart").value; n.totalSessions = toInt($("pTotal").value); n.doneSessions = 0;
   n.price = round2(newBase + carry); n.paid = 0; n.carriedIn = carry;
-  n.sessionLog = []; n.payLog = [];
+  n.sessionLog = []; n.payLog = []; n.missLog = [];
   commit(n, true); render(); window.scrollTo({top:0});
   toast(`Nuovo pacchetto dal ${itDate(n.start)}: 0 su ${n.totalSessions}`);
   if(thenSession) await addSession(id);
@@ -3332,7 +3486,21 @@ async function renameClient(id){
 
 /* ======================= MODIFICA DI TUTTO ======================= */
 const logOwner = (c, pkg) => pkg ? (c.packages || []).find(p=>p.id===pkg) : c;
+function syncMissUI(){
+  const on = $("sMiss").checked;
+  $("sMissOpts").hidden = !on;
+  $("sNoteL").textContent = on ? "Motivo (facoltativo)" : "Cosa avete fatto (facoltativo)";
+  $("sNote").placeholder = on ? "es. disdetta all'ultimo, malato" : "es. Gambe + core";
+  $("sesOk").textContent = on ? "Segna lezione saltata" : ($("sesTitle").textContent === "Modifica seduta" ? "Salva" : "Segna seduta");
+  const lost = (document.querySelector('input[name="sMissKind"]:checked') || {}).value !== "recover";
+  $("sesHint").textContent = on ? (lost ? "Persa: si scala dal pacchetto, ma non conta come seduta fatta." : "Da recuperare: non si scala; quando la recuperi tocca “✓ Recuperata” nella sezione “Lezioni saltate”.")
+    : ($("sesTitle").textContent === "Modifica seduta" ? "Cambi data e note: il numero di sedute fatte non cambia." : "Le sedute fatte aumentano di 1.");
+}
+$("sMiss").addEventListener("change", syncMissUI);
+document.querySelectorAll('input[name="sMissKind"]').forEach(r=>r.addEventListener("change", syncMissUI));
 function sesDialogMode(edit){
+  $("sMissL").hidden = !!edit; $("sMiss").checked = false; $("sMissOpts").hidden = true;
+  $("sNoteL").textContent = "Cosa avete fatto (facoltativo)";
   $("sesTitle").textContent = edit ? "Modifica seduta" : "Segna seduta";
   $("sesOk").textContent = edit ? "Salva" : "Segna seduta";
   $("sesHint").textContent = edit ? "Cambi data e note: il numero di sedute fatte non cambia." : "Le sedute fatte aumentano di 1.";
@@ -3730,7 +3898,7 @@ const monthLabel = k => `${MONTHS_LONG[Number(k.slice(5,7)) - 1]} ${k.slice(0,4)
 function allPackages(c){
   const past = [...c.packages].sort((a,b)=>(a.start||a.end||"").localeCompare(b.start||b.end||""));
   return [...past, {start:c.start, end:"", totalSessions:c.totalSessions, doneSessions:c.doneSessions, price:c.price, paid:c.paid,
-                    sessionLog:c.sessionLog, payLog:c.payLog, current:true}];
+                    sessionLog:c.sessionLog, payLog:c.payLog, missLog:c.missLog, current:true}];
 }
 const pkgUsed = p => !!(p.doneSessions || p.paid || p.sessionLog.length || p.payLog.length || (p.current && p.start));
 /* soldi incassati con la data: le rate registrate; quello scritto a mano in “già pagato” senza rata
@@ -3745,7 +3913,66 @@ function payEvents(c){
   });
   return out;
 }
+/* Soldi incassati di ogni pacchetto, messi nel mese in cui il pacchetto è iniziato (anche se il cliente
+   paga dopo: inizia il 1° ottobre e salda il 1° novembre → ottobre). Senza data d'inizio, vale la data del pagamento. */
+function incomeMonths(c, undated){
+  const out = [];
+  allPackages(c).forEach(p=>{
+    const paid = round2(Number(p.paid) || 0); if(paid <= 0) return;
+    if(isDate(p.start)){ out.push([p.start.slice(0,7), paid]); return; }
+    let logged = 0;
+    p.payLog.forEach(x=>{ const v = Number(x.amount) || 0; if(isDate(x.date) && v){ out.push([x.date.slice(0,7), v]); logged += v; } });
+    const rest = round2(paid - logged); if(rest > 0.004 && undated) undated.amount += rest;
+  });
+  return out;
+}
+/* quanto resta da incassare dei pacchetti iniziati in un mese */
+function dueForMonth(k){
+  let t = 0;
+  clients.forEach(c=>allPackages(c).forEach(p=>{
+    if(!isDate(p.start) || p.start.slice(0,7) !== k) return;
+    t += Math.max(round2((Number(p.price)||0) - (Number(p.paid)||0) - (p.current ? 0 : (Number(p.carriedOut)||0))), 0);
+  }));
+  return round2(t);
+}
 function sessionDates(c){ const out = []; allPackages(c).forEach(p=>p.sessionLog.forEach(x=>{ if(isDate(x.date)) out.push(x.date); })); return out; }
+/* Sedute fatte davvero (non quelle previste dal pacchetto), messe nei mesi in base a quando è iniziato
+   il pacchetto e a quante lezioni ha (un pacchetto più corto finisce prima):
+   - fino a 10 lezioni (≈ 25 giorni): inizio 1–7 → 100%; 8–14 → 75/25; 15–21 → 50/50; dal 22 → 25/75
+   - da 11 a 15 lezioni (≈ un mese): inizio 1–10 → 100%; 11–19 → 50/50; dal 20 → 20/80
+   - da 16 lezioni in su: ≈ 12 lezioni al mese, divise in proporzione ai giorni di ogni mese */
+const nextMonthKey = k => { let y = Number(k.slice(0,4)), m = Number(k.slice(5,7)) + 1; if(m > 12){ m = 1; y++; } return `${y}-${String(m).padStart(2,"0")}`; };
+function sessionShares(start, size){
+  const k = start.slice(0,7), day = Number(start.slice(8,10)), nk = nextMonthKey(k);
+  const two = p => p >= 1 ? [[k, 1]] : [[k, p], [nk, 1 - p]];
+  if(size <= 10) return two(day <= 7 ? 1 : day <= 14 ? 0.75 : day <= 21 ? 0.5 : 0.25);
+  if(size <= 15) return two(day <= 10 ? 1 : day <= 19 ? 0.5 : 0.2);
+  const total = Math.round(size * 2.5), out = [];          // pacchetti lunghi: ≈ 2,5 giorni per lezione
+  let d = new Date(Date.UTC(Number(start.slice(0,4)), Number(start.slice(5,7)) - 1, day)), left = total;
+  while(left > 0){
+    const y = d.getUTCFullYear(), m = d.getUTCMonth();
+    const take = Math.min(new Date(Date.UTC(y, m + 1, 0)).getUTCDate() - d.getUTCDate() + 1, left);
+    out.push([`${y}-${String(m + 1).padStart(2,"0")}`, take / total]);
+    left -= take; d = new Date(Date.UTC(y, m + 1, 1));
+  }
+  return out;
+}
+/* divide n sedute fatte secondo le quote, con numeri interi che sommano sempre a n */
+function sessionSplit(start, n, size){
+  const out = sessionShares(start, size || n).map(([k, p])=>{ const v = n * p, f = Math.floor(v + 1e-9); return {k, n:f, r:v - f}; });
+  let rest = n - out.reduce((t,x)=>t + x.n, 0);
+  out.map((x,i)=>({i, r:x.r})).sort((x,y)=>y.r - x.r || x.i - y.i).forEach(({i})=>{ if(rest > 0){ out[i].n++; rest--; } });
+  return out.filter(x=>x.n > 0).map(x=>[x.k, x.n]);
+}
+function sessionMonths(c, undated){
+  const out = [];
+  allPackages(c).forEach(p=>{
+    const n = Number(p.doneSessions) || 0; if(n <= 0) return;
+    if(isDate(p.start)) out.push(...sessionSplit(p.start, n, Number(p.totalSessions) || n));
+    else if(undated) undated.n += n;
+  });
+  return out;
+}
 function lastActivity(c){
   const d = [...sessionDates(c), ...payEvents(c).map(e=>e.date), ...allPackages(c).map(p=>p.start)].filter(isDate).sort();
   return d.length ? d[d.length - 1] : "";
@@ -3761,6 +3988,7 @@ function clientStats(c){
   const sessions = pk.reduce((a,p)=>a + (Number(p.doneSessions)||0), 0);
   return {
     c, packages: pk.length, renewals: Math.max(pk.length - 1, 0),
+    lost: pk.reduce((t,p)=>t + (p.missLog || []).filter(x=>x.status === "lost").length, 0),
     typical: top ? {sessions: Number(top[0].split("|")[0]), price: Number(top[0].split("|")[1])} : null,
     every: gaps.length ? Math.round(gaps.reduce((a,b)=>a+b,0) / gaps.length) : null,
     earned, sessions, last, active: age !== null && age <= ACTIVE_DAYS
@@ -3768,11 +3996,11 @@ function clientStats(c){
 }
 function statsData(){
   const per = clients.map(clientStats);
-  const byMonth = {}, noDate = {amount:0};
+  const byMonth = {}, noDate = {amount:0}, noDateSes = {n:0};
   const add = (k, f, v) => { byMonth[k] = byMonth[k] || {income:0, sessions:0, expense:0}; byMonth[k][f] += v; };
   clients.forEach(c=>{
-    payEvents(c).forEach(e=>{ if(e.date) add(e.date.slice(0,7), "income", e.amount); else noDate.amount += e.amount; });
-    sessionDates(c).forEach(d=>add(d.slice(0,7), "sessions", 1));
+    incomeMonths(c, noDate).forEach(([k, v])=>add(k, "income", v));      // soldi nel mese d'inizio del pacchetto
+    sessionMonths(c, noDateSes).forEach(([k, n])=>add(k, "sessions", n));
   });
   Object.entries(expByMonth()).forEach(([k,v])=>add(k, "expense", v));     // spese di gestione pagate
   Object.values(byMonth).forEach(m=>{ m.income = round2(m.income); m.expense = round2(m.expense); m.net = round2(m.income - m.expense); });
@@ -3789,7 +4017,7 @@ function statsData(){
     }
   }
   const month = k => byMonth[k] || {income:0, sessions:0, expense:0, net:0};
-  return {per, byMonth, span, month, noDate: round2(noDate.amount),
+  return {per, byMonth, span, month, noDate: round2(noDate.amount), noDateSes: noDateSes.n,
     years: [...new Set(span.map(k=>k.slice(0,4)))].sort()};
 }
 const money = v => settings.statsHideMoney ? "•••" : eur(v);
@@ -3834,6 +4062,8 @@ function statsHTML(){
   const pInc = round2(inPeriod.reduce((a,k)=>a + D.month(k).income, 0)), pSes = inPeriod.reduce((a,k)=>a + D.month(k).sessions, 0);
   const pExp = round2(inPeriod.reduce((a,k)=>a + D.month(k).expense, 0)), pNet = round2(pInc - pExp);
   const nMonths = inPeriod.filter(k=>k <= today().slice(0,7)).length || 1;
+  const allIncome = round2(clients.reduce((s,c)=>s + allPackages(c).reduce((t,p)=>t + (Number(p.paid)||0), 0), 0));
+  const allLost = D.per.reduce((t,p)=>t + p.lost, 0);
   const allDone = clients.reduce((s,c)=>s + (Number(c.doneSessions)||0) + c.packages.reduce((t,p)=>t + (Number(p.doneSessions)||0), 0), 0);
   h += `<div class="totals stats-kpi">
     <div><b>${act.length}</b><span>clienti attivi</span></div>
@@ -3841,11 +4071,13 @@ function statsHTML(){
     <div><b>${pkgs}</b><span>pacchetti venduti</span></div>
     <div><b>${D.per.length ? Math.round(renewed / D.per.length * 100) : 0}%</b><span>ha rinnovato almeno una volta</span></div>
     <div><b id="kpiIncome">${money(pInc)}</b><span>entrate ${mode === "month" ? `nel ${year}` : "in totale"}</span></div>
-    <div><b id="kpiSes">${pSes}</b><span>sedute svolte ${mode === "month" ? `nel ${year}` : "in totale"} (con la data)</span></div>
+    <div><b id="kpiSes">${pSes}</b><span>sedute svolte ${mode === "month" ? `nel ${year}` : "in tutti gli anni"}</span></div>
     ${useExp ? `<div class="owed"><b id="kpiExpense">${money(pExp)}</b><span>uscite (spese di gestione) ${mode === "month" ? `nel ${year}` : "in totale"}</span></div>
     <div class="${pNet < 0 ? "loss" : "net"}"><b id="kpiNet">${money(pNet)}</b><span>guadagno netto (entrate − uscite)</span></div>
     <div><b id="kpiNetAvg">${money(round2(pNet / nMonths))}</b><span>netto medio al mese</span></div>` : ""}
     <div><b id="kpiSesAll">${allDone}</b><span>sedute svolte in totale (tutti i pacchetti)</span></div>
+    <div class="${allLost ? "owed" : ""}"><b id="kpiLost">${allLost}</b><span>lezioni saltate (perse) in totale</span></div>
+    <div class="net"><b id="kpiIncomeAll">${money(allIncome)}</b><span>entrate totali da quando hai iniziato</span></div>
   </div>
   <p class="hint">Attivo = almeno una seduta o un pagamento negli ultimi ${ACTIVE_DAYS} giorni.</p>`;
 
@@ -3864,7 +4096,13 @@ function statsHTML(){
     : D.years.map(y=>{ const ks = D.span.filter(k=>k.startsWith(y)); return {label:y, full:y, v: round2(ks.reduce((a,k)=>a+D.month(k)[metric],0)), hi: y === yNow}; });
   h += `<div class="chart-wrap">${barsSVG(items, metric === "sessions" ? (v=>String(v)) : shortEur)}</div>`;
   if(!hide && metric === "net") h += `<p class="hint">Guadagno netto = entrate meno uscite (spese di gestione) di quel ${mode === "month" ? "mese" : "anno"}. Le barre rosse sono periodi in perdita.</p>`;
+  if(!hide && (metric === "net" || metric === "income")) h += `<p class="hint">Le entrate contano nel mese d'inizio del pacchetto, anche se il cliente paga dopo (inizia il 1° ottobre e salda a novembre → ottobre).</p>`;
   if(!hide && D.noDate > 0) h += `<p class="hint">${eur(D.noDate)} incassati non hanno una data (pacchetti senza data di inizio): contano nei totali ma non nel grafico.</p>`;
+  if(metric === "sessions") h += `<p class="hint">Sedute fatte davvero, contate dal mese d'inizio del pacchetto in base a quante lezioni ha.<br>
+    <b>Fino a 10 lezioni</b>: inizio dal 1 al 7 → tutte in quel mese; dall'8 al 14 → 75% e 25% al mese dopo; dal 15 al 21 → metà e metà; dal 22 in poi → 25% e 75% al mese dopo.<br>
+    <b>Da 11 a 15 lezioni</b>: inizio dal 1 al 10 → tutte in quel mese; dall'11 al 19 → metà e metà; dal 20 in poi → 20% e 80% al mese dopo.<br>
+    <b>Da 16 lezioni in su</b>: circa 12 lezioni al mese, divise in proporzione ai giorni.</p>`;
+  if(D.noDateSes > 0) h += `<p class="hint">${D.noDateSes} ${D.noDateSes === 1 ? "seduta fatta è" : "sedute fatte sono"} in pacchetti senza data d'inizio: ${D.noDateSes === 1 ? "conta" : "contano"} nel totale ma non nel grafico. Metti la data d'inizio del pacchetto nella cartella per vederle nel mese giusto.</p>`;
   h += periodTableHTML(D, mode, year, hide) + `</section>`;
 
   // mesi migliori e peggiori
@@ -3905,6 +4143,7 @@ function statsHTML(){
         <span><i>Rinnova ogni</i>${p.every !== null ? `~${p.every} giorni` : "—"}</span>
         <span><i>Incassato</i>${money(p.earned)}</span>
         <span><i>Sedute fatte</i>${p.sessions}</span>
+        <span><i>Lezioni saltate</i>${p.lost}</span>
         <span><i>Ultima attività</i>${p.last ? itDate(p.last) : "—"}</span>
       </span></button>`;
   });
@@ -3912,6 +4151,56 @@ function statsHTML(){
   return h;
 }
 let statsYear = "";
+/* Pagina principale: “Guadagnato nel mese”. Di base il mese corrente (data del telefono); si possono
+   scegliere i mesi passati. I soldi contano nel mese d'inizio del pacchetto di ogni cliente. */
+let earnSel = "";
+const monthCap = k => { const s = monthLabel(k); return s.charAt(0).toUpperCase() + s.slice(1); };
+/* due riquadri: il tasto del mese (dove prima c'era “incassato”) e l'importo del mese (nello spazio accanto) */
+function earnMonthKey(D){
+  const nowK = today().slice(0,7), last = [nowK, ...D.span].sort().pop();
+  return earnSel && earnSel <= last ? earnSel : nowK;
+}
+function earnPickHTML(D){
+  const k = earnMonthKey(D), nowK = today().slice(0,7);
+  return `<button type="button" class="month-pick" id="earnPick" data-a="pickMonth" data-m="${k}" aria-label="Scegli il mese da vedere">
+      <span>📅 Mese</span><b>${esc(monthCap(k))} ▾</b><span>${k === nowK ? "in corso" : "tocca per cambiare"}</span></button>`;
+}
+function earnValueHTML(D){
+  const k = earnMonthKey(D), due = dueForMonth(k);
+  const nPk = clients.reduce((t,c)=>t + allPackages(c).filter(p=>isDate(p.start) && p.start.slice(0,7) === k && pkgUsed(p)).length, 0);
+  return `<div class="earn-val" id="earnCell" data-a="pickMonth" role="button" tabindex="0" aria-label="Guadagnato a ${esc(monthLabel(k))}: tocca per cambiare mese">
+      <b id="earnValue">${hm(D.month(k).income)}</b>
+      <span id="earnInfo">guadagnato a ${esc(monthLabel(k))} · ${nPk} ${nPk === 1 ? "pacchetto iniziato" : "pacchetti iniziati"}${due > 0 ? ` · da incassare ${hm(due)}` : ""}</span>
+    </div>`;
+}
+/* schermata grande per scegliere il mese: 12 riquadri, anni con ‹ ›, e l'importo di ogni mese */
+let pickYear = "";
+function renderMonthGrid(){
+  const D = statsData(), nowK = today().slice(0,7), sel = $("earnPick") ? $("earnPick").dataset.m : nowK;
+  const years = [...new Set([...D.span.map(k=>k.slice(0,4)), nowK.slice(0,4)])].sort();
+  if(!years.includes(pickYear)) pickYear = sel.slice(0,4);
+  const yi = years.indexOf(pickYear);
+  $("mpYear").textContent = pickYear;
+  $("mpPrev").disabled = yi <= 0; $("mpNext").disabled = yi >= years.length - 1;
+  $("mpGrid").innerHTML = MONTHS_LONG.map((l,i)=>{
+    const k = `${pickYear}-${String(i+1).padStart(2,"0")}`, inc = D.month(k).income, future = k > nowK && !inc;
+    return `<button type="button" class="mp-m${k === sel ? " sel" : ""}${k === nowK ? " now" : ""}" data-m="${k}"${future ? " disabled" : ""}>
+      <b>${l.charAt(0).toUpperCase() + l.slice(1)}</b><span>${future ? "—" : hm(inc)}</span></button>`;
+  }).join("");
+}
+async function pickMonth(){
+  pickYear = ($("earnPick") ? $("earnPick").dataset.m : today()).slice(0,4);
+  renderMonthGrid();
+  await ask("dlgMonth");
+}
+$("mpPrev").addEventListener("click", ()=>{ pickYear = String(Number(pickYear) - 1); renderMonthGrid(); });
+$("mpNext").addEventListener("click", ()=>{ pickYear = String(Number(pickYear) + 1); renderMonthGrid(); });
+$("mpNow").addEventListener("click", ()=>{ earnSel = ""; $("dlgMonth").close("ok"); render(); });
+$("mpGrid").addEventListener("click", e=>{
+  const b = e.target.closest("button[data-m]"); if(!b || b.disabled) return;
+  earnSel = b.dataset.m === today().slice(0,7) ? "" : b.dataset.m;     // il mese corrente segue il calendario
+  $("dlgMonth").close("ok"); render();
+});
 /* riepilogo sotto il grafico: mese per mese (dell'anno scelto) o anno per anno; toccando un anno si aprono i suoi mesi */
 function periodTableHTML(D, mode, year, hide){
   /* nella tabella gli importi tondi senza ",00" così sul telefono ci stanno tutte le colonne */
