@@ -81,25 +81,39 @@ a.btn[hidden]{display:none}
 .miss-row{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-left:4px solid var(--owed);border-radius:10px;padding:6px 8px 6px 12px}
 .miss-row .miss-st{margin-right:auto}
 #sMissL[hidden],#sNoteW[hidden]{display:none}
-.totals.home-tot{grid-template-columns:repeat(4,1fr);margin-bottom:12px}
-@media (max-width:640px){ .totals.home-tot{grid-template-columns:repeat(2,1fr)} }
-/* riquadro del mese: tasto del mese in alto, sotto guadagnato · spese · guadagno netto mensile su una riga */
-.month-panel{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:24px;background:var(--line)}
-.month-panel .mp-head{background:var(--paper)}
-.month-panel .mp-head .month-pick{width:100%;flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding:10px 14px}
-.month-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:1px}
-.month-grid > div{background:var(--paper);padding:12px 14px;min-width:0}
-.month-grid b{display:block;font-family:"Barlow Condensed",sans-serif;font-size:1.7rem;line-height:1}
-.month-grid span{display:block;color:var(--muted);font-size:.9rem;margin-top:2px}
-.month-grid small{display:block;margin-top:3px;font-size:.76rem;color:var(--muted);overflow-wrap:anywhere}
-.month-grid .earn-val b{color:var(--moss)}
-.month-grid .exp-cell{cursor:pointer}
-.month-grid .exp-cell b{color:var(--owed)}
-.month-grid .net-cell b{color:var(--moss)}
-.month-grid .net-cell.loss b{color:var(--danger)}
-.month-grid .exp-cell:hover,.month-grid .earn-val:hover{background:var(--moss-soft)}
-.month-grid .earn-val{cursor:pointer}
-@media (max-width:520px){ .month-grid > div{padding:10px 8px} .month-grid b{font-size:1.25rem} .month-grid span{font-size:.8rem} .month-grid small{font-size:.7rem} }
+/* Le due tabelle della pagina principale: stesso formato e stesse misure.
+   Sopra “📊 Generale” (non dipende dal mese), sotto “📅 il mese scelto”. */
+.dash{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:12px}
+.dash + .dash{margin-bottom:24px}
+.dash > *{background:var(--paper);padding:14px 16px;min-width:0;min-height:112px;display:flex;flex-direction:column;align-items:flex-start;text-align:left}
+.dash .dc b{font-family:"Barlow Condensed",sans-serif;font-size:1.9rem;line-height:1;color:var(--pine)}
+.dash .dc span{color:var(--muted);font-size:.92rem;margin-top:4px}
+.dash .dc small{margin-top:4px;font-size:.76rem;color:var(--muted);line-height:1.35;overflow-wrap:anywhere}
+.dash .dash-title{justify-content:center;gap:2px;border:none;border-radius:0;font:inherit;color:var(--pine)}
+.dash .dash-title .dt-ico{font-size:1.4rem;line-height:1}
+.dash .dash-title b{font-family:"Barlow Condensed",sans-serif;font-size:1.4rem;line-height:1.1;max-width:100%;overflow-wrap:anywhere}
+.dash .dash-title span:last-child{font-size:.82rem;color:var(--muted)}
+.dash-gen .dash-title{background:var(--chalk)}
+.dash-month .dash-title{background:var(--moss-soft);cursor:pointer}
+.dash-month .dash-title b{color:var(--moss)}
+.dash-month .dash-title:hover{filter:brightness(.97)}
+.dash .c-owed b{color:var(--owed)}
+.dash .c-in b{color:var(--moss)}
+.dash .c-exp b{color:var(--danger)}
+.dash .c-net b{color:var(--pine)}
+.dash [role=button]{cursor:pointer}
+.dash [role=button]:hover{background:var(--moss-soft)}
+@media (max-width:1100px){ .dash .dc b{font-size:1.55rem} .dash > *{padding:12px 12px} }
+@media (max-width:860px){
+  .dash{grid-template-columns:repeat(2,1fr)}
+  .dash > *{min-height:96px;padding:12px}
+  .dash .dash-title{grid-column:1/-1;min-height:0;flex-direction:row;align-items:baseline;justify-content:flex-start;flex-wrap:wrap;gap:4px 10px;padding:10px 12px}
+  .dash .dc b{font-size:1.6rem}
+  .dash > *{min-height:96px}
+  .dash .dc span{font-size:.86rem}
+  .dash .dc small{font-size:.72rem}
+}
+@media (max-width:360px){ .dash .dc b{font-size:1.3rem} .dash > *{padding:10px 8px} }
 .totals small{display:block;margin-top:3px;font-size:.76rem;color:var(--muted)}
 .totals .exp-cell,.totals .net-cell,.totals .earn-val{cursor:default}
 .totals .exp-cell{cursor:pointer}
@@ -1094,10 +1108,12 @@ function docxClientBody(c, o){
   if(inc.pacchetti) b += dPackages(c, {pay:!!inc.pagamenti, sessions:!!inc.storicoSedute, notes:!!(inc.storicoSedute && inc.noteSedute), payments:!!inc.storicoPagamenti});
   return b;
 }
+/* dicitura in fondo a ogni pagina dei documenti (Word e PDF) */
+const DOC_NOTICE = "Documento riepilogativo a scopo esclusivamente informativo. Non ha valore fiscale né legale e non sostituisce fattura, ricevuta o scontrino.";
 function docxParts(body, footerText, title, subject){
   const MUTED = DC.MUTED;
   const fr = t => `<w:r><w:rPr><w:color w:val="${MUTED}"/><w:sz w:val="16"/></w:rPr>${t}</w:r>`;
-  const footer = `<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">${wPara([
+  const footer = `<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">${wPara([wRun(DOC_NOTICE, {color:MUTED, size:14, italic:true})], {align:"center"})}${wPara([
     wRun(footerText+"   ", {color:MUTED, size:16}),
     fr(`<w:t xml:space="preserve">Pagina </w:t>`), fr(`<w:fldChar w:fldCharType="begin"/>`), fr(`<w:instrText xml:space="preserve"> PAGE </w:instrText>`),
     fr(`<w:fldChar w:fldCharType="separate"/>`), fr(`<w:t>1</w:t>`), fr(`<w:fldChar w:fldCharType="end"/>`)
@@ -1253,7 +1269,9 @@ function pdfKit(jsPDF){
   K.footer = left => {
     const pages = doc.getNumberOfPages();
     for(let i=1;i<=pages;i++){
-      doc.setPage(i); color(C.muted); font("normal", 8);
+      doc.setPage(i); color(C.muted); font("italic", 6.5);
+      doc.text(doc.splitTextToSize(DOC_NOTICE, PW-2*M), PW/2, 283.5, {align:"center"});
+      font("normal", 8);
       doc.text(left, M, 290); doc.text(`Pagina ${i} di ${pages}`, PW-M, 290, {align:"right"});
     }
   };
@@ -2121,19 +2139,14 @@ function listHTML(){
   const SD = statsData();                                           // una volta sola per il riquadro del mese
   const hid = !!settings.homeHideMoney;
   h += alertsPanelHTML() + `<div class="money-eye"><button type="button" class="eye-btn" id="moneyEye" data-a="toggleHomeMoney" aria-pressed="${hid}" title="${hid ? "Mostra gli importi" : "Nascondi gli importi"}">${hid ? "🙈" : "👁"}<span>${hid ? "Mostra importi" : "Nascondi importi"}</span></button></div>
-  <div class="totals home-tot">
-    <div><b>${clients.length}</b><span>clienti</span></div>
-    <div class="${nDueClients ? "owed" : ""}" id="dueClients"><b>${nDueClients}</b><span>${nDueClients === 1 ? "cliente da regolarizzare" : "clienti da regolarizzare"}</span></div>
-    <div><b>${sLeft}</b><span>sedute da fare</span></div>
-    <div class="owed" id="dueCell"><b>${hm(due)}</b><span>da incassare</span><small>quote non saldate dei clienti</small></div>
+  <div class="dash dash-gen" id="dashGen" aria-label="Situazione generale">
+    <div class="dash-title"><span class="dt-ico" aria-hidden="true">📊</span><b>Generale</b></div>
+    <div class="dc"><b>${clients.length}</b><span>${clients.length === 1 ? "cliente" : "clienti"}</span></div>
+    <div class="dc ${nDueClients ? "c-owed" : ""}" id="dueClients"><b>${nDueClients}</b><span>${nDueClients === 1 ? "cliente da regolarizzare" : "clienti da regolarizzare"}</span></div>
+    <div class="dc"><b>${sLeft}</b><span>sedute da fare</span></div>
+    <div class="dc c-owed" id="dueCell"><b>${hm(due)}</b><span>da incassare</span><small>quote non saldate dai clienti</small></div>
   </div>
-  <section class="month-panel" aria-label="Il mese scelto">
-    <div class="mp-head">${earnPickHTML(SD)}</div>
-    <div class="month-grid">
-      ${earnValueHTML(SD)}
-      ${monthExpNetHTML(SD)}
-    </div>
-  </section>
+  ${monthDashHTML(SD)}
   <div class="searchbar" role="search">
     <input class="search" id="search" type="search" enterkeyhint="search" placeholder="Cerca un cliente…" value="${esc(query)}" aria-label="Cerca un cliente" autocomplete="off">
     ${q ? `<button class="s-btn s-clear" data-a="clearSearch" aria-label="Cancella la ricerca" title="Cancella">✕</button>` : ""}
@@ -3354,7 +3367,7 @@ $("delBackupBtn").addEventListener("click", async ()=>{
 $("delBackupOk").addEventListener("change", ()=>{ $("delErr").textContent = ""; });
 function delDialog(o){
   $("delTitle").textContent = o.title; $("delText").textContent = o.text;
-  $("delOpts").innerHTML = (o.opts || []).map(x=>`<label class="check"><input type="checkbox" value="${x.k}"${x.on ? " checked" : ""}${x.lock ? " disabled" : ""}><span>${esc(x.label)}</span></label>`).join("");
+  $("delOpts").innerHTML = (o.opts || []).map(x=>`<label class="check"><input type="checkbox" value="${x.k}"${x.group ? ` data-group="${x.group}"` : ""}${x.on ? " checked" : ""}${x.lock ? " disabled" : ""}><span>${esc(x.label)}</span></label>`).join("");
   $("delOpts").hidden = !(o.opts && o.opts.length);
   delNeedWord = !!o.typeWord; $("delTypeWrap").hidden = !delNeedWord; $("delType").value = "";
   delNeedBackup = !!o.backup; $("delBackup").hidden = !delNeedBackup; $("delBackupOk").checked = false;
@@ -3411,15 +3424,23 @@ async function deleteClient(id){
   if(errs.length) await messageBox("Cartella eliminata dal gestionale", "Non sono riuscito a eliminare tutto nel cloud:\n\n" + errs.join("\n\n"));
   else toast(sel.length ? "Cartella eliminata, anche nel cloud" : "Cartella eliminata");
 }
+/* caselle alternative (una sola scelta): spuntandone una si toglie l'altra, e ne resta sempre una */
+$("delOpts").addEventListener("change", e=>{
+  const t = e.target, g = t.dataset && t.dataset.group; if(!g) return;
+  const all = [...$("delOpts").querySelectorAll(`input[data-group="${g}"]`)];
+  if(t.checked) all.forEach(x=>{ if(x !== t) x.checked = false; }); else t.checked = true;
+});
 async function wipeAll(){
   if(exporting) return;
-  const opts = [{k:"data", label:`Tutti i clienti e i dati del gestionale (${clients.length} ${clients.length === 1 ? "cartella" : "cartelle"})`, on:true, lock:true}];
+  const n = clients.length, nc = `${n} ${n === 1 ? "cartella" : "cartelle"}`;
+  const opts = [{k:"data", group:"wipe", on:true, label:`Solo i dati: cartelle dei clienti (${nc}), sedute, pagamenti, pacchetti e spese di gestione. Il programma resta con le tue impostazioni e riparte da zero, pronto all'uso.`},
+                {k:"all", group:"wipe", label:`Tutto: dati e impostazioni del programma (soglia avvisi, preferenze, occhietto…), come il primo giorno.`}];
   if(cloudAvailable()){
     opts.push({k:"dropbox", label:`Anche la cartella “${DRIVE_FOLDER}” su Dropbox, con tutto quello che contiene`});
     opts.push({k:"drive", label:`Anche la cartella “${DRIVE_FOLDER}” su Google Drive, con tutto quello che contiene (va nel cestino)`});
   }
   const sel = await delDialog({title:"Cancellare tutto?",
-    text:"Il gestionale torna vuoto come il primo giorno. Non si può annullare: se vuoi tenere una copia, fai prima un backup." +
+    text:"Scegli cosa cancellare. Non si può annullare: scarica SEMPRE prima il backup ZIP, è l'unico modo per recuperare i dati." +
       (cloudAvailable() ? "\n\nSe elimini anche le cartelle nel cloud, i clienti con cui le hai condivise non le vedranno più." : ""),
     opts, ok:"Cancella tutto", typeWord:true, backup: clients.length > 0});
   if(!sel) return;
@@ -3435,7 +3456,12 @@ async function wipeAll(){
       catch(e){ console.error(e); errs.push("Google Drive: " + cloudErrorText(e, "drive")); }
     }
     for(const cid of clients.map(x=>x.id)) await removeClient(cid);
+    if(!sel.includes("all")){                                        // solo i dati: tengo le impostazioni, tolgo le spese
+      settings.expenses = {items:[], pays:[], skips:[]}; await saveSettings();
+    } else {
     settings = {trainerName:"", driveFolderId: settings.driveFolderId || "", exportDest:"device", backupDest:"drive", followSvcs:["drive"], lastBackup: settings.lastBackup || ""};
+    await saveSettings();
+    }
     await saveSettings();
   } finally { exporting = false; }
   openId = null; query = ""; openPkgs.clear();
@@ -4153,20 +4179,7 @@ function earnMonthKey(D){
   const nowK = today().slice(0,7), last = [nowK, ...D.span].sort().pop();
   return earnSel && earnSel <= last ? earnSel : nowK;
 }
-function earnPickHTML(D){
-  const k = earnMonthKey(D), nowK = today().slice(0,7);
-  return `<button type="button" class="month-pick" id="earnPick" data-a="pickMonth" data-m="${k}" aria-label="Scegli il mese da vedere">
-      <span>📅 Mese</span><b>${esc(monthCap(k))} ▾</b><span>${k === nowK ? "in corso" : "tocca per cambiare"}</span></button>`;
-}
-function earnValueHTML(D){
-  const k = earnMonthKey(D);
-  const nPk = clients.reduce((t,c)=>t + allPackages(c).filter(p=>isDate(p.start) && p.start.slice(0,7) === k && pkgUsed(p)).length, 0);
-  return `<div class="earn-val" id="earnCell" data-a="pickMonth" role="button" tabindex="0" aria-label="Guadagnato a ${esc(monthLabel(k))}: tocca per cambiare mese">
-      <b id="earnValue">${hm(D.month(k).income)}</b>
-      <span>guadagnato</span><small id="earnInfo">${nPk} ${nPk === 1 ? "pacchetto iniziato" : "pacchetti iniziati"} a ${esc(monthLabel(k))}</small>
-    </div>`;
-}
-/* spese di gestione del mese scelto (mensili, annuali, una tantum: nel mese in cui le paghi) e netto */
+/* spese di gestione pagate nei mesi indicati, divise per tipo (mensili, annuali, una tantum) */
 function expByKind(keys){
   const d = expData(), set = new Set(keys), out = {monthly:0, yearly:0, once:0};
   d.pays.forEach(p=>{
@@ -4178,14 +4191,23 @@ function expByKind(keys){
 }
 function kindLine(bk, fmt){
   const f = fmt || hm;
-  const parts = [["monthly","mensili"],["yearly","annuali"],["once","una tantum"]].filter(([k])=>bk[k] > 0).map(([k,l])=>`${l} ${f(bk[k])}`);
-  return parts.join(" · ");
+  return [["monthly","mensili"],["yearly","annuali"],["once","una tantum"]].filter(([k])=>bk[k] > 0).map(([k,l])=>`${l} ${f(bk[k])}`).join(" · ");
 }
-function monthExpNetHTML(D){
-  const k = earnMonthKey(D), m = D.month(k), exp = m.expense || 0, net = round2(m.income - exp), bk = expByKind([k]);
-  return `<div class="exp-cell" id="expMonthCell" data-a="openExp" role="button" tabindex="0" aria-label="Spese di gestione di ${esc(monthLabel(k))}">
-      <b id="expMonthValue">${hm(exp)}</b><span>spese</span>${exp > 0 ? `<small id="expKinds">${kindLine(bk)}</small>` : `<small>nessuna spesa di gestione</small>`}</div>
-    <div class="net-cell ${net < 0 ? "loss" : ""}" id="netMonthCell"><b id="netMonthValue">${hm(net)}</b><span>guadagno netto mensile</span><small>guadagnato − spese</small></div>`;
+function monthDashHTML(D){
+  const k = earnMonthKey(D), nowK = today().slice(0,7), m = D.month(k);
+  const inc = m.income, exp = m.expense || 0, net = round2(inc - exp), dueM = dueForMonth(k), bk = expByKind([k]);
+  const nPk = clients.reduce((t,c)=>t + allPackages(c).filter(p=>isDate(p.start) && p.start.slice(0,7) === k && pkgUsed(p)).length, 0);
+  const ml = esc(monthLabel(k));
+  const expDetail = exp > 0 ? [["monthly","mensili"],["yearly","annuali"],["once","una tantum"]].filter(([x])=>bk[x] > 0)
+      .map(([x,l])=>x === "yearly" ? `annuali ${hm(bk[x])} (pagate in questo mese)` : `${l} ${hm(bk[x])}`).join(" · ") : "nessuna spesa di gestione";
+  return `<div class="dash dash-month" id="dashMonth" aria-label="Il mese scelto">
+    <button type="button" class="dash-title month-pick" id="earnPick" data-a="pickMonth" data-m="${k}" aria-label="Scegli il mese da vedere">
+      <span class="dt-ico" aria-hidden="true">📅</span><b>${esc(monthCap(k))}&nbsp;▾</b><span>${k === nowK ? "mese in corso" : "tocca per cambiare"}</span></button>
+    <div class="dc c-in" id="earnCell" data-a="pickMonth" role="button" tabindex="0"><b id="earnValue">${hm(inc)}</b><span>guadagno del mese</span><small id="earnInfo">incassato · ${nPk} ${nPk === 1 ? "pacchetto iniziato" : "pacchetti iniziati"} a ${ml}</small></div>
+    <div class="dc c-owed" id="dueMonthCell"><b id="dueMonthValue">${hm(dueM)}</b><span>ancora da incassare</span><small>quote non saldate dei pacchetti di ${ml}</small></div>
+    <div class="dc c-exp" id="expMonthCell" data-a="openExp" role="button" tabindex="0"><b id="expMonthValue">${hm(exp)}</b><span>spese del mese</span><small id="expKinds">${expDetail}</small></div>
+    <div class="dc c-net" id="netMonthCell"><b id="netMonthValue">${hm(net)}</b><span>guadagno netto mensile</span><small>guadagno − spese</small></div>
+  </div>`;
 }
 /* schermata grande per scegliere il mese: 12 riquadri, anni con ‹ ›, e l'importo di ogni mese */
 let pickYear = "";
