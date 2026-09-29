@@ -77,20 +77,43 @@ a.btn[hidden]{display:none}
 .miss-st.lost{background:var(--owed-soft);color:var(--owed);border-color:var(--owed)}
 .miss-st.recover{color:var(--owed)}
 .miss-st.recovered{background:var(--moss-soft);color:var(--moss);border-color:var(--moss)}
-.miss-list{display:grid;gap:8px}
-.miss-row{border:1px solid var(--line);border-left:4px solid var(--owed);border-radius:10px;padding:10px 12px}
-.miss-row.recovered{border-left-color:var(--moss)}
-.mr-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.mr-note{margin:6px 0 0;font-size:.92rem}
-.mr-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-#sMissOpts[hidden],#sMissL[hidden]{display:none}
-#sMissOpts .seg{margin:8px 0 4px}
+.miss-list{display:grid;gap:6px}
+.miss-row{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-left:4px solid var(--owed);border-radius:10px;padding:6px 8px 6px 12px}
+.miss-row .miss-st{margin-right:auto}
+#sMissL[hidden],#sNoteW[hidden]{display:none}
+.totals.home-tot{grid-template-columns:repeat(4,1fr);margin-bottom:12px}
+@media (max-width:640px){ .totals.home-tot{grid-template-columns:repeat(2,1fr)} }
+/* riquadro del mese: tasto del mese in alto, sotto guadagnato · spese · guadagno netto mensile su una riga */
+.month-panel{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:24px;background:var(--line)}
+.month-panel .mp-head{background:var(--paper)}
+.month-panel .mp-head .month-pick{width:100%;flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding:10px 14px}
+.month-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:1px}
+.month-grid > div{background:var(--paper);padding:12px 14px;min-width:0}
+.month-grid b{display:block;font-family:"Barlow Condensed",sans-serif;font-size:1.7rem;line-height:1}
+.month-grid span{display:block;color:var(--muted);font-size:.9rem;margin-top:2px}
+.month-grid small{display:block;margin-top:3px;font-size:.76rem;color:var(--muted);overflow-wrap:anywhere}
+.month-grid .earn-val b{color:var(--moss)}
+.month-grid .exp-cell{cursor:pointer}
+.month-grid .exp-cell b{color:var(--owed)}
+.month-grid .net-cell b{color:var(--moss)}
+.month-grid .net-cell.loss b{color:var(--danger)}
+.month-grid .exp-cell:hover,.month-grid .earn-val:hover{background:var(--moss-soft)}
+.month-grid .earn-val{cursor:pointer}
+@media (max-width:520px){ .month-grid > div{padding:10px 8px} .month-grid b{font-size:1.25rem} .month-grid span{font-size:.8rem} .month-grid small{font-size:.7rem} }
+.totals small{display:block;margin-top:3px;font-size:.76rem;color:var(--muted)}
+.totals .exp-cell,.totals .net-cell,.totals .earn-val{cursor:default}
+.totals .exp-cell{cursor:pointer}
+.totals .exp-cell b{color:var(--owed)}
+.totals .net-cell b{color:var(--moss)}
+.totals .net-cell.loss b{color:var(--danger)}
+.totals small{display:block;margin-top:3px;font-size:.78rem;color:var(--muted);overflow-wrap:anywhere}
+.totals .exp-cell:hover{background:var(--moss-soft)}
 .money-eye{display:flex;justify-content:flex-end;margin:0 0 4px}
 .eye-btn{display:inline-flex;align-items:center;gap:4px;background:none;border:none;padding:4px 6px;min-height:28px;border-radius:8px;color:var(--muted);font-size:.72rem;font-weight:600;cursor:pointer;line-height:1}
 .eye-btn:hover{background:var(--moss-soft);color:var(--pine)}
 .eye-btn[aria-pressed="true"]{color:var(--owed)}
-.totals .month-pick{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:none;border-radius:0;background:var(--paper);padding:12px 14px;cursor:pointer;color:var(--pine);font:inherit;min-height:44px}
-.totals .month-pick b{font-family:"Barlow Condensed",sans-serif;font-size:1.35rem;line-height:1.1;color:var(--moss)}
+.month-pick{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:none;border-radius:0;background:var(--paper);padding:12px 14px;cursor:pointer;color:var(--pine);font:inherit;min-height:44px}
+.month-pick b{font-family:"Barlow Condensed",sans-serif;font-size:1.35rem;line-height:1.1;color:var(--moss)}
 .totals .month-pick:hover,.totals .earn-val:hover{background:var(--moss-soft)}
 .totals .earn-val{cursor:pointer}
 .totals .earn-val b{color:var(--moss)}
@@ -647,12 +670,9 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
   <h3 id="sesTitle">Segna seduta</h3>
   <label for="sDate">Data</label>
   <input id="sDate" type="date" required>
-  <label class="check carry miss-check" id="sMissL"><input type="checkbox" id="sMiss"><span>❌ Lezione saltata (il cliente non si è presentato o ha disdetto)</span></label>
-  <div id="sMissOpts" hidden>
-    <div class="seg"><label><input type="radio" name="sMissKind" value="lost" checked><span>Persa</span></label><label><input type="radio" name="sMissKind" value="recover"><span>Da recuperare</span></label></div>
-  </div>
-  <label for="sNote" id="sNoteL">Cosa avete fatto (facoltativo)</label>
-  <input id="sNote" placeholder="es. Gambe + core" autocomplete="off">
+  <label class="check carry miss-check" id="sMissL"><input type="checkbox" id="sMiss"><span>❌ Lezione saltata non recuperabile</span></label>
+  <div id="sNoteW"><label for="sNote">Cosa avete fatto (facoltativo)</label>
+  <input id="sNote" placeholder="es. Gambe + core" autocomplete="off"></div>
   <p class="hint" id="sesHint">Le sedute fatte aumentano di 1.</p>
   <div class="dlg-actions">
     <button class="btn ghost" value="cancel" formnovalidate>Annulla</button>
@@ -845,12 +865,10 @@ function normFollow(f){
   };
 }
 /* Pacchetti conclusi, tenuti nello storico della cartella */
-/* Lezioni saltate: “lost” = persa (si scala dal pacchetto, non è una seduta fatta),
-   “recover” = da recuperare (non si scala), “recovered” = recuperata (è diventata una seduta fatta) */
+/* Lezioni saltate non recuperabili: si scalano dal pacchetto ma non sono sedute fatte */
 function normMisses(list){
-  return (Array.isArray(list) ? list : []).filter(x=>x && typeof x === "object").map(x=>({
-    id: x.id || uid(), date: /^\d{4}-\d{2}-\d{2}$/.test(x.date||"") ? x.date : "", note: String(x.note || ""),
-    status: ["lost","recover","recovered"].includes(x.status) ? x.status : "lost" }));
+  return (Array.isArray(list) ? list : []).filter(x=>x && typeof x === "object" && x.status !== "recovered").map(x=>({
+    id: x.id || uid(), date: /^\d{4}-\d{2}-\d{2}$/.test(x.date||"") ? x.date : "", note: String(x.note || ""), status: "lost" }));
 }
 const missCount = (c, st) => (c.missLog || []).filter(x=>x.status === st).length;
 function normPackage(p){
@@ -864,8 +882,8 @@ function normPackage(p){
 }
 function stats(c){
   const total = c.totalSessions, done = c.doneSessions, carriedOut = Number(c.carriedOut)||0;
-  const lost = missCount(c, "lost"), toRecover = missCount(c, "recover");   // le perse consumano il pacchetto, le da recuperare no
-  return { total, done, lost, toRecover, left:Math.max(total-done-lost,0), price:c.price, paid:c.paid,
+  const lost = missCount(c, "lost");                          // le lezioni saltate consumano il pacchetto
+  return { total, done, lost, left:Math.max(total-done-lost,0), price:c.price, paid:c.paid,
            due:round2(c.price - c.paid - carriedOut),          // se il saldo è stato spostato nel pacchetto dopo, qui non si conta più
            start:c.start||"", end:c.end||"", complete: total>0 && done+lost>=total,
            carriedIn:Number(c.carriedIn)||0, carriedOut };
@@ -882,8 +900,7 @@ function sessRows(s){
   const r = [];
   if(s.start) r.push(s.end ? ["Periodo", `dal ${itDate(s.start)} al ${itDate(s.end)}`] : ["Inizio pacchetto", itDate(s.start)]);
   r.push(["Sedute nel pacchetto", String(s.total)], ["Sedute fatte", String(s.done)]);
-  if(s.lost) r.push(["Lezioni saltate (perse)", String(s.lost)]);
-  if(s.toRecover) r.push(["Lezioni da recuperare", String(s.toRecover)]);
+  if(s.lost) r.push(["Lezioni saltate (non recuperabili)", String(s.lost)]);
   r.push(["Sedute da fare", String(s.left)]);
   if(s.total > 0) r.push(["Stato sedute", s.complete ? "Completato" : "In corso"]);
   return r;
@@ -979,13 +996,13 @@ function dKv(rows){
 }
 function dHeadRow(cols, widths){ return wRow(cols.map((t,i)=>wCell(wPara(wRun(t,{bold:true,color:DC.MOSS,size:19})), widths[i], {fill:"D7E6DC"})), true); }
 function dEmpty(t){ return wPara(wRun(t,{italic:true,color:DC.MUTED}), {before:60}); }
-const MISS_DOC = {lost:"Persa", recover:"Da recuperare", recovered:"Recuperata"};
+const MISS_DOC = {lost:"Saltata non recuperabile"};
 const missSorted = c => [...(c.missLog || [])].sort(byDateAsc);
-/* tabella delle lezioni saltate (Data · Esito · Motivo): si rilegge all'importazione */
+/* tabella delle lezioni saltate (Data · Esito): si rilegge all'importazione */
 function dMisses(c){
-  const W = DC.W, wd = [1900, 2200, W-4100];
-  const rows = [dHeadRow(["Data","Esito","Motivo"], wd)];
-  missSorted(c).forEach(x=>rows.push(wRow([wCell(wPara(wRun(itDate(x.date))), wd[0]), wCell(wPara(wRun(MISS_DOC[x.status])), wd[1]), wCell(wPara(wRun(x.note||"—")), wd[2])])));
+  const W = DC.W, wd = [2400, W-2400];
+  const rows = [dHeadRow(["Data","Esito"], wd)];
+  missSorted(c).forEach(x=>rows.push(wRow([wCell(wPara(wRun(itDate(x.date))), wd[0]), wCell(wPara(wRun(MISS_DOC.lost)), wd[1])])));
   return wTable(rows, wd);
 }
 function dSessions(c, withNotes){
@@ -1226,7 +1243,7 @@ function pdfKit(jsPDF){
     if(withNotes) K.table([{t:"N°",w:14,muted:true},{t:"Data",w:32},{t:"Note seduta",w:CW-46}], list.map((x,i)=>[String(i+1), itDate(x.date), x.note||"—"]));
     else K.table([{t:"N°",w:14,muted:true},{t:"Data",w:CW-14}], list.map((x,i)=>[String(i+1), itDate(x.date)]));
   };
-  K.misses = c => K.table([{t:"Data",w:32},{t:"Esito",w:36},{t:"Motivo",w:CW-68}], missSorted(c).map(x=>[itDate(x.date), MISS_DOC[x.status], x.note||"—"]));
+  K.misses = c => K.table([{t:"Data",w:40},{t:"Esito",w:CW-40}], missSorted(c).map(x=>[itDate(x.date), MISS_DOC.lost]));
   K.payments = c => {
     if(!c.payLog.length) return K.empty("Nessun pagamento registrato nello storico.");
     const rows = [...c.payLog].sort(byDateAsc).map(x=>[itDate(x.date), eurDoc(x.amount), x.method||"—", x.note||"—"]);
@@ -1311,7 +1328,7 @@ function tSessions(c, withNotes){
   return [...c.sessionLog].sort(byDateAsc).map((x,i)=>`${String(i+1).padStart(3," ")}.  ${itDate(x.date)}${withNotes && x.note ? "   " + x.note : ""}`).join("\n") + "\n";
 }
 function tMisses(c){
-  return missSorted(c).map(x=>`  ${itDate(x.date)}   ${MISS_DOC[x.status]}${x.note ? "   " + x.note : ""}`).join("\n") + "\n";
+  return missSorted(c).map(x=>`  ${itDate(x.date)}   ${MISS_DOC.lost}`).join("\n") + "\n";
 }
 function tPayments(c){
   if(!c.payLog.length) return "Nessun pagamento registrato.\n";
@@ -1436,8 +1453,7 @@ function clientFromTables(tables, name){
     } else if(head.some(h=>h.startsWith("esito"))){
       found = true;
       const iD = head.indexOf("data"), iE = head.findIndex(h=>h.startsWith("esito")), iN = head.findIndex(h=>h.startsWith("motivo") || h.startsWith("note"));
-      const st = v => { const s = String(v||"").toLowerCase(); return s.startsWith("recuperata") ? "recovered" : s.startsWith("da recuperare") ? "recover" : "lost"; };
-      rows.slice(1).forEach(r=>{ if(r[iD]) (target.missLog = target.missLog || []).push({id:uid(), date:parseDate(r[iD]), status:st(r[iE]), note:iN>=0?clean(r[iN]):""}); });
+      rows.slice(1).forEach(r=>{ if(r[iD]) (target.missLog = target.missLog || []).push({id:uid(), date:parseDate(r[iD]), status:"lost", note:iN>=0?clean(r[iN]):""}); });
     } else if(head.includes("data")){
       found = true;
       const iD = head.indexOf("data"), iN = head.findIndex(h=>h.startsWith("note"));
@@ -2105,14 +2121,19 @@ function listHTML(){
   const SD = statsData();                                           // una volta sola per il riquadro del mese
   const hid = !!settings.homeHideMoney;
   h += alertsPanelHTML() + `<div class="money-eye"><button type="button" class="eye-btn" id="moneyEye" data-a="toggleHomeMoney" aria-pressed="${hid}" title="${hid ? "Mostra gli importi" : "Nascondi gli importi"}">${hid ? "🙈" : "👁"}<span>${hid ? "Mostra importi" : "Nascondi importi"}</span></button></div>
-  <div class="totals">
+  <div class="totals home-tot">
     <div><b>${clients.length}</b><span>clienti</span></div>
     <div class="${nDueClients ? "owed" : ""}" id="dueClients"><b>${nDueClients}</b><span>${nDueClients === 1 ? "cliente da regolarizzare" : "clienti da regolarizzare"}</span></div>
     <div><b>${sLeft}</b><span>sedute da fare</span></div>
-    ${earnPickHTML(SD)}
-    <div class="owed"><b>${hm(due)}</b><span>da incassare</span></div>
-    ${earnValueHTML(SD)}
+    <div class="owed" id="dueCell"><b>${hm(due)}</b><span>da incassare</span><small>quote non saldate dei clienti</small></div>
   </div>
+  <section class="month-panel" aria-label="Il mese scelto">
+    <div class="mp-head">${earnPickHTML(SD)}</div>
+    <div class="month-grid">
+      ${earnValueHTML(SD)}
+      ${monthExpNetHTML(SD)}
+    </div>
+  </section>
   <div class="searchbar" role="search">
     <input class="search" id="search" type="search" enterkeyhint="search" placeholder="Cerca un cliente…" value="${esc(query)}" aria-label="Cerca un cliente" autocomplete="off">
     ${q ? `<button class="s-btn s-clear" data-a="clearSearch" aria-label="Cancella la ricerca" title="Cancella">✕</button>` : ""}
@@ -2157,7 +2178,6 @@ function alertsFor(c){
     if(s.complete) out.push({k:"done", w:2, t:"Pacchetto finito"});
     else if(s.left <= th) out.push({k:"near", w:1, t: s.left === 1 ? "Manca 1 seduta" : `Mancano ${s.left} sedute`});
   }
-  if(s.toRecover) out.push({k:"recover", w:1, t: s.toRecover === 1 ? "1 lezione da recuperare" : `${s.toRecover} lezioni da recuperare`});
   if(s.due > 0 && ending) out.push({k:"due", w:3, t:`da saldare ${hm(s.due)}`});
   const oldDue = round2(c.packages.reduce((a,p)=>a + Math.max(stats(pkgClient(c,p)).due, 0), 0));
   if(oldDue > 0) out.push({k:"old", w:3, t:`pacchetti precedenti da saldare ${hm(oldDue)}`});
@@ -2346,20 +2366,15 @@ function detailHTML(c){
   h += `</section>`;
   return h + packagesHTML(c);
 }
-/* Lezioni saltate del pacchetto in corso */
-const MISS_LAB = {lost:"Persa", recover:"Da recuperare", recovered:"Recuperata"};
+/* Lezioni saltate non recuperabili del pacchetto in corso */
 function missHTML(c, hasPast){
   if(!c.missLog.length) return "";
-  const s = stats(c);
+  const n = c.missLog.length;
   let h = `<section class="block miss-block"><div class="bh"><h3>Lezioni saltate${hasPast ? " del pacchetto in corso" : ""}</h3></div>
-    <p class="sub">${s.lost} ${s.lost === 1 ? "persa (scalata dal pacchetto)" : "perse (scalate dal pacchetto)"}${s.toRecover ? ` · ${s.toRecover} da recuperare` : ""}</p>
-    <div class="miss-list">`;
+    <p class="sub">${n} ${n === 1 ? "lezione saltata non recuperabile, scalata" : "lezioni saltate non recuperabili, scalate"} dal pacchetto.</p><div class="miss-list">`;
   [...c.missLog].sort((x,y)=>(y.date||"").localeCompare(x.date||"")).forEach(x=>{
-    h += `<div class="miss-row ${x.status}">
-      <div class="mr-top"><b>${itDate(x.date)}</b><span class="miss-st ${x.status}">${MISS_LAB[x.status]}</span></div>
-      ${x.note ? `<p class="mr-note">${esc(x.note)}</p>` : ""}
-      <div class="mr-acts">${x.status === "recover" ? `<button class="btn small primary" data-a="missRecovered" data-id="${esc(x.id)}">✓ Recuperata</button><button class="btn small ghost" data-a="missLost" data-id="${esc(x.id)}">Persa</button>` : ""}<button class="btn small ghost" data-a="delMiss" data-id="${esc(x.id)}" aria-label="Elimina lezione saltata del ${itDate(x.date)}">✕ Elimina</button></div>
-    </div>`;
+    h += `<div class="miss-row"><b>${itDate(x.date)}</b><span class="miss-st">Saltata non recuperabile</span>
+      <button class="x" data-a="delMiss" data-id="${esc(x.id)}" aria-label="Elimina lezione saltata del ${itDate(x.date)}" title="Elimina (errore)">✕</button></div>`;
   });
   return h + `</div></section>`;
 }
@@ -3148,26 +3163,10 @@ async function handle(a, el){
     case "followAll": return updateAllFollow();
     case "import": $("importInput").value=""; $("importInput").click(); return;
     case "addSes": return c && addSession(c.id);
-    case "missRecovered": {
-      if(!c) return;
-      const x = c.missLog.find(m=>m.id === el.dataset.id); if(!x) return;
-      const n = clone(c), m = n.missLog.find(y=>y.id === x.id);
-      m.status = "recovered";                                        // è diventata una seduta fatta
-      n.doneSessions += 1;
-      n.sessionLog.push({id:uid(), date:today(), note:`Recupero della lezione del ${itDate(x.date)}`});
-      commit(n, true); render(); toast("Lezione recuperata: conta come seduta fatta");
-      return;
-    }
-    case "missLost": {
-      if(!c) return;
-      const n = clone(c), m = n.missLog.find(y=>y.id === el.dataset.id); if(!m) return;
-      m.status = "lost"; commit(n, true); render(); toast("Lezione segnata come persa (scalata dal pacchetto)");
-      return;
-    }
     case "delMiss": {
       if(!c) return;
       const x = c.missLog.find(m=>m.id === el.dataset.id); if(!x) return;
-      if(!(await messageBox("Eliminare la lezione saltata?", `La lezione saltata del ${itDate(x.date)} verrà tolta${x.status === "recovered" ? " (la seduta di recupero resta nello storico sedute)" : ""}.`, {ok:"Elimina", cancel:"Annulla", danger:true}))) return;
+      if(!(await messageBox("Eliminare la lezione saltata?", `La lezione saltata del ${itDate(x.date)} verrà tolta e il pacchetto la riavrà disponibile.`, {ok:"Elimina", cancel:"Annulla", danger:true}))) return;
       const cur = getClient(c.id); if(!cur) return;
       const n = clone(cur); n.missLog = n.missLog.filter(m=>m.id !== x.id); commit(n, true); render(); toast("Lezione saltata eliminata");
       return;
@@ -3285,15 +3284,14 @@ async function addSession(id){
   }
   sesDialogMode(false);
   $("sDate").value = today(); $("sNote").value = "";
-  $("sMiss").checked = false; document.querySelectorAll('input[name="sMissKind"]').forEach(r=>r.checked = r.value === "lost"); syncMissUI();
+  $("sMiss").checked = false; syncMissUI();
   if(await ask("dlgSes") !== "ok") return;
   const cur = getClient(id); if(!cur) return;
   const n = clone(cur), date = $("sDate").value || today(), note = $("sNote").value.trim();
-  if($("sMiss").checked){                                          // lezione saltata: non è una seduta fatta
-    const kind = (document.querySelector('input[name="sMissKind"]:checked') || {}).value === "recover" ? "recover" : "lost";
-    n.missLog.push({id:uid(), date, note, status:kind});
+  if($("sMiss").checked){                                          // lezione saltata non recuperabile: si scala, non è una seduta fatta
+    n.missLog.push({id:uid(), date, note:"", status:"lost"});
     commit(n, true); render();
-    toast(kind === "lost" ? `Lezione saltata segnata come persa (scalata dal pacchetto)` : `Lezione saltata da recuperare`);
+    toast("Lezione saltata non recuperabile: scalata dal pacchetto");
     return;
   }
   n.sessionLog.push({id:uid(), date, note});
@@ -3487,20 +3485,15 @@ async function renameClient(id){
 /* ======================= MODIFICA DI TUTTO ======================= */
 const logOwner = (c, pkg) => pkg ? (c.packages || []).find(p=>p.id===pkg) : c;
 function syncMissUI(){
-  const on = $("sMiss").checked;
-  $("sMissOpts").hidden = !on;
-  $("sNoteL").textContent = on ? "Motivo (facoltativo)" : "Cosa avete fatto (facoltativo)";
-  $("sNote").placeholder = on ? "es. disdetta all'ultimo, malato" : "es. Gambe + core";
-  $("sesOk").textContent = on ? "Segna lezione saltata" : ($("sesTitle").textContent === "Modifica seduta" ? "Salva" : "Segna seduta");
-  const lost = (document.querySelector('input[name="sMissKind"]:checked') || {}).value !== "recover";
-  $("sesHint").textContent = on ? (lost ? "Persa: si scala dal pacchetto, ma non conta come seduta fatta." : "Da recuperare: non si scala; quando la recuperi tocca “✓ Recuperata” nella sezione “Lezioni saltate”.")
-    : ($("sesTitle").textContent === "Modifica seduta" ? "Cambi data e note: il numero di sedute fatte non cambia." : "Le sedute fatte aumentano di 1.");
+  const on = $("sMiss").checked, edit = $("sesTitle").textContent === "Modifica seduta";
+  $("sNoteW").hidden = on;                                           // saltata: basta la spunta
+  $("sesOk").textContent = on ? "Segna lezione saltata" : (edit ? "Salva" : "Segna seduta");
+  $("sesHint").textContent = on ? "Si scala dal pacchetto, ma non conta come seduta fatta."
+    : (edit ? "Cambi data e note: il numero di sedute fatte non cambia." : "Le sedute fatte aumentano di 1.");
 }
 $("sMiss").addEventListener("change", syncMissUI);
-document.querySelectorAll('input[name="sMissKind"]').forEach(r=>r.addEventListener("change", syncMissUI));
 function sesDialogMode(edit){
-  $("sMissL").hidden = !!edit; $("sMiss").checked = false; $("sMissOpts").hidden = true;
-  $("sNoteL").textContent = "Cosa avete fatto (facoltativo)";
+  $("sMissL").hidden = !!edit; $("sMiss").checked = false; $("sNoteW").hidden = false;
   $("sesTitle").textContent = edit ? "Modifica seduta" : "Segna seduta";
   $("sesOk").textContent = edit ? "Salva" : "Segna seduta";
   $("sesHint").textContent = edit ? "Cambi data e note: il numero di sedute fatte non cambia." : "Le sedute fatte aumentano di 1.";
@@ -3988,7 +3981,7 @@ function clientStats(c){
   const sessions = pk.reduce((a,p)=>a + (Number(p.doneSessions)||0), 0);
   return {
     c, packages: pk.length, renewals: Math.max(pk.length - 1, 0),
-    lost: pk.reduce((t,p)=>t + (p.missLog || []).filter(x=>x.status === "lost").length, 0),
+    lost: pk.reduce((t,p)=>t + (p.missLog || []).length, 0),
     typical: top ? {sessions: Number(top[0].split("|")[0]), price: Number(top[0].split("|")[1])} : null,
     every: gaps.length ? Math.round(gaps.reduce((a,b)=>a+b,0) / gaps.length) : null,
     earned, sessions, last, active: age !== null && age <= ACTIVE_DAYS
@@ -4072,11 +4065,11 @@ function statsHTML(){
     <div><b>${D.per.length ? Math.round(renewed / D.per.length * 100) : 0}%</b><span>ha rinnovato almeno una volta</span></div>
     <div><b id="kpiIncome">${money(pInc)}</b><span>entrate ${mode === "month" ? `nel ${year}` : "in totale"}</span></div>
     <div><b id="kpiSes">${pSes}</b><span>sedute svolte ${mode === "month" ? `nel ${year}` : "in tutti gli anni"}</span></div>
-    ${useExp ? `<div class="owed"><b id="kpiExpense">${money(pExp)}</b><span>uscite (spese di gestione) ${mode === "month" ? `nel ${year}` : "in totale"}</span></div>
+    ${useExp ? `<div class="owed"><b id="kpiExpense">${money(pExp)}</b><span>uscite (spese di gestione) ${mode === "month" ? `nel ${year}` : "in totale"}</span>${pExp > 0 ? `<small id="kpiExpKinds">${kindLine(expByKind(inPeriod), money)}</small>` : ""}</div>
     <div class="${pNet < 0 ? "loss" : "net"}"><b id="kpiNet">${money(pNet)}</b><span>guadagno netto (entrate − uscite)</span></div>
     <div><b id="kpiNetAvg">${money(round2(pNet / nMonths))}</b><span>netto medio al mese</span></div>` : ""}
     <div><b id="kpiSesAll">${allDone}</b><span>sedute svolte in totale (tutti i pacchetti)</span></div>
-    <div class="${allLost ? "owed" : ""}"><b id="kpiLost">${allLost}</b><span>lezioni saltate (perse) in totale</span></div>
+    <div class="${allLost ? "owed" : ""}"><b id="kpiLost">${allLost}</b><span>lezioni saltate (non recuperabili) in totale</span></div>
     <div class="net"><b id="kpiIncomeAll">${money(allIncome)}</b><span>entrate totali da quando hai iniziato</span></div>
   </div>
   <p class="hint">Attivo = almeno una seduta o un pagamento negli ultimi ${ACTIVE_DAYS} giorni.</p>`;
@@ -4166,12 +4159,33 @@ function earnPickHTML(D){
       <span>📅 Mese</span><b>${esc(monthCap(k))} ▾</b><span>${k === nowK ? "in corso" : "tocca per cambiare"}</span></button>`;
 }
 function earnValueHTML(D){
-  const k = earnMonthKey(D), due = dueForMonth(k);
+  const k = earnMonthKey(D);
   const nPk = clients.reduce((t,c)=>t + allPackages(c).filter(p=>isDate(p.start) && p.start.slice(0,7) === k && pkgUsed(p)).length, 0);
   return `<div class="earn-val" id="earnCell" data-a="pickMonth" role="button" tabindex="0" aria-label="Guadagnato a ${esc(monthLabel(k))}: tocca per cambiare mese">
       <b id="earnValue">${hm(D.month(k).income)}</b>
-      <span id="earnInfo">guadagnato a ${esc(monthLabel(k))} · ${nPk} ${nPk === 1 ? "pacchetto iniziato" : "pacchetti iniziati"}${due > 0 ? ` · da incassare ${hm(due)}` : ""}</span>
+      <span>guadagnato</span><small id="earnInfo">${nPk} ${nPk === 1 ? "pacchetto iniziato" : "pacchetti iniziati"} a ${esc(monthLabel(k))}</small>
     </div>`;
+}
+/* spese di gestione del mese scelto (mensili, annuali, una tantum: nel mese in cui le paghi) e netto */
+function expByKind(keys){
+  const d = expData(), set = new Set(keys), out = {monthly:0, yearly:0, once:0};
+  d.pays.forEach(p=>{
+    if(!isDate(p.date) || !set.has(p.date.slice(0,7))) return;
+    const it = d.items.find(x=>x.id === p.itemId), k = it && KIND[it.kind] ? it.kind : "monthly";
+    out[k] = round2(out[k] + (Number(p.amount)||0));
+  });
+  return out;
+}
+function kindLine(bk, fmt){
+  const f = fmt || hm;
+  const parts = [["monthly","mensili"],["yearly","annuali"],["once","una tantum"]].filter(([k])=>bk[k] > 0).map(([k,l])=>`${l} ${f(bk[k])}`);
+  return parts.join(" · ");
+}
+function monthExpNetHTML(D){
+  const k = earnMonthKey(D), m = D.month(k), exp = m.expense || 0, net = round2(m.income - exp), bk = expByKind([k]);
+  return `<div class="exp-cell" id="expMonthCell" data-a="openExp" role="button" tabindex="0" aria-label="Spese di gestione di ${esc(monthLabel(k))}">
+      <b id="expMonthValue">${hm(exp)}</b><span>spese</span>${exp > 0 ? `<small id="expKinds">${kindLine(bk)}</small>` : `<small>nessuna spesa di gestione</small>`}</div>
+    <div class="net-cell ${net < 0 ? "loss" : ""}" id="netMonthCell"><b id="netMonthValue">${hm(net)}</b><span>guadagno netto mensile</span><small>guadagnato − spese</small></div>`;
 }
 /* schermata grande per scegliere il mese: 12 riquadri, anni con ‹ ›, e l'importo di ogni mese */
 let pickYear = "";
