@@ -122,6 +122,56 @@ a.btn[hidden]{display:none}
 .totals .net-cell.loss b{color:var(--danger)}
 .totals small{display:block;margin-top:3px;font-size:.78rem;color:var(--muted);overflow-wrap:anywhere}
 .totals .exp-cell:hover{background:var(--moss-soft)}
+.paybar{display:block;margin:6px 0 4px}
+.paybar .pb-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:0 8px;font-size:.92rem}
+.paybar .pb-top strong{margin-left:auto;text-align:right}
+.paybar .pb-top > span{color:var(--muted)}
+.paybar .pb-top small{font-weight:500;color:var(--muted);font-size:.85em}
+.paybar .pb-top strong{white-space:nowrap;font-size:.95em}
+.paybar .pb-top > span{flex-shrink:0}
+.paybar .pb-track{display:block;height:9px;border-radius:999px;background:var(--owed);opacity:.9;overflow:hidden;margin-top:5px}
+.paybar .pb-fill{display:block;height:100%;background:var(--moss);border-radius:999px;transition:width .3s}
+.paybar.full .pb-track{background:var(--moss)}
+/* statistiche: due tabelle da 6 valori (+ il titolo) */
+.dash.dash6{grid-template-columns:repeat(7,1fr)}
+.dash.dash6 > *{padding:12px 10px}
+.dash.dash6 .dc b{font-size:1.3rem}
+.dash.dash6 .dc span{font-size:.84rem}
+.dash.dash6 .dc small{font-size:.72rem}
+@media (max-width:1100px){ .dash.dash6 .dc b{font-size:1.55rem} .dash.dash6{grid-template-columns:repeat(3,1fr)} .dash.dash6 .dash-title{grid-column:1/-1;min-height:0;flex-direction:row;align-items:baseline;justify-content:flex-start;flex-wrap:wrap;gap:4px 10px;padding:10px 12px} }
+@media (max-width:640px){ .dash.dash6{grid-template-columns:repeat(2,1fr)} }
+#ypGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+/* colori delle voci (uguali alla tabella del mese) */
+:root{--c-ses:#3b6fc4}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){--c-ses:#7aa7f0} }
+:root[data-theme="dark"]{--c-ses:#7aa7f0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:4px 0 8px}
+.legend .lg{display:inline-flex;align-items:center;gap:6px;margin:0;cursor:pointer;font-weight:600;font-size:.9rem;padding:4px 8px;border-radius:8px;border:1px solid var(--line)}
+.legend .lg input{position:absolute;opacity:0;width:1px;height:1px}
+.legend .lg i{width:14px;height:14px;border-radius:4px;display:inline-block}
+.legend .lg:has(input:not(:checked)){opacity:.45;text-decoration:line-through}
+.s-in i,.bar.s-in{fill:var(--moss);background:var(--moss)}
+.s-exp i,.bar.s-exp{fill:var(--danger);background:var(--danger)}
+.s-net i,.bar.s-net{fill:var(--pine);background:var(--pine)}
+.s-ses i{background:var(--c-ses);border-radius:50%}
+svg.ybars{width:100%;min-width:640px;height:auto;display:block}
+svg.ybars .axis{stroke:var(--line);stroke-width:1.5}
+svg.ybars .ax{font-size:10px;fill:var(--muted);text-anchor:end}
+svg.ybars .ax-r{fill:var(--c-ses);text-anchor:end}
+svg.ybars .lab{font-size:11px;fill:var(--muted);text-anchor:middle}
+svg.ybars .ses-line{fill:none;stroke:var(--c-ses);stroke-width:2}
+svg.ybars .ses-dot{fill:var(--c-ses);stroke:var(--paper);stroke-width:1.5}
+.pie-wrap{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin:8px 0}
+svg.pie{width:220px;max-width:100%;height:auto}
+svg.pie .slice{stroke:var(--paper);stroke-width:1}
+.pie-legend{flex:1;min-width:220px}
+.pie-legend ul{list-style:none;padding:0;margin:6px 0;display:grid;gap:4px}
+.pie-legend li{display:grid;grid-template-columns:14px 1fr auto 44px;gap:8px;align-items:center;font-size:.92rem}
+.pie-legend li i{width:14px;height:14px;border-radius:4px}
+.pie-legend li em{font-style:normal;color:var(--muted);text-align:right}
+.pl-tot{margin:0;font-weight:600}
+.calc-note{margin:8px 0}
+.calc-note summary{cursor:pointer;font-weight:600;color:var(--moss)}
 .money-eye{display:flex;justify-content:flex-end;margin:0 0 4px}
 .eye-btn{display:inline-flex;align-items:center;gap:4px;background:none;border:none;padding:4px 6px;min-height:28px;border-radius:8px;color:var(--muted);font-size:.72rem;font-weight:600;cursor:pointer;line-height:1}
 .eye-btn:hover{background:var(--moss-soft);color:var(--pine)}
@@ -596,6 +646,13 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
   <div class="mp-nav"><button type="button" class="btn small ghost" id="mpPrev" aria-label="Anno precedente">‹</button><b id="mpYear">2026</b><button type="button" class="btn small ghost" id="mpNext" aria-label="Anno successivo">›</button></div>
   <div id="mpGrid"></div>
   <button type="button" class="btn" id="mpNow">Torna al mese corrente</button>
+  <div class="dlg-actions"><button class="btn ghost" value="cancel" formnovalidate>Chiudi</button></div>
+</form></dialog>
+
+<dialog id="dlgYear"><form method="dialog">
+  <h3>Scegli l'anno</h3>
+  <p class="hint">Sotto ogni anno: il guadagno (entrate già incassate).</p>
+  <div id="ypGrid"></div>
   <div class="dlg-actions"><button class="btn ghost" value="cancel" formnovalidate>Chiudi</button></div>
 </form></dialog>
 
@@ -2093,6 +2150,16 @@ function softRender(){
 }
 /* importi della pagina principale: con l'occhietto 🙈 diventano “•••” (la scelta si salva nel database) */
 const hm = v => settings.homeHideMoney ? "•••" : eur(v);
+/* barra del pagamento sulla cartellina: si riempie di verde man mano che il cliente paga, l'arancione è ciò che resta da saldare */
+function payBarHTML(s){
+  const price = Number(s.price)||0, paid = Number(s.paid)||0;
+  const pct = price > 0 ? Math.max(0, Math.min(100, Math.round(paid / price * 100))) : (paid > 0 ? 100 : 0);
+  const full = price > 0 && s.due <= 0;
+  return `<span class="paybar${full ? " full" : ""}" role="img" aria-label="Pagato ${pct}%">
+      <span class="pb-top"><span>Pagato</span><strong>${hm(paid)} <small>su ${hm(price)}</small></strong></span>
+      <span class="pb-track"><span class="pb-fill" style="width:${pct}%"></span></span>
+    </span>`;
+}
 function countText(s){
   const sk = s.lost ? ` · ${s.lost} ${s.lost === 1 ? "saltata" : "saltate"}` : "";
   if(s.done > s.total) return `Fatte ${s.done} su ${s.total} (oltre il pacchetto)${sk}`;
@@ -2166,7 +2233,7 @@ function listHTML(){
       ${s.start ? `<span class="pk">Pacchetto dal ${itDate(s.start)}</span>` : ""}
       ${dotsHTML(s.done,s.total,20,false,s.lost)}
       <span class="row"><span>Sedute</span><strong>${s.done} su ${s.total}</strong></span>
-      <span class="row"><span>Pagato</span><strong>${hm(s.paid)} su ${hm(s.price)}</strong></span>
+      ${payBarHTML(s)}
       <span class="row"><span>${s.due<0?"Credito":"Da saldare"}</span><strong class="${s.due>0?"due":""}">${hm(Math.abs(s.due))}</strong></span>
       ${f?`<span class="freq">${esc(f)}</span>`:""}
       ${ticksHTML(s)}
@@ -3142,6 +3209,7 @@ async function handle(a, el){
     case "clearFilter": listFilter = "all"; filtersOpen = false; render(); return;
     case "exportAll": return exportAll();
     case "pickMonth": return pickMonth();
+    case "pickStatsYear": return pickStatsYear();
     case "toggleHomeMoney": settings.homeHideMoney = !settings.homeHideMoney; saveSettings(); render(); return;
     case "dataMenu": return dataMenu();
     case "exportDocs": return exportDocs();
@@ -4062,75 +4130,57 @@ const shortEur = (v, short) => { if(!short) return eur(v); const a = Math.abs(v)
 
 function statsHTML(){
   const D = statsData(), hide = !!settings.statsHideMoney;
-  const mode = settings.statsMode === "year" ? "year" : "month";
-  const useExp = true;                                        // entrate, uscite e guadagno netto sempre visibili (uscite a 0 se non hai spese)
-  const metricsOn = useExp ? ["net","income","expense","sessions"] : ["income","sessions"];
-  const metric = hide ? "sessions" : (metricsOn.includes(settings.statsMetric) ? settings.statsMetric : metricsOn[0]);
-  const yNow = today().slice(0,4);
-  const year = D.years.includes(statsYear) ? statsYear : (D.years.includes(yNow) ? yNow : (D.years[D.years.length-1] || yNow));
+  const nowY = today().slice(0,4), nowK = today().slice(0,7);
+  const years = [...new Set([...D.years, nowY])].sort();
+  const year = years.includes(statsYear) ? statsYear : nowY;           // di base l'anno in corso (ora di Roma)
   let h = `<button class="back" data-a="closeStats">‹ Tutte le cartelle</button>
   <div class="stats-head"><h1>📊 Statistiche andamento</h1>
     <span class="head-btns"><button class="btn small ghost" data-a="openExp">💸 Spese di gestione</button><button class="btn small ghost" data-a="statsHide" aria-pressed="${hide}">${hide ? "👁 Mostra importi" : "🙈 Nascondi importi"}</button></span></div>
   <p class="sub">Solo per te: questa sezione non si esporta. Si calcola dalle cartelle dei clienti, compresi i pacchetti precedenti.</p>`;
   if(!clients.length) return h + `<div class="empty"><h2>Ancora nessun dato</h2><p>Le statistiche compaiono quando avrai clienti con sedute e pagamenti.</p></div>`;
 
-  // numeri generali
-  const act = D.per.filter(p=>p.active), inact = D.per.filter(p=>!p.active);
-  const pkgs = D.per.reduce((a,p)=>a+p.packages, 0), renewed = D.per.filter(p=>p.renewals > 0).length;
-  const inPeriod = mode === "month" ? D.span.filter(k=>k.startsWith(year)) : D.span;
-  const pInc = round2(inPeriod.reduce((a,k)=>a + D.month(k).income, 0)), pSes = inPeriod.reduce((a,k)=>a + D.month(k).sessions, 0);
-  const pExp = round2(inPeriod.reduce((a,k)=>a + D.month(k).expense, 0)), pNet = round2(pInc - pExp);
-  const nMonths = inPeriod.filter(k=>k <= today().slice(0,7)).length || 1;
+  // ---- tabella GENERALE (da quando hai iniziato)
+  const act = D.per.filter(p=>p.active).length;
+  const pkgs = D.per.reduce((t,p)=>t + p.packages, 0), renewed = D.per.filter(p=>p.renewals > 0).length;
   const allIncome = round2(clients.reduce((s,c)=>s + allPackages(c).reduce((t,p)=>t + (Number(p.paid)||0), 0), 0));
-  const allLost = D.per.reduce((t,p)=>t + p.lost, 0);
+  const allExp = round2(expData().pays.reduce((t,p)=>t + (Number(p.amount)||0), 0));
   const allDone = clients.reduce((s,c)=>s + (Number(c.doneSessions)||0) + c.packages.reduce((t,p)=>t + (Number(p.doneSessions)||0), 0), 0);
-  h += `<div class="totals stats-kpi">
-    <div><b>${act.length}</b><span>clienti attivi</span></div>
-    <div><b>${inact.length}</b><span>non attivi</span></div>
-    <div><b>${pkgs}</b><span>pacchetti venduti</span></div>
-    <div><b>${D.per.length ? Math.round(renewed / D.per.length * 100) : 0}%</b><span>ha rinnovato almeno una volta</span></div>
-    <div><b id="kpiIncome">${money(pInc)}</b><span>entrate ${mode === "month" ? `nel ${year}` : "in totale"}</span></div>
-    <div><b id="kpiSes">${pSes}</b><span>sedute svolte ${mode === "month" ? `nel ${year}` : "in tutti gli anni"}</span></div>
-    ${useExp ? `<div class="owed"><b id="kpiExpense">${money(pExp)}</b><span>uscite (spese di gestione) ${mode === "month" ? `nel ${year}` : "in totale"}</span>${pExp > 0 ? `<small id="kpiExpKinds">${kindLine(expByKind(inPeriod), money)}</small>` : ""}</div>
-    <div class="${pNet < 0 ? "loss" : "net"}"><b id="kpiNet">${money(pNet)}</b><span>guadagno netto (entrate − uscite)</span></div>
-    <div><b id="kpiNetAvg">${money(round2(pNet / nMonths))}</b><span>netto medio al mese</span></div>` : ""}
-    <div><b id="kpiSesAll">${allDone}</b><span>sedute svolte in totale (tutti i pacchetti)</span></div>
-    <div class="${allLost ? "owed" : ""}"><b id="kpiLost">${allLost}</b><span>lezioni saltate (non recuperabili) in totale</span></div>
-    <div class="net"><b id="kpiIncomeAll">${money(allIncome)}</b><span>entrate totali da quando hai iniziato</span></div>
-  </div>
-  <p class="hint">Attivo = almeno una seduta o un pagamento negli ultimi ${ACTIVE_DAYS} giorni.</p>`;
+  h += `<div class="dash dash-gen dash6" id="statsGen" aria-label="Dati generali">
+    <div class="dash-title"><span class="dt-ico" aria-hidden="true">📊</span><b>Generale</b></div>
+    <div class="dc"><b id="kpiActive">${act}</b><span>clienti attivi</span><small>seduta o pagamento negli ultimi ${ACTIVE_DAYS} giorni</small></div>
+    <div class="dc"><b id="kpiPkgs">${pkgs}</b><span>pacchetti venduti</span></div>
+    <div class="dc"><b id="kpiRenew">${D.per.length ? Math.round(renewed / D.per.length * 100) : 0}%</b><span>hanno rinnovato almeno una volta</span></div>
+    <div class="dc"><b id="kpiSesAll">${allDone}</b><span>sedute svolte in totale</span></div>
+    <div class="dc c-in"><b id="kpiIncomeAll">${money(allIncome)}</b><span>guadagno totale</span><small>da quando hai iniziato</small></div>
+    <div class="dc c-net"><b id="kpiNetAll">${money(round2(allIncome - allExp))}</b><span>netto totale</span><small>guadagno totale − spese pagate</small></div>
+  </div>`;
 
-  // andamento
-  h += `<section class="block stats-block"><div class="bh"><h3>Andamento</h3>
-    <div class="seg small"><label><input type="radio" name="statsMode" value="month"${mode==="month"?" checked":""}><span>Mensile</span></label><label><input type="radio" name="statsMode" value="year"${mode==="year"?" checked":""}><span>Annuale</span></label></div></div>`;
-  const MLAB = {net:"Guadagno netto", income:"Entrate", expense:"Uscite", sessions:"Sedute"};
-  if(!hide) h += `<div class="seg small metric">` + metricsOn.map(v=>`<label><input type="radio" name="statsMetric" value="${v}"${metric===v?" checked":""}><span>${MLAB[v]}</span></label>`).join("") + `</div>`;
-  else h += `<p class="hint">Importi nascosti: il grafico mostra le sedute.</p>`;
-  if(mode === "month"){
-    const yi = D.years.indexOf(year);
-    h += `<div class="yearnav"><button class="btn small ghost" data-a="statsYear" data-y="${esc(D.years[yi-1]||"")}"${yi>0?"":" disabled"} aria-label="Anno precedente">‹</button><b id="statsYear">${esc(year)}</b><button class="btn small ghost" data-a="statsYear" data-y="${esc(D.years[yi+1]||"")}"${yi>=0 && yi<D.years.length-1?"":" disabled"} aria-label="Anno successivo">›</button></div>`;
-  }
-  const items = mode === "month"
-    ? MONTHS.map((l,i)=>{ const k = `${year}-${String(i+1).padStart(2,"0")}`, m = D.month(k); return {label:l, full:monthLabel(k), v: m[metric], hi: k === today().slice(0,7)}; })
-    : D.years.map(y=>{ const ks = D.span.filter(k=>k.startsWith(y)); return {label:y, full:y, v: round2(ks.reduce((a,k)=>a+D.month(k)[metric],0)), hi: y === yNow}; });
-  h += `<div class="chart-wrap">${barsSVG(items, metric === "sessions" ? (v=>String(v)) : shortEur)}</div>`;
-  if(!hide && metric === "net") h += `<p class="hint">Guadagno netto = entrate meno uscite (spese di gestione) di quel ${mode === "month" ? "mese" : "anno"}. Le barre rosse sono periodi in perdita.</p>`;
-  if(!hide && (metric === "net" || metric === "income")) h += `<p class="hint">Le entrate contano nel mese d'inizio del pacchetto, anche se il cliente paga dopo (inizia il 1° ottobre e salda a novembre → ottobre).</p>`;
-  if(!hide && D.noDate > 0) h += `<p class="hint">${eur(D.noDate)} incassati non hanno una data (pacchetti senza data di inizio): contano nei totali ma non nel grafico.</p>`;
-  if(metric === "sessions") h += `<p class="hint">Sedute fatte davvero, contate dal mese d'inizio del pacchetto in base a quante lezioni ha.<br>
-    <b>Fino a 10 lezioni</b>: inizio dal 1 al 7 → tutte in quel mese; dall'8 al 14 → 75% e 25% al mese dopo; dal 15 al 21 → metà e metà; dal 22 in poi → 25% e 75% al mese dopo.<br>
-    <b>Da 11 a 15 lezioni</b>: inizio dal 1 al 10 → tutte in quel mese; dall'11 al 19 → metà e metà; dal 20 in poi → 20% e 80% al mese dopo.<br>
-    <b>Da 16 lezioni in su</b>: circa 12 lezioni al mese, divise in proporzione ai giorni.</p>`;
-  if(D.noDateSes > 0) h += `<p class="hint">${D.noDateSes} ${D.noDateSes === 1 ? "seduta fatta è" : "sedute fatte sono"} in pacchetti senza data d'inizio: ${D.noDateSes === 1 ? "conta" : "contano"} nel totale ma non nel grafico. Metti la data d'inizio del pacchetto nella cartella per vederle nel mese giusto.</p>`;
-  h += periodTableHTML(D, mode, year, hide) + `</section>`;
+  // ---- tabella dell'ANNO scelto (come quella del mese nella pagina principale)
+  const ks = MONTHS.map((_,i)=>`${year}-${String(i+1).padStart(2,"0")}`);
+  const sum = f => round2(ks.reduce((t,k)=>t + (D.month(k)[f] || 0), 0));
+  const yInc = sum("income"), yExp = sum("expense"), ySes = sum("sessions"), yNet = round2(yInc - yExp);
+  const yDue = round2(ks.reduce((t,k)=>t + dueForMonth(k), 0));
+  const nMonths = year < nowY ? 12 : (ks.filter(k=>k <= nowK).length || 1);
+  h += `<div class="dash dash-month dash6" id="statsYearDash" aria-label="L'anno scelto">
+    <button type="button" class="dash-title month-pick" id="yearPick" data-a="pickStatsYear" data-y="${year}" aria-label="Scegli l'anno"><span class="dt-ico" aria-hidden="true">📅</span><b>${year}&nbsp;▾</b><span>${year === nowY ? "anno in corso" : "tocca per cambiare"}</span></button>
+    <div class="dc"><b id="kpiSes">${ySes}</b><span>sedute svolte</span><small>nel ${year}</small></div>
+    <div class="dc c-in"><b id="kpiIncome">${money(yInc)}</b><span>guadagno dell'anno</span><small>entrate del ${year} (già incassate)</small></div>
+    <div class="dc c-owed"><b id="kpiDueYear">${money(yDue)}</b><span>ancora da incassare</span><small>pacchetti del ${year}</small></div>
+    <div class="dc c-exp"><b id="kpiExpense">${money(yExp)}</b><span>spese dell'anno</span><small id="kpiExpKinds">${yExp > 0 ? kindLine(expByKind(ks), money) : `uscite del ${year}`}</small></div>
+    <div class="dc c-net"><b id="kpiNet">${money(yNet)}</b><span>guadagno netto annuale</span><small>entrate − uscite</small></div>
+    <div class="dc c-net"><b id="kpiNetAvg">${money(round2(yNet / nMonths))}</b><span>netto medio al mese</span><small>nel ${year}</small></div>
+  </div>`;
+
+  // ---- grafici dell'anno scelto: istogramma o torta, mese per mese
+  h += chartsHTML(D, year, hide) + `</section>`;
 
   // mesi migliori e peggiori
-  const withAct = D.span;   // anche i mesi vuoti contano: un mese senza incassi è un mese “peggiore”
+  const withAct = ks.filter(k=>k <= nowK || D.month(k).income || D.month(k).sessions || D.month(k).expense);   // i mesi dell'anno scelto (i vuoti contano come “peggiori”)
   if(withAct.length){
     const rank = (f) => { const s = [...withAct].sort((a,b)=>D.month(b)[f]-D.month(a)[f] || a.localeCompare(b)); const n = Math.min(3, Math.floor(s.length/2) || 1); return {best:s.slice(0,n), worst:s.slice(-n).reverse().filter(k=>!s.slice(0,n).includes(k))}; };
     const row = (k, f) => `<li><span>${esc(monthLabel(k))}</span><b>${f==="sessions" ? `${D.month(k).sessions} sedute` : money(D.month(k)[f])}</b></li>`;
-    h += `<section class="block stats-block"><h3>Mesi migliori e peggiori</h3><div class="bw">`;
-    const moneyF = useExp ? "net" : "income";
+    h += `<section class="block stats-block"><h3>Mesi migliori e peggiori del ${year}</h3><div class="bw">`;
+    const useExp = true, moneyF = "net";
     if(!hide){ const r = rank(moneyF); h += `<div><h4>${useExp ? "Per guadagno netto" : "Per incassi"}</h4><p class="lbl ok">▲ Migliori</p><ol>${r.best.map(k=>row(k,moneyF)).join("")}</ol>${r.worst.length ? `<p class="lbl bad">▼ Peggiori</p><ol>${r.worst.map(k=>row(k,moneyF)).join("")}</ol>` : ""}</div>`; }
     const r2 = rank("sessions"); h += `<div><h4>Per sedute</h4><p class="lbl ok">▲ Migliori</p><ol>${r2.best.map(k=>row(k,"sessions")).join("")}</ol>${r2.worst.length ? `<p class="lbl bad">▼ Peggiori</p><ol>${r2.worst.map(k=>row(k,"sessions")).join("")}</ol>` : ""}</div>`;
     h += `</div></section>`;
@@ -4169,6 +4219,107 @@ function statsHTML(){
   h += `</div></section>`;
   return h;
 }
+/* ======= grafici dell'anno scelto: istogramma (mesi, più voci insieme) o torta (una voce, divisa per mese) ======= */
+const SERIES = {
+  income:   {label:"Guadagno", cls:"s-in",  money:true},
+  expense:  {label:"Spese",    cls:"s-exp", money:true},
+  net:      {label:"Guadagno netto", cls:"s-net", money:true},
+  sessions: {label:"Sedute",   cls:"s-ses", money:false}
+};
+const PIE_HUE = {income:[150,45], expense:[5,65], net:[200,18], sessions:[215,65]};
+const fmtSeries = (f, v) => SERIES[f].money ? money(v) : `${v} ${v === 1 ? "seduta" : "sedute"}`;
+function chartsHTML(D, year, hide){
+  const type = settings.statsChart === "pie" ? "pie" : "bar";
+  const allowed = hide ? ["sessions"] : ["income","expense","net","sessions"];
+  let on = Array.isArray(settings.statsSeries) ? settings.statsSeries.filter(x=>allowed.includes(x)) : allowed.slice();
+  if(!on.length) on = allowed.slice(0,1);
+  const pieM = allowed.includes(settings.pieMetric) ? settings.pieMetric : allowed[0];
+  const ks = MONTHS.map((_,i)=>`${year}-${String(i+1).padStart(2,"0")}`);
+  let h = `<section class="block stats-block" id="chartBlock"><div class="bh"><h3>Andamento del ${year}, mese per mese</h3>
+    <div class="seg small" role="radiogroup" aria-label="Tipo di grafico">
+      <label><input type="radio" name="statsChart" value="bar"${type === "bar" ? " checked" : ""}><span>📊 Istogramma</span></label>
+      <label><input type="radio" name="statsChart" value="pie"${type === "pie" ? " checked" : ""}><span>🥧 Torta</span></label></div></div>`;
+  if(hide) h += `<p class="hint">Importi nascosti: il grafico mostra solo le sedute.</p>`;
+  if(type === "bar"){
+    h += `<div class="legend" role="group" aria-label="Voci del grafico">` + allowed.map(f=>`<label class="lg ${SERIES[f].cls}"><input type="checkbox" name="statsSeries" value="${f}"${on.includes(f) ? " checked" : ""}><i></i><span>${SERIES[f].label}</span></label>`).join("") + `</div>`;
+    h += `<div class="chart-wrap">${yearBarsSVG(D, ks, on)}</div>`;
+    h += `<p class="hint">Tocca una voce della legenda per mostrarla o nasconderla. Le sedute usano la scala a destra.${on.includes("net") ? " Il guadagno netto sotto la linea dello zero è un mese in perdita." : ""}</p>`;
+  } else {
+    h += `<div class="seg small metric" role="radiogroup" aria-label="Voce della torta">` + allowed.map(f=>`<label><input type="radio" name="pieMetric" value="${f}"${pieM === f ? " checked" : ""}><span>${SERIES[f].label}</span></label>`).join("") + `</div>`;
+    h += pieHTML(D, ks, pieM);
+  }
+  h += `<details class="calc-note"><summary>Come si calcolano</summary>
+    <p class="hint">Le entrate contano nel mese d'inizio del pacchetto, anche se il cliente paga dopo (inizia il 1° ottobre e salda a novembre → ottobre). Le spese contano nel mese in cui le paghi.</p>
+    <p class="hint">Sedute fatte davvero, contate dal mese d'inizio del pacchetto in base a quante lezioni ha.<br>
+    <b>Fino a 10 lezioni</b>: inizio dal 1 al 7 → tutte in quel mese; dall'8 al 14 → 75% e 25% al mese dopo; dal 15 al 21 → metà e metà; dal 22 in poi → 25% e 75% al mese dopo.<br>
+    <b>Da 11 a 15 lezioni</b>: inizio dal 1 al 10 → tutte in quel mese; dall'11 al 19 → metà e metà; dal 20 in poi → 20% e 80% al mese dopo.<br>
+    <b>Da 16 lezioni in su</b>: circa 12 lezioni al mese, divise in proporzione ai giorni.</p></details>`;
+  return h + periodTableHTML(D, "month", year, hide);
+}
+function yearBarsSVG(D, ks, on){
+  const moneyS = on.filter(f=>SERIES[f].money), ses = on.includes("sessions");
+  const vals = ks.map(k=>D.month(k));
+  let max = Math.max(0, ...vals.flatMap(m=>moneyS.map(f=>m[f] || 0))), min = Math.min(0, ...vals.flatMap(m=>moneyS.map(f=>m[f] || 0)));
+  if(max === 0 && min === 0) max = 1;
+  const sMax = Math.max(1, ...vals.map(m=>m.sessions || 0));
+  const GW = 58, W = ks.length * GW + 56, H = 240, top = 18, bot = H - 30, L = 44;
+  const range = max - min, zero = top + (bot - top) * max / range;
+  const y = v => top + (bot - top) * (max - v) / range, ys = v => bot - (bot - top) * v / sMax;
+  let s = `<svg class="ybars" viewBox="0 0 ${W} ${H}" role="img" aria-label="Istogramma dell'anno">`;
+  if(moneyS.length){                                                     // scala dei soldi a sinistra
+    [max, (max + min) / 2, min].forEach(v=>{ if(Math.abs(v) < 0.005 && v !== 0) return; s += `<text x="${L - 6}" y="${y(v) + 4}" class="ax">${esc(shortEur(v, true))}</text>`; });
+  }
+  s += `<line x1="${L}" y1="${zero}" x2="${W - 12}" y2="${zero}" class="axis"/>`;
+  const bw = moneyS.length ? Math.min(14, (GW - 14) / moneyS.length) : 0;
+  ks.forEach((k, i)=>{
+    const m = D.month(k), gx = L + i * GW + (GW - bw * moneyS.length) / 2;
+    moneyS.forEach((f, j)=>{
+      const v = m[f] || 0, yy = v >= 0 ? y(v) : zero, hh = Math.max(Math.abs(y(v) - zero), v ? 1.5 : 0);
+      s += `<rect x="${gx + j * bw}" y="${yy}" width="${bw - 1.5}" height="${hh}" rx="2" class="bar ${SERIES[f].cls}${v < 0 ? " neg" : ""}"><title>${esc(monthLabel(k))} · ${SERIES[f].label}: ${esc(fmtSeries(f, v))}</title></rect>`;
+    });
+    s += `<text x="${L + i * GW + GW / 2}" y="${H - 10}" class="lab">${MONTHS[i]}</text>`;
+  });
+  if(ses){                                                               // sedute: linea con i punti, scala a destra
+    const pts = ks.map((k, i)=>[L + i * GW + GW / 2, ys(D.month(k).sessions || 0)]);
+    s += `<polyline class="ses-line" points="${pts.map(p=>p.join(",")).join(" ")}"/>`;
+    ks.forEach((k, i)=>{ const n = D.month(k).sessions || 0; s += `<circle cx="${pts[i][0]}" cy="${pts[i][1]}" r="4" class="ses-dot"><title>${esc(monthLabel(k))} · Sedute: ${n}</title></circle>`; });
+    s += `<text x="${W - 4}" y="${top + 4}" class="ax ax-r">${sMax}</text><text x="${W - 4}" y="${bot}" class="ax ax-r">0</text>`;
+  }
+  return s + `</svg>`;
+}
+function pieHTML(D, ks, f){
+  const items = ks.map((k,i)=>({k, i, v: D.month(k)[f] || 0}));
+  const pos = items.filter(x=>x.v > 0), neg = items.filter(x=>x.v < 0), total = pos.reduce((t,x)=>t + x.v, 0);
+  if(!total) return `<p class="none">Nessun dato di “${SERIES[f].label.toLowerCase()}” in questo anno.</p>`;
+  const [hue, sat] = PIE_HUE[f], order = pos.map(x=>x.i);
+  const col = i => { const j = order.indexOf(i), n = Math.max(order.length - 1, 1); return `hsl(${hue} ${sat}% ${order.length === 1 ? 45 : Math.round(24 + j * 50 / n)}%)`; };   // fette ben distinte
+  const R = 90, C = 100; let ang = -Math.PI / 2, s = `<svg class="pie" viewBox="0 0 200 200" role="img" aria-label="Grafico a torta: ${SERIES[f].label}">`;
+  pos.forEach(x=>{
+    const a2 = ang + 2 * Math.PI * x.v / total, large = a2 - ang > Math.PI ? 1 : 0;
+    const p1 = [C + R * Math.cos(ang), C + R * Math.sin(ang)], p2 = [C + R * Math.cos(a2), C + R * Math.sin(a2)];
+    const d = pos.length === 1 ? `M ${C - R} ${C} A ${R} ${R} 0 1 1 ${C + R} ${C} A ${R} ${R} 0 1 1 ${C - R} ${C} Z` : `M ${C} ${C} L ${p1[0].toFixed(2)} ${p1[1].toFixed(2)} A ${R} ${R} 0 ${large} 1 ${p2[0].toFixed(2)} ${p2[1].toFixed(2)} Z`;
+    s += `<path d="${d}" fill="${col(x.i)}" class="slice"><title>${esc(monthLabel(x.k))} · ${SERIES[f].label}: ${esc(fmtSeries(f, x.v))} (${Math.round(x.v / total * 100)}%)</title></path>`;
+    ang = a2;
+  });
+  s += `</svg>`;
+  let h = `<div class="pie-wrap">${s}<div class="pie-legend"><p class="pl-tot">${SERIES[f].label} del ${ks[0].slice(0,4)}: <b>${esc(fmtSeries(f, round2(total)))}</b></p><ul>`;
+  pos.forEach(x=>{ h += `<li><i style="background:${col(x.i)}"></i><span>${esc(MONTHS_LONG[x.i].charAt(0).toUpperCase() + MONTHS_LONG[x.i].slice(1))}</span><b>${esc(fmtSeries(f, round2(x.v)))}</b><em>${Math.round(x.v / total * 100)}%</em></li>`; });
+  h += `</ul>${neg.length ? `<p class="hint">Non nella torta (in perdita): ${neg.map(x=>`${MONTHS_LONG[x.i]} ${esc(fmtSeries(f, x.v))}`).join(", ")}.</p>` : ""}</div></div>`;
+  return h;
+}
+/* scelta dell'anno */
+async function pickStatsYear(){
+  const D = statsData(), nowY = today().slice(0,4), years = [...new Set([...D.years, nowY])].sort().reverse();
+  const sel = $("yearPick") ? $("yearPick").dataset.y : nowY;
+  $("ypGrid").innerHTML = years.map(y=>{ const inc = round2(MONTHS.reduce((t,_,i)=>t + D.month(`${y}-${String(i+1).padStart(2,"0")}`).income, 0));
+    return `<button type="button" class="mp-m${y === sel ? " sel" : ""}${y === nowY ? " now" : ""}" data-y="${y}"><b>${y}</b><span>${money(inc)}</span></button>`; }).join("");
+  await ask("dlgYear");
+}
+$("ypGrid").addEventListener("click", e=>{
+  const b = e.target.closest("button[data-y]"); if(!b) return;
+  statsYear = b.dataset.y === today().slice(0,4) ? "" : b.dataset.y;     // l'anno in corso segue il calendario
+  $("dlgYear").close("ok"); render();
+});
 let statsYear = "";
 /* Pagina principale: “Guadagnato nel mese”. Di base il mese corrente (data del telefono); si possono
    scegliere i mesi passati. I soldi contano nel mese d'inizio del pacchetto di ogni cliente. */
@@ -4267,8 +4418,13 @@ function periodTableHTML(D, mode, year, hide){
 }
 document.addEventListener("change", e=>{
   const t = e.target;
-  if(t.name === "statsMode"){ settings.statsMode = t.value; saveSettings(); render(); }
-  else if(t.name === "statsMetric"){ settings.statsMetric = t.value; saveSettings(); render(); }
+  if(t.name === "statsChart"){ settings.statsChart = t.value; saveSettings(); render(); }
+  else if(t.name === "pieMetric"){ settings.pieMetric = t.value; saveSettings(); render(); }
+  else if(t.name === "statsSeries"){
+    const on = [...document.querySelectorAll('input[name="statsSeries"]:checked')].map(x=>x.value);
+    if(!on.length){ t.checked = true; return; }                        // almeno una voce resta visibile
+    settings.statsSeries = on; saveSettings(); render();
+  }
   else if(t.id === "statsSort"){ settings.statsSort = t.value; saveSettings(); render(); }
 });
 
@@ -4278,7 +4434,7 @@ function statsText(){
   const d = new Date(), p = n => String(n).padStart(2,"0");
   L.push("GESTIONALE PERSONAL TRAINER - STATISTICHE ANDAMENTO", `Create il ${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()}`, "");
   const act = D.per.filter(x=>x.active).length;
-  L.push(`Clienti attivi: ${act}   Non attivi: ${D.per.length - act}   Pacchetti venduti: ${D.per.reduce((a,x)=>a+x.packages,0)}`, "");
+  L.push(`Clienti attivi: ${act}   Pacchetti venduti: ${D.per.reduce((a,x)=>a+x.packages,0)}`, "");
   L.push("PER ANNO");
   D.years.forEach(y=>{ const ks = D.span.filter(k=>k.startsWith(y)), S = f => round2(ks.reduce((a,k)=>a+D.month(k)[f],0));
     L.push(`  ${y}: incassato ${eur(S("income"))}, spese di gestione ${eur(S("expense"))}, guadagno netto ${eur(S("net"))}, sedute ${S("sessions")}`); });
