@@ -133,13 +133,13 @@ a.btn[hidden]{display:none}
 .paybar .pb-fill{display:block;height:100%;background:var(--moss);border-radius:999px;transition:width .3s}
 .paybar.full .pb-track{background:var(--moss)}
 /* statistiche: due tabelle da 6 valori (+ il titolo) */
-.dash.dash6{grid-template-columns:repeat(7,1fr)}
+.dash.dash6{grid-template-columns:repeat(8,1fr)}
 .dash.dash6 > *{padding:12px 10px}
 .dash.dash6 .dc b{font-size:1.3rem}
 .dash.dash6 .dc span{font-size:.84rem}
 .dash.dash6 .dc small{font-size:.72rem}
-@media (max-width:1100px){ .dash.dash6 .dc b{font-size:1.55rem} .dash.dash6{grid-template-columns:repeat(3,1fr)} .dash.dash6 .dash-title{grid-column:1/-1;min-height:0;flex-direction:row;align-items:baseline;justify-content:flex-start;flex-wrap:wrap;gap:4px 10px;padding:10px 12px} }
-@media (max-width:640px){ .dash.dash6{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:1180px){ .dash.dash6 .dc b{font-size:1.55rem} .dash.dash6{grid-template-columns:repeat(4,1fr)} .dash.dash6 .dash-title{grid-column:1/-1;min-height:0;flex-direction:row;align-items:baseline;justify-content:flex-start;flex-wrap:wrap;gap:4px 10px;padding:10px 12px} }
+@media (max-width:760px){ .dash.dash6{grid-template-columns:repeat(2,1fr)} }
 #ypGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 /* colori delle voci (uguali alla tabella del mese) */
 :root{--c-ses:#3b6fc4}
@@ -172,6 +172,32 @@ svg.pie .slice{stroke:var(--paper);stroke-width:1}
 .pl-tot{margin:0;font-weight:600}
 .calc-note{margin:8px 0}
 .calc-note summary{cursor:pointer;font-weight:600;color:var(--moss)}
+#cKindW[hidden],#cSesW[hidden]{display:none}
+.per-ses{margin:2px 0 6px;color:var(--muted);font-size:.95rem}
+.per-ses b{color:var(--moss)}
+.hist-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:640px){ .hist-grid{grid-template-columns:repeat(2,1fr)} }
+.hist-grid > div{border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+.hist-grid b{display:block;font-family:"Barlow Condensed",sans-serif;font-size:1.5rem;line-height:1}
+.hist-grid span{display:block;color:var(--muted);font-size:.86rem;margin-top:3px}
+.hist-grid small{display:block;color:var(--muted);font-size:.74rem;margin-top:2px}
+.hist-grid .c-in b{color:var(--moss)}
+.single-row{flex-wrap:wrap}
+.single-row.paid{border-left-color:var(--moss)}
+.miss-st.ok{background:var(--moss-soft);color:var(--moss);border-color:var(--moss)}
+.hist-h{align-items:center}
+.hist-t{display:flex;align-items:baseline;gap:8px;background:none;border:none;padding:4px 0;cursor:pointer;color:var(--pine);font:inherit;text-align:left;min-height:40px}
+.hist-t h3{margin:0}
+.hist-t small{color:var(--muted);font-size:.8rem;font-weight:600}
+.hist-t .arr{display:inline-block;width:1.1em;color:var(--moss);font-size:1.1rem}
+.hist-body[hidden]{display:none}
+.pkg-hist{width:100%;table-layout:fixed;font-size:.9rem}
+.pkg-hist th,.pkg-hist td{padding:7px 4px}
+.pkg-hist th:last-child{position:static;background:none}
+.pkg-hist tr.cur td{font-weight:700}
+.pkg-hist .in-corso{display:block;font-size:.72rem;font-weight:700;color:var(--moss)}
+.pkg-hist th:nth-child(1){width:31%} .pkg-hist th:nth-child(2){width:17%}
+@media (max-width:360px){ .pkg-hist{font-size:.78rem} table.pkg-hist th,table.pkg-hist td,table.pkg-hist td.num,table.pkg-hist td.date{padding:6px 2px;white-space:normal;overflow-wrap:anywhere} }
 .money-eye{display:flex;justify-content:flex-end;margin:0 0 4px}
 .eye-btn{display:inline-flex;align-items:center;gap:4px;background:none;border:none;padding:4px 6px;min-height:28px;border-radius:8px;color:var(--muted);font-size:.72rem;font-weight:600;cursor:pointer;line-height:1}
 .eye-btn:hover{background:var(--moss-soft);color:var(--pine)}
@@ -530,16 +556,18 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
     <div><label for="cPhone">Telefono</label><input id="cPhone" type="text" autocomplete="off"></div>
     <div><label for="cEmail">Email</label><input id="cEmail" type="email" autocomplete="off"></div>
   </div>
-  <h4>Pacchetto</h4>
-  <label for="cStart">Data di inizio del pacchetto</label>
+  <div id="cKindW"><label>Tipo</label>
+    <div class="seg"><label><input type="radio" name="cKind" value="pkg" checked><span>Pacchetto</span></label><label><input type="radio" name="cKind" value="single"><span>Seduta singola</span></label></div></div>
+  <h4 id="cPkgH">Pacchetto</h4>
+  <label for="cStart" id="cStartL">Data di inizio del pacchetto</label>
   <input id="cStart" type="date">
-  <div class="two">
+  <div class="two" id="cSesW">
     <div><label for="cTotal">Sedute nel pacchetto</label><input id="cTotal" type="text" placeholder="es. 10"></div>
     <div><label for="cDone">Sedute già fatte</label><input id="cDone" type="text" placeholder="0"></div>
   </div>
   <div class="two">
-    <div><label for="cPrice">Totale da pagare (€)</label><input id="cPrice" type="text" placeholder="es. 400"></div>
-    <div><label for="cPaid">Già pagato / acconto (€)</label><input id="cPaid" type="text" placeholder="0"></div>
+    <div><label for="cPrice" id="cPriceL">Totale da pagare (€)</label><input id="cPrice" type="text" placeholder="es. 400"></div>
+    <div><label for="cPaid" id="cPaidL">Già pagato / acconto (€)</label><input id="cPaid" type="text" placeholder="0"></div>
   </div>
   <h4>Informazioni facoltative</h4>
   <div class="two">
@@ -654,6 +682,19 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
   <p class="hint">Sotto ogni anno: il guadagno (entrate già incassate).</p>
   <div id="ypGrid"></div>
   <div class="dlg-actions"><button class="btn ghost" value="cancel" formnovalidate>Chiudi</button></div>
+</form></dialog>
+
+<dialog id="dlgSingle"><form method="dialog" id="fSingle">
+  <h3>Seduta singola</h3>
+  <p class="hint">Per chi non fa pacchetti: una seduta con il suo prezzo. Conta nei guadagni del mese di questa data.</p>
+  <div class="two">
+    <div><label for="sgDate">Data</label><input id="sgDate" type="date"></div>
+    <div><label for="sgPrice">Prezzo (€)</label><input id="sgPrice" type="text" autocomplete="off" placeholder="es. 30"></div>
+  </div>
+  <label class="check carry"><input type="checkbox" id="sgPaid" checked><span>Già pagata</span></label>
+  <label for="sgNote">Note (facoltativo)</label><input id="sgNote" autocomplete="off">
+  <p class="err" id="sgErr" role="alert"></p>
+  <div class="dlg-actions"><button class="btn ghost" value="cancel" formnovalidate>Annulla</button><button class="btn primary" value="ok">Segna seduta singola</button></div>
 </form></dialog>
 
 <dialog id="dlgData"><form method="dialog">
@@ -949,8 +990,10 @@ function normPackage(p){
     price: Number(p.price)||0, paid: Number(p.paid)||0,
     carriedIn: round2(Number(p.carriedIn)||0), carriedOut: round2(Number(p.carriedOut)||0),
     sessionLog: Array.isArray(p.sessionLog) ? p.sessionLog : [], payLog: Array.isArray(p.payLog) ? p.payLog : [],
-    missLog: normMisses(p.missLog) };
+    missLog: normMisses(p.missLog), single: !!p.single };
 }
+/* seduta singola = “pacchetto” da 1 seduta (chi non fa pacchetti) */
+const isSingle = p => !!(p && (p.single || Number(p.totalSessions) === 1));
 function stats(c){
   const total = c.totalSessions, done = c.doneSessions, carriedOut = Number(c.carriedOut)||0;
   const lost = missCount(c, "lost");                          // le lezioni saltate consumano il pacchetto
@@ -1027,7 +1070,7 @@ const SHARE_ITEMS = [
   {k:"storicoSedute",    label:"Storico delle sedute con le date",       def:true},
   {k:"noteSedute",       label:"Note di ogni seduta (cosa avete fatto)", def:true},
   {k:"storicoPagamenti", label:"Storico dei pagamenti",                  def:false},
-  {k:"pacchetti",        label:"Pacchetti precedenti (date e sedute)",   def:true},
+  {k:"storicoPacchetti", label:"Storico pacchetti cliente (date, sedute e costo)", def:false},
   {k:"giorni",           label:"Giorni e volte a settimana",             def:true},
   {k:"allenamento",      label:"Descrizione dell'allenamento",           def:true},
   {k:"note",             label:"Note (di solito private)",               def:false}
@@ -1069,6 +1112,18 @@ function dHeadRow(cols, widths){ return wRow(cols.map((t,i)=>wCell(wPara(wRun(t,
 function dEmpty(t){ return wPara(wRun(t,{italic:true,color:DC.MUTED}), {before:60}); }
 const MISS_DOC = {lost:"Saltata non recuperabile"};
 const missSorted = c => [...(c.missLog || [])].sort(byDateAsc);
+/* storico dei pacchetti (inizio · sedute · costo), dal più vecchio; niente sedute singole */
+function pkgHistory(c){
+  const rows = (c.packages || []).filter(p=>!isSingle(p)).map(p=>({start:p.start||"", total:Number(p.totalSessions)||0, price:round2((Number(p.price)||0) - (Number(p.carriedIn)||0)), current:false}));
+  if(Number(c.totalSessions) > 0) rows.push({start:c.start||"", total:Number(c.totalSessions)||0, price:round2((Number(c.price)||0) - (Number(c.carriedIn)||0)), current:true});
+  return rows.sort((a,b)=>(a.start||"9999").localeCompare(b.start||"9999"));
+}
+function dPkgHistory(c){
+  const W = DC.W, wd = [2600, 2000, W-4600];
+  const rows = [dHeadRow(["Inizio","Sedute","Costo del pacchetto"], wd)];
+  pkgHistory(c).forEach(r=>rows.push(wRow([wCell(wPara(wRun(itDate(r.start) + (r.current ? " (in corso)" : ""))), wd[0]), wCell(wPara(wRun(String(r.total))), wd[1]), wCell(wPara(wRun(eurDoc(r.price))), wd[2])])));
+  return wTable(rows, wd);
+}
 /* tabella delle lezioni saltate (Data · Esito): si rilegge all'importazione */
 function dMisses(c){
   const W = DC.W, wd = [2400, W-2400];
@@ -1162,7 +1217,7 @@ function docxClientBody(c, o){
   if(inc.note) b += dHeading("Note") + wPara(wRun(c.notes || "—"), {before:60});
   if(inc.storicoSedute) b += dHeading("Storico sedute") + dSessions(c, !!inc.noteSedute);
   if(inc.storicoPagamenti) b += dHeading("Storico pagamenti") + dPayments(c);
-  if(inc.pacchetti) b += dPackages(c, {pay:!!inc.pagamenti, sessions:!!inc.storicoSedute, notes:!!(inc.storicoSedute && inc.noteSedute), payments:!!inc.storicoPagamenti});
+  if(inc.storicoPacchetti && pkgHistory(c).length) b += dHeading("Storico pacchetti cliente") + dPkgHistory(c);
   return b;
 }
 /* dicitura in fondo a ogni pagina dei documenti (Word e PDF) */
@@ -1316,6 +1371,7 @@ function pdfKit(jsPDF){
     if(withNotes) K.table([{t:"N°",w:14,muted:true},{t:"Data",w:32},{t:"Note seduta",w:CW-46}], list.map((x,i)=>[String(i+1), itDate(x.date), x.note||"—"]));
     else K.table([{t:"N°",w:14,muted:true},{t:"Data",w:CW-14}], list.map((x,i)=>[String(i+1), itDate(x.date)]));
   };
+  K.pkgHistory = c => K.table([{t:"Inizio",w:60},{t:"Sedute",w:40},{t:"Costo del pacchetto",w:CW-100}], pkgHistory(c).map(r=>[itDate(r.start) + (r.current ? " (in corso)" : ""), String(r.total), eurDoc(r.price)]));
   K.misses = c => K.table([{t:"Data",w:40},{t:"Esito",w:CW-40}], missSorted(c).map(x=>[itDate(x.date), MISS_DOC.lost]));
   K.payments = c => {
     if(!c.payLog.length) return K.empty("Nessun pagamento registrato nello storico.");
@@ -1382,7 +1438,7 @@ function buildClientPdf(c, jsPDF, o){
   if(inc.note){ K.heading("Note"); K.text(c.notes); }
   if(inc.storicoSedute){ K.heading("Storico sedute"); K.sessions(c, !!inc.noteSedute); }
   if(inc.storicoPagamenti){ K.heading("Storico pagamenti"); K.payments(c); }
-  if(inc.pacchetti) K.packages(c, {pay:!!inc.pagamenti, sessions:!!inc.storicoSedute, notes:!!(inc.storicoSedute && inc.noteSedute), payments:!!inc.storicoPagamenti});
+  if(inc.storicoPacchetti && pkgHistory(c).length){ K.heading("Storico pacchetti cliente"); K.pkgHistory(c); }
   K.footer("Riepilogo per " + c.name);
   K.doc.setProperties({title:"Riepilogo " + c.name, subject:"PTCLIENT", creator:"Gestionale Personal Trainer"});
   return K.doc;
@@ -1453,7 +1509,7 @@ function buildClientText(c, o){
   if(inc.note) t += tHead("Note") + (c.notes || "—") + "\n";
   if(inc.storicoSedute) t += tHead("Storico sedute") + tSessions(c, !!inc.noteSedute);
   if(inc.storicoPagamenti) t += tHead("Storico pagamenti") + tPayments(c);
-  if(inc.pacchetti) t += tPackages(c, {pay:!!inc.pagamenti, sessions:!!inc.storicoSedute, notes:!!(inc.storicoSedute && inc.noteSedute), payments:!!inc.storicoPagamenti});
+  if(inc.storicoPacchetti && pkgHistory(c).length) t += tHead("Storico pacchetti cliente") + pkgHistory(c).map(r=>`  ${itDate(r.start)}${r.current ? " (in corso)" : ""}   ${r.total} sedute   ${eurDoc(r.price)}`).join("\n") + "\n";
   return t;
 }
 
@@ -2150,6 +2206,18 @@ function softRender(){
 }
 /* importi della pagina principale: con l'occhietto 🙈 diventano “•••” (la scelta si salva nel database) */
 const hm = v => settings.homeHideMoney ? "•••" : eur(v);
+/* cartellina di chi fa solo sedute singole */
+function singleCardHTML(c){
+  const sg = c.packages.filter(isSingle);
+  if(!sg.length) return `<span class="row"><span>Pacchetto</span><strong>nessuno in corso</strong></span>`;
+  const earned = round2(sg.reduce((t,p)=>t + (Number(p.paid)||0), 0));
+  const due = round2(sg.reduce((t,p)=>t + Math.max((Number(p.price)||0) - (Number(p.paid)||0), 0), 0));
+  const last = sg.map(p=>p.start).filter(isDate).sort().pop();
+  return `<span class="pk">Sedute singole${last ? ` · ultima il ${itDate(last)}` : ""}</span>
+      <span class="row"><span>Sedute singole</span><strong>${sg.length}</strong></span>
+      <span class="row"><span>Pagato</span><strong>${hm(earned)}</strong></span>
+      <span class="row"><span>Da saldare</span><strong class="${due > 0 ? "due" : ""}">${hm(due)}</strong></span>`;
+}
 /* barra del pagamento sulla cartellina: si riempie di verde man mano che il cliente paga, l'arancione è ciò che resta da saldare */
 function payBarHTML(s){
   const price = Number(s.price)||0, paid = Number(s.paid)||0;
@@ -2160,7 +2228,15 @@ function payBarHTML(s){
       <span class="pb-track"><span class="pb-fill" style="width:${pct}%"></span></span>
     </span>`;
 }
+const perSession = (price, n) => n > 0 ? round2((Number(price)||0) / n) : 0;
+/* riga “200 € · 10 sedute → 20 €/seduta” del pacchetto in corso */
+function perSesLine(c, s){
+  if(!s.total) return "";
+  const base = round2((Number(c.price)||0) - (Number(c.carriedIn)||0));
+  return `Pacchetto ${eur(base)} · ${s.total} ${s.total === 1 ? "seduta" : "sedute"} → <b>${eur(perSession(base, s.total))}/seduta</b>`;
+}
 function countText(s){
+  if(!s.total && !s.done) return "Nessun pacchetto in corso";
   const sk = s.lost ? ` · ${s.lost} ${s.lost === 1 ? "saltata" : "saltate"}` : "";
   if(s.done > s.total) return `Fatte ${s.done} su ${s.total} (oltre il pacchetto)${sk}`;
   if(s.complete) return `Completato: ${s.done} su ${s.total}${sk}`;
@@ -2231,10 +2307,10 @@ function listHTML(){
     h += `<div class="fwrap"><button class="folder" data-a="open" data-id="${esc(c.id)}">
       <span class="fname">${esc(c.name)}</span>
       ${s.start ? `<span class="pk">Pacchetto dal ${itDate(s.start)}</span>` : ""}
-      ${dotsHTML(s.done,s.total,20,false,s.lost)}
+      ${(s.total || s.done) ? `${dotsHTML(s.done,s.total,20,false,s.lost)}
       <span class="row"><span>Sedute</span><strong>${s.done} su ${s.total}</strong></span>
       ${payBarHTML(s)}
-      <span class="row"><span>${s.due<0?"Credito":"Da saldare"}</span><strong class="${s.due>0?"due":""}">${hm(Math.abs(s.due))}</strong></span>
+      <span class="row"><span>${s.due<0?"Credito":"Da saldare"}</span><strong class="${s.due>0?"due":""}">${hm(Math.abs(s.due))}</strong></span>` : singleCardHTML(c)}
       ${f?`<span class="freq">${esc(f)}</span>`:""}
       ${ticksHTML(s)}
       ${alertsFor(c).length ? `<span class="alert">⚠ ${esc(alertText(c))}</span>` : ""}
@@ -2357,6 +2433,7 @@ function detailHTML(c){
     ${contact?`<p class="contact">${contact}</p>`:`<div style="height:10px"></div>`}
     <p class="pkg-line" id="pkgLine">${pkgLineHTML(s)}</p>
     <div class="big-count" id="bigCount">${countText(s)}</div>
+    <p class="per-ses" id="perSes">${perSesLine(c, s)}</p>
     <div id="bigDots">${dotsHTML(s.done,s.total,40,true,s.lost)}</div>
     <div id="headTicks">${ticksHTML(s)}</div>
     <div id="headAlert">${headAlertHTML(c)}</div>
@@ -2364,6 +2441,7 @@ function detailHTML(c){
       <button class="btn ${s.complete ? "" : "primary"}" data-a="addSes" id="addSesBtn">Segna seduta</button>
       <button class="btn" data-a="addPay">Aggiungi rata</button>
       <button class="btn ${s.complete ? "primary" : ""}" data-a="newPkg" id="newPkgBtn">Nuovo pacchetto</button>
+      <button class="btn" data-a="addSingle" id="addSingleBtn">Seduta singola</button>
       <button class="btn" data-a="share">Invia al cliente</button>
       <button class="btn" data-a="export">${cloudAvailable() ? "Esporta o salva la scheda" : "Esporta in Word o PDF"}</button>
       <button class="btn ghost" data-a="edit">Modifica dati</button>
@@ -2426,6 +2504,7 @@ function detailHTML(c){
   h += `</section>`;
 
   const hasPast = c.packages.length > 0;
+  h += historyHTML(c) + singlesHTML(c);
   h += missHTML(c, hasPast);
   h += `<section class="block"><div class="bh"><h3>Storico sedute${hasPast ? " del pacchetto in corso" : ""}</h3><button class="btn small" data-a="addSes">+ Seduta</button></div>`;
   if(!c.sessionLog.length) h += `<p class="none">Qui compaiono le sedute segnate con il pulsante “Segna seduta”, con data e note.</p>`;
@@ -2436,14 +2515,14 @@ function detailHTML(c){
   }
   h += `</section>`;
 
-  h += `<section class="block"><div class="bh"><h3>Storico pagamenti${hasPast ? " del pacchetto in corso" : ""}</h3><button class="btn small" data-a="addPay">+ Rata</button></div>`;
+  h += `<section class="block hist-sec" id="histPay">${histHead("pay", "Storico rate del cliente", hasPast ? "pacchetto in corso" : "", `<button class="btn small" data-a="addPay">+ Rata</button>`)}<div class="hist-body"${histOpen.pay ? "" : " hidden"}>`;
   if(!c.payLog.length) h += `<p class="none">Qui compaiono le rate aggiunte con il pulsante “Aggiungi rata”.</p>`;
   else {
     h += `<div class="scroll"><table><thead><tr><th>Data</th><th class="num">Importo</th><th>Metodo</th><th>Note</th><th><span hidden>Azioni</span></th></tr></thead><tbody>`;
     [...c.payLog].sort(byDate).forEach(x=>{ h += `<tr><td class="date">${itDate(x.date)}</td><td class="num">${eur(x.amount)}</td><td>${esc(x.method)}</td><td>${esc(x.note)}</td><td class="act">${rowBtns("Pay", x, "", `pagamento del ${itDate(x.date)}`)}</td></tr>`; });
     h += `</tbody></table></div>`;
   }
-  h += `</section>`;
+  h += `</div></section>`;
   return h + packagesHTML(c);
 }
 /* Lezioni saltate non recuperabili del pacchetto in corso */
@@ -2470,13 +2549,57 @@ document.addEventListener("toggle", e=>{
   if(d.open) openPkgs.add(d.dataset.pkg); else openPkgs.delete(d.dataset.pkg);
 }, true);
 /* Pacchetti conclusi: uno sotto l'altro, dal più recente; si aprono per vedere sedute e pagamenti */
+/* “Il cliente con te”: quanti pacchetti ha fatto, di quante lezioni, quanto hai guadagnato */
+function historyHTML(c){
+  const all = allPackages(c).filter(pkgUsed), pk = all.filter(p=>!isSingle(p)), sg = all.filter(isSingle);
+  if(!pk.length && !sg.length) return "";
+  const earned = round2(all.reduce((t,p)=>t + (Number(p.paid)||0), 0));
+  const done = all.reduce((t,p)=>t + (Number(p.doneSessions)||0), 0);
+  const first = all.map(p=>p.start).filter(isDate).sort()[0];
+  const sizes = pk.map(p=>p.totalSessions).filter(Boolean);
+  return `<section class="block hist-block" id="histBlock"><h3>Il cliente con te</h3>
+    <div class="hist-grid">
+      <div><b id="histPkgs">${pk.length}</b><span>${pk.length === 1 ? "pacchetto" : "pacchetti"}</span>${sizes.length ? `<small>da ${sizes.join(", ")} lezioni</small>` : ""}</div>
+      <div><b id="histSingles">${sg.length}</b><span>${sg.length === 1 ? "seduta singola" : "sedute singole"}</span></div>
+      <div><b id="histDone">${done}</b><span>sedute fatte</span>${first ? `<small>dal ${itDate(first)}</small>` : ""}</div>
+      <div class="c-in"><b id="histEarned">${hm(earned)}</b><span>guadagnato in totale</span>${done ? `<small>in media ${hm(perSession(earned, done))}/seduta</small>` : ""}</div>
+    </div></section>`;
+}
+/* sedute singole del cliente */
+function singlesHTML(c){
+  const sg = c.packages.filter(isSingle).sort((x,y)=>(y.start||"").localeCompare(x.start||""));
+  if(!sg.length) return "";
+  let h = `<section class="block" id="singlesBlock"><div class="bh"><h3>Sedute singole (${sg.length})</h3><button class="btn small" data-a="addSingle">+ Seduta singola</button></div><div class="miss-list">`;
+  sg.forEach(p=>{
+    const paid = (Number(p.paid)||0) >= (Number(p.price)||0) - 0.004;
+    h += `<div class="miss-row single-row${paid ? " paid" : ""}"><b>${itDate(p.start)}</b><span>${eur(p.price)}/seduta</span>
+      <span class="miss-st ${paid ? "ok" : "lost"}">${paid ? "pagata" : "da pagare"}</span>
+      ${paid ? "" : `<button class="btn small" data-a="singlePaid" data-id="${esc(p.id)}">Segna pagata</button>`}
+      <button class="x" data-a="delSingle" data-id="${esc(p.id)}" aria-label="Elimina seduta singola del ${itDate(p.start)}">✕</button></div>`;
+  });
+  return h + `</div></section>`;
+}
+/* titolo di uno storico con la freccetta: il titolo si vede sempre, i dati solo se lo apri */
+const histOpen = {pay: !!window.__histDefaultOpen, pkg: !!window.__histDefaultOpen};
+function histHead(key, title, sub, extra){
+  const open = histOpen[key];
+  return `<div class="bh hist-h"><button type="button" class="hist-t" data-a="toggleHist" data-h="${key}" aria-expanded="${open}" aria-controls="hist-${key}">
+      <span class="arr" aria-hidden="true">${open ? "▾" : "▸"}</span><h3>${title}</h3>${sub ? `<small>${sub}</small>` : ""}</button>${extra || ""}</div>`;
+}
 function packagesHTML(c){
-  const past = pastPackages(c); if(!past.length) return "";
-  let h = `<section class="block"><h3>Pacchetti precedenti (${past.length})</h3>`;
+  const past = pastPackages(c).filter(p=>!isSingle(p)).sort((x,y)=>(x.start||x.end||"").localeCompare(y.start||y.end||""));   // dal più vecchio
+  const rows = pkgHistory(c);
+  let h = `<section class="block hist-sec" id="histPkg">${histHead("pkg", "Storico pacchetti fatti dal cliente", rows.length ? `${rows.length} ${rows.length === 1 ? "pacchetto" : "pacchetti"}` : "")}<div class="hist-body"${histOpen.pkg ? "" : " hidden"}>`;
+  if(!rows.length) return h + `<p class="none">Nessun pacchetto ancora.</p></div></section>`;
+  h += `<table class="pkg-hist"><thead><tr><th>Inizio</th><th class="num">Sedute</th><th class="num">Costo</th><th class="num">€/seduta</th></tr></thead><tbody>`;
+  rows.forEach(r=>{ h += `<tr class="${r.current ? "cur" : ""}"><td class="date">${itDate(r.start)}${r.current ? `<small class="in-corso">in corso</small>` : ""}</td><td class="num">${r.total}</td><td class="num">${hm(r.price)}</td><td class="num">${r.total ? hm(perSession(r.price, r.total)) : "—"}</td></tr>`; });
+  h += `</tbody></table>`;
+  if(!past.length) return h + `</div></section>`;
+  h += `<p class="lbl">Dettagli dei pacchetti conclusi</p>`;
   past.forEach(p=>{
     const pc = pkgClient(c, p), s = stats(pc);
     h += `<details class="pkg" data-pkg="${esc(p.id)}"${openPkgs.has(p.id) ? " open" : ""}><summary><span class="pt">${esc(pkgTitle(p))}</span>
-      <span class="ps">${s.done} su ${s.total}${s.lost ? ` · ${s.lost} ${s.lost === 1 ? "saltata" : "saltate"}` : ""}${s.complete ? " · <b class=\"ok\">completato</b>" : ""} · pagato ${eur(s.paid)} su ${eur(s.price)}${s.due > 0 ? ` · <b class="due">da saldare ${eur(s.due)}</b>` : ""}${s.carriedOut ? " · saldo spostato nel pacchetto dopo" : ""}</span></summary><div class="pkg-body">`;
+      <span class="ps">${s.done} su ${s.total}${s.lost ? ` · ${s.lost} ${s.lost === 1 ? "saltata" : "saltate"}` : ""}${s.complete ? " · <b class=\"ok\">completato</b>" : ""} · pagato ${eur(s.paid)} su ${eur(s.price)}${s.total > 0 ? ` · ${eur(perSession(p.price - (p.carriedIn||0), s.total))}/seduta` : ""}${s.due > 0 ? ` · <b class="due">da saldare ${eur(s.due)}</b>` : ""}${s.carriedOut ? " · saldo spostato nel pacchetto dopo" : ""}</span></summary><div class="pkg-body">`;
     if(pc.sessionLog.length){
       h += `<p class="lbl">Sedute</p><div class="scroll"><table><tbody>`;
       [...pc.sessionLog].sort(byDateAsc).forEach((x,i)=>{ h += `<tr><td class="num">${i+1}</td><td class="date">${itDate(x.date)}</td><td>${esc(x.note)}</td><td class="act">${rowBtns("Ses", x, p.id, `seduta del ${itDate(x.date)}`)}</td></tr>`; });
@@ -2489,11 +2612,12 @@ function packagesHTML(c){
     }
     h += `<div class="acts"><button class="btn small" data-a="editPkg" data-id="${esc(p.id)}">Modifica questo pacchetto</button><button class="btn small danger" data-a="delPkg" data-id="${esc(p.id)}">Elimina questo pacchetto</button></div></div></details>`;
   });
-  return h + `</section>`;
+  return h + `</div></section>`;
 }
 function refreshSummary(c){
   const s = stats(c);
   const bc = $("bigCount"); if(bc) bc.textContent = countText(s);
+  const ps = $("perSes"); if(ps) ps.innerHTML = perSesLine(c, s);
   const bd = $("bigDots"); if(bd) bd.innerHTML = dotsHTML(s.done,s.total,40,true,s.lost);
   const db = $("dueBox");
   if(db){ db.className = "field " + (s.due>0?"due":"ok"); db.innerHTML = `<label>${s.due<0?"Credito del cliente":"Ancora da saldare"}</label><div class="val">${eur(Math.abs(s.due))}</div>`; }
@@ -2508,6 +2632,37 @@ function refreshSummary(c){
 /* ======================= AZIONI ======================= */
 $("cDays").innerHTML = DAYS.map(d=>`<label><input type="checkbox" value="${d}"><span>${d}</span></label>`).join("");
 
+/* nuova seduta singola: data, prezzo, pagata sì/no */
+function singleRecord(date, price, paid, note){
+  const d = isDate(date) ? date : today(), pr = round2(Math.max(Number(price)||0, 0));
+  return {id:uid(), start:d, end:d, totalSessions:1, doneSessions:1, price:pr, paid: paid ? pr : 0, carriedIn:0, carriedOut:0, single:true,
+    sessionLog:[{id:uid(), date:d, note:note||""}], payLog: paid && pr > 0 ? [{id:uid(), date:d, amount:pr, method:"", note:"Seduta singola"}] : [], missLog:[]};
+}
+$("fSingle").addEventListener("submit", e=>{
+  if(!e.submitter || e.submitter.value !== "ok") return;
+  if(!(parseNum($("sgPrice").value) > 0)){ e.preventDefault(); $("sgErr").textContent = "Scrivi il prezzo della seduta, ad esempio 30."; $("sgPrice").focus(); }
+});
+async function addSingle(id){
+  const c = getClient(id); if(!c) return;
+  const last = c.packages.filter(isSingle).sort((x,y)=>(y.start||"").localeCompare(x.start||""))[0];
+  $("sgDate").value = today(); $("sgPrice").value = last ? fmtIn(last.price) : (settings.singlePrice ? fmtIn(settings.singlePrice) : "");
+  $("sgPaid").checked = true; $("sgNote").value = ""; $("sgErr").textContent = "";
+  if(await ask("dlgSingle") !== "ok") return;
+  const price = parseNum($("sgPrice").value);
+  const cur = getClient(id); if(!cur) return;
+  const n = clone(cur); n.packages.push(singleRecord($("sgDate").value, price, $("sgPaid").checked, $("sgNote").value.trim()));
+  if(price > 0 && settings.singlePrice !== price){ settings.singlePrice = price; saveSettings(); }
+  commit(n, true); render(); toast(`Seduta singola segnata: ${eur(price)}`);
+}
+function syncKindUI(){
+  const single = (document.querySelector('input[name="cKind"]:checked') || {}).value === "single" && !$("cKindW").hidden;
+  $("cSesW").hidden = single;
+  $("cPkgH").textContent = single ? "Seduta singola" : "Pacchetto";
+  $("cStartL").textContent = single ? "Data della seduta" : "Data di inizio del pacchetto";
+  $("cPriceL").textContent = single ? "Prezzo della seduta (€)" : "Totale da pagare (€)";
+  $("cPaidL").textContent = single ? "Pagato (€)" : "Già pagato / acconto (€)";
+}
+document.querySelectorAll('input[name="cKind"]').forEach(r=>r.addEventListener("change", syncKindUI));
 async function clientForm(existing){
   const isNew = !existing;
   $("dlgClientTitle").textContent = isNew ? "Nuova cartella" : "Modifica dati";
@@ -2518,7 +2673,9 @@ async function clientForm(existing){
   $("cStart").value = isNew ? today() : v.start;
   $("cFreq").value = v.freq || ""; $("cTraining").value = v.training; $("cNotes").value = v.notes;
   $("cDays").querySelectorAll("input").forEach(i=>i.checked = v.days.includes(i.value));
+  $("cKindW").hidden = !isNew; document.querySelectorAll('input[name="cKind"]').forEach(r=>r.checked = r.value === "pkg"); syncKindUI();
   if(await ask("dlgClient") !== "ok") return;
+  const single = isNew && (document.querySelector('input[name="cKind"]:checked') || {}).value === "single";
   const name = $("cName").value.trim(); if(!name) return;
   const freqRaw = $("cFreq").value.trim();
   const data = {
@@ -2530,7 +2687,14 @@ async function clientForm(existing){
     training:$("cTraining").value.trim(), notes:$("cNotes").value.trim(),
     start: /^\d{4}-\d{2}-\d{2}$/.test($("cStart").value) ? $("cStart").value : ""
   };
-  if(isNew){
+  if(isNew && single){                                              // solo seduta singola: nessun pacchetto in corso
+    const pr = data.price, pd = data.paid;
+    const nc = normalize(Object.assign({}, data, {totalSessions:0, doneSessions:0, price:0, paid:0, start:""}));
+    nc.packages.push(singleRecord(data.start || today(), pr, pd >= pr - 0.004, ""));
+    if(pd > 0 && pd < pr - 0.004){ const sp = nc.packages[nc.packages.length-1]; sp.paid = round2(pd); sp.payLog = [{id:uid(), date:sp.start, amount:round2(pd), method:"", note:"Acconto"}]; }
+    if(pr > 0){ settings.singlePrice = pr; saveSettings(); }
+    commit(nc, true); openId = nc.id; toast("Cartella creata con una seduta singola");
+  } else if(isNew){
     const nc = normalize(data);
     if(nc.paid > 0) nc.payLog.push({id:uid(), date:today(), amount:nc.paid, method:"", note:"Acconto"});
     commit(nc, true); openId = nc.id; toast("Cartella creata");
@@ -3209,6 +3373,7 @@ async function handle(a, el){
     case "clearFilter": listFilter = "all"; filtersOpen = false; render(); return;
     case "exportAll": return exportAll();
     case "pickMonth": return pickMonth();
+    case "toggleHist": { const k = el.dataset.h; if(k in histOpen){ histOpen[k] = !histOpen[k]; render(); } return; }
     case "pickStatsYear": return pickStatsYear();
     case "toggleHomeMoney": settings.homeHideMoney = !settings.homeHideMoney; saveSettings(); render(); return;
     case "dataMenu": return dataMenu();
@@ -3244,6 +3409,23 @@ async function handle(a, el){
     case "followAll": return updateAllFollow();
     case "import": $("importInput").value=""; $("importInput").click(); return;
     case "addSes": return c && addSession(c.id);
+    case "addSingle": return c && addSingle(c.id);
+    case "singlePaid": {
+      if(!c) return;
+      const n = clone(c), p = n.packages.find(x=>x.id === el.dataset.id); if(!p) return;
+      const rest = round2((Number(p.price)||0) - (Number(p.paid)||0));
+      if(rest > 0) p.payLog.push({id:uid(), date:today(), amount:rest, method:"", note:"Seduta singola"});
+      p.paid = Number(p.price)||0; commit(n, true); render(); toast("Seduta singola pagata");
+      return;
+    }
+    case "delSingle": {
+      if(!c) return;
+      const p = c.packages.find(x=>x.id === el.dataset.id); if(!p) return;
+      if(!(await messageBox("Eliminare la seduta singola?", `La seduta singola del ${itDate(p.start)} (${eur(p.price)}) verrà tolta, anche dai guadagni.`, {ok:"Elimina", cancel:"Annulla", danger:true}))) return;
+      const cur = getClient(c.id); if(!cur) return;
+      const n = clone(cur); n.packages = n.packages.filter(x=>x.id !== p.id); commit(n, true); render(); toast("Seduta singola eliminata");
+      return;
+    }
     case "delMiss": {
       if(!c) return;
       const x = c.missLog.find(m=>m.id === el.dataset.id); if(!x) return;
@@ -4055,7 +4237,8 @@ function sessionMonths(c, undated){
   const out = [];
   allPackages(c).forEach(p=>{
     const n = Number(p.doneSessions) || 0; if(n <= 0) return;
-    if(isDate(p.start)) out.push(...sessionSplit(p.start, n, Number(p.totalSessions) || n));
+    if(isDate(p.start) && isSingle(p)) out.push([p.start.slice(0,7), n]);      // seduta singola: nel mese della sua data
+    else if(isDate(p.start)) out.push(...sessionSplit(p.start, n, Number(p.totalSessions) || n));
     else if(undated) undated.n += n;
   });
   return out;
@@ -4065,16 +4248,16 @@ function lastActivity(c){
   return d.length ? d[d.length - 1] : "";
 }
 function clientStats(c){
-  const pk = allPackages(c).filter(pkgUsed);
+  const used = allPackages(c).filter(pkgUsed), pk = used.filter(p=>!isSingle(p)), singles = used.filter(isSingle).length;
   const starts = pk.map(p=>p.start).filter(isDate).sort();
   const gaps = []; for(let i=1;i<starts.length;i++) gaps.push(daysBetween(starts[i-1], starts[i]));
   const kinds = {}; pk.forEach(p=>{ const k = `${p.totalSessions}|${round2(p.price - (p.current ? (c.carriedIn||0) : (p.carriedIn||0)))}`; kinds[k] = (kinds[k]||0) + 1; });
   const top = Object.entries(kinds).sort((a,b)=>b[1]-a[1])[0];
   const last = lastActivity(c), age = last ? daysBetween(last, today()) : null;
   const earned = round2(payEvents(c).reduce((a,e)=>a+e.amount, 0));
-  const sessions = pk.reduce((a,p)=>a + (Number(p.doneSessions)||0), 0);
+  const sessions = used.reduce((a,p)=>a + (Number(p.doneSessions)||0), 0);
   return {
-    c, packages: pk.length, renewals: Math.max(pk.length - 1, 0),
+    c, packages: pk.length, renewals: Math.max(pk.length - 1, 0), singles,
     lost: pk.reduce((t,p)=>t + (p.missLog || []).length, 0),
     typical: top ? {sessions: Number(top[0].split("|")[0]), price: Number(top[0].split("|")[1])} : null,
     every: gaps.length ? Math.round(gaps.reduce((a,b)=>a+b,0) / gaps.length) : null,
@@ -4141,16 +4324,19 @@ function statsHTML(){
 
   // ---- tabella GENERALE (da quando hai iniziato)
   const act = D.per.filter(p=>p.active).length;
-  const pkgs = D.per.reduce((t,p)=>t + p.packages, 0), renewed = D.per.filter(p=>p.renewals > 0).length;
+  const pkgs = D.per.reduce((t,p)=>t + p.packages, 0);
   const allIncome = round2(clients.reduce((s,c)=>s + allPackages(c).reduce((t,p)=>t + (Number(p.paid)||0), 0), 0));
   const allExp = round2(expData().pays.reduce((t,p)=>t + (Number(p.amount)||0), 0));
   const allDone = clients.reduce((s,c)=>s + (Number(c.doneSessions)||0) + c.packages.reduce((t,p)=>t + (Number(p.doneSessions)||0), 0), 0);
+  const personal = D.per.filter(p=>p.packages > 0).length;                       // chi ha fatto almeno un pacchetto
+  const singleOnly = D.per.filter(p=>p.packages === 0 && p.singles > 0).length;    // solo sedute singole (1 persona anche con più sedute)
   h += `<div class="dash dash-gen dash6" id="statsGen" aria-label="Dati generali">
     <div class="dash-title"><span class="dt-ico" aria-hidden="true">📊</span><b>Generale</b></div>
+    <div class="dc"><b id="kpiPersonal">${personal}</b><span>clienti da personal</span><small>hanno fatto almeno un pacchetto</small></div>
+    <div class="dc"><b id="kpiPkgs">${pkgs}</b><span>pacchetti venduti</span><small>anche più di uno a persona</small></div>
+    <div class="dc"><b id="kpiSesAll">${allDone}</b><span>sedute svolte in totale</span><small>pacchetti + sedute singole</small></div>
     <div class="dc"><b id="kpiActive">${act}</b><span>clienti attivi</span><small>seduta o pagamento negli ultimi ${ACTIVE_DAYS} giorni</small></div>
-    <div class="dc"><b id="kpiPkgs">${pkgs}</b><span>pacchetti venduti</span></div>
-    <div class="dc"><b id="kpiRenew">${D.per.length ? Math.round(renewed / D.per.length * 100) : 0}%</b><span>hanno rinnovato almeno una volta</span></div>
-    <div class="dc"><b id="kpiSesAll">${allDone}</b><span>sedute svolte in totale</span></div>
+    <div class="dc"><b id="kpiSingles">${singleOnly}</b><span>clienti solo sedute singole</span><small>persone che non hanno mai fatto un pacchetto</small></div>
     <div class="dc c-in"><b id="kpiIncomeAll">${money(allIncome)}</b><span>guadagno totale</span><small>da quando hai iniziato</small></div>
     <div class="dc c-net"><b id="kpiNetAll">${money(round2(allIncome - allExp))}</b><span>netto totale</span><small>guadagno totale − spese pagate</small></div>
   </div>`;
@@ -4159,13 +4345,16 @@ function statsHTML(){
   const ks = MONTHS.map((_,i)=>`${year}-${String(i+1).padStart(2,"0")}`);
   const sum = f => round2(ks.reduce((t,k)=>t + (D.month(k)[f] || 0), 0));
   const yInc = sum("income"), yExp = sum("expense"), ySes = sum("sessions"), yNet = round2(yInc - yExp);
-  const yDue = round2(ks.reduce((t,k)=>t + dueForMonth(k), 0));
   const nMonths = year < nowY ? 12 : (ks.filter(k=>k <= nowK).length || 1);
+  const inYear = p => (p.start || "").startsWith(year);
+  const yClients = clients.filter(c=>allPackages(c).some(p=>pkgUsed(p) && !isSingle(p) && inYear(p))).length;
+  const ySingle = clients.filter(c=>!allPackages(c).some(p=>pkgUsed(p) && !isSingle(p) && inYear(p)) && allPackages(c).some(p=>isSingle(p) && inYear(p))).length;
   h += `<div class="dash dash-month dash6" id="statsYearDash" aria-label="L'anno scelto">
     <button type="button" class="dash-title month-pick" id="yearPick" data-a="pickStatsYear" data-y="${year}" aria-label="Scegli l'anno"><span class="dt-ico" aria-hidden="true">📅</span><b>${year}&nbsp;▾</b><span>${year === nowY ? "anno in corso" : "tocca per cambiare"}</span></button>
-    <div class="dc"><b id="kpiSes">${ySes}</b><span>sedute svolte</span><small>nel ${year}</small></div>
+    <div class="dc"><b id="kpiClientsYear">${yClients}</b><span>clienti del ${year}</span><small>con un pacchetto iniziato nel ${year}</small></div>
+    <div class="dc"><b id="kpiSes">${ySes}</b><span>sedute svolte</span><small>nel ${year}, pacchetti + sedute singole</small></div>
+    <div class="dc"><b id="kpiSinglesYear">${ySingle}</b><span>clienti solo sedute singole</span><small>persone senza pacchetto nel ${year}</small></div>
     <div class="dc c-in"><b id="kpiIncome">${money(yInc)}</b><span>guadagno dell'anno</span><small>entrate del ${year} (già incassate)</small></div>
-    <div class="dc c-owed"><b id="kpiDueYear">${money(yDue)}</b><span>ancora da incassare</span><small>pacchetti del ${year}</small></div>
     <div class="dc c-exp"><b id="kpiExpense">${money(yExp)}</b><span>spese dell'anno</span><small id="kpiExpKinds">${yExp > 0 ? kindLine(expByKind(ks), money) : `uscite del ${year}`}</small></div>
     <div class="dc c-net"><b id="kpiNet">${money(yNet)}</b><span>guadagno netto annuale</span><small>entrate − uscite</small></div>
     <div class="dc c-net"><b id="kpiNetAvg">${money(round2(yNet / nMonths))}</b><span>netto medio al mese</span><small>nel ${year}</small></div>
