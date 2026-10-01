@@ -85,6 +85,13 @@ a.btn[hidden]{display:none}
    Sopra “📊 Generale” (non dipende dal mese), sotto “📅 il mese scelto”. */
 .dash{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:12px}
 .dash + .dash{margin-bottom:24px}
+/* pagina principale: Generale ha 5 valori, il mese 4 → il titolo del mese occupa 2 spazi e le colonne restano allineate */
+.dash.dash-gen:not(.dash6),.dash.dash-month:not(.dash6){grid-template-columns:repeat(6,1fr)}
+.dash.dash-month:not(.dash6) > .dash-title{grid-column:span 2}
+.dash.dash-gen:not(.dash6) .dc b,.dash.dash-month:not(.dash6) .dc b{font-size:1.6rem}
+@media (max-width:1100px){ .dash.dash-gen:not(.dash6) .dc b,.dash.dash-month:not(.dash6) .dc b{font-size:1.35rem} .dash.dash-gen:not(.dash6) > *,.dash.dash-month:not(.dash6) > *{padding:12px 10px} }
+@media (max-width:860px){ .dash.dash-gen:not(.dash6) .dc b,.dash.dash-month:not(.dash6) .dc b{font-size:1.6rem} }
+@media (max-width:360px){ .dash.dash-gen:not(.dash6) .dc b,.dash.dash-month:not(.dash6) .dc b{font-size:1.3rem} }
 .dash > *{background:var(--paper);padding:14px 16px;min-width:0;min-height:112px;display:flex;flex-direction:column;align-items:flex-start;text-align:left}
 .dash .dc b{font-family:"Barlow Condensed",sans-serif;font-size:1.9rem;line-height:1;color:var(--pine)}
 .dash .dc span{color:var(--muted);font-size:.92rem;margin-top:4px}
@@ -105,7 +112,9 @@ a.btn[hidden]{display:none}
 .dash [role=button]:hover{background:var(--moss-soft)}
 @media (max-width:1100px){ .dash .dc b{font-size:1.55rem} .dash > *{padding:12px 12px} }
 @media (max-width:860px){
-  .dash{grid-template-columns:repeat(2,1fr)}
+  .dash,.dash.dash-gen:not(.dash6),.dash.dash-month:not(.dash6){grid-template-columns:repeat(2,1fr)}
+  .dash.dash-month:not(.dash6) > .dash-title{grid-column:1/-1}
+  .dash.dash-gen:not(.dash6) > .dc:last-child{grid-column:1/-1}
   .dash > *{min-height:96px;padding:12px}
   .dash .dash-title{grid-column:1/-1;min-height:0;flex-direction:row;align-items:baseline;justify-content:flex-start;flex-wrap:wrap;gap:4px 10px;padding:10px 12px}
   .dash .dc b{font-size:1.6rem}
@@ -139,7 +148,8 @@ a.btn[hidden]{display:none}
 .dash.dash6 .dc span{font-size:.84rem}
 .dash.dash6 .dc small{font-size:.72rem}
 @media (max-width:1180px){ .dash.dash6 .dc b{font-size:1.55rem} .dash.dash6{grid-template-columns:repeat(4,1fr)} .dash.dash6 .dash-title{grid-column:1/-1;min-height:0;flex-direction:row;align-items:baseline;justify-content:flex-start;flex-wrap:wrap;gap:4px 10px;padding:10px 12px} }
-@media (max-width:760px){ .dash.dash6{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:1180px){ .dash.dash6 > .dc:last-child{grid-column:span 2} }
+@media (max-width:760px){ .dash.dash6{grid-template-columns:repeat(2,1fr)} .dash.dash6 > .dc:last-child{grid-column:1/-1} }
 #ypGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 /* colori delle voci (uguali alla tabella del mese) */
 :root{--c-ses:#3b6fc4}
@@ -154,6 +164,9 @@ a.btn[hidden]{display:none}
 .s-exp i,.bar.s-exp{fill:var(--danger);background:var(--danger)}
 .s-net i,.bar.s-net{fill:var(--pine);background:var(--pine)}
 .s-ses i{background:var(--c-ses);border-radius:50%}
+.s-pt i,.bar.s-pt{fill:var(--moss);background:var(--moss)}
+.s-ck i,.bar.s-ck{fill:var(--c-ses);background:var(--c-ses)}
+.chart-quick{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 6px}
 svg.ybars{width:100%;min-width:640px;height:auto;display:block}
 svg.ybars .axis{stroke:var(--line);stroke-width:1.5}
 svg.ybars .ax{font-size:10px;fill:var(--muted);text-anchor:end}
@@ -195,9 +208,103 @@ svg.pie .slice{stroke:var(--paper);stroke-width:1}
 .pkg-hist th,.pkg-hist td{padding:7px 4px}
 .pkg-hist th:last-child{position:static;background:none}
 .pkg-hist tr.cur td{font-weight:700}
-.pkg-hist .in-corso{display:block;font-size:.72rem;font-weight:700;color:var(--moss)}
-.pkg-hist th:nth-child(1){width:31%} .pkg-hist th:nth-child(2){width:17%}
-@media (max-width:360px){ .pkg-hist{font-size:.78rem} table.pkg-hist th,table.pkg-hist td,table.pkg-hist td.num,table.pkg-hist td.date{padding:6px 2px;white-space:normal;overflow-wrap:anywhere} }
+.pkg-hist .in-corso{font-size:.8em;font-weight:700;color:var(--moss)}
+.closed-line{margin:2px 0 6px;font-weight:700;color:var(--moss)}
+.closed-line:empty{display:none}
+.closed-line small{font-weight:500;color:var(--muted)}
+.pkg-hist th:nth-child(1),.pkg-hist th:nth-child(2){width:24%} .pkg-hist th:nth-child(3){width:14%}
+.pkg-hist-list{display:none;list-style:none;margin:0 0 8px;padding:0;gap:6px}
+.pkg-hist-list li{border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.pkg-hist-list li.cur{border-color:var(--moss)}
+.pkg-hist-list li > b{display:block;font-size:.95rem}
+.pkg-hist-list li > span{display:block;color:var(--muted);font-size:.86rem;margin-top:2px}
+.pkg-hist-list .pps{color:var(--moss)}
+@media (max-width:480px){ table.pkg-hist{display:none} .pkg-hist-list{display:grid} }
+
+.svc-sw{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0}
+.svc{display:inline-flex;align-items:center;gap:6px;margin:0;padding:10px 14px;border:1.5px solid var(--line);border-radius:999px;cursor:pointer;font-weight:700;min-height:44px}
+.svc input{position:absolute;opacity:0;width:1px;height:1px}
+.svc:has(input:checked){background:var(--moss);border-color:var(--moss);color:var(--on-moss)}
+.svc:has(input:focus-visible){outline:2px solid var(--moss);outline-offset:2px}
+#cPtW[hidden],#cCkW[hidden],#ckPkgW[hidden],#ckSingleW[hidden]{display:none}
+.ck-per{font-weight:700;color:var(--moss);margin:6px 0}
+.ck-per:empty{display:none}
+.ck-block .ck-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media (max-width:640px){ .ck-block .ck-grid{grid-template-columns:repeat(2,1fr)} }
+.ck-block .ck-grid > div{border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+.ck-block .ck-grid b{display:block;font-family:"Barlow Condensed",sans-serif;font-size:1.45rem;line-height:1}
+.ck-block .ck-grid span{display:block;color:var(--muted);font-size:.86rem;margin-top:3px}
+.ck-block .c-in b{color:var(--moss)}
+.ck-block .c-owed b{color:var(--owed)}
+.ck-block .ck-notes{white-space:pre-wrap;border-left:3px solid var(--moss);padding:6px 10px;margin:10px 0 0}
+.ck-line{display:block;font-size:.85rem;font-weight:700;color:var(--moss);margin:2px 0 4px}
+#shareWhatW[hidden],#shareChecks[hidden],#shareCkNote[hidden]{display:none}
+/* statistiche check: due tabelle da 5 valori */
+.st-sec{font-family:"Barlow Condensed",sans-serif;font-size:1.5rem;margin:22px 0 10px}
+.dash.dashck{grid-template-columns:repeat(6,1fr)}
+.dash.dashck .dc b{font-size:1.6rem}
+.dashck.ck-gen .dash-title{background:var(--chalk)}
+.dashck.ck-month .dash-title{background:var(--moss-soft);cursor:pointer}
+.dashck.ck-month .dash-title b{color:var(--moss)}
+@media (max-width:1100px){ .dash.dashck .dc b{font-size:1.35rem} .dash.dashck > *{padding:12px 10px} }
+@media (max-width:860px){ .dash.dashck{grid-template-columns:repeat(2,1fr)} .dash.dashck .dc b{font-size:1.6rem} .dash.dashck > .dc:last-child{grid-column:1/-1} }
+@media (max-width:360px){ .dash.dashck .dc b{font-size:1.3rem} }
+/* profitti: due tabelle da 3 valori */
+.dash.dashpf{grid-template-columns:repeat(4,1fr)}
+.dash.dashpf .dc b{font-size:1.8rem}
+.dashpf.pf-gen .dash-title{background:var(--chalk)}
+.dashpf.pf-month .dash-title{background:var(--moss-soft);cursor:pointer}
+.dashpf.pf-month .dash-title b{color:var(--moss)}
+@media (max-width:860px){ .dash.dashpf{grid-template-columns:repeat(3,1fr)} .dash.dashpf .dc b{font-size:1.35rem} }
+@media (max-width:560px){ .dash.dashpf{grid-template-columns:repeat(2,1fr)} .dash.dashpf .dc b{font-size:1.5rem} .dash.dashpf > .dc:last-child{grid-column:1/-1} }
+@media (max-width:360px){ .dash.dashpf .dc b{font-size:1.3rem} }
+/* ===== formato fluido: si adatta a qualunque schermo (iPhone, portatile, monitor) ===== */
+body[data-view="list"] .wrap,body[data-view="stats"] .wrap{max-width:1400px}
+.dash > *{padding:clamp(10px, .45rem + .55vw, 18px)}
+.dash .dc b{font-size:clamp(1.4rem, .95rem + 1.05vw, 2rem)}
+.dash .dc span{font-size:clamp(.86rem, .8rem + .18vw, 1rem)}
+.dash .dc small{font-size:clamp(.74rem, .7rem + .12vw, .86rem)}
+.dash .dash-title b{font-size:clamp(1.3rem, 1.1rem + .5vw, 1.6rem)}
+/* statistiche: stesso numero di colonne per tutte le tabelle (lo decide il gestionale in base allo spazio) */
+#app .dash.dash6,#app .dash.dashck,#app .dash.dashpf{grid-template-columns:repeat(var(--cols,3),1fr)}
+.dash.dash6 .dc b,.dash.dashck .dc b,.dash.dashpf .dc b{font-size:clamp(1.45rem, 1.05rem + 1.1vw, 2rem)}
+.dash.dash6 > .dash-title,.dash.dashck > .dash-title,.dash.dashpf > .dash-title{grid-column:1/-1;min-height:0;flex-direction:row;align-items:baseline;justify-content:flex-start;flex-wrap:wrap;gap:4px 10px;padding:10px 14px}
+#app .dash.dash6 > .dc,#app .dash.dashck > .dc,#app .dash.dashpf > .dc{grid-column:auto}   /* l'ultima riga la riempie il gestionale */
+@media (max-width:860px){
+  .dash.dash-gen:not(.dash6) .dc b,.dash.dash-month:not(.dash6) .dc b{font-size:clamp(1.45rem, 1.1rem + 1.2vw, 1.8rem)}
+}
+@media (min-width:861px){
+  .dash.dash-gen:not(.dash6) .dc b,.dash.dash-month:not(.dash6) .dc b{font-size:clamp(1.3rem, .7rem + 1.05vw, 2rem)}
+}
+.seg.seg-wrap{flex-wrap:wrap;height:auto;min-height:0;row-gap:6px;align-content:flex-start}
+.seg.seg-wrap > label{margin:0 !important;flex:1 1 auto}
+#dlgCkLog .seg,#ckTodayW .seg{margin:4px 0 6px}
+.ck-alert{margin:6px 0 10px;padding:8px 12px;border-radius:10px;background:var(--owed-soft);color:var(--owed);font-weight:700}
+.seg.score label{flex:1}
+.stars{color:#E0A100;letter-spacing:1px;font-size:.95rem}
+.stars .off{color:var(--line)}
+.ck-log-row,.w-row{border-left-color:var(--moss) !important}
+.ck-log-row{flex-wrap:wrap;position:relative;padding-right:44px !important;row-gap:4px}
+
+.w-row{position:relative;padding-right:44px !important}
+.ck-log-note{flex-basis:100%;color:var(--muted);font-size:.9rem;order:5}
+.ck-block .ck-grid .ck-done-cell .dots{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0 0}
+.ck-block .ck-grid .ck-done-cell .dots .dot{display:inline-block;margin:0}
+.wsvg{width:100%;max-width:560px;height:auto;display:block;margin:6px 0 10px}
+.wsvg .wline{fill:none;stroke:var(--moss);stroke-width:2.5}
+.wsvg .wdot{fill:var(--moss);stroke:var(--paper);stroke-width:1.5}
+.wsvg .ax{font-size:11px;fill:var(--muted);text-anchor:end}
+.wsvg .lab{font-size:11px;fill:var(--muted)}
+.wsvg .lab.end{text-anchor:end}
+.w-down{color:var(--moss)}
+.w-up{color:var(--owed)}
+.today-box{border:1.5px dashed var(--line);border-radius:12px;padding:10px 14px 12px;margin:14px 0 4px}
+.today-box legend{font-weight:700;padding:0 6px}
+.today-box legend small{font-weight:500;color:var(--muted)}
+.miss-st.prog{background:#E8EEF9;color:#2D5BA8;border-color:#9BB5E3}
+.row-acts{display:inline-flex;gap:2px;position:absolute;right:6px;top:50%;transform:translateY(-50%)}
+.ck-log-row > .row-acts,.w-row > .row-acts{position:absolute}
+.ck-log-row,.w-row{padding-right:76px !important}
 .money-eye{display:flex;justify-content:flex-end;margin:0 0 4px}
 .eye-btn{display:inline-flex;align-items:center;gap:4px;background:none;border:none;padding:4px 6px;min-height:28px;border-radius:8px;color:var(--muted);font-size:.72rem;font-weight:600;cursor:pointer;line-height:1}
 .eye-btn:hover{background:var(--moss-soft);color:var(--pine)}
@@ -229,7 +336,7 @@ svg.pie .slice{stroke:var(--paper);stroke-width:1}
 .s-clear{right:58px;width:36px;background:transparent;color:var(--muted);font-size:1.05rem;font-weight:700}
 .found{margin:-12px 0 16px;font-size:.92rem;font-weight:600;color:var(--moss)}
 
-.folders{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:26px 18px}
+.folders{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:26px 18px;grid-auto-rows:1fr}   /* tutte le cartelline alte uguali */
 .folder{position:relative;display:block;text-align:left;background:var(--folder);border:1.5px solid var(--folder-edge);border-radius:0 10px 10px 10px;padding:16px 16px 14px;margin-top:14px;width:100%;transition:transform .15s}
 .folder::before{content:"";position:absolute;left:-1.5px;top:-15px;width:42%;height:15px;background:var(--folder);border:1.5px solid var(--folder-edge);border-bottom:none;border-radius:8px 14px 0 0}
 .folder .fname{display:block;font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:700;font-size:1.45rem;line-height:1.1;margin-bottom:10px;overflow-wrap:anywhere}
@@ -467,8 +574,18 @@ body.has-syncbar{padding-top:calc(34px + env(safe-area-inset-top,0px))}
 .del-backup{background:var(--moss-soft);border-radius:10px;padding:12px;margin:12px 0}
 .del-backup .btn{width:100%}
 .danger-zone .wipe{background:none;border:none;color:var(--danger);font-weight:600;font-size:.85rem;padding:8px 10px;min-height:36px;opacity:.85;text-decoration:underline;text-underline-offset:3px}
-.fwrap{position:relative}
+.fwrap{position:relative;display:flex;flex-direction:column}
+.fwrap > .folder{flex:1 1 auto;display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch}
+/* chi ha personal e check: i due lati occupano lo stesso spazio, così cambiando lato la cartellina non cambia dimensione */
+.fviews{display:grid}
+.fviews > .fv{grid-area:1/1;display:block;min-width:0}
+.fviews > .fv.off{visibility:hidden}
 .fwrap .folder{padding-top:44px}
+.fwrap.has-sw .folder{padding-top:104px}
+.fsw{position:absolute;top:64px;left:10px;right:10px;display:flex;gap:4px;padding:3px;border-radius:999px;background:var(--paper);border:1px solid var(--folder-edge)}
+.fsw-b{flex:1;min-height:34px;border:none;border-radius:999px;background:none;color:var(--pine);font:inherit;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap}
+.fsw-b.on{background:var(--moss);color:var(--on-moss)}
+.folder .row strong.ok{color:var(--moss)}
 .ftools{position:absolute;top:22px;right:8px;display:flex;gap:4px}
 .ftool{width:36px;height:36px;border-radius:8px;border:1px solid var(--folder-edge);background:var(--paper);color:var(--pine);font-weight:700;font-size:.95rem;display:flex;align-items:center;justify-content:center;padding:0}
 .ftool.del{color:var(--danger)}
@@ -556,9 +673,16 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
     <div><label for="cPhone">Telefono</label><input id="cPhone" type="text" autocomplete="off"></div>
     <div><label for="cEmail">Email</label><input id="cEmail" type="email" autocomplete="off"></div>
   </div>
+  <h4>Servizi</h4>
+  <div class="svc-sw" role="group" aria-label="Servizi del cliente">
+    <label class="svc"><input type="checkbox" id="cSvcPt" checked><span>🏋️ Personal 1 to 1</span></label>
+    <label class="svc"><input type="checkbox" id="cSvcCk"><span>📋 Check</span></label>
+  </div>
+  <p class="err" id="cSvcErr" role="alert"></p>
+  <div id="cPtW">
   <div id="cKindW"><label>Tipo</label>
     <div class="seg"><label><input type="radio" name="cKind" value="pkg" checked><span>Pacchetto</span></label><label><input type="radio" name="cKind" value="single"><span>Seduta singola</span></label></div></div>
-  <h4 id="cPkgH">Pacchetto</h4>
+  <h4 id="cPkgH">Pacchetto personal 1 to 1</h4>
   <label for="cStart" id="cStartL">Data di inizio del pacchetto</label>
   <input id="cStart" type="date">
   <div class="two" id="cSesW">
@@ -568,6 +692,37 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
   <div class="two">
     <div><label for="cPrice" id="cPriceL">Totale da pagare (€)</label><input id="cPrice" type="text" placeholder="es. 400"></div>
     <div><label for="cPaid" id="cPaidL">Già pagato / acconto (€)</label><input id="cPaid" type="text" placeholder="0"></div>
+  </div>
+  </div>
+  <div id="cCkW" hidden>
+    <h4>Check</h4>
+    <div class="seg"><label><input type="radio" name="ckKind" value="single" checked><span>Consulenza singola</span></label><label><input type="radio" name="ckKind" value="pkg"><span>Pacchetto di più consulenze</span></label></div>
+    <div id="ckSingleW">
+      <div class="two"><div><label for="ckPrice1">Importo della consulenza (€)</label><input id="ckPrice1" type="text" placeholder="es. 50"></div>
+        <div><label for="ckStart1">Dal</label><input id="ckStart1" type="date"></div></div>
+      <label class="check carry"><input type="checkbox" id="ckPaidMonth"><span id="ckPaidMonthL">Ha pagato la consulenza di questo mese</span></label>
+    </div>
+    <div id="ckPkgW" hidden>
+      <label for="ckStart">Data di inizio</label><input id="ckStart" type="date">
+      <div class="two"><div><label for="ckCount">Numero di consulenze</label><input id="ckCount" type="text" placeholder="es. 6"></div>
+        <div><label for="ckPrice">Costo totale (€)</label><input id="ckPrice" type="text" placeholder="es. 100"></div></div>
+      <label for="ckPaid">Già pagato (€)</label><input id="ckPaid" type="text" placeholder="0">
+    </div>
+    <p class="ck-per" id="ckPer"></p>
+    <label for="ckNotes">Note sul cliente e sui check (facoltativo)</label>
+    <textarea id="ckNotes" rows="3" placeholder="Informazioni sul cliente, obiettivi, cadenza dei check, feedback…"></textarea>
+    <fieldset class="today-box" id="ckTodayW">
+      <legend>Vuoi segnare qualcosa di oggi? <small>(tutto facoltativo: se lasci vuoto non viene segnato niente)</small></legend>
+      <label for="fkDate">Data</label><input id="fkDate" type="date">
+      <label class="check carry"><input type="checkbox" id="fkCheck"><span>✓ Check fatto</span></label>
+      <label class="check carry"><input type="checkbox" id="fkProg"><span>📄 Programma aggiornato</span></label>
+      <div class="two"><div><label for="fkKg">Peso (kg)</label><input id="fkKg" type="text" autocomplete="off" placeholder="es. 78,5"></div>
+        <div><label for="fkChan">Canale</label><select id="fkChan"><option value="">—</option><option>WhatsApp</option><option>Videochiamata</option><option>In presenza</option><option>Telefono</option><option>Email</option></select></div></div>
+      <label>Aderenza al percorso</label>
+      <div class="seg score"><label><input type="radio" name="fkScore" value="0" checked><span>—</span></label><label><input type="radio" name="fkScore" value="1"><span>1</span></label><label><input type="radio" name="fkScore" value="2"><span>2</span></label><label><input type="radio" name="fkScore" value="3"><span>3</span></label><label><input type="radio" name="fkScore" value="4"><span>4</span></label><label><input type="radio" name="fkScore" value="5"><span>5</span></label></div>
+      <label for="fkNote">Nota</label><input id="fkNote" autocomplete="off" placeholder="es. si è pesato, programma rivisto">
+      <p class="err" id="fkErr" role="alert"></p>
+    </fieldset>
   </div>
   <h4>Informazioni facoltative</h4>
   <div class="two">
@@ -695,6 +850,31 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
   <label for="sgNote">Note (facoltativo)</label><input id="sgNote" autocomplete="off">
   <p class="err" id="sgErr" role="alert"></p>
   <div class="dlg-actions"><button class="btn ghost" value="cancel" formnovalidate>Annulla</button><button class="btn primary" value="ok">Segna seduta singola</button></div>
+</form></dialog>
+
+<dialog id="dlgCkLog"><form method="dialog" id="fCkLog">
+  <h3 id="clTitle">Segna check fatto</h3>
+  <p class="hint">Tutto facoltativo: segna solo quello che ti serve. Si può modificare o cancellare quando vuoi.</p>
+  <label for="clDate">Data</label><input id="clDate" type="date">
+  <label class="check carry"><input type="checkbox" id="clIsCheck" checked><span>✓ Check fatto <small>(nei pacchetti conta come consulenza)</small></span></label>
+  <label class="check carry"><input type="checkbox" id="clProg"><span>📄 Programma aggiornato</span></label>
+  <label for="clKg">Peso (kg, facoltativo)</label><input id="clKg" type="text" autocomplete="off" placeholder="es. 78,5 — lascia vuoto se non si è pesato">
+  <label>Canale (facoltativo)</label>
+  <div class="seg seg-wrap"><label><input type="radio" name="clChan" value="WhatsApp"><span>WhatsApp</span></label><label><input type="radio" name="clChan" value="Videochiamata"><span>Videochiamata</span></label><label><input type="radio" name="clChan" value="In presenza"><span>In presenza</span></label><label><input type="radio" name="clChan" value="Telefono"><span>Telefono</span></label><label><input type="radio" name="clChan" value="Email"><span>Email</span></label></div>
+  <label>Aderenza al percorso (facoltativo)</label>
+  <div class="seg score"><label><input type="radio" name="clScore" value="0" checked><span>—</span></label><label><input type="radio" name="clScore" value="1"><span>1</span></label><label><input type="radio" name="clScore" value="2"><span>2</span></label><label><input type="radio" name="clScore" value="3"><span>3</span></label><label><input type="radio" name="clScore" value="4"><span>4</span></label><label><input type="radio" name="clScore" value="5"><span>5</span></label></div>
+  <p class="hint">1 = non segue il programma · 5 = lo segue alla perfezione</p>
+  <label for="clNote">Nota (facoltativo)</label><input id="clNote" autocomplete="off" placeholder="es. buona settimana, da rivedere la colazione">
+  <p class="err" id="clErr" role="alert"></p>
+  <div class="dlg-actions"><button class="btn ghost" value="cancel" formnovalidate>Annulla</button><button class="btn primary" value="ok">Salva</button></div>
+</form></dialog>
+
+<dialog id="dlgWeight"><form method="dialog" id="fWeight">
+  <h3 id="wTitle">Peso</h3>
+  <div class="two"><div><label for="wDate">Data</label><input id="wDate" type="date"></div>
+    <div><label for="wKg">Peso (kg)</label><input id="wKg" type="text" autocomplete="off" placeholder="es. 78,5"></div></div>
+  <p class="err" id="wErr" role="alert"></p>
+  <div class="dlg-actions"><button class="btn ghost" value="cancel" formnovalidate>Annulla</button><button class="btn primary" value="ok">Aggiungi</button></div>
 </form></dialog>
 
 <dialog id="dlgData"><form method="dialog">
@@ -830,7 +1010,13 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
 <dialog id="dlgShare"><form method="dialog" id="fShare">
   <h3 id="shareTitle">Invia al cliente</h3>
   <p class="hint" style="margin:-6px 0 8px">Scegli cosa vedrà il cliente. Le tue scelte vengono ricordate per questa cartella.</p>
+  <div id="shareWhatW">
+    <label>Cosa inviare</label>
+    <div class="seg"><label><input type="radio" name="shareWhat" value="pt" checked><span>🏋️ Pacchetto personal 1 to 1</span></label><label><input type="radio" name="shareWhat" value="ck"><span>📋 Pacchetto check</span></label></div>
+    <p class="hint">Si invia un pacchetto alla volta: per mandarli entrambi, ripeti l'invio.</p>
+  </div>
   <div class="checks" id="shareChecks"></div>
+  <p class="hint" id="shareCkNote" hidden>Il documento riporta il tuo check: tipo, consulenze, costo, costo a consulenza, pagato e da saldare (per la consulenza singola: importo e mesi pagati).</p>
   <p class="err" id="shareErr" role="alert"></p>
   <label for="shareMsg">Messaggio per il cliente (facoltativo)</label>
   <textarea id="shareMsg" placeholder="es. Ottimo lavoro questo mese! Ci vediamo lunedì."></textarea>
@@ -954,9 +1140,12 @@ function normalize(c){
     sessionLog: Array.isArray(c.sessionLog) ? c.sessionLog.filter(x=>!(x && x.auto)) : [],   // (le righe “auto” di una versione di prova non servono più)
     payLog: Array.isArray(c.payLog) ? c.payLog : [],
     start: /^\d{4}-\d{2}-\d{2}$/.test(c.start||"") ? c.start : "",      // inizio del pacchetto in corso
+    closed: /^\d{4}-\d{2}-\d{2}$/.test(c.closed||"") ? c.closed : "",    // data di chiusura automatica (lezioni finite + saldo completato)
     carriedIn: round2(Number(c.carriedIn)||0),                               // saldo portato dal pacchetto precedente (già dentro "price")
     packages: Array.isArray(c.packages) ? c.packages.filter(p=>p && typeof p === "object").map(normPackage) : [],
     missLog: normMisses(c.missLog),                                          // lezioni saltate
+    personal: c.personal !== false,                                          // servizio personal 1 to 1
+    check: normCheck(c.check),                                               // servizio check (consulenze)
     share: c.share && typeof c.share === "object" && c.share.inc ? {inc:{...c.share.inc}, format:c.share.format==="docx"?"docx":"pdf"} : null,
     follow: normFollow(c.follow)
   };
@@ -992,6 +1181,30 @@ function normPackage(p){
     sessionLog: Array.isArray(p.sessionLog) ? p.sessionLog : [], payLog: Array.isArray(p.payLog) ? p.payLog : [],
     missLog: normMisses(p.missLog), single: !!p.single };
 }
+/* CHECK (consulenze): singola = importo al mese, con i mesi pagati; pacchetto = più consulenze con costo totale */
+function normCheck(x){
+  x = (x && typeof x === "object") ? x : {};
+  const num = v => { const n = Number(v); return isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : 0; };
+  const start = /^\d{4}-\d{2}-\d{2}$/.test(x.start||"") ? x.start : "";
+  // pagamenti del pacchetto check con la loro data (il saldo conta nel mese in cui viene pagato)
+  let payLog = (Array.isArray(x.payLog) ? x.payLog : []).filter(p=>p && num(p.amount) > 0).map(p=>({date: /^\d{4}-\d{2}-\d{2}$/.test(p.date||"") ? p.date : "", amount: num(p.amount)}));
+  if(!payLog.length && num(x.paid) > 0) payLog = [{date:start, amount:num(x.paid)}];          // dati vecchi: il pagato va alla data d'inizio
+  const paid = Math.round(payLog.reduce((t,p)=>t + p.amount, 0) * 100) / 100;
+  return { on: !!x.on, kind: x.kind === "pkg" ? "pkg" : "single", start,
+    count: Math.max(0, Math.round(Number(x.count) || 0)), price: num(x.price), paid, payLog,
+    months: [...new Set((Array.isArray(x.months) ? x.months : []).filter(m=>/^\d{4}-\d{2}$/.test(m)))].sort(),
+    notes: String(x.notes || ""),
+    // diario dei check (ogni check fatto: data, canale, aderenza 1–5, nota) e storico del peso
+    log: (Array.isArray(x.log) ? x.log : []).filter(e=>e && typeof e === "object").map(e=>({id: e.id || uid(), date: /^\d{4}-\d{2}-\d{2}$/.test(e.date||"") ? e.date : "",
+      channel: String(e.channel || ""), score: Math.max(0, Math.min(5, Math.round(Number(e.score) || 0))), note: String(e.note || ""),
+      check: e.check !== false, program: !!e.program, weightId: String(e.weightId || "")})),
+    weights: (Array.isArray(x.weights) ? x.weights : []).filter(e=>e && Number(e.kg) > 0).map(e=>({id: e.id || uid(), date: /^\d{4}-\d{2}-\d{2}$/.test(e.date||"") ? e.date : "", kg: Math.round(Number(e.kg) * 10) / 10})) };
+}
+const ckDoneCount = k => (k.log || []).filter(e=>e.check !== false).length;   // consulenze fatte (le voci “solo programma” non contano)
+const ckOn = c => !!(c && c.check && c.check.on);
+const checkPerOne = k => k.kind === "pkg" && k.count > 0 ? Math.round(k.price / k.count * 100) / 100 : k.price;
+const checkPaidTotal = c => !ckOn(c) ? 0 : c.check.kind === "pkg" ? c.check.paid : Math.round(c.check.months.length * c.check.price * 100) / 100;
+const checkDue = c => ckOn(c) && c.check.kind === "pkg" ? Math.max(Math.round((c.check.price - c.check.paid) * 100) / 100, 0) : 0;
 /* seduta singola = “pacchetto” da 1 seduta (chi non fa pacchetti) */
 const isSingle = p => !!(p && (p.single || Number(p.totalSessions) === 1));
 function stats(c){
@@ -1113,15 +1326,23 @@ function dEmpty(t){ return wPara(wRun(t,{italic:true,color:DC.MUTED}), {before:6
 const MISS_DOC = {lost:"Saltata non recuperabile"};
 const missSorted = c => [...(c.missLog || [])].sort(byDateAsc);
 /* storico dei pacchetti (inizio · sedute · costo), dal più vecchio; niente sedute singole */
+/* Chiusura automatica del pacchetto in corso: quando le lezioni sono finite (fatte + saltate) E il saldo è completo.
+   La data è la più recente tra l'ultima seduta e l'ultimo pagamento. */
+function closeDateOf(c){
+  const s = stats(c);
+  if(!(s.total > 0 && s.complete && s.due <= 0.004)) return "";
+  const dates = [...(c.sessionLog||[]), ...(c.missLog||[]), ...(c.payLog||[])].map(x=>x.date).filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d||"")).sort();
+  return dates.length ? dates[dates.length-1] : (c.closed || "");
+}
 function pkgHistory(c){
-  const rows = (c.packages || []).filter(p=>!isSingle(p)).map(p=>({start:p.start||"", total:Number(p.totalSessions)||0, price:round2((Number(p.price)||0) - (Number(p.carriedIn)||0)), current:false}));
-  if(Number(c.totalSessions) > 0) rows.push({start:c.start||"", total:Number(c.totalSessions)||0, price:round2((Number(c.price)||0) - (Number(c.carriedIn)||0)), current:true});
+  const rows = (c.packages || []).filter(p=>!isSingle(p)).map(p=>({start:p.start||"", end:p.end||"", total:Number(p.totalSessions)||0, price:round2((Number(p.price)||0) - (Number(p.carriedIn)||0)), current:false}));
+  if(Number(c.totalSessions) > 0) rows.push({start:c.start||"", end:c.closed || closeDateOf(c), total:Number(c.totalSessions)||0, price:round2((Number(c.price)||0) - (Number(c.carriedIn)||0)), current:true});
   return rows.sort((a,b)=>(a.start||"9999").localeCompare(b.start||"9999"));
 }
 function dPkgHistory(c){
-  const W = DC.W, wd = [2600, 2000, W-4600];
-  const rows = [dHeadRow(["Inizio","Sedute","Costo del pacchetto"], wd)];
-  pkgHistory(c).forEach(r=>rows.push(wRow([wCell(wPara(wRun(itDate(r.start) + (r.current ? " (in corso)" : ""))), wd[0]), wCell(wPara(wRun(String(r.total))), wd[1]), wCell(wPara(wRun(eurDoc(r.price))), wd[2])])));
+  const W = DC.W, wd = [2300, 2300, 1500, W-6100];
+  const rows = [dHeadRow(["Inizio","Fine","Sedute","Costo del pacchetto"], wd)];
+  pkgHistory(c).forEach(r=>rows.push(wRow([wCell(wPara(wRun(itDate(r.start))), wd[0]), wCell(wPara(wRun(r.end ? itDate(r.end) : (r.current ? "in corso" : "—"))), wd[1]), wCell(wPara(wRun(String(r.total))), wd[2]), wCell(wPara(wRun(eurDoc(r.price))), wd[3])])));
   return wTable(rows, wd);
 }
 /* tabella delle lezioni saltate (Data · Esito): si rilegge all'importazione */
@@ -1262,6 +1483,38 @@ function zipDocx(p, JSZip){
 async function buildDocx(c, JSZip){ return zipDocx(docxParts(docxFullBody(c), c.name, c.name, "PTGEST1"), JSZip); }
 async function buildClientDocx(c, JSZip, o){ return zipDocx(docxParts(docxClientBody(c, o), "Riepilogo per " + c.name, "Riepilogo " + c.name, "PTCLIENT"), JSZip); }
 
+/* ===== Riepilogo del CHECK per il cliente (Word e PDF) ===== */
+const MESI_DOC = ["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+const monthDoc = m => `${MESI_DOC[Number(m.slice(5,7))-1]} ${m.slice(0,4)}`;
+function checkRows(c){
+  const k = c.check;
+  if(k.kind === "pkg"){
+    const due = checkDue(c);
+    return [["Tipo","Pacchetto di più consulenze"], ...(k.start ? [["Inizio", itDate(k.start)]] : []), ["Consulenze", String(k.count)],
+      ["Consulenze fatte", `${ckDoneCount(k)} di ${k.count}`], ["Costo totale", eurDoc(k.price)], ["Costo a consulenza", eurDoc(checkPerOne(k))], ["Pagato", eurDoc(k.paid)], ["Da saldare", eurDoc(due), due > 0 ? {bold:true, color:"OWED"} : null]];
+  }
+  return [["Tipo","Consulenza singola"], ...(k.start ? [["Dal", itDate(k.start)]] : []), ["Importo", eurDoc(k.price) + " al mese"],
+    ["Mesi pagati", k.months.length ? k.months.map(monthDoc).join(", ") : "nessuno"]];
+}
+function docxCheckBody(c, o){
+  let b = dHeader("RIEPILOGO CHECK", c.name, "Aggiornato al " + itDate(today()) + (o.trainer ? "\nPersonal trainer: " + o.trainer : ""));
+  if(o.message) b += dMessage("Messaggio dal tuo personal trainer", o.message);
+  b += dHeading(c.check.kind === "pkg" ? "Il tuo pacchetto di consulenze" : "La tua consulenza") + dKv(checkRows(c).map(r=>r[2] ? [r[0], r[1], {bold:true, color:DC[r[2].color]}] : [r[0], r[1]]));
+  if(c.check.kind === "pkg" && c.check.payLog.length) b += dHeading("Pagamenti") + dKv(c.check.payLog.map(p=>[p.date ? itDate(p.date) : "—", eurDoc(p.amount)]));
+  return b;
+}
+async function buildCheckDocx(c, JSZip, o){ return zipDocx(docxParts(docxCheckBody(c, o), "Riepilogo check per " + c.name, "Riepilogo check " + c.name, "PTCHECK"), JSZip); }
+function buildCheckPdf(c, jsPDF, o){
+  const K = pdfKit(jsPDF);
+  K.header("RIEPILOGO CHECK", c.name, "Aggiornato al " + itDate(today()) + (o.trainer ? "      Personal trainer: " + o.trainer : ""));
+  if(o.message) K.message("Messaggio dal tuo personal trainer", o.message);
+  K.heading(c.check.kind === "pkg" ? "Il tuo pacchetto di consulenze" : "La tua consulenza");
+  K.kv(checkRows(c).map(r=>r[2] ? [r[0], r[1], {bold:true}] : [r[0], r[1]]));
+  if(c.check.kind === "pkg" && c.check.payLog.length){ K.heading("Pagamenti"); K.kv(c.check.payLog.map(p=>[p.date ? itDate(p.date) : "—", eurDoc(p.amount)])); }
+  K.footer("Riepilogo check per " + c.name);
+  return K.doc;
+}
+
 /* ===== PDF: blocchi ===== */
 function pdfKit(jsPDF){
   const doc = new jsPDF({unit:"mm", format:"a4"});
@@ -1371,7 +1624,7 @@ function pdfKit(jsPDF){
     if(withNotes) K.table([{t:"N°",w:14,muted:true},{t:"Data",w:32},{t:"Note seduta",w:CW-46}], list.map((x,i)=>[String(i+1), itDate(x.date), x.note||"—"]));
     else K.table([{t:"N°",w:14,muted:true},{t:"Data",w:CW-14}], list.map((x,i)=>[String(i+1), itDate(x.date)]));
   };
-  K.pkgHistory = c => K.table([{t:"Inizio",w:60},{t:"Sedute",w:40},{t:"Costo del pacchetto",w:CW-100}], pkgHistory(c).map(r=>[itDate(r.start) + (r.current ? " (in corso)" : ""), String(r.total), eurDoc(r.price)]));
+  K.pkgHistory = c => K.table([{t:"Inizio",w:45},{t:"Fine",w:45},{t:"Sedute",w:30},{t:"Costo del pacchetto",w:CW-120}], pkgHistory(c).map(r=>[itDate(r.start), r.end ? itDate(r.end) : (r.current ? "in corso" : "—"), String(r.total), eurDoc(r.price)]));
   K.misses = c => K.table([{t:"Data",w:40},{t:"Esito",w:CW-40}], missSorted(c).map(x=>[itDate(x.date), MISS_DOC.lost]));
   K.payments = c => {
     if(!c.payLog.length) return K.empty("Nessun pagamento registrato nello storico.");
@@ -1509,7 +1762,7 @@ function buildClientText(c, o){
   if(inc.note) t += tHead("Note") + (c.notes || "—") + "\n";
   if(inc.storicoSedute) t += tHead("Storico sedute") + tSessions(c, !!inc.noteSedute);
   if(inc.storicoPagamenti) t += tHead("Storico pagamenti") + tPayments(c);
-  if(inc.storicoPacchetti && pkgHistory(c).length) t += tHead("Storico pacchetti cliente") + pkgHistory(c).map(r=>`  ${itDate(r.start)}${r.current ? " (in corso)" : ""}   ${r.total} sedute   ${eurDoc(r.price)}`).join("\n") + "\n";
+  if(inc.storicoPacchetti && pkgHistory(c).length) t += tHead("Storico pacchetti cliente") + pkgHistory(c).map(r=>`  ${itDate(r.start)} → ${r.end ? itDate(r.end) : (r.current ? "in corso" : "—")}   ${r.total} sedute   ${eurDoc(r.price)}`).join("\n") + "\n";
   return t;
 }
 
@@ -1897,6 +2150,8 @@ async function removeClient(id){
 
 /* Aggiorna un cliente in memoria e lo salva */
 function commit(c, now){
+  { const s = stats(c), done = s.total > 0 && s.complete && s.due <= 0.004;   // pacchetto chiuso da solo (lezioni finite + saldo completo), riaperto se non lo è più
+    c.closed = done ? (closeDateOf(c) || c.closed || today()) : ""; }
   const i = clients.findIndex(x=>x.id===c.id);
   if(i >= 0) clients[i] = c; else clients.push(c);
   persist(c, now);
@@ -2189,11 +2444,39 @@ function dotsHTML(done,total,max,big,lost){
 function render(){
   if(!loaded || store.mode === "sync-login" || store.mode === "sync-setup") return;   // non coprire la schermata di accesso
   const app = $("app");
-  if(openId && getClient(openId)) app.innerHTML = detailHTML(getClient(openId));
-  else if(expOpen){ openId = null; app.innerHTML = expHTML(); }
-  else if(statsOpen){ openId = null; app.innerHTML = statsHTML(); }
+  let view = "list";
+  if(openId && getClient(openId)){ app.innerHTML = detailHTML(getClient(openId)); view = "detail"; }
+  else if(expOpen){ openId = null; app.innerHTML = expHTML(); view = "exp"; }
+  else if(statsOpen){ openId = null; app.innerHTML = statsHTML(); view = "stats"; }
   else { openId = null; app.innerHTML = listHTML(); }
+  document.body.dataset.view = view;                                  // home e statistiche usano tutta la larghezza dello schermo
+  harmonize();
 }
+/* Formato “fluido”: colonne uguali per tutte le tabelle della pagina in base allo spazio,
+   ultima riga sempre piena, e tutti i riquadri alti uguali. Si ricalcola quando cambia la finestra o si gira il telefono. */
+function harmonize(){
+  const app = $("app"); if(!app) return;
+  const w = app.clientWidth;
+  const cols = w >= 1180 ? 5 : w >= 900 ? 4 : w >= 600 ? 3 : 2;
+  app.style.setProperty("--cols", cols);
+  app.querySelectorAll(".dash.dash6, .dash.dashck, .dash.dashpf").forEach(d=>{
+    const cells = [...d.children].filter(x=>x.classList.contains("dc"));
+    cells.forEach(x=>x.style.gridColumn = "");
+    const r = cells.length % cols;
+    if(r && cells.length) cells[cells.length - 1].style.gridColumn = `span ${cols - r + 1}`;
+  });
+  const same = sel => {
+    const els = [...app.querySelectorAll(sel)]; if(!els.length) return;
+    els.forEach(e=>e.style.minHeight = "");
+    const m = Math.ceil(Math.max(...els.map(e=>e.getBoundingClientRect().height)));
+    els.forEach(e=>e.style.minHeight = m + "px");
+  };
+  same(".dash.dash6 > .dc, .dash.dashck > .dc, .dash.dashpf > .dc");
+  same("#dashGen > .dc, #dashMonth > .dc");
+}
+{ let t = 0; const later = ()=>{ clearTimeout(t); t = setTimeout(harmonize, 80); };
+  window.addEventListener("resize", later); window.addEventListener("orientationchange", later);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(harmonize); }
 /* Aggiorna senza disturbare mentre stai scrivendo in un campo */
 function softRender(){
   const a = document.activeElement;
@@ -2206,6 +2489,22 @@ function softRender(){
 }
 /* importi della pagina principale: con l'occhietto 🙈 diventano “•••” (la scelta si salva nel database) */
 const hm = v => settings.homeHideMoney ? "•••" : eur(v);
+/* cartellina: lato Personal o lato Check (lo switch compare solo a chi ha entrambi) */
+const cardView = {};
+const cardViewOf = c => (c.personal !== false && ckOn(c)) ? (cardView[c.id] || "pt") : (c.personal === false && ckOn(c) ? "ck" : "pt");
+function checkCardHTML(c){
+  const k = c.check, nowM = today().slice(0,7);
+  if(k.kind === "pkg"){
+    const due = checkDue(c);
+    return `<span class="pk">📋 Check · ${k.count} consulenze${k.start ? ` dal ${itDate(k.start)}` : ""}</span>
+      ${payBarHTML({price:k.price, paid:k.paid, due})}
+      <span class="row"><span>Da saldare</span><strong class="${due > 0 ? "due" : ""}">${hm(due)}</strong></span>`;
+  }
+  const paidNow = k.months.includes(nowM), mName = monthLabel(nowM).split(" ")[0];
+  return `<span class="pk">📋 Check · consulenza singola</span>
+      <span class="row"><span>Importo</span><strong>${hm(k.price)} <small>al mese</small></strong></span>
+      <span class="row"><span>${mName.charAt(0).toUpperCase() + mName.slice(1)}</span><strong class="${paidNow ? "ok" : "due"}">${paidNow ? "✓ pagata" : "da pagare"}</strong></span>`;
+}
 /* cartellina di chi fa solo sedute singole */
 function singleCardHTML(c){
   const sg = c.packages.filter(isSingle);
@@ -2227,6 +2526,10 @@ function payBarHTML(s){
       <span class="pb-top"><span>Pagato</span><strong>${hm(paid)} <small>su ${hm(price)}</small></strong></span>
       <span class="pb-track"><span class="pb-fill" style="width:${pct}%"></span></span>
     </span>`;
+}
+function closedLineHTML(c){
+  const d = c.closed || closeDateOf(c);
+  return d ? `✓ Pacchetto concluso il ${itDate(d)} <small>(lezioni finite e saldo completato)</small>` : "";
 }
 const perSession = (price, n) => n > 0 ? round2((Number(price)||0) / n) : 0;
 /* riga “200 € · 10 sedute → 20 €/seduta” del pacchetto in corso */
@@ -2250,7 +2553,7 @@ function pkgLineHTML(s){
 function listHTML(){
   let sDone=0, sLeft=0, paid=0, due=0;
   clients.forEach(c=>{
-    const s=stats(c); sDone+=s.done; sLeft+=s.left; paid+=s.paid; due+=Math.max(s.due,0);
+    const s=stats(c); sDone+=s.done; sLeft+=(c.personal !== false ? s.left : 0); paid+=s.paid; due+=Math.max(s.due,0) + checkDue(c);
     c.packages.forEach(p=>{ const ps=stats(pkgClient(c,p)); sDone+=ps.done; paid+=ps.paid; due+=Math.max(ps.due,0); });   // anche i pacchetti vecchi
   });
   const needCount = clients.filter(followNeeds).length;
@@ -2279,14 +2582,16 @@ function listHTML(){
       <div class="actions"><button class="btn ghost" data-a="import">Importa documenti</button><button class="btn primary" data-a="newClient">Crea la prima cartella</button></div></div>` + dangerZoneHTML();
   }
   const nDueClients = clients.filter(owesMoney).length;
+  const nPt = clients.filter(c=>c.personal !== false).length;                  // chi fa personal (anche se fa anche check)
   const SD = statsData();                                           // una volta sola per il riquadro del mese
   const hid = !!settings.homeHideMoney;
   h += alertsPanelHTML() + `<div class="money-eye"><button type="button" class="eye-btn" id="moneyEye" data-a="toggleHomeMoney" aria-pressed="${hid}" title="${hid ? "Mostra gli importi" : "Nascondi gli importi"}">${hid ? "🙈" : "👁"}<span>${hid ? "Mostra importi" : "Nascondi importi"}</span></button></div>
   <div class="dash dash-gen" id="dashGen" aria-label="Situazione generale">
     <div class="dash-title"><span class="dt-ico" aria-hidden="true">📊</span><b>Generale</b></div>
-    <div class="dc"><b>${clients.length}</b><span>${clients.length === 1 ? "cliente" : "clienti"}</span></div>
-    <div class="dc ${nDueClients ? "c-owed" : ""}" id="dueClients"><b>${nDueClients}</b><span>${nDueClients === 1 ? "cliente da regolarizzare" : "clienti da regolarizzare"}</span></div>
-    <div class="dc"><b>${sLeft}</b><span>sedute da fare</span></div>
+    <div class="dc" id="allClients"><b>${clients.length}</b><span>${clients.length === 1 ? "cliente" : "clienti"}</span><small>tutte le persone</small></div>
+    <div class="dc" id="ptClients"><b>${nPt}</b><span>${nPt === 1 ? "cliente" : "clienti"} personal 1 to 1</span></div>
+    <div class="dc ${nDueClients ? "c-owed" : ""}" id="dueClients"><b>${nDueClients}</b><span>${nDueClients === 1 ? "cliente da regolarizzare" : "clienti da regolarizzare"}</span><small>personal e check</small></div>
+    <div class="dc" id="ptLeft"><b>${sLeft}</b><span>sedute personal 1 to 1 da fare</span></div>
     <div class="dc c-owed" id="dueCell"><b>${hm(due)}</b><span>da incassare</span><small>quote non saldate dai clienti</small></div>
   </div>
   ${monthDashHTML(SD)}
@@ -2304,8 +2609,8 @@ function listHTML(){
   h += `<div class="folders">`;
   list.forEach(c=>{
     const s = stats(c), f = freqText(c);
-    h += `<div class="fwrap"><button class="folder" data-a="open" data-id="${esc(c.id)}">
-      <span class="fname">${esc(c.name)}</span>
+    const both = c.personal !== false && ckOn(c), view = cardViewOf(c);
+    const ptCard = `
       ${s.start ? `<span class="pk">Pacchetto dal ${itDate(s.start)}</span>` : ""}
       ${(s.total || s.done) ? `${dotsHTML(s.done,s.total,20,false,s.lost)}
       <span class="row"><span>Sedute</span><strong>${s.done} su ${s.total}</strong></span>
@@ -2313,11 +2618,19 @@ function listHTML(){
       <span class="row"><span>${s.due<0?"Credito":"Da saldare"}</span><strong class="${s.due>0?"due":""}">${hm(Math.abs(s.due))}</strong></span>` : singleCardHTML(c)}
       ${f?`<span class="freq">${esc(f)}</span>`:""}
       ${ticksHTML(s)}
-      ${alertsFor(c).length ? `<span class="alert">⚠ ${esc(alertText(c))}</span>` : ""}
+      ${alertsFor(c).length ? `<span class="alert">⚠ ${esc(alertText(c))}</span>` : ""}`;
+    h += `<div class="fwrap${both ? " has-sw" : ""}"><button class="folder" data-a="open" data-id="${esc(c.id)}">
+      <span class="fname">${esc(c.name)}</span>
+      ${both
+        ? `<span class="fviews"><span class="fv${view === "pt" ? "" : " off"}" aria-hidden="${view !== "pt"}">${ptCard}</span><span class="fv${view === "ck" ? "" : " off"}" aria-hidden="${view !== "ck"}">${checkCardHTML(c)}</span></span>`
+        : view === "ck" ? checkCardHTML(c) : ptCard}
       ${c.follow && cloudAvailable() ? `<span class="sh${followNeeds(c)?" stale":""}">${followNeeds(c) ? "Condiviso · da aggiornare" : "Condiviso · aggiornato"}</span>` : ""}
     </button>
+    ${both ? `<div class="fsw" role="group" aria-label="Cosa vedere di ${esc(c.name)}">
+      <button type="button" class="fsw-b${view === "pt" ? " on" : ""}" data-a="cardView" data-id="${esc(c.id)}" data-v="pt" aria-pressed="${view === "pt"}">🏋️ Personal</button>
+      <button type="button" class="fsw-b${view === "ck" ? " on" : ""}" data-a="cardView" data-id="${esc(c.id)}" data-v="ck" aria-pressed="${view === "ck"}">📋 Check</button></div>` : ""}
     <div class="ftools">
-      <button class="ftool" data-a="quickEdit" data-id="${esc(c.id)}" title="Modifica" aria-label="Modifica ${esc(c.name)}">✎</button>
+      <button class="ftool" data-a="quickEdit" data-id="${esc(c.id)}" data-v="${view}" title="Modifica" aria-label="Modifica ${esc(c.name)}">✎</button>
       <button class="ftool" data-a="renameClient" data-id="${esc(c.id)}" title="Rinomina" aria-label="Rinomina ${esc(c.name)}">Aa</button>
       <button class="ftool del" data-a="quickDel" data-id="${esc(c.id)}" title="Elimina" aria-label="Elimina ${esc(c.name)}">🗑</button>
     </div></div>`;
@@ -2337,6 +2650,11 @@ function alertsFor(c){
   if(s.due > 0 && ending) out.push({k:"due", w:3, t:`da saldare ${hm(s.due)}`});
   const oldDue = round2(c.packages.reduce((a,p)=>a + Math.max(stats(pkgClient(c,p)).due, 0), 0));
   if(oldDue > 0) out.push({k:"old", w:3, t:`pacchetti precedenti da saldare ${hm(oldDue)}`});
+  if(ckOn(c) && c.check.kind === "pkg" && c.check.count > 0){                 // pacchetto di consulenze quasi finito / finito
+    const left = c.check.count - ckDoneCount(c.check);
+    if(left <= 0) out.push({k:"ckdone", w:2, t:"consulenze del pacchetto check finite: proponi il rinnovo"});
+    else if(left === 1) out.push({k:"cknear", w:1, t:"manca 1 consulenza del pacchetto check"});
+  }
   return out;
 }
 const alertWeight = c => alertsFor(c).reduce((a,x)=>a+x.w, 0);
@@ -2371,7 +2689,7 @@ document.addEventListener("change", e=>{
 /* Filtri sotto la ricerca: si aprono con il tasto “Filtri”, una scelta alla volta.
    Il saldo guarda il pacchetto in corso e anche quelli precedenti. */
 let listFilter = "all", filtersOpen = false;
-const owesMoney = c => stats(c).due > 0 || c.packages.some(p=>stats(pkgClient(c,p)).due > 0);
+const owesMoney = c => stats(c).due > 0 || c.packages.some(p=>stats(pkgClient(c,p)).due > 0) || checkDue(c) > 0;
 const hasPrice = c => stats(c).price > 0 || c.packages.some(p=>Number(p.price) > 0);
 const FILTERS = {
   all:     {label:"Tutti i clienti",           test:()=>true,                                         none:"Nessun cliente."},
@@ -2424,7 +2742,160 @@ function ticksHTML(s){
   const paid = s.price > 0 && s.due <= 0;
   return `<span class="ticks"><span class="tick${paid ? " on" : ""}">${paid ? "✓" : "○"} Pagato</span><span class="tick${s.complete ? " on" : ""}">${s.complete ? "✓" : "○"} Sedute completate</span></span>`;
 }
+/* sezione CHECK nella cartella */
+function checkSectionHTML(c){
+  if(!ckOn(c)) return "";
+  const k = c.check, nowM = today().slice(0,7), mL = monthLabel(nowM);
+  let cells = "", acts = "";
+  if(k.kind === "single"){
+    const paidNow = k.months.includes(nowM);
+    cells = `<div class="c-in"><b id="ckPerVal">${hm(k.price)}</b><span>a consulenza (al mese)</span></div>
+      <div class="${paidNow ? "c-in" : "c-owed"}"><b id="ckNow">${paidNow ? "✓ pagata" : "da pagare"}</b><span>${esc(mL)}</span></div>
+      <div><b>${k.months.length}</b><span>${k.months.length === 1 ? "mese pagato" : "mesi pagati"}</span></div>`;
+    acts = `<button class="btn small ${paidNow ? "ghost" : "primary"}" data-a="ckMonth" id="ckMonthBtn">${paidNow ? `Togli il pagamento di ${esc(mL)}` : `Segna pagata ${esc(mL)}`}</button>`;
+  } else {
+    const due = checkDue(c);
+    cells = `<div class="ck-done-cell"><b id="ckDone">${ckDoneCount(k)} di ${k.count}</b><span>consulenze fatte</span>${k.count ? dotsHTML(Math.min(ckDoneCount(k), k.count), k.count, 24, false) : ""}</div>
+      <div><b>${hm(k.price)}</b><span>costo totale</span></div>
+      <div class="c-in"><b id="ckPerVal">${hm(checkPerOne(k))}</b><span>a consulenza</span></div>
+      <div class="c-in"><b>${hm(k.paid)}</b><span>pagato</span></div>
+      <div class="${due > 0 ? "c-owed" : ""}"><b id="ckDue">${hm(due)}</b><span>da saldare</span></div>`;
+    if(due > 0) acts = `<button class="btn small primary" data-a="ckSaldo">Segna saldato</button>`;
+  }
+  const ckAl = alertsFor(c).filter(x=>x.k === "ckdone" || x.k === "cknear").map(x=>x.t);
+  const alHTML = ckAl.length ? `<p class="ck-alert" id="ckAlert">⚠ ${esc(ckAl.join(" · ").replace(/^./, m=>m.toUpperCase()))}</p>` : "";
+  return `<section class="block ck-block" id="ckBlock"><div class="bh"><h3>📋 Check · ${k.kind === "pkg" ? "pacchetto di consulenze" : "consulenza singola"}</h3><button class="btn small ghost" data-a="editCheck">Modifica</button></div>
+    ${k.start ? `<p class="sub">${k.kind === "pkg" ? "Iniziato" : "Dal"} ${itDate(k.start)}</p>` : ""}
+    ${alHTML}<div class="ck-grid">${cells}</div>
+    ${acts ? `<div class="acts" style="margin-top:10px">${acts}</div>` : ""}
+    <h4 style="margin:14px 0 4px">Note sul cliente e sui check</h4>
+    ${k.notes ? `<p class="ck-notes">${esc(k.notes)}</p>` : `<p class="none">Nessuna nota. Aggiungile da “Modifica”.</p>`}</section>`;
+}
+/* diario dei check e storico del peso */
+const CK_CHANNELS = ["WhatsApp","Videochiamata","In presenza","Telefono","Email"];
+function checkExtrasHTML(c){
+  if(!ckOn(c)) return "";
+  const k = c.check;
+  const log = [...k.log].reverse().sort((x,y)=>(y.date||"").localeCompare(x.date||""));   // la più recente in cima (a parità di data, l'ultima segnata)
+  const nCk = ckDoneCount(k), scored = log.filter(e=>e.score > 0), avg = scored.length ? round2(scored.reduce((t,e)=>t + e.score, 0) / scored.length) : 0;
+  const lastProg = log.find(e=>e.program);
+  const stars = n => n ? `<span class="stars" aria-label="aderenza ${n} su 5">${"★".repeat(n)}<span class="off">${"★".repeat(5 - n)}</span></span>` : "";
+  const kgTxt = v => `${String(Number(v).toFixed(1)).replace(".", ",")} kg`;
+  let h = `<section class="block" id="ckLogBlock"><div class="bh"><h3>📝 Diario dei check</h3><button class="btn small primary" data-a="ckLogAdd" id="ckLogAddBtn">+ Segna check fatto</button></div>
+    <p class="sub">${nCk} ${nCk === 1 ? "check fatto" : "check fatti"}${k.kind === "pkg" && k.count ? ` · ${nCk} di ${k.count} consulenze del pacchetto` : ""}${scored.length ? ` · aderenza al percorso <b id="ckAvg">${String(avg).replace(".", ",")}</b>/5` : ""}${lastProg ? ` · programma aggiornato il <b id="ckLastProg">${itDate(lastProg.date)}</b>` : ""}</p>`;
+  if(!log.length) h += `<p class="none">Qui compaiono i check che segni: data, peso, programma aggiornato, canale, aderenza al percorso (1–5) e una nota. Tutto facoltativo.</p>`;
+  else h += `<div class="miss-list">` + log.map(e=>{ const w = e.weightId ? k.weights.find(x=>x.id === e.weightId) : null;
+      return `<div class="miss-row ck-log-row"><b>${itDate(e.date)}</b>${e.check ? `<span class="miss-st ok">✓ check</span>` : ""}${e.program ? `<span class="miss-st prog">📄 programma aggiornato</span>` : ""}${w ? `<span class="miss-st">⚖️ ${kgTxt(w.kg)}</span>` : ""}${e.channel ? `<span class="miss-st">${esc(e.channel)}</span>` : ""}${stars(e.score)}
+      ${e.note ? `<span class="ck-log-note">${esc(e.note)}</span>` : ""}<span class="row-acts"><button class="x" data-a="ckLogEdit" data-id="${esc(e.id)}" aria-label="Modifica la voce del ${itDate(e.date)}">✎</button><button class="x" data-a="ckLogDel" data-id="${esc(e.id)}" aria-label="Elimina la voce del ${itDate(e.date)}">✕</button></span></div>`; }).join("") + `</div>`;
+  h += `</section>`;
+  // storico del peso
+  const ws = [...k.weights].sort((x,y)=>(x.date||"").localeCompare(y.date||""));       // in ordine di data (a parità, in ordine di inserimento)
+  h += `<section class="block" id="weightBlock"><div class="bh"><h3>⚖️ Storico peso</h3><button class="btn small" data-a="wAdd" id="wAddBtn">+ Peso</button></div>`;
+  if(!ws.length) h += `<p class="none">Aggiungi il peso con data per vederne l'andamento.</p>`;
+  else {
+    const first = ws[0], last = ws[ws.length - 1], diff = Math.round((last.kg - first.kg) * 10) / 10;
+    const kg = v => `${String(v.toFixed(1)).replace(".", ",")} kg`;
+    h += `<p class="sub">Inizio ${kg(first.kg)} (${itDate(first.date)}) · ultimo ${kg(last.kg)} (${itDate(last.date)}) · <b id="wDiff" class="${diff < 0 ? "w-down" : diff > 0 ? "w-up" : ""}">${diff > 0 ? "+" : diff < 0 ? "−" : ""}${kg(Math.abs(diff))}</b></p>`;
+    if(ws.length > 1) h += weightSVG(ws);
+    h += `<div class="miss-list">` + [...ws].reverse().map((w, i, arr)=>{ const prev = arr[i + 1], d = prev ? Math.round((w.kg - prev.kg) * 10) / 10 : null;
+      return `<div class="miss-row w-row"><b>${itDate(w.date)}</b><span>${kg(w.kg)}</span>${d !== null ? `<small class="${d < 0 ? "w-down" : d > 0 ? "w-up" : ""}">${d > 0 ? "+" : d < 0 ? "−" : "±"}${String(Math.abs(d).toFixed(1)).replace(".", ",")}</small>` : `<small>inizio</small>`}
+      <span class="row-acts"><button class="x" data-a="wEdit" data-id="${esc(w.id)}" aria-label="Modifica il peso del ${itDate(w.date)}">✎</button><button class="x" data-a="wDel" data-id="${esc(w.id)}" aria-label="Elimina il peso del ${itDate(w.date)}">✕</button></span></div>`; }).join("") + `</div>`;
+  }
+  return h + `</section>`;
+}
+function weightSVG(ws){
+  const W = 360, H = 130, L = 34, R = 10, T = 12, B = 24, min = Math.min(...ws.map(w=>w.kg)), max = Math.max(...ws.map(w=>w.kg)), span = Math.max(max - min, 1);
+  const x = i => L + (W - L - R) * (ws.length === 1 ? 0.5 : i / (ws.length - 1)), y = v => T + (H - T - B) * (max - v) / span;
+  const pts = ws.map((w,i)=>`${x(i).toFixed(1)},${y(w.kg).toFixed(1)}`).join(" ");
+  return `<svg class="wsvg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Andamento del peso">
+    <text x="${L - 6}" y="${y(max) + 4}" class="ax">${String(max.toFixed(1)).replace(".", ",")}</text><text x="${L - 6}" y="${y(min) + 4}" class="ax">${String(min.toFixed(1)).replace(".", ",")}</text>
+    <polyline points="${pts}" class="wline"/>${ws.map((w,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(w.kg).toFixed(1)}" r="4" class="wdot"><title>${itDate(w.date)} · ${String(w.kg.toFixed(1)).replace(".", ",")} kg</title></circle>`).join("")}
+    <text x="${x(0)}" y="${H - 8}" class="lab">${itDate(ws[0].date)}</text><text x="${x(ws.length - 1)}" y="${H - 8}" class="lab end">${itDate(ws[ws.length - 1].date)}</text></svg>`;
+}
+/* applica una voce del diario (nuova o modificata) e il peso collegato */
+function applyLogEntry(chk, entry, kgVal){
+  const k = normCheck(chk), log = k.log.filter(x=>x.id !== entry.id), weights = k.weights.slice();
+  const old = chk.log.find(x=>x.id === entry.id), wid = (old && old.weightId) || "";
+  let weightId = "";
+  if(kgVal > 0){
+    if(wid && weights.some(w=>w.id === wid)){ const w = weights.find(x=>x.id === wid); w.kg = kgVal; w.date = entry.date; weightId = wid; }
+    else { weightId = uid(); weights.push({id:weightId, date:entry.date, kg:kgVal}); }
+  } else if(wid){ const i = weights.findIndex(w=>w.id === wid); if(i >= 0) weights.splice(i, 1); }   // peso svuotato: tolto anche dallo storico
+  log.push(Object.assign({}, entry, {weightId}));
+  return normCheck(Object.assign({}, k, {log, weights}));
+}
+function readLogDialog(){
+  return { date: $("clDate").value || today(), check: $("clIsCheck").checked, program: $("clProg").checked,
+    channel: (document.querySelector('input[name="clChan"]:checked') || {}).value || "",
+    score: Number((document.querySelector('input[name="clScore"]:checked') || {}).value || 0), note: $("clNote").value.trim() };
+}
+async function ckLogAdd(id, editId){
+  const c = getClient(id); if(!c || !ckOn(c)) return;
+  const ed = editId ? c.check.log.find(x=>x.id === editId) : null;
+  const w = ed && ed.weightId ? c.check.weights.find(x=>x.id === ed.weightId) : null;
+  $("clTitle").textContent = ed ? "Modifica voce del diario" : "Segna check fatto";
+  $("clDate").value = ed ? (ed.date || today()) : today(); $("clNote").value = ed ? ed.note : "";
+  $("clIsCheck").checked = ed ? ed.check : true; $("clProg").checked = ed ? ed.program : false;
+  $("clKg").value = w ? String(w.kg).replace(".", ",") : ""; $("clErr").textContent = "";
+  document.querySelectorAll('input[name="clChan"]').forEach(r=>r.checked = !!ed && r.value === ed.channel);
+  document.querySelectorAll('input[name="clScore"]').forEach(r=>r.checked = r.value === String(ed ? ed.score : 0));
+  if(await ask("dlgCkLog") !== "ok") return;
+  const cur = getClient(id); if(!cur || !ckOn(cur)) return;
+  const n = clone(cur), entry = Object.assign({id: ed ? ed.id : uid()}, readLogDialog());
+  n.check = applyLogEntry(n.check, entry, parseNum($("clKg").value));
+  commit(n, true); render();
+  const k = n.check;
+  toast(ed ? "Voce del diario aggiornata" : entry.check && k.kind === "pkg" && k.count ? `Check segnato: ${ckDoneCount(k)} di ${k.count} consulenze` : "Segnato nel diario");
+}
+$("fCkLog").addEventListener("submit", e=>{
+  if(!e.submitter || e.submitter.value !== "ok") return;
+  const kg = $("clKg").value.trim(), v = parseNum(kg);
+  if(kg && !(v > 20 && v < 400)){ e.preventDefault(); $("clErr").textContent = "Il peso va scritto in kg, ad esempio 78,5 (oppure lascialo vuoto)."; $("clKg").focus(); return; }
+  if(!$("clIsCheck").checked && !$("clProg").checked && !kg && !$("clNote").value.trim()){ e.preventDefault(); $("clErr").textContent = "Spunta “Check fatto” o “Programma aggiornato”, oppure scrivi il peso o una nota."; }
+});
+async function wAdd(id, editId){
+  const c = getClient(id); if(!c) return;
+  const ed = editId ? c.check.weights.find(x=>x.id === editId) : null;
+  const last = [...c.check.weights].sort((x,y)=>(x.date||"").localeCompare(y.date||"")).pop();
+  $("wTitle").textContent = ed ? "Modifica peso" : "Peso";
+  $("wDate").value = ed ? (ed.date || today()) : today(); $("wKg").value = ed ? String(ed.kg).replace(".", ",") : (last ? String(last.kg).replace(".", ",") : ""); $("wErr").textContent = "";
+  if(await ask("dlgWeight") !== "ok") return;
+  const kgv = parseNum($("wKg").value); if(!(kgv > 0)) return;
+  const cur = getClient(id); if(!cur) return;
+  const n = clone(cur);
+  if(ed){ const w = n.check.weights.find(x=>x.id === ed.id); if(w){ w.kg = kgv; w.date = $("wDate").value || w.date; } }
+  else n.check.weights.push({id:uid(), date: $("wDate").value || today(), kg: kgv});
+  n.check = normCheck(n.check);
+  commit(n, true); render(); toast(ed ? "Peso aggiornato" : `Peso aggiunto: ${String(kgv).replace(".", ",")} kg`);
+}
+$("fWeight").addEventListener("submit", e=>{
+  if(!e.submitter || e.submitter.value !== "ok") return;
+  const v = parseNum($("wKg").value);
+  if(!(v > 20 && v < 400)){ e.preventDefault(); $("wErr").textContent = "Scrivi il peso in kg, ad esempio 78,5."; $("wKg").focus(); }
+});
+function checkShort(c){
+  const k = c.check, nowM = today().slice(0,7);
+  return k.kind === "pkg" ? `${k.count} consulenze · ${hm(checkPerOne(k))}/consulenza${checkDue(c) > 0 ? ` · da saldare ${hm(checkDue(c))}` : ""}`
+    : `${hm(k.price)}/mese · ${k.months.includes(nowM) ? `pagato ${monthLabel(nowM).split(" ")[0]}` : "da pagare questo mese"}`;
+}
+/* cartella di chi fa solo check (personal 1 to 1 spento) */
+function checkOnlyDetailHTML(c){
+  const contact = [c.phone,c.email].filter(Boolean).map(esc).join("  |  ");
+  return `<button class="back" data-a="back">${statsOpen ? "‹ Statistiche andamento" : "‹ Tutte le cartelle"}</button>
+  <div class="detail-head">
+    <h2>${esc(c.name)}</h2>
+    ${contact?`<p class="contact">${contact}</p>`:`<div style="height:10px"></div>`}
+    <p class="pkg-line">Solo check · Personal 1 to 1 non attivo</p>
+    <div class="head-actions">
+      <button class="btn" data-a="share">Invia al cliente</button>
+      <button class="btn ghost" data-a="edit">Modifica dati</button>
+      <button class="btn danger" data-a="delClient">Elimina cartella</button>
+    </div>
+  </div>
+  ${checkSectionHTML(c)}${checkExtrasHTML(c)}`;
+}
 function detailHTML(c){
+  if(c.personal === false) return checkOnlyDetailHTML(c);
   const s = stats(c);
   const contact = [c.phone,c.email].filter(Boolean).map(esc).join("  |  ");
   let h = `<button class="back" data-a="back">${statsOpen ? "‹ Statistiche andamento" : "‹ Tutte le cartelle"}</button>
@@ -2434,6 +2905,7 @@ function detailHTML(c){
     <p class="pkg-line" id="pkgLine">${pkgLineHTML(s)}</p>
     <div class="big-count" id="bigCount">${countText(s)}</div>
     <p class="per-ses" id="perSes">${perSesLine(c, s)}</p>
+    <p class="closed-line" id="closedLine">${closedLineHTML(c)}</p>
     <div id="bigDots">${dotsHTML(s.done,s.total,40,true,s.lost)}</div>
     <div id="headTicks">${ticksHTML(s)}</div>
     <div id="headAlert">${headAlertHTML(c)}</div>
@@ -2449,6 +2921,7 @@ function detailHTML(c){
     </div>
   </div>
   ${followHTML(c)}
+  ${checkSectionHTML(c)}${checkExtrasHTML(c)}
   <section class="block">
     <h3>Pacchetto in corso e pagamenti</h3>
     <p class="sub">Tutti i campi si possono cambiare in qualsiasi momento: vengono salvati appena li modifichi. Quando il pacchetto finisce, premi “Nuovo pacchetto”: questo va nello storico e si riparte da zero.</p>
@@ -2591,9 +3064,13 @@ function packagesHTML(c){
   const rows = pkgHistory(c);
   let h = `<section class="block hist-sec" id="histPkg">${histHead("pkg", "Storico pacchetti fatti dal cliente", rows.length ? `${rows.length} ${rows.length === 1 ? "pacchetto" : "pacchetti"}` : "")}<div class="hist-body"${histOpen.pkg ? "" : " hidden"}>`;
   if(!rows.length) return h + `<p class="none">Nessun pacchetto ancora.</p></div></section>`;
-  h += `<table class="pkg-hist"><thead><tr><th>Inizio</th><th class="num">Sedute</th><th class="num">Costo</th><th class="num">€/seduta</th></tr></thead><tbody>`;
-  rows.forEach(r=>{ h += `<tr class="${r.current ? "cur" : ""}"><td class="date">${itDate(r.start)}${r.current ? `<small class="in-corso">in corso</small>` : ""}</td><td class="num">${r.total}</td><td class="num">${hm(r.price)}</td><td class="num">${r.total ? hm(perSession(r.price, r.total)) : "—"}</td></tr>`; });
+  h += `<table class="pkg-hist"><thead><tr><th>Inizio</th><th>Fine</th><th class="num">Sedute</th><th class="num">Costo</th><th class="num">€/seduta</th></tr></thead><tbody>`;
+  const fineTxt = r => r.end ? itDate(r.end) : (r.current ? "in corso" : "—");
+  rows.forEach(r=>{ h += `<tr class="${r.current ? "cur" : ""}" data-start="${itDate(r.start)}" data-fine="${fineTxt(r)}"><td class="date">${itDate(r.start)}</td><td class="date">${r.end ? itDate(r.end) : (r.current ? `<span class="in-corso">in corso</span>` : "—")}</td><td class="num">${r.total}</td><td class="num">${hm(r.price)}</td><td class="num">${r.total ? hm(perSession(r.price, r.total)) : "—"}</td></tr>`; });
   h += `</tbody></table>`;
+  /* sul telefono: elenco a righe (la tabella a 5 colonne non ci sta) */
+  h += `<ul class="pkg-hist-list">` + rows.map(r=>`<li class="${r.current ? "cur" : ""}"><b>${itDate(r.start)} → ${r.end ? itDate(r.end) : (r.current ? `<span class="in-corso">in corso</span>` : "—")}</b>
+      <span>${r.total} ${r.total === 1 ? "seduta" : "sedute"} · ${hm(r.price)}${r.total ? ` · <b class="pps">${hm(perSession(r.price, r.total))}/seduta</b>` : ""}</span></li>`).join("") + `</ul>`;
   if(!past.length) return h + `</div></section>`;
   h += `<p class="lbl">Dettagli dei pacchetti conclusi</p>`;
   past.forEach(p=>{
@@ -2618,6 +3095,8 @@ function refreshSummary(c){
   const s = stats(c);
   const bc = $("bigCount"); if(bc) bc.textContent = countText(s);
   const ps = $("perSes"); if(ps) ps.innerHTML = perSesLine(c, s);
+  const cl = $("closedLine"); if(cl) cl.innerHTML = closedLineHTML(c);
+  const hp = $("histPkg"); if(hp) hp.outerHTML = packagesHTML(c);            // anche lo storico dei pacchetti (fine / in corso)
   const bd = $("bigDots"); if(bd) bd.innerHTML = dotsHTML(s.done,s.total,40,true,s.lost);
   const db = $("dueBox");
   if(db){ db.className = "field " + (s.due>0?"due":"ok"); db.innerHTML = `<label>${s.due<0?"Credito del cliente":"Ancora da saldare"}</label><div class="val">${eur(Math.abs(s.due))}</div>`; }
@@ -2654,16 +3133,42 @@ async function addSingle(id){
   if(price > 0 && settings.singlePrice !== price){ settings.singlePrice = price; saveSettings(); }
   commit(n, true); render(); toast(`Seduta singola segnata: ${eur(price)}`);
 }
+/* cambia il totale pagato di un pacchetto check: aggiunge un pagamento datato o toglie dagli ultimi */
+function setCheckPaid(k, newPaid, date){
+  newPaid = round2(Math.max(Number(newPaid)||0, 0));
+  let diff = round2(newPaid - k.paid), log = k.payLog.map(p=>({...p}));
+  if(diff > 0) log.push({date: date || today(), amount: diff});
+  while(diff < 0 && log.length){ const last = log[log.length-1]; if(last.amount <= -diff){ diff = round2(diff + last.amount); log.pop(); } else { last.amount = round2(last.amount + diff); diff = 0; } }
+  return normCheck(Object.assign({}, k, {payLog: log, paid: undefined}));
+}
+function ckKind(){ return (document.querySelector('input[name="ckKind"]:checked') || {}).value === "pkg" ? "pkg" : "single"; }
+function syncSvcUI(){
+  $("cPtW").hidden = !$("cSvcPt").checked; $("cCkW").hidden = !$("cSvcCk").checked; $("cSvcErr").textContent = "";
+  const pkg = ckKind() === "pkg"; $("ckPkgW").hidden = !pkg; $("ckSingleW").hidden = pkg;
+  $("ckPaidMonthL").textContent = `Ha pagato la consulenza di ${monthLabel(today().slice(0,7))}`;
+  const n = toInt($("ckCount").value), pr = parseNum($("ckPrice").value);
+  $("ckPer").textContent = pkg && n > 0 && pr > 0 ? `${n} ${n === 1 ? "consulenza" : "consulenze"} · ${eur(pr)} → ${eur(round2(pr / n))}/consulenza`
+    : (!pkg && parseNum($("ckPrice1").value) > 0 ? `${eur(parseNum($("ckPrice1").value))}/consulenza` : "");
+  syncKindUI();
+}
+["cSvcPt","cSvcCk","ckCount","ckPrice","ckPrice1"].forEach(id=>{ $(id).addEventListener("input", syncSvcUI); $(id).addEventListener("change", syncSvcUI); });
+document.querySelectorAll('input[name="ckKind"]').forEach(r=>r.addEventListener("change", syncSvcUI));
+document.querySelector("#dlgClient form").addEventListener("submit", e=>{
+  if(!e.submitter || e.submitter.value !== "ok") return;
+  if(!$("cSvcPt").checked && !$("cSvcCk").checked){ e.preventDefault(); $("cSvcErr").textContent = "Scegli almeno un servizio: Personal 1 to 1 o Check."; return; }
+  const kg = $("fkKg").value.trim(), v = parseNum(kg);
+  if($("cSvcCk").checked && kg && !(v > 20 && v < 400)){ e.preventDefault(); $("fkErr").textContent = "Il peso va scritto in kg, ad esempio 78,5 (oppure lascialo vuoto)."; $("fkKg").focus(); }
+}, true);
 function syncKindUI(){
   const single = (document.querySelector('input[name="cKind"]:checked') || {}).value === "single" && !$("cKindW").hidden;
   $("cSesW").hidden = single;
-  $("cPkgH").textContent = single ? "Seduta singola" : "Pacchetto";
+  $("cPkgH").textContent = single ? "Seduta singola personal 1 to 1" : "Pacchetto personal 1 to 1";
   $("cStartL").textContent = single ? "Data della seduta" : "Data di inizio del pacchetto";
   $("cPriceL").textContent = single ? "Prezzo della seduta (€)" : "Totale da pagare (€)";
   $("cPaidL").textContent = single ? "Pagato (€)" : "Già pagato / acconto (€)";
 }
 document.querySelectorAll('input[name="cKind"]').forEach(r=>r.addEventListener("change", syncKindUI));
-async function clientForm(existing){
+async function clientForm(existing, opts){
   const isNew = !existing;
   $("dlgClientTitle").textContent = isNew ? "Nuova cartella" : "Modifica dati";
   const v = existing || normalize({});
@@ -2673,7 +3178,19 @@ async function clientForm(existing){
   $("cStart").value = isNew ? today() : v.start;
   $("cFreq").value = v.freq || ""; $("cTraining").value = v.training; $("cNotes").value = v.notes;
   $("cDays").querySelectorAll("input").forEach(i=>i.checked = v.days.includes(i.value));
-  $("cKindW").hidden = !isNew; document.querySelectorAll('input[name="cKind"]').forEach(r=>r.checked = r.value === "pkg"); syncKindUI();
+  $("cKindW").hidden = !isNew; document.querySelectorAll('input[name="cKind"]').forEach(r=>r.checked = r.value === "pkg");
+  const ck = normCheck(v.check), nowM = today().slice(0,7);
+  $("cSvcPt").checked = isNew ? true : v.personal !== false; $("cSvcCk").checked = isNew ? false : ck.on;
+  document.querySelectorAll('input[name="ckKind"]').forEach(r=>r.checked = r.value === ck.kind);
+  $("ckPrice1").value = ck.kind === "single" && ck.price ? fmtIn(ck.price) : ""; $("ckStart1").value = ck.kind === "single" ? (ck.start || "") : "";
+  $("ckPaidMonth").checked = ck.kind === "single" && ck.months.includes(nowM);
+  $("ckStart").value = ck.kind === "pkg" ? (ck.start || "") : ""; $("ckCount").value = ck.kind === "pkg" && ck.count ? ck.count : "";
+  $("ckPrice").value = ck.kind === "pkg" && ck.price ? fmtIn(ck.price) : ""; $("ckPaid").value = ck.kind === "pkg" && ck.paid ? fmtIn(ck.paid) : "";
+  $("ckNotes").value = ck.notes;
+  $("fkDate").value = today(); $("fkCheck").checked = false; $("fkProg").checked = false; $("fkKg").value = ""; $("fkChan").value = ""; $("fkNote").value = ""; $("fkErr").textContent = "";
+  document.querySelectorAll('input[name="fkScore"]').forEach(r=>r.checked = r.value === "0");
+  syncSvcUI();
+  if(opts && opts.focus === "ck") setTimeout(()=>{ const t = $("cCkW"); if(t && !t.hidden) t.scrollIntoView({block:"start"}); }, 60);   // si apre sul lato Check
   if(await ask("dlgClient") !== "ok") return;
   const single = isNew && (document.querySelector('input[name="cKind"]:checked') || {}).value === "single";
   const name = $("cName").value.trim(); if(!name) return;
@@ -2687,7 +3204,28 @@ async function clientForm(existing){
     training:$("cTraining").value.trim(), notes:$("cNotes").value.trim(),
     start: /^\d{4}-\d{2}-\d{2}$/.test($("cStart").value) ? $("cStart").value : ""
   };
-  if(isNew && single){                                              // solo seduta singola: nessun pacchetto in corso
+  // servizi: personal 1 to 1 e/o check
+  data.personal = $("cSvcPt").checked;
+  { const prev = normCheck(v.check), kind = ckKind(), nowM = today().slice(0,7);
+    const months = kind === "single" ? prev.months.filter(m=>m !== nowM).concat($("ckPaidMonth").checked ? [nowM] : []) : prev.months;
+    if(kind === "pkg"){
+      const base = normCheck({on:$("cSvcCk").checked, kind, start:$("ckStart").value, count:toInt($("ckCount").value), price:parseNum($("ckPrice").value),
+        payLog: prev.kind === "pkg" ? prev.payLog : [], months, notes:$("ckNotes").value.trim(), log: prev.log, weights: prev.weights});
+      // il “già pagato” scritto qui: la differenza è un pagamento di oggi (per un check nuovo, alla data d'inizio)
+      const isNewPkg = !(prev.on && prev.kind === "pkg");
+      data.check = setCheckPaid(base, parseNum($("ckPaid").value), isNewPkg ? (isDate(base.start) ? base.start : today()) : today());
+    } else data.check = normCheck({on:$("cSvcCk").checked, kind, start:$("ckStart1").value, price:parseNum($("ckPrice1").value), months, notes:$("ckNotes").value.trim(), log: prev.log, weights: prev.weights}); }
+  if(!data.personal && isNew) Object.assign(data, {totalSessions:0, doneSessions:0, price:0, paid:0, start:""});
+  // “Vuoi segnare qualcosa di oggi?”: solo se hai compilato qualcosa
+  if(data.check.on){
+    const fk = {date: $("fkDate").value || today(), check: $("fkCheck").checked, program: $("fkProg").checked, channel: $("fkChan").value,
+      score: Number((document.querySelector('input[name="fkScore"]:checked') || {}).value || 0), note: $("fkNote").value.trim()};
+    const kgv = parseNum($("fkKg").value);
+    if(fk.check || fk.program || fk.note || fk.channel || fk.score){
+      data.check = applyLogEntry(data.check, Object.assign({id:uid()}, fk), kgv > 0 ? kgv : 0);
+    } else if(kgv > 0){ data.check = normCheck(Object.assign({}, data.check, {weights:[...data.check.weights, {id:uid(), date:fk.date, kg:kgv}]})); }
+  }
+  if(isNew && single && data.personal){                                              // solo seduta singola: nessun pacchetto in corso
     const pr = data.price, pd = data.paid;
     const nc = normalize(Object.assign({}, data, {totalSessions:0, doneSessions:0, price:0, paid:0, start:""}));
     nc.packages.push(singleRecord(data.start || today(), pr, pd >= pr - 0.004, ""));
@@ -2796,8 +3334,12 @@ function syncShareChecks(){
   $("shareErr").textContent = "";
 }
 $("shareChecks").addEventListener("change", syncShareChecks);
+const shareWhat = () => (document.querySelector('input[name="shareWhat"]:checked') || {}).value === "ck" ? "ck" : "pt";
+function syncShareWhat(){ const ck = shareWhat() === "ck"; $("shareChecks").hidden = ck; $("shareCkNote").hidden = !ck; $("shareErr").textContent = ""; }
+document.querySelectorAll('input[name="shareWhat"]').forEach(r=>r.addEventListener("change", syncShareWhat));
 $("fShare").addEventListener("submit", e=>{
   if(!e.submitter || e.submitter.value !== "ok") return;
+  if(shareWhat() === "ck") return;                                   // il riepilogo check ha sempre il suo contenuto
   const any = [...$("shareChecks").querySelectorAll("input:checked")].some(i=>!i.disabled && i.value!=="noteSedute");
   if(!any && !$("shareMsg").value.trim()){ e.preventDefault(); $("shareErr").textContent = "Scegli almeno una cosa da includere."; }
 });
@@ -2810,7 +3352,13 @@ async function shareClient(id){
   $("shareMsg").value = "";
   $("shareTrainer").value = settings.trainerName || "";
   document.querySelectorAll('input[name="shareFmt"]').forEach(r=>r.checked = r.value===d.format);
+  // cosa inviare: personal o check (uno per volta); a chi ha un solo servizio non si chiede
+  const hasPt = c.personal !== false, hasCk = ckOn(c);
+  $("shareWhatW").hidden = !(hasPt && hasCk);
+  const def = hasPt && hasCk ? (cardViewOf(c) === "ck" ? "ck" : "pt") : (hasCk ? "ck" : "pt");
+  document.querySelectorAll('input[name="shareWhat"]').forEach(r=>r.checked = r.value === def); syncShareWhat();
   if(await ask("dlgShare") !== "ok") return;
+  const what = shareWhat();
 
   const inc = {};
   $("shareChecks").querySelectorAll("input").forEach(i=>inc[i.value] = i.checked);
@@ -2832,12 +3380,12 @@ async function shareClient(id){
     let blob;
     if(format === "docx"){
       const JSZip = await lib("jszip");
-      blob = await (await buildClientDocx(fresh, JSZip, opt)).generateAsync({type:"blob", mimeType:MIME.docx});
+      blob = await (await (what === "ck" ? buildCheckDocx : buildClientDocx)(fresh, JSZip, opt)).generateAsync({type:"blob", mimeType:MIME.docx});
     } else {
       const jsPDF = await lib("jspdf");
-      blob = buildClientPdf(fresh, jsPDF, opt).output("blob");
+      blob = (what === "ck" ? buildCheckPdf : buildClientPdf)(fresh, jsPDF, opt).output("blob");
     }
-    const ok = await saveFile(blob, `${safeName(fresh.name)} - riepilogo.${format}`, true);
+    const ok = await saveFile(blob, `${safeName(fresh.name)} - ${what === "ck" ? "check" : "riepilogo"}.${format}`, true);
     if(ok) toast("Riepilogo per il cliente pronto");
   }catch(e){
     console.error(e);
@@ -3372,7 +3920,14 @@ async function handle(a, el){
     case "toggleFilters": filtersOpen = !filtersOpen; render(); return;
     case "clearFilter": listFilter = "all"; filtersOpen = false; render(); return;
     case "exportAll": return exportAll();
-    case "pickMonth": return pickMonth();
+    case "pickMonth": return pickMonth("home");
+    case "pickCkMonth": return pickMonth("ck");
+    case "pickPfMonth": return pickMonth("prof");
+    case "chartQuick": {
+      const base = {pt:["pt"], ck:["ck"], both:["pt","ck"]}[el.dataset.v]; if(!base) return;
+      const cur = Array.isArray(settings.chartSeries) ? settings.chartSeries : ["pt","ck","exp"];
+      settings.chartSeries = [...base, ...(cur.includes("exp") ? ["exp"] : [])]; saveSettings(); render(); return;
+    }
     case "toggleHist": { const k = el.dataset.h; if(k in histOpen){ histOpen[k] = !histOpen[k]; render(); } return; }
     case "pickStatsYear": return pickStatsYear();
     case "toggleHomeMoney": settings.homeHideMoney = !settings.homeHideMoney; saveSettings(); render(); return;
@@ -3394,7 +3949,9 @@ async function handle(a, el){
     case "statsYear": if(el.dataset.y){ statsYear = el.dataset.y; render(); } return;
     case "statsOpenYear": if(el.dataset.y){ statsYear = el.dataset.y; settings.statsMode = "month"; saveSettings(); render(); const c = document.querySelector(".chart-wrap"); if(c) c.scrollIntoView({block:"center"}); } return;
     case "clearSearch": { query = ""; render(); const s = $("search"); if(s) s.focus(); return; }
-    case "quickEdit": { const q = getClient(el.dataset.id); return q && clientForm(q); }
+    case "quickEdit": { const q = getClient(el.dataset.id); return q && clientForm(q, {focus: el.dataset.v}); }
+    case "cardView": { if(el.dataset.id){ cardView[el.dataset.id] = el.dataset.v === "ck" ? "ck" : "pt"; render(); } return; }
+    case "editCheck": return c && clientForm(c, {focus:"ck"});
     case "quickDel": return getClient(el.dataset.id) && deleteClient(el.dataset.id);
     case "renameClient": return getClient(el.dataset.id) && renameClient(el.dataset.id);
     case "back": openId = null; render(); window.scrollTo({top:0}); return;
@@ -3410,6 +3967,32 @@ async function handle(a, el){
     case "import": $("importInput").value=""; $("importInput").click(); return;
     case "addSes": return c && addSession(c.id);
     case "addSingle": return c && addSingle(c.id);
+    case "ckLogAdd": return c && ckLogAdd(c.id);
+    case "ckLogEdit": return c && ckLogAdd(c.id, el.dataset.id);
+    case "wAdd": return c && wAdd(c.id);
+    case "wEdit": return c && wAdd(c.id, el.dataset.id);
+    case "ckLogDel": case "wDel": {
+      if(!c) return;
+      const isLog = a === "ckLogDel", list = isLog ? c.check.log : c.check.weights, x = list.find(e=>e.id === el.dataset.id); if(!x) return;
+      if(!(await messageBox(isLog ? "Eliminare questo check?" : "Eliminare questo peso?", `${isLog ? "La voce" : "Il peso"} del ${itDate(x.date)} verrà tolt${isLog ? "a" : "o"}${isLog && x.weightId ? ", insieme al peso segnato in quella voce" : ""}${isLog && x.check && c.check.kind === "pkg" ? " (e non conterà più tra le consulenze fatte)" : ""}.`, {ok:"Elimina", cancel:"Annulla", danger:true}))) return;
+      const cur = getClient(c.id); if(!cur) return;
+      const n = clone(cur);
+      if(isLog){ n.check.log = n.check.log.filter(e=>e.id !== x.id); if(x.weightId) n.check.weights = n.check.weights.filter(w=>w.id !== x.weightId); }
+      else { n.check.weights = n.check.weights.filter(e=>e.id !== x.id); n.check.log.forEach(e=>{ if(e.weightId === x.id) e.weightId = ""; }); }
+      commit(n, true); render(); toast(isLog ? "Check eliminato" : "Peso eliminato"); return;
+    }
+    case "ckMonth": {
+      if(!c || !ckOn(c)) return;
+      const n = clone(c), m = today().slice(0,7);
+      n.check.months = n.check.months.includes(m) ? n.check.months.filter(x=>x !== m) : [...n.check.months, m].sort();
+      commit(n, true); render(); toast(n.check.months.includes(m) ? `Consulenza di ${monthLabel(m)} pagata` : `Pagamento di ${monthLabel(m)} tolto`);
+      return;
+    }
+    case "ckSaldo": {
+      if(!c || !ckOn(c)) return;
+      const n = clone(c); n.check = setCheckPaid(n.check, n.check.price, today()); commit(n, true); render(); toast("Pacchetto di consulenze saldato: conta nel guadagno di questo mese");
+      return;
+    }
     case "singlePaid": {
       if(!c) return;
       const n = clone(c), p = n.packages.find(x=>x.id === el.dataset.id); if(!p) return;
@@ -3595,7 +4178,7 @@ async function newPackage(id, thenSession){
   const carry = canCarry && $("pCarry").checked ? cs.due : 0;
   if(active){
     const last = [...cur.sessionLog].sort(byDateAsc).pop();
-    n.packages.push(normPackage({start:cur.start, end: last ? last.date : "", totalSessions:cur.totalSessions, doneSessions:cur.doneSessions,
+    n.packages.push(normPackage({start:cur.start, end: cur.closed || closeDateOf(cur) || (last ? last.date : ""), totalSessions:cur.totalSessions, doneSessions:cur.doneSessions,
       price:cur.price, paid:cur.paid, carriedIn:cur.carriedIn, carriedOut:carry, sessionLog:cur.sessionLog, payLog:cur.payLog, missLog:cur.missLog}));
   }
   const newBase = round2(Math.max(parseNum($("pPrice").value), 0));
@@ -4184,7 +4767,7 @@ function payEvents(c){
 }
 /* Soldi incassati di ogni pacchetto, messi nel mese in cui il pacchetto è iniziato (anche se il cliente
    paga dopo: inizia il 1° ottobre e salda il 1° novembre → ottobre). Senza data d'inizio, vale la data del pagamento. */
-function incomeMonths(c, undated){
+function incomeMonths(c, undated, noCheck){
   const out = [];
   allPackages(c).forEach(p=>{
     const paid = round2(Number(p.paid) || 0); if(paid <= 0) return;
@@ -4193,11 +4776,19 @@ function incomeMonths(c, undated){
     p.payLog.forEach(x=>{ const v = Number(x.amount) || 0; if(isDate(x.date) && v){ out.push([x.date.slice(0,7), v]); logged += v; } });
     const rest = round2(paid - logged); if(rest > 0.004 && undated) undated.amount += rest;
   });
+  if(ckOn(c) && !noCheck){                                                // check: singola = ogni mese pagato; pacchetto = mese del pagamento
+    const k = c.check;
+    if(k.kind === "single") k.months.forEach(m=>{ if(k.price > 0) out.push([m, k.price]); });
+    else k.payLog.forEach(p=>{                                                       // pacchetto check: ogni pagamento nel suo mese
+      const d = isDate(p.date) ? p.date : k.start;
+      if(isDate(d)) out.push([d.slice(0,7), p.amount]); else if(undated) undated.amount += p.amount;
+    });
+  }
   return out;
 }
 /* quanto resta da incassare dei pacchetti iniziati in un mese */
 function dueForMonth(k){
-  let t = 0;
+  let t = clients.reduce((s,c)=>s + (ckOn(c) && c.check.kind === "pkg" && (c.check.start||"").slice(0,7) === k ? checkDue(c) : 0), 0);
   clients.forEach(c=>allPackages(c).forEach(p=>{
     if(!isDate(p.start) || p.start.slice(0,7) !== k) return;
     t += Math.max(round2((Number(p.price)||0) - (Number(p.paid)||0) - (p.current ? 0 : (Number(p.carriedOut)||0))), 0);
@@ -4264,12 +4855,12 @@ function clientStats(c){
     earned, sessions, last, active: age !== null && age <= ACTIVE_DAYS
   };
 }
-function statsData(){
+function statsData(ptOnly){                                               // ptOnly: solo le entrate dei personal 1 to 1
   const per = clients.map(clientStats);
   const byMonth = {}, noDate = {amount:0}, noDateSes = {n:0};
   const add = (k, f, v) => { byMonth[k] = byMonth[k] || {income:0, sessions:0, expense:0}; byMonth[k][f] += v; };
   clients.forEach(c=>{
-    incomeMonths(c, noDate).forEach(([k, v])=>add(k, "income", v));      // soldi nel mese d'inizio del pacchetto
+    incomeMonths(c, noDate, ptOnly).forEach(([k, v])=>add(k, "income", v));      // soldi nel mese d'inizio del pacchetto
     sessionMonths(c, noDateSes).forEach(([k, n])=>add(k, "sessions", n));
   });
   Object.entries(expByMonth()).forEach(([k,v])=>add(k, "expense", v));     // spese di gestione pagate
@@ -4311,8 +4902,76 @@ function barsSVG(items, fmt){
 }
 const shortEur = (v, short) => { if(!short) return eur(v); const a = Math.abs(v), sg = v < 0 ? "−" : ""; return sg + (a >= 1000 ? `${String(Math.round(a/100)/10).replace(".", ",")}k` : String(Math.round(a))); };
 
+/* ======= statistiche dei CHECK ======= */
+function checkIncomeMonths(c){
+  if(!ckOn(c)) return [];
+  const k = c.check, out = [];
+  if(k.kind === "single") k.months.forEach(m=>{ if(k.price > 0) out.push([m, k.price]); });
+  else k.payLog.forEach(p=>{ const d = isDate(p.date) ? p.date : k.start; if(isDate(d)) out.push([d.slice(0,7), p.amount]); });
+  return out;
+}
+function checkLastMonth(c){                                               // ultimo mese in cui il cliente “c'è stato” con i check
+  const k = c.check, ms = [];
+  if(k.kind === "single") ms.push(...k.months); else ms.push(...k.payLog.map(p=>(p.date||"").slice(0,7)).filter(Boolean));
+  if(isDate(k.start)) ms.push(k.start.slice(0,7));
+  return ms.sort().pop() || "";
+}
+const monthsBetween = (a, b) => (Number(b.slice(0,4)) - Number(a.slice(0,4))) * 12 + Number(b.slice(5,7)) - Number(a.slice(5,7));
+let ckSel = "", profSel = "";
+/* ======= PROFITTI: personal + check insieme ======= */
+function profitHTML(){
+  const nowK = today().slice(0,7), DF = statsData(), DP = statsData(true);
+  const ptAll = round2(clients.reduce((s,c)=>s + allPackages(c).reduce((t,p)=>t + (Number(p.paid)||0), 0), 0));
+  const ckAll = round2(clients.reduce((s,c)=>s + checkPaidTotal(c), 0));
+  const inAll = round2(ptAll + ckAll), exAll = round2(expData().pays.reduce((t,p)=>t + (Number(p.amount)||0), 0));
+  const m = profSel || nowK, ml = esc(monthLabel(m)), mm = DF.month(m), ptM = round2(DP.month(m).income), ckM = round2(mm.income - ptM);
+  const split = (p, c) => `personal ${money(p)} · check ${money(c)}`;
+  return `<h2 class="st-sec" id="pfTitle">💰 Profitti · personal + check</h2>
+  <div class="dash dashpf pf-gen" id="pfGen" aria-label="Profitti totali">
+    <div class="dash-title"><span class="dt-ico" aria-hidden="true">📊</span><b>Totale</b><span>da quando hai iniziato</span></div>
+    <div class="dc c-in"><b id="pfIncomeAll">${money(inAll)}</b><span>guadagni</span><small>${split(ptAll, ckAll)}</small></div>
+    <div class="dc c-exp"><b id="pfExpAll">${money(exAll)}</b><span>spese</span><small>spese di gestione pagate</small></div>
+    <div class="dc c-net"><b id="pfNetAll">${money(round2(inAll - exAll))}</b><span>guadagno netto</span><small>guadagni − spese</small></div>
+  </div>
+  <div class="dash dashpf pf-month" id="pfMonthDash" aria-label="Profitti del mese scelto">
+    <button type="button" class="dash-title month-pick" id="pfMonthPick" data-a="pickPfMonth" data-m="${m}" aria-label="Scegli il mese dei profitti"><span class="dt-ico" aria-hidden="true">📅</span><b>${esc(monthCap(m))}&nbsp;▾</b><span>${m === nowK ? "mese in corso" : "tocca per cambiare"}</span></button>
+    <div class="dc c-in"><b id="pfIncomeM">${money(mm.income)}</b><span>guadagni del mese</span><small>${split(ptM, ckM)}</small></div>
+    <div class="dc c-exp"><b id="pfExpM">${money(mm.expense || 0)}</b><span>spese del mese</span><small>spese di gestione di ${ml}</small></div>
+    <div class="dc c-net"><b id="pfNetM">${money(round2(mm.income - (mm.expense || 0)))}</b><span>guadagno netto del mese</span><small>guadagni − spese</small></div>
+  </div>`;
+}
+function checkStatsHTML(){
+  const cks = clients.filter(ckOn), nowK = today().slice(0,7);
+  const single = cks.filter(c=>c.check.kind === "single"), pkg = cks.filter(c=>c.check.kind === "pkg");
+  const inactive = cks.filter(c=>{ const l = checkLastMonth(c); return l && monthsBetween(l, nowK) > 4; }).length;
+  const incAll = round2(cks.reduce((t,c)=>t + checkPaidTotal(c), 0));
+  const m = ckSel || nowK, ml = esc(monthLabel(m));
+  const inMonth = c => c.check.kind === "single" ? c.check.months.includes(m) : ((c.check.start||"").slice(0,7) === m || c.check.payLog.some(p=>(p.date||"").slice(0,7) === m));
+  const mSingle = single.filter(c=>c.check.months.includes(m)).length, mPkg = pkg.filter(c=>(c.check.start||"").slice(0,7) === m).length;
+  const mClients = cks.filter(inMonth).length;
+  const mInc = round2(cks.reduce((t,c)=>t + checkIncomeMonths(c).filter(([k])=>k === m).reduce((s,[,v])=>s + v, 0), 0));
+  const mExp = round2(expByMonth()[m] || 0);
+  return `<h2 class="st-sec" id="ckStatsTitle">📋 Statistiche andamento check</h2>
+  <div class="dash dashck ck-gen" id="ckGen" aria-label="Check, dati generali">
+    <div class="dash-title"><span class="dt-ico" aria-hidden="true">📊</span><b>Generale</b></div>
+    <div class="dc"><b id="ckClients">${cks.length}</b><span>clienti check</span></div>
+    <div class="dc"><b id="ckSingle">${single.length}</b><span>clienti a consulenza singola</span><small>pagano la singola consulenza</small></div>
+    <div class="dc"><b id="ckPkg">${pkg.length}</b><span>clienti con pacchetti di consulenze</span><small>pacchetti chiusi</small></div>
+    <div class="dc ${inactive ? "c-owed" : ""}"><b id="ckInactive">${inactive}</b><span>non vengono da più di 4 mesi</span></div>
+    <div class="dc c-in"><b id="ckIncomeAll">${money(incAll)}</b><span>guadagno totale check</span><small>da quando hai iniziato</small></div>
+  </div>
+  <div class="dash dashck ck-month" id="ckMonthDash" aria-label="Check, il mese scelto">
+    <button type="button" class="dash-title month-pick" id="ckMonthPick" data-a="pickCkMonth" data-m="${m}" aria-label="Scegli il mese dei check"><span class="dt-ico" aria-hidden="true">📅</span><b>${esc(monthCap(m))}&nbsp;▾</b><span>${m === nowK ? "mese in corso" : "tocca per cambiare"}</span></button>
+    <div class="dc"><b id="ckMClients">${mClients}</b><span>clienti check</span><small>nel mese</small></div>
+    <div class="dc"><b id="ckMSingle">${mSingle}</b><span>consulenze singole</span><small>pagate a ${ml}</small></div>
+    <div class="dc"><b id="ckMPkg">${mPkg}</b><span>pacchetti di consulenze</span><small>iniziati a ${ml}</small></div>
+    <div class="dc c-exp"><b id="ckMExp">${money(mExp)}</b><span>spese mensili</span><small>spese di gestione di ${ml}</small></div>
+    <div class="dc c-in"><b id="ckMIncome">${money(mInc)}</b><span>guadagno check del mese</span><small>incassato a ${ml}</small></div>
+  </div>
+  <h2 class="st-sec" id="ptStatsTitle">🏋️ Statistiche andamento personal 1 to 1</h2>`;
+}
 function statsHTML(){
-  const D = statsData(), hide = !!settings.statsHideMoney;
+  const D = statsData(true), hide = !!settings.statsHideMoney;               // solo personal 1 to 1 (i check hanno la loro sezione)
   const nowY = today().slice(0,4), nowK = today().slice(0,7);
   const years = [...new Set([...D.years, nowY])].sort();
   const year = years.includes(statsYear) ? statsYear : nowY;           // di base l'anno in corso (ora di Roma)
@@ -4321,11 +4980,12 @@ function statsHTML(){
     <span class="head-btns"><button class="btn small ghost" data-a="openExp">💸 Spese di gestione</button><button class="btn small ghost" data-a="statsHide" aria-pressed="${hide}">${hide ? "👁 Mostra importi" : "🙈 Nascondi importi"}</button></span></div>
   <p class="sub">Solo per te: questa sezione non si esporta. Si calcola dalle cartelle dei clienti, compresi i pacchetti precedenti.</p>`;
   if(!clients.length) return h + `<div class="empty"><h2>Ancora nessun dato</h2><p>Le statistiche compaiono quando avrai clienti con sedute e pagamenti.</p></div>`;
+  h += checkStatsHTML();
 
   // ---- tabella GENERALE (da quando hai iniziato)
   const act = D.per.filter(p=>p.active).length;
   const pkgs = D.per.reduce((t,p)=>t + p.packages, 0);
-  const allIncome = round2(clients.reduce((s,c)=>s + allPackages(c).reduce((t,p)=>t + (Number(p.paid)||0), 0), 0));
+  const allIncome = round2(clients.reduce((s,c)=>s + allPackages(c).reduce((t,p)=>t + (Number(p.paid)||0), 0), 0));   // solo personal
   const allExp = round2(expData().pays.reduce((t,p)=>t + (Number(p.amount)||0), 0));
   const allDone = clients.reduce((s,c)=>s + (Number(c.doneSessions)||0) + c.packages.reduce((t,p)=>t + (Number(p.doneSessions)||0), 0), 0);
   const personal = D.per.filter(p=>p.packages > 0).length;                       // chi ha fatto almeno un pacchetto
@@ -4360,7 +5020,8 @@ function statsHTML(){
     <div class="dc c-net"><b id="kpiNetAvg">${money(round2(yNet / nMonths))}</b><span>netto medio al mese</span><small>nel ${year}</small></div>
   </div>`;
 
-  // ---- grafici dell'anno scelto: istogramma o torta, mese per mese
+  // ---- profitti (personal + check), poi il grafico del personal
+  h += profitHTML();
   h += chartsHTML(D, year, hide) + `</section>`;
 
   // mesi migliori e peggiori
@@ -4417,25 +5078,22 @@ const SERIES = {
 };
 const PIE_HUE = {income:[150,45], expense:[5,65], net:[200,18], sessions:[215,65]};
 const fmtSeries = (f, v) => SERIES[f].money ? money(v) : `${v} ${v === 1 ? "seduta" : "sedute"}`;
+/* istogramma dell'anno: guadagno personal, guadagno check, spese (3 voci, 3 colori, accendibili dalla legenda) */
+const BAR3 = {pt:{label:"Guadagno personal", cls:"s-pt"}, ck:{label:"Guadagno check", cls:"s-ck"}, exp:{label:"Spese", cls:"s-exp"}};
 function chartsHTML(D, year, hide){
-  const type = settings.statsChart === "pie" ? "pie" : "bar";
-  const allowed = hide ? ["sessions"] : ["income","expense","net","sessions"];
-  let on = Array.isArray(settings.statsSeries) ? settings.statsSeries.filter(x=>allowed.includes(x)) : allowed.slice();
-  if(!on.length) on = allowed.slice(0,1);
-  const pieM = allowed.includes(settings.pieMetric) ? settings.pieMetric : allowed[0];
-  const ks = MONTHS.map((_,i)=>`${year}-${String(i+1).padStart(2,"0")}`);
-  let h = `<section class="block stats-block" id="chartBlock"><div class="bh"><h3>Andamento del ${year}, mese per mese</h3>
-    <div class="seg small" role="radiogroup" aria-label="Tipo di grafico">
-      <label><input type="radio" name="statsChart" value="bar"${type === "bar" ? " checked" : ""}><span>📊 Istogramma</span></label>
-      <label><input type="radio" name="statsChart" value="pie"${type === "pie" ? " checked" : ""}><span>🥧 Torta</span></label></div></div>`;
-  if(hide) h += `<p class="hint">Importi nascosti: il grafico mostra solo le sedute.</p>`;
-  if(type === "bar"){
-    h += `<div class="legend" role="group" aria-label="Voci del grafico">` + allowed.map(f=>`<label class="lg ${SERIES[f].cls}"><input type="checkbox" name="statsSeries" value="${f}"${on.includes(f) ? " checked" : ""}><i></i><span>${SERIES[f].label}</span></label>`).join("") + `</div>`;
-    h += `<div class="chart-wrap">${yearBarsSVG(D, ks, on)}</div>`;
-    h += `<p class="hint">Tocca una voce della legenda per mostrarla o nasconderla. Le sedute usano la scala a destra.${on.includes("net") ? " Il guadagno netto sotto la linea dello zero è un mese in perdita." : ""}</p>`;
-  } else {
-    h += `<div class="seg small metric" role="radiogroup" aria-label="Voce della torta">` + allowed.map(f=>`<label><input type="radio" name="pieMetric" value="${f}"${pieM === f ? " checked" : ""}><span>${SERIES[f].label}</span></label>`).join("") + `</div>`;
-    h += pieHTML(D, ks, pieM);
+  const ks = MONTHS.map((_,i)=>`${year}-${String(i+1).padStart(2,"0")}`), DF = statsData();
+  const val = (k, f) => f === "pt" ? round2(D.month(k).income) : f === "ck" ? round2(DF.month(k).income - D.month(k).income) : round2(D.month(k).expense || 0);
+  let on = Array.isArray(settings.chartSeries) ? settings.chartSeries.filter(x=>BAR3[x]) : ["pt","ck","exp"];
+  if(!on.length) on = ["pt","ck","exp"];
+  let h = `<section class="block stats-block" id="chartBlock"><div class="bh"><h3>Andamento del ${year}: personal, check e spese</h3></div>`;
+  if(hide){ h += `<p class="hint" id="chartHidden">Importi nascosti: tocca “👁 Mostra importi” per vedere il grafico.</p>`; }
+  else {
+    const quick = [["pt","Solo personal",["pt"]],["ck","Solo check",["ck"]],["both","Entrambi",["pt","ck"]]];
+    const cur = on.filter(x=>x !== "exp").sort().join(",");
+    h += `<div class="seg small chart-quick" role="group" aria-label="Cosa vedere">` + quick.map(([id,l,v])=>`<button type="button" class="btn small ${cur === v.slice().sort().join(",") ? "primary" : "ghost"}" data-a="chartQuick" data-v="${id}">${l}</button>`).join("") + `</div>`;
+    h += `<div class="legend" role="group" aria-label="Voci del grafico">` + Object.entries(BAR3).map(([f,x])=>`<label class="lg ${x.cls}"><input type="checkbox" name="chartSeries" value="${f}"${on.includes(f) ? " checked" : ""}><i></i><span>${x.label}</span></label>`).join("") + `</div>`;
+    h += `<div class="chart-wrap">${bars3SVG(ks, val, on)}</div>`;
+    h += `<p class="hint">Tocca una voce della legenda per mostrarla o nasconderla: puoi vedere 1, 2 o tutte e 3 le voci. Le spese sono le spese di gestione.</p>`;
   }
   h += `<details class="calc-note"><summary>Come si calcolano</summary>
     <p class="hint">Le entrate contano nel mese d'inizio del pacchetto, anche se il cliente paga dopo (inizia il 1° ottobre e salda a novembre → ottobre). Le spese contano nel mese in cui le paghi.</p>
@@ -4444,6 +5102,21 @@ function chartsHTML(D, year, hide){
     <b>Da 11 a 15 lezioni</b>: inizio dal 1 al 10 → tutte in quel mese; dall'11 al 19 → metà e metà; dal 20 in poi → 20% e 80% al mese dopo.<br>
     <b>Da 16 lezioni in su</b>: circa 12 lezioni al mese, divise in proporzione ai giorni.</p></details>`;
   return h + periodTableHTML(D, "month", year, hide);
+}
+function bars3SVG(ks, val, on){
+  let max = Math.max(0, ...ks.flatMap(k=>on.map(f=>val(k, f)))); if(!max) max = 1;
+  const GW = 58, W = ks.length * GW + 56, H = 240, top = 18, bot = H - 30, L = 44, y = v => bot - (bot - top) * v / max;
+  let s = `<svg class="ybars" viewBox="0 0 ${W} ${H}" role="img" aria-label="Istogramma dell'anno">`;
+  [max, max / 2].forEach(v=>{ s += `<text x="${L - 6}" y="${y(v) + 4}" class="ax">${esc(shortEur(v, true))}</text>`; });
+  s += `<line x1="${L}" y1="${bot}" x2="${W - 12}" y2="${bot}" class="axis"/>`;
+  const bw = Math.min(14, (GW - 14) / on.length);
+  ks.forEach((k, i)=>{
+    const gx = L + i * GW + (GW - bw * on.length) / 2;
+    on.forEach((f, j)=>{ const v = val(k, f), hh = Math.max(bot - y(v), v ? 1.5 : 0);
+      s += `<rect x="${gx + j * bw}" y="${bot - hh}" width="${bw - 1.5}" height="${hh}" rx="2" class="bar ${BAR3[f].cls}"><title>${esc(monthLabel(k))} · ${BAR3[f].label}: ${esc(money(v))}</title></rect>`; });
+    s += `<text x="${L + i * GW + GW / 2}" y="${H - 10}" class="lab">${MONTHS[i]}</text>`;
+  });
+  return s + `</svg>`;
 }
 function yearBarsSVG(D, ks, on){
   const moneyS = on.filter(f=>SERIES[f].money), ses = on.includes("sessions");
@@ -4498,7 +5171,7 @@ function pieHTML(D, ks, f){
 }
 /* scelta dell'anno */
 async function pickStatsYear(){
-  const D = statsData(), nowY = today().slice(0,4), years = [...new Set([...D.years, nowY])].sort().reverse();
+  const D = statsData(true), nowY = today().slice(0,4), years = [...new Set([...D.years, nowY])].sort().reverse();
   const sel = $("yearPick") ? $("yearPick").dataset.y : nowY;
   $("ypGrid").innerHTML = years.map(y=>{ const inc = round2(MONTHS.reduce((t,_,i)=>t + D.month(`${y}-${String(i+1).padStart(2,"0")}`).income, 0));
     return `<button type="button" class="mp-m${y === sel ? " sel" : ""}${y === nowY ? " now" : ""}" data-y="${y}"><b>${y}</b><span>${money(inc)}</span></button>`; }).join("");
@@ -4551,30 +5224,35 @@ function monthDashHTML(D){
 }
 /* schermata grande per scegliere il mese: 12 riquadri, anni con ‹ ›, e l'importo di ogni mese */
 let pickYear = "";
+let monthTarget = "home";
 function renderMonthGrid(){
-  const D = statsData(), nowK = today().slice(0,7), sel = $("earnPick") ? $("earnPick").dataset.m : nowK;
+  const D = statsData(), nowK = today().slice(0,7), btn = $({ck:"ckMonthPick", prof:"pfMonthPick"}[monthTarget] || "earnPick"), sel = btn ? btn.dataset.m : nowK;
+  const ckInc = k => round2(clients.filter(ckOn).reduce((t,c)=>t + checkIncomeMonths(c).filter(([x])=>x === k).reduce((s,[,v])=>s + v, 0), 0));
   const years = [...new Set([...D.span.map(k=>k.slice(0,4)), nowK.slice(0,4)])].sort();
   if(!years.includes(pickYear)) pickYear = sel.slice(0,4);
   const yi = years.indexOf(pickYear);
   $("mpYear").textContent = pickYear;
   $("mpPrev").disabled = yi <= 0; $("mpNext").disabled = yi >= years.length - 1;
   $("mpGrid").innerHTML = MONTHS_LONG.map((l,i)=>{
-    const k = `${pickYear}-${String(i+1).padStart(2,"0")}`, inc = D.month(k).income, future = k > nowK && !inc;
+    const k = `${pickYear}-${String(i+1).padStart(2,"0")}`, inc = monthTarget === "ck" ? ckInc(k) : D.month(k).income, future = k > nowK && !inc;
     return `<button type="button" class="mp-m${k === sel ? " sel" : ""}${k === nowK ? " now" : ""}" data-m="${k}"${future ? " disabled" : ""}>
       <b>${l.charAt(0).toUpperCase() + l.slice(1)}</b><span>${future ? "—" : hm(inc)}</span></button>`;
   }).join("");
 }
-async function pickMonth(){
-  pickYear = ($("earnPick") ? $("earnPick").dataset.m : today()).slice(0,4);
+async function pickMonth(target){
+  monthTarget = ["ck","prof"].includes(target) ? target : "home";
+  const btn = $({ck:"ckMonthPick", prof:"pfMonthPick"}[monthTarget] || "earnPick");
+  pickYear = (btn ? btn.dataset.m : today()).slice(0,4);
   renderMonthGrid();
   await ask("dlgMonth");
 }
 $("mpPrev").addEventListener("click", ()=>{ pickYear = String(Number(pickYear) - 1); renderMonthGrid(); });
 $("mpNext").addEventListener("click", ()=>{ pickYear = String(Number(pickYear) + 1); renderMonthGrid(); });
-$("mpNow").addEventListener("click", ()=>{ earnSel = ""; $("dlgMonth").close("ok"); render(); });
+$("mpNow").addEventListener("click", ()=>{ if(monthTarget === "ck") ckSel = ""; else if(monthTarget === "prof") profSel = ""; else earnSel = ""; $("dlgMonth").close("ok"); render(); });
 $("mpGrid").addEventListener("click", e=>{
   const b = e.target.closest("button[data-m]"); if(!b || b.disabled) return;
-  earnSel = b.dataset.m === today().slice(0,7) ? "" : b.dataset.m;     // il mese corrente segue il calendario
+  const v = b.dataset.m === today().slice(0,7) ? "" : b.dataset.m;     // il mese corrente segue il calendario
+  if(monthTarget === "ck") ckSel = v; else if(monthTarget === "prof") profSel = v; else earnSel = v;
   $("dlgMonth").close("ok"); render();
 });
 /* riepilogo sotto il grafico: mese per mese (dell'anno scelto) o anno per anno; toccando un anno si aprono i suoi mesi */
@@ -4609,10 +5287,10 @@ document.addEventListener("change", e=>{
   const t = e.target;
   if(t.name === "statsChart"){ settings.statsChart = t.value; saveSettings(); render(); }
   else if(t.name === "pieMetric"){ settings.pieMetric = t.value; saveSettings(); render(); }
-  else if(t.name === "statsSeries"){
-    const on = [...document.querySelectorAll('input[name="statsSeries"]:checked')].map(x=>x.value);
+  else if(t.name === "chartSeries"){
+    const on = [...document.querySelectorAll('input[name="chartSeries"]:checked')].map(x=>x.value);
     if(!on.length){ t.checked = true; return; }                        // almeno una voce resta visibile
-    settings.statsSeries = on; saveSettings(); render();
+    settings.chartSeries = on; saveSettings(); render();
   }
   else if(t.id === "statsSort"){ settings.statsSort = t.value; saveSettings(); render(); }
 });
