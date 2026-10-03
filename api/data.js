@@ -2,18 +2,18 @@
    GET  /api/data?ping=1        -> controlla che tutto sia configurato
    GET  /api/data?since=REV     -> i documenti cambiati dopo REV
    POST /api/data {ops:[{id, data|null}]} -> salva (data) o elimina (null) */
-const {kv, missing, authorized, readJson, send, P} = require("./_kv");
+const {kv, missing, authorized, readJson, send, P, recoveryReady} = require("./kvlib");
 const REV = P + "rev", DOCS = P + "docs";
 
 module.exports = async (req, res) => {
   const q = new URL(req.url, "http://x").searchParams;
   if(req.method === "GET" && q.get("ping")){
     const miss = missing();
-    return send(res, 200, {ok:true, app:"gestionale-pt", configured: miss.length === 0, missing: miss});
+    return send(res, 200, {ok:true, app:"gestionale-pt", configured: miss.length === 0, missing: miss, recovery: recoveryReady()});
   }
   const miss = missing();
   if(miss.length) return send(res, 503, {error:"setup", missing:miss});
-  if(!authorized(req)) return send(res, 401, {error:"login"});
+  if(!(await authorized(req))) return send(res, 401, {error:"login"});
   try{
     if(req.method === "GET"){
       const since = Number(q.get("since")) || 0;
