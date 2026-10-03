@@ -719,6 +719,9 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
 .recap-sec{margin:14px 0 8px;font-size:1.05rem}
 .recap-sec small{display:block;font-weight:400;color:var(--muted);font-size:.85rem;margin-top:2px}
 #recapBlock .hist-h{flex-wrap:wrap;gap:8px}
+.type-legend{margin:6px 4px 10px;font-size:.82rem;color:var(--muted);line-height:1.5}
+.link-inline{border:none;background:none;padding:0;font:inherit;color:var(--moss);font-weight:700;text-decoration:underline;cursor:pointer}
+.ck-cur-type .sub{margin:2px 0 8px}
 </style>
 </head>
 <body>
@@ -1356,9 +1359,19 @@ function normCheck(x){
       check: kind ? true : e.check === true, program: !!e.program, channel: String(e.channel || ""),
       score: Math.max(0, Math.min(5, Math.round(Number(e.score) || 0))), note: String(e.note || ""), weightId: String(e.weightId || "")});
   });
-  return { on: !!x.on, notes: String(x.notes || ""), pkg, pkgs, log,
+  return { on: !!x.on, notes: String(x.notes || ""), pkg, pkgs, log, curType: ckType(x.curType),   // curType: tipo attuale scelto a mano ("" = automatico)
     weights: (Array.isArray(x.weights) ? x.weights : []).filter(w=>w && Number(w.kg) > 0).map(w=>({id: String(w.id || uid()), date: ckDate(w.date), kg: Math.round(Number(w.kg) * 10) / 10})) };
 }
+/* tipo di consulenza ATTUALE del cliente: quello scelto a mano nella cartella, altrimenti quello dell'ultima consulenza con un tipo */
+function currentCkType(c){
+  const k = c && c.check; if(!k) return "";
+  if(ckType(k.curType)) return k.curType;
+  const pks = [k.pkg, ...(k.pkgs || [])].filter(Boolean);
+  const cons = (k.log || []).filter(e=>e.kind === "pkg" || e.kind === "single").sort((x,y)=>(y.date || "").localeCompare(x.date || ""));
+  for(const e of cons){ const t = e.kind === "single" ? e.type : ((pks.find(p=>p.id === e.pkgId)) || {}).type; if(ckType(t)) return t; }
+  return "";
+}
+const autoCkType = c => { const k = c && c.check; if(!k) return ""; const save = k.curType; k.curType = ""; const t = currentCkType(c); k.curType = save; return t; };
 /* pacchetto personal ATTIVO: c'è un pacchetto con sedute non ancora finite (fatte + saltate), anche se non pagato */
 const hasActivePt = c => { const s = stats(c); return s.total > 0 && !s.complete; };
 const ckOn = c => !!(c && c.check && c.check.on);
@@ -1707,18 +1720,19 @@ function checkConsRows(c){
   const k = c.check, num = {};
   [...(k.pkgs || []), ...(k.pkg ? [k.pkg] : [])].forEach(p=>{ k.log.filter(e=>e.kind === "pkg" && e.pkgId === p.id).sort((a,b)=>(a.date||"").localeCompare(b.date||"")).forEach((e,i)=>{ num[e.id] = `${i + 1}/${p.count || "?"}`; }); });
   return [...k.log].filter(e=>e.kind).sort((a,b)=>(a.date||"").localeCompare(b.date||"")).map(e=>[itDate(e.date),
-    e.kind === "pkg" ? `Consulenza del pacchetto ${num[e.id] || ""}` : `Consulenza singola · ${eurDoc(e.amount)}${e.paid ? "" : " (da pagare)"}`]);
+    e.kind === "pkg" ? `Consulenza del pacchetto ${num[e.id] || ""}${(()=>{ const p = [k.pkg, ...(k.pkgs || [])].find(q=>q && q.id === e.pkgId); return p && ckType(p.type) ? ` · ${ckTypeLabel(p.type)}` : ""; })()}`
+      : `Consulenza singola${ckType(e.type) ? ` · ${ckTypeLabel(e.type)}` : ""} · ${eurDoc(e.amount)}${e.paid ? "" : " (da pagare)"}`]);
 }
 function checkPayRows(c){
   const k = c.check;
-  return [...[k.pkg, ...(k.pkgs || [])].filter(Boolean).flatMap(p=>p.payLog.map(x=>({d:x.date, t:`Rata pacchetto${p.start ? ` dal ${itDate(p.start)}` : ""}`, a:x.amount}))),
-    ...ckSingles(k).filter(e=>e.paid).map(e=>({d:e.date, t:"Consulenza singola", a:e.amount}))].sort((x,y)=>(x.d||"").localeCompare(y.d||"")).map(x=>[x.d ? itDate(x.d) : "—", `${eurDoc(x.a)} · ${x.t}`]);
+  return [...[k.pkg, ...(k.pkgs || [])].filter(Boolean).flatMap(p=>p.payLog.map(x=>({d:x.date, t:`Rata pacchetto${p.start ? ` dal ${itDate(p.start)}` : ""}${ckType(p.type) ? ` · ${ckTypeLabel(p.type)}` : ""}`, a:x.amount}))),
+    ...ckSingles(k).filter(e=>e.paid).map(e=>({d:e.date, t:`Consulenza singola${ckType(e.type) ? ` · ${ckTypeLabel(e.type)}` : ""}`, a:e.amount}))].sort((x,y)=>(x.d||"").localeCompare(y.d||"")).map(x=>[x.d ? itDate(x.d) : "—", `${eurDoc(x.a)} · ${x.t}`]);
 }
 function checkFullSections(c){
   const k = c.check, kg = v => String(Number(v).toFixed(1)).replace(".", ",") + " kg";
   const main = [["Servizio check", k.on ? "attivo" : "non attivo"], ...checkRows(c).map(r=>[r[0], r[1]]), ...(k.notes ? [["Note sul cliente e sui check", k.notes]] : [])];
   const cons = checkConsRows(c), pays = checkPayRows(c);
-  const pkgs = [...(k.pkgs || [])].sort((a,b)=>(a.start||"").localeCompare(b.start||"")).map(p=>[`${itDate(p.start)} → ${p.end ? itDate(p.end) : "—"}`, `${ckDoneOf(k, p)} di ${p.count || "—"} consulenze · ${eurDoc(p.price)}`]);
+  const pkgs = [...(k.pkgs || [])].sort((a,b)=>(a.start||"").localeCompare(b.start||"")).map(p=>[`${itDate(p.start)} → ${p.end ? itDate(p.end) : "—"}`, `${ckType(p.type) ? ckTypeLabel(p.type) + " · " : ""}${ckDoneOf(k, p)} di ${p.count || "—"} consulenze · ${eurDoc(p.price)}`]);
   const diary = [...k.log].sort((x,y)=>(x.date||"").localeCompare(y.date||"")).filter(e=>e.program || e.channel || e.score || e.note || !e.kind).map(e=>[itDate(e.date),
     [e.kind === "pkg" ? "consulenza del pacchetto" : e.kind === "single" ? "consulenza singola" : "", e.program ? "programma aggiornato" : "", e.channel, e.score ? `aderenza ${e.score}/5` : "", e.note].filter(Boolean).join(" · ") || "—"]);
   const ws = [...(k.weights || [])].sort((x,y)=>(x.date||"").localeCompare(y.date||"")).map(w=>[itDate(w.date), kg(w.kg)]);
@@ -2954,9 +2968,12 @@ function listHTML(){
       const open = cl.filter(c=>c.check && c.check.pkg && ckDoneOf(c.check, c.check.pkg) < c.check.pkg.count);
       const left = open.reduce((t,c)=>t + c.check.pkg.count - ckDoneOf(c.check, c.check.pkg), 0);
       const withPt = cl.filter(hasActivePt).length;
-      return [["allClients", cl.length, `${cl.length === 1 ? "cliente" : "clienti"} con le consulenze`, "", ""],
+      const tb = {diet:0, plan:0, both:0, none:0}; cl.forEach(c=>{ tb[currentCkType(c) || "none"]++; });
+      const pb = {diet:0, plan:0, both:0, none:0}; open.forEach(c=>{ pb[ckType(c.check.pkg.type) || "none"]++; });
+      const brTxt = o => [["diet","dieta"],["plan","scheda"],["both","dieta + scheda"]].filter(([k])=>o[k]).map(([k,l])=>`${o[k]} ${l}`).join(" · ");
+      return [["allClients", cl.length, `${cl.length === 1 ? "cliente" : "clienti"} con le consulenze`, brTxt(tb), ""],
               ["onlyClients", withPt, `${withPt === 1 ? "cliente" : "clienti"} con anche il personal 1 to 1 attivo`, "pacchetto personal con sedute da fare", ""],
-              ["ptClients", open.length, open.length === 1 ? "pacchetto consulenze in corso" : "pacchetti consulenze in corso", "", ""],
+              ["ptClients", open.length, open.length === 1 ? "pacchetto consulenze in corso" : "pacchetti consulenze in corso", brTxt(pb), ""],
               ["dueClients", dc.length, dc.length === 1 ? "cliente da regolarizzare" : "clienti da regolarizzare", "consulenze", dc.length ? "c-owed" : ""],
               ["ptLeft", left, left === 1 ? "consulenza da fare" : "consulenze da fare", "nei pacchetti in corso", ""],
               ["dueCell", hm(round2(clients.reduce((t,c)=>t + checkDue(c), 0))), "da incassare", "quote delle consulenze non saldate", "c-owed"]]; })()
@@ -2973,7 +2990,7 @@ function listHTML(){
   <div class="dash dash-gen" id="dashGen" aria-label="Situazione generale">
     <div class="dash-title"><span class="dt-ico" aria-hidden="true">📊</span><b>Generale</b>${sc !== "all" ? `<span>${sc === "pt" ? "solo personal 1 to 1" : "solo consulenze"}</span>` : ""}</div>
     ${G.map(([id, v, lab, sm, cls])=>`<div class="dc ${cls}" id="${id}"><b>${v}</b><span>${lab}</span>${sm ? `<small>${sm}</small>` : ""}</div>`).join("\n    ")}
-  </div>
+  </div>${sc === "ck" ? (()=>{ const miss = clients.filter(c=>usesCk(c) && !currentCkType(c)); return miss.length ? `<p class="type-legend" id="ckTypeLegend">⚠ ${miss.length === 1 ? "1 cliente senza" : `${miss.length} clienti senza`} tipo di consulenza: ${miss.map(c=>`<button type="button" class="link-inline" data-a="openSide" data-side="ck" data-id="${esc(c.id)}">${esc(c.name)}</button>`).join(", ")} — sceglilo nella cartella.</p>` : ""; })() : ""}
   ${monthDashHTML(SD)}
   <div class="searchbar" role="search">
     <input class="search" id="search" type="search" enterkeyhint="search" placeholder="Cerca un cliente…" value="${esc(query)}" aria-label="Cerca un cliente" autocomplete="off">
@@ -3184,6 +3201,12 @@ function checkDetailHTML(c){
       <button type="button" class="btn ghost more-btn" data-a="moreActs" aria-expanded="${actsOpen}">${actsOpen ? "▴ Meno" : "⋯ Altro"}</button>
     </div>
   </div>`;
+  // ---- tipo di consulenza attuale del cliente (per la tabella Generale)
+  { const auto = autoCkType(c), man = ckType(c.check.curType);
+    h += `<section class="block ck-cur-type" id="ckCurTypeBlock"><h3>Tipo di consulenza del cliente</h3>
+      <p class="sub">Conta nella tabella Generale. In automatico è quello dell'ultima consulenza${auto ? ` (ora: <b>${CK_ICON[auto]} ${ckTypeLabel(auto)}</b>)` : " (nessun tipo ancora scelto)"}; puoi sceglierlo tu a mano. I mesi passati restano come erano.</p>
+      <div class="ck-type-row">${[["", `🔄 Automatico${auto ? ` (${ckTypeLabel(auto).toLowerCase()})` : ""}`], ...Object.keys(CK_TYPES).map(t=>[t, `${CK_ICON[t]} ${ckTypeLabel(t)}`])].map(([v, l])=>
+        `<button type="button" class="btn small ${man === v ? "primary" : "ghost"}" data-a="ckCurType" data-v="${v}" aria-pressed="${man === v}">${l}</button>`).join("")}</div></section>`; }
   // ---- pacchetto in corso e pagamenti (campi modificabili)
   h += `<section class="block" id="ckPkgBlock"><h3>Pacchetto consulenze in corso e pagamenti</h3>`;
   if(!p) h += `<p class="none">Nessun pacchetto in corso. Premi “Nuovo pacchetto consulenze” per crearne uno, oppure segna una consulenza singola.</p>`;
@@ -4506,6 +4529,7 @@ async function handle(a, el){
     }
     case "ckSinglePaid": { if(c) ckSave(c.id, kk=>{ const e = kk.log.find(x=>x.id === el.dataset.id); if(e) e.paid = true; }, "Consulenza singola pagata"); return; }
     case "ckNewPkg": return c && ckNewPkg(c.id);
+    case "ckCurType": { if(!c) return; const v = ckType(el.dataset.v); ckSave(c.id, kk=>{ kk.curType = v; }, v ? `Tipo del cliente: ${ckTypeLabel(v)} (scelto a mano)` : "Tipo del cliente: automatico"); return; }
     case "ckPkgType": { if(!c) return; const v = ckType(el.dataset.v); ckSave(c.id, kk=>{ if(kk.pkg) kk.pkg.type = v; }, v ? `Tipo del pacchetto: ${ckTypeLabel(v)}` : "Tipo del pacchetto tolto"); return; }
     case "wAdd": return c && wAdd(c.id);
     case "wEdit": return c && wAdd(c.id, el.dataset.id);
