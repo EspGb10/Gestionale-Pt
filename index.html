@@ -86,8 +86,8 @@ a.btn[hidden]{display:none}
 .dash{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:12px}
 .dash + .dash{margin-bottom:24px}
 /* pagina principale: Generale ha 5 valori, il mese 4 → il titolo del mese occupa 2 spazi e le colonne restano allineate */
-.dash.dash-gen:not(.dash6),.dash.dash-month:not(.dash6){grid-template-columns:repeat(6,1fr)}
-.dash.dash-month:not(.dash6) > .dash-title{grid-column:span 2}
+.dash.dash-gen:not(.dash6),.dash.dash-month:not(.dash6){grid-template-columns:repeat(7,1fr)}   /* titolo + 6 valori, colonne allineate */
+
 .dash.dash-gen:not(.dash6) .dc b,.dash.dash-month:not(.dash6) .dc b{font-size:1.6rem}
 @media (max-width:1100px){ .dash.dash-gen:not(.dash6) .dc b,.dash.dash-month:not(.dash6) .dc b{font-size:1.35rem} .dash.dash-gen:not(.dash6) > *,.dash.dash-month:not(.dash6) > *{padding:12px 10px} }
 @media (max-width:860px){ .dash.dash-gen:not(.dash6) .dc b,.dash.dash-month:not(.dash6) .dc b{font-size:1.6rem} }
@@ -114,7 +114,6 @@ a.btn[hidden]{display:none}
 @media (max-width:860px){
   .dash,.dash.dash-gen:not(.dash6),.dash.dash-month:not(.dash6){grid-template-columns:repeat(2,1fr)}
   .dash.dash-month:not(.dash6) > .dash-title{grid-column:1/-1}
-  .dash.dash-gen:not(.dash6) > .dc:last-child{grid-column:1/-1}
   .dash > *{min-height:96px;padding:12px}
   .dash .dash-title{grid-column:1/-1;min-height:0;flex-direction:row;align-items:baseline;justify-content:flex-start;flex-wrap:wrap;gap:4px 10px;padding:10px 12px}
   .dash .dc b{font-size:1.6rem}
@@ -185,7 +184,7 @@ svg.pie .slice{stroke:var(--paper);stroke-width:1}
 .pl-tot{margin:0;font-weight:600}
 .calc-note{margin:8px 0}
 .calc-note summary{cursor:pointer;font-weight:600;color:var(--moss)}
-#cKindW[hidden],#cSesW[hidden]{display:none}
+#docsExpW[hidden],#cKindW[hidden],#cSesW[hidden]{display:none}
 .per-ses{margin:2px 0 6px;color:var(--muted);font-size:.95rem}
 .per-ses b{color:var(--moss)}
 .hist-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
@@ -274,7 +273,7 @@ body[data-view="list"] .wrap,body[data-view="stats"] .wrap{max-width:1400px}
   .dash.dash-gen:not(.dash6) .dc b,.dash.dash-month:not(.dash6) .dc b{font-size:clamp(1.45rem, 1.1rem + 1.2vw, 1.8rem)}
 }
 @media (min-width:861px){
-  .dash.dash-gen:not(.dash6) .dc b,.dash.dash-month:not(.dash6) .dc b{font-size:clamp(1.3rem, .7rem + 1.05vw, 2rem)}
+  .dash.dash-gen:not(.dash6) .dc b,.dash.dash-month:not(.dash6) .dc b{font-size:clamp(1.2rem, .6rem + 1.05vw, 1.9rem)}
 }
 .seg.seg-wrap{flex-wrap:wrap;height:auto;min-height:0;row-gap:6px;align-content:flex-start}
 .seg.seg-wrap > label{margin:0 !important;flex:1 1 auto}
@@ -502,6 +501,24 @@ button.x.ed{color:var(--moss)}
 .folder .alert{display:block;margin-top:8px;font-size:.8rem;font-weight:700;color:var(--owed)}
 .alert-box{background:var(--owed-soft);color:var(--pine);border-left:4px solid var(--owed);border-radius:8px;padding:8px 12px;margin:0 0 12px;font-size:.92rem;font-weight:600}
 .title-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.more-btn{display:none}
+@media (max-width:640px){
+  .head-actions:not(.open) .sec{display:none}               /* telefono: i tasti meno usati sotto “⋯ Altro” */
+  .head-actions .more-btn{display:inline-flex;align-items:center;justify-content:center}
+}
+.dash-bar{display:flex;align-items:center;justify-content:space-between;gap:8px 12px;flex-wrap:wrap;margin:6px 0 8px}
+.dash-bar .money-eye{margin:0}
+.scope-sw{display:flex;gap:4px;padding:3px;border-radius:999px;background:var(--paper);border:1px solid var(--line);flex-wrap:wrap}
+.scope-sw .fsw-b{min-height:36px;padding:0 14px;border:none;border-radius:999px;background:none;color:var(--pine);font:inherit;font-size:.86rem;font-weight:700;cursor:pointer;white-space:nowrap}
+.scope-sw .fsw-b.on{background:var(--moss);color:var(--on-moss)}
+@media (max-width:420px){ .scope-sw{width:100%} .scope-sw .fsw-b{flex:1;padding:0 6px;font-size:.8rem} }
+.exp-area{margin:2px 0 6px}
+.miss-st.area-pt{background:var(--moss-soft);color:var(--moss);border-color:var(--moss)}
+.miss-st.area-ck{background:#E8EEF9;color:#2D5BA8;border-color:#9BB5E3}
+header.top{position:relative}
+header.top.has-logout .title-row{padding-right:82px}            /* spazio per “Esci”: non copre mai “⚙ Dati” */
+.logout-btn{position:absolute;top:0;right:0;font-size:.8rem;font-weight:700;padding:4px 12px;min-height:32px;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--muted);cursor:pointer}
+.logout-btn:hover,.logout-btn:focus-visible{color:var(--danger);border-color:var(--danger)}
 .data-btn{font-size:.8rem;font-weight:600;padding:4px 11px;min-height:32px;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--pine);cursor:pointer;opacity:.85}
 .data-btn:hover{opacity:1;border-color:var(--pine)}
 .docs-head{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-top:14px}
@@ -686,6 +703,12 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
   .head-actions .btn{flex:1 1 auto}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (max-width:360px){ dialog .seg{flex-wrap:wrap;row-gap:6px} dialog .seg > label{flex:1 1 auto;margin:0} }
+/* tabella Generale: la descrizione di ogni riquadro tutta della stessa grandezza (i numeri restano grandi) */
+#dashGen .dc span,#dashGen .dc small{font-size:clamp(.86rem, .8rem + .18vw, 1rem);color:var(--muted);line-height:1.3;font-weight:400}
+.link-btn{display:block;margin:14px auto 0;padding:8px 10px;border:none;background:none;color:var(--moss);font:inherit;font-size:.92rem;font-weight:700;text-decoration:underline;cursor:pointer}
+#forgotMsg:empty{display:none}
+#forgotMsg{margin-top:8px;text-align:center}
 </style>
 </head>
 <body>
@@ -741,11 +764,11 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
     </div>
     <p class="ck-per" id="ckPer"></p>
     <label for="ckNotes">Note sul cliente e sui check (facoltativo)</label>
-    <textarea id="ckNotes" rows="3" placeholder="Informazioni sul cliente, obiettivi, cadenza dei check, feedback…"></textarea>
+    <textarea id="ckNotes" rows="3" placeholder="Informazioni sul cliente, obiettivi, cadenza delle consulenze, feedback…"></textarea>
     <fieldset class="today-box" id="ckTodayW">
       <legend>Vuoi segnare qualcosa di oggi? <small>(tutto facoltativo: se lasci vuoto non viene segnato niente)</small></legend>
       <label for="fkDate">Data</label><input id="fkDate" type="date">
-      <label class="check carry"><input type="checkbox" id="fkCheck"><span>✓ Check fatto</span></label>
+      <label class="check carry"><input type="checkbox" id="fkCheck"><span>✓ Consulenza fatta</span></label>
       <label class="check carry"><input type="checkbox" id="fkProg"><span>📄 Programma aggiornato</span></label>
       <div class="two"><div><label for="fkKg">Peso (kg)</label><input id="fkKg" type="text" autocomplete="off" placeholder="es. 78,5"></div>
         <div><label for="fkChan">Canale</label><select id="fkChan"><option value="">—</option><option>WhatsApp</option><option>Videochiamata</option><option>In presenza</option><option>Telefono</option><option>Email</option></select></div></div>
@@ -796,6 +819,7 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
   <div class="seg"><label><input type="radio" name="docsFmt" value="docx" checked><span>Word</span></label><label><input type="radio" name="docsFmt" value="pdf"><span>PDF</span></label></div>
   <div class="docs-head"><label>Clienti</label><span><button type="button" class="btn small ghost" id="docsAll">Tutti</button> <button type="button" class="btn small ghost" id="docsNone">Nessuno</button></span></div>
   <div class="checks" id="docsList"></div>
+  <label class="check carry" id="docsExpW"><input type="checkbox" id="docsExp" checked><span>💸 Includi le spese di gestione <small>(un file con tutte le spese: data, voce, tipo e attività)</small></span></label>
   <p class="hint" id="docsHint"></p>
   <p class="err" id="docsErr" role="alert"></p>
   <div class="dlg-actions">
@@ -808,8 +832,11 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
   <h3 id="expTitle">Nuova spesa</h3>
   <label for="xName">Nome della spesa</label>
   <input id="xName" autocomplete="off" placeholder="es. Affitto sala, Struttura, Assicurazione">
+  <label>A quale attività si riferisce?</label>
+  <div class="seg seg-wrap"><label><input type="radio" name="xArea" value="all" checked><span>⚖️ Entrambi</span></label><label><input type="radio" name="xArea" value="pt"><span>🏋️ Personal</span></label><label><input type="radio" name="xArea" value="ck"><span>📋 Consulenze</span></label></div>
+  <p class="hint">“Entrambi”: conta sia nel personal sia nelle consulenze, e una volta sola nel totale.</p>
   <label>Ogni quanto si paga</label>
-  <div class="seg"><label><input type="radio" name="xKind" value="monthly" checked><span>Mensile</span></label><label><input type="radio" name="xKind" value="yearly"><span>Annuale</span></label><label><input type="radio" name="xKind" value="once"><span>Una tantum</span></label></div>
+  <div class="seg seg-wrap"><label><input type="radio" name="xKind" value="monthly" checked><span>Mensile</span></label><label><input type="radio" name="xKind" value="yearly"><span>Annuale</span></label><label><input type="radio" name="xKind" value="once"><span>Una tantum</span></label></div>
   <p class="hint" id="xKindHint"></p>
   <div class="two">
     <div><label for="xAmount" id="xAmountL">Importo (€ al mese)</label><input id="xAmount" type="text" autocomplete="off" placeholder="es. 300"></div>
@@ -884,7 +911,7 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
 </form></dialog>
 
 <dialog id="dlgCkLog"><form method="dialog" id="fCkLog">
-  <h3 id="clTitle">Segna check fatto</h3>
+  <h3 id="clTitle">Segna consulenza</h3>
   <p class="hint">Tutto facoltativo: segna solo quello che ti serve. Si può modificare o cancellare quando vuoi.</p>
   <label>Che cosa segni</label>
   <div class="seg seg-wrap" id="clTypeW"><label><input type="radio" name="clType" value="pkg" checked><span>📦 Consulenza del pacchetto</span></label><label><input type="radio" name="clType" value="single"><span>💶 Consulenza singola</span></label><label><input type="radio" name="clType" value="none"><span>📝 Solo diario</span></label></div>
@@ -1614,6 +1641,25 @@ async function buildDocx(c, JSZip){
 }
 async function buildClientDocx(c, JSZip, o){ return zipDocx(docxParts(docxClientBody(c, o), "Riepilogo per " + c.name, "Riepilogo " + c.name, "PTCLIENT"), JSZip); }
 
+/* ===== file “Spese di gestione” (backup): tabella leggibile + tutti i dati per il ripristino ===== */
+function expDocRows(rows){ return rows.map(r=>[r.date ? itDate(r.date) : "—", r.name, r.kind, r.area, eurDoc(r.amount)]); }
+async function buildExpDocx(rows, data, JSZip){
+  const W = DC.W, wd = [1500, 3000, 1500, 1800, W-7800];
+  const tr = [dHeadRow(["Data","Voce","Tipo","Attività","Importo"], wd)];
+  expDocRows(rows).forEach(r=>tr.push(wRow(r.map((v,i)=>wCell(wPara(wRun(v)), wd[i])))));
+  let body = dHeader("SPESE DI GESTIONE", "Tutte le spese pagate", "Aggiornato al " + itDate(today()));
+  body += dHeading("Spese pagate") + (rows.length ? wTable(tr, wd) : dEmpty("Nessuna spesa pagata."));
+  return zipDocx(docxParts(body, "Spese di gestione", "Spese di gestione", "PTSPESE1", "PTSPESE1:" + b64enc(JSON.stringify(data))), JSZip);
+}
+function buildExpPdf(rows, data, jsPDF){
+  const K = pdfKit(jsPDF);
+  K.header("SPESE DI GESTIONE", "Tutte le spese pagate", "Aggiornato al " + itDate(today()));
+  K.heading("Spese pagate");
+  if(rows.length) K.expTable(expDocRows(rows)); else K.empty("Nessuna spesa pagata.");
+  K.footer("Spese di gestione");
+  K.doc.setProperties({title:"Spese di gestione", subject:"PTSPESE1:" + b64enc(JSON.stringify(data)), creator:"Gestionale Personal Trainer"});
+  return K.doc;
+}
 /* ===== sezione CHECK della scheda completa (per te): pacchetti, consulenze, pagamenti, pesi ===== */
 const hasCheckData = c => !!(c.check && (c.check.on || checkPaidTotal(c) > 0 || ckHasData(c.check)));
 const MESI_DOC = ["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
@@ -1652,7 +1698,7 @@ function checkFullSections(c){
     [e.kind === "pkg" ? "consulenza del pacchetto" : e.kind === "single" ? "consulenza singola" : "", e.program ? "programma aggiornato" : "", e.channel, e.score ? `aderenza ${e.score}/5` : "", e.note].filter(Boolean).join(" · ") || "—"]);
   const ws = [...(k.weights || [])].sort((x,y)=>(x.date||"").localeCompare(y.date||"")).map(w=>[itDate(w.date), kg(w.kg)]);
   return [["Check", main], ...(cons.length ? [["Storico consulenze", cons]] : []), ...(pays.length ? [["Pagamenti check", pays]] : []),
-    ...(pkgs.length ? [["Pacchetti di consulenze passati", pkgs]] : []), ...(diary.length ? [["Diario dei check", diary]] : []), ...(ws.length ? [["Storico peso", ws]] : [])];
+    ...(pkgs.length ? [["Pacchetti di consulenze passati", pkgs]] : []), ...(diary.length ? [["Diario (peso, programma, note)", diary]] : []), ...(ws.length ? [["Storico peso", ws]] : [])];
 }
 /* ===== Riepilogo del CHECK per il cliente (Word e PDF) ===== */
 function docxCheckBody(c, o){
@@ -1788,6 +1834,7 @@ function pdfKit(jsPDF){
     else K.table([{t:"N°",w:14,muted:true},{t:"Data",w:CW-14}], list.map((x,i)=>[String(i+1), itDate(x.date)]));
   };
   K.pkgHistory = c => K.table([{t:"Inizio",w:45},{t:"Fine",w:45},{t:"Sedute",w:30},{t:"Costo del pacchetto",w:CW-120}], pkgHistory(c).map(r=>[itDate(r.start), r.end ? itDate(r.end) : (r.current ? "in corso" : "—"), String(r.total), eurDoc(r.price)]));
+  K.expTable = rows => K.table([{t:"Data",w:24},{t:"Voce",w:58},{t:"Tipo",w:26},{t:"Attività",w:34},{t:"Importo",w:CW-142}], rows);
   K.misses = c => K.table([{t:"Data",w:40},{t:"Esito",w:CW-40}], missSorted(c).map(x=>[itDate(x.date), MISS_DOC.lost]));
   K.payments = c => {
     if(!c.payLog.length) return K.empty("Nessun pagamento registrato nello storico.");
@@ -2072,10 +2119,15 @@ function saveLocal(){
 const SYNC_KEYS = {token:"gpt_token", cache:"gpt_sync_cache", out:"gpt_sync_out", lock:"gpt_lock"};
 /* Accesso: la chiave resta solo finché l'app è aperta (sessionStorage) → la password si chiede a ogni apertura.
    Sul dispositivo resta solo un'“impronta” della chiave, per aprire l'app anche senza internet. */
-const LOCK_AFTER_MS = 5 * 60 * 1000;                                       // in background più di 5 minuti → si richiede la password
 const sessGet = () => { try{ return sessionStorage.getItem(SYNC_KEYS.token); }catch(_){ return null; } };
 const sessSet = t => { try{ sessionStorage.setItem(SYNC_KEYS.token, t); }catch(_){} };
 const sessDel = () => { try{ sessionStorage.removeItem(SYNC_KEYS.token); }catch(_){} };
+/* chiamata POST al server: [stato, risposta]; -1 = niente internet */
+async function postApi(url, body){
+  try{ const res = await fetch(url, {method:"POST", cache:"no-store", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)});
+    return [res.status, await res.json().catch(()=>null)]; }catch(_){ return [-1, null]; }
+}
+const pl = (n, one, many) => `${n} ${Number(n) === 1 ? one : many}`;          // “1 seduta”, “3 sedute”
 async function sha256hex(s){
   try{ if(!(window.crypto && crypto.subtle && window.TextEncoder)) return null;
     const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
@@ -2187,10 +2239,11 @@ async function fetchJson(url, ms){
 /* è la versione su Vercel? (su GitHub Pages o aperto come file il gestionale resta “in questo browser”) */
 async function detectSync(){
   if(!/^https?:$/.test(location.protocol)) return false;
-  // versione vecchia: la chiave era salvata per sempre → diventa solo un'impronta, e da ora si chiede la password
-  let old = null; try{ old = localStorage.getItem(SYNC_KEYS.token); }catch(_){}
-  if(old){ const v = await lockOf(old); try{ if(v) localStorage.setItem(SYNC_KEYS.lock, v); localStorage.removeItem(SYNC_KEYS.token); }catch(_){} }
-  const token = sessGet();
+  const rc = new URLSearchParams(location.search).get("reset");          // arrivo dal link dell'email
+  if(rc){ showReset(rc); return true; }
+  // il dispositivo resta collegato finché non premi “Esci” (la chiave è salvata qui; dopo “Esci” resta solo l'impronta)
+  let token = null; try{ token = localStorage.getItem(SYNC_KEYS.token); }catch(_){}
+  if(!token) token = sessGet();
   let hasCache = false, hasLock = false; try{ hasCache = !!localStorage.getItem(SYNC_KEYS.cache); hasLock = !!localStorage.getItem(SYNC_KEYS.lock); }catch(_){}
   if(token && hasCache){ startSync(token); return true; }                    // stessa apertura (pagina ricaricata): parte subito
   if(hasLock && hasCache){ showLogin(""); return true; }                     // app già usata qui: chiede la password, anche senza internet
@@ -2220,7 +2273,7 @@ function showLogin(msg){
     <div class="pw-wrap"><input id="loginPw" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false">
       <button type="button" class="pw-eye" id="pwEye" aria-label="Mostra la password" aria-pressed="false" title="Mostra la password">${EYE_OPEN}</button></div>
     <p class="err" id="loginErr" role="alert"></p>
-    <button class="btn primary" id="loginBtn" type="submit">Accedi</button></form>`;
+    <button class="btn primary" id="loginBtn" type="submit">Accedi</button><button type="button" class="link-btn" id="forgotBtn">Password dimenticata?</button><p class="sub" id="forgotMsg" role="status"></p></form>`;
   $("loginForm").addEventListener("submit", async e=>{
     e.preventDefault();
     const pw = $("loginPw").value; if(!pw){ $("loginErr").textContent = "Scrivi la password."; return; }
@@ -2229,17 +2282,27 @@ function showLogin(msg){
     try{ const res = await fetch("api/login", {method:"POST", cache:"no-store", headers:{"Content-Type":"application/json"}, body:JSON.stringify({password:pw})}); code = res.status; r = await res.json().catch(()=>null); }catch(_){ code = -1; }
     $("loginBtn").disabled = false;
     if(code === 200 && r && r.token){
-      sessSet(r.token);
+      sessSet(r.token); try{ localStorage.setItem(SYNC_KEYS.token, r.token); }catch(_){}
       const v = await lockOf(r.token); try{ if(v) localStorage.setItem(SYNC_KEYS.lock, v); }catch(_){}
       startSync(r.token); render(); return;
     }
     if(code === -1){                                                       // senza internet: la password si verifica sul dispositivo
       let saved = null; try{ saved = localStorage.getItem(SYNC_KEYS.lock); }catch(_){}
       const t = await tokenOf(pw), v = t && await lockOf(t);
-      if(saved && v && v === saved){ sessSet(t); startSync(t); render(); return; }
+      if(saved && v && v === saved){ sessSet(t); try{ localStorage.setItem(SYNC_KEYS.token, t); }catch(_){} startSync(t); render(); return; }
       if(saved && v){ $("loginErr").textContent = "Password sbagliata."; return; }
     }
     $("loginErr").textContent = code === 401 ? "Password sbagliata." : code === 429 ? "Troppi tentativi sbagliati: riprova tra 15 minuti." : code === -1 ? "Non riesco a collegarmi: controlla internet e riprova." : "Il database non risponde: riprova tra poco.";
+  });
+  $("forgotBtn").addEventListener("click", async ()=>{               // “Password dimenticata?”: email con il link
+    const m = $("forgotMsg"); m.className = "sub"; m.textContent = "Invio in corso…"; $("forgotBtn").disabled = true;
+    const [code, r] = await postApi("api/recover", {action:"request"});
+    $("forgotBtn").disabled = false;
+    if(code === 200) m.innerHTML = `✉️ Ti ho mandato un'email a <b>${esc(r.to || "")}</b> con il link per scegliere una nuova password. Il link vale <b>30 minuti</b>. Se non la trovi, guarda anche nello spam.`;
+    else if(code === 429) m.textContent = "Ti ho appena mandato un'email: aspetta un paio di minuti prima di chiederne un'altra (controlla anche lo spam).";
+    else if(code === 503 && r && r.error === "not_configured") m.textContent = "Il recupero via email non è ancora attivo. Si attiva una volta sola dalle impostazioni del progetto su Vercel (RESEND_API_KEY e RECOVERY_EMAIL). Intanto puoi vedere o cambiare la password su Vercel: Settings → Environment Variables → APP_PASSWORD.";
+    else if(code === -1) m.textContent = "Serve internet per mandarti l'email. Riprova quando sei collegato.";
+    else { m.className = "err"; m.textContent = "Non sono riuscito a mandare l'email. Riprova tra poco."; }
   });
   $("pwEye").addEventListener("click", ()=>{                            // occhietto: mostra / nasconde la password
     const i = $("loginPw"), show = i.type === "password";
@@ -2250,13 +2313,51 @@ function showLogin(msg){
   });
   setTimeout(()=>{ const i = $("loginPw"); if(i) i.focus(); }, 50);
 }
-/* in background per più di 5 minuti → alla riapertura si richiede la password */
-{ let hiddenAt = 0;
-  document.addEventListener("visibilitychange", ()=>{
-    if(store.mode !== "sync") return;
-    if(document.hidden){ hiddenAt = Date.now(); return; }
-    if(hiddenAt && Date.now() - hiddenAt > LOCK_AFTER_MS){ sessDel(); location.reload(); }
-  }); }
+function showReset(code){
+  if(window.__oldBrowser) return;
+  store.mode = "sync-login";
+  const pwField = (id, lab) => `<label for="${id}">${lab}</label><div class="pw-wrap"><input id="${id}" type="password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <button type="button" class="pw-eye" data-eye="${id}" aria-label="Mostra la password" aria-pressed="false">${EYE_OPEN}</button></div>`;
+  $("app").innerHTML = `<form class="login" id="resetForm"><h1>Gestionale PT</h1>
+    <p class="sub">Scegli la nuova password (almeno 6 caratteri). Varrà su tutti i tuoi dispositivi.</p>
+    ${pwField("resetPw", "Nuova password")}${pwField("resetPw2", "Ripeti la nuova password")}
+    <p class="err" id="resetErr" role="alert"></p>
+    <button class="btn primary" id="resetBtn">Salva la nuova password</button></form>`;
+  document.querySelectorAll("#resetForm .pw-eye").forEach(b=>b.addEventListener("click", ()=>{
+    const i = $(b.dataset.eye), show = i.type === "password"; i.type = show ? "text" : "password";
+    b.innerHTML = show ? EYE_SHUT : EYE_OPEN; b.setAttribute("aria-pressed", String(show)); b.setAttribute("aria-label", show ? "Nascondi la password" : "Mostra la password"); i.focus(); }));
+  $("resetForm").addEventListener("submit", async e=>{
+    e.preventDefault();
+    const p1 = $("resetPw").value, p2 = $("resetPw2").value, err = $("resetErr");
+    if(p1.length < 6){ err.textContent = "La password deve avere almeno 6 caratteri."; return; }
+    if(p1 !== p2){ err.textContent = "Le due password non sono uguali."; return; }
+    $("resetBtn").disabled = true; err.textContent = "";
+    const [code2, r] = await postApi("api/recover", {action:"reset", code, password:p1});
+    $("resetBtn").disabled = false;
+    if(code2 === 200 && r && r.token){
+      try{ history.replaceState(null, "", location.pathname); }catch(_){}
+      sessSet(r.token); try{ localStorage.setItem(SYNC_KEYS.token, r.token); }catch(_){}
+      const v = await lockOf(r.token); try{ if(v) localStorage.setItem(SYNC_KEYS.lock, v); }catch(_){}
+      startSync(r.token); render();
+      toast("Password cambiata. Sugli altri dispositivi entra con la nuova password.");
+      return;
+    }
+    if(code2 === -1){ err.textContent = "Serve internet per salvare la nuova password."; return; }
+    err.innerHTML = r && r.error === "short" ? "La password deve avere almeno 6 caratteri."
+      : `Il link non è più valido (scaduto, già usato o sbagliato). <a href="${esc(location.pathname)}">Torna all'accesso</a> e chiedi una nuova email con “Password dimenticata?”.`;
+  });
+  setTimeout(()=>{ const i = $("resetPw"); if(i) i.focus(); }, 50);
+}
+/* “Esci”: esce dal gestionale su questo dispositivo; al rientro chiede la password (i dati restano, anche senza internet) */
+async function appLogout(){
+  if(store.mode !== "sync") return;
+  const n = sync ? sync.pending : 0;
+  if(!(await messageBox("Sei sicuro di voler uscire dal gestionale?",
+    (n ? `Attenzione: ${n} ${n === 1 ? "modifica non è ancora arrivata" : "modifiche non sono ancora arrivate"} al database (sei offline?). Partiranno quando rientri.\n\n` : "") +
+    "Al prossimo accesso ti verrà chiesta la password. I tuoi dati restano al sicuro.", {ok:"Sì, esci", cancel:"No, rimani"}))) return;
+  sessDel(); try{ localStorage.removeItem(SYNC_KEYS.token); }catch(_){}
+  location.reload();
+}
 async function syncLogout(){
   if(store.mode !== "sync") return;
   const n = sync ? sync.pending : 0;
@@ -2716,9 +2817,10 @@ function checkCardHTML(c){
     const d = ckDoneOf(k, p), paid = ckPaidOf(p), due = Math.max(round2(p.price - paid), 0);
     return `<span class="pk">📋 Check · pacchetto${p.start ? ` dal ${itDate(p.start)}` : ""}</span>
       ${p.count ? dotsHTML(Math.min(d, p.count), p.count, 20, false) : ""}
-      <span class="row"><span>Consulenze</span><strong>${d} su ${p.count}</strong></span>
+      <span class="row"><span>Consulenze</span><strong>${d} su ${p.count}${p.count && d > p.count ? " ⚠" : ""}</strong></span>
       ${payBarHTML({price:p.price, paid, due})}
-      <span class="row"><span>Da saldare</span><strong class="${due > 0 ? "due" : ""}">${hm(due)}</strong></span>`;
+      ${p.price > 0 && round2(paid - p.price) > 0.004 ? `<span class="row"><span>Credito</span><strong>${hm(round2(paid - p.price))}</strong></span>`
+        : `<span class="row"><span>Da saldare</span><strong class="${due > 0 ? "due" : ""}">${hm(due)}</strong></span>`}`;
   }
   if(sg.length){
     const last = sg.map(e=>e.date).filter(Boolean).sort().pop(), unpaid = round2(sg.filter(e=>!e.paid).reduce((t,e)=>t + e.amount, 0));
@@ -2785,8 +2887,8 @@ function listHTML(){
   const found = clients.filter(c=>nameMatches(c.name, q));
   const list = found.filter(FILTERS[listFilter] ? FILTERS[listFilter].test : ()=>true).sort((a,b)=>a.name.localeCompare(b.name,"it"));
 
-  let h = `<header class="top">
-    <div><div class="title-row"><h1>I miei clienti</h1><button class="data-btn" data-a="dataMenu" title="Esporta o importa i dati del programma" aria-label="Dati del programma: esporta o importa">⚙ Dati</button></div><p>Sedute one to one e pagamenti, una cartella per persona.</p>
+  let h = `<header class="top${store.mode === "sync" ? " has-logout" : ""}">
+    <div><div class="title-row"><h1>I miei clienti</h1><button class="data-btn" data-a="dataMenu" title="Esporta o importa i dati del programma" aria-label="Dati del programma: esporta o importa">⚙ Dati</button>${store.mode === "sync" ? `<button class="logout-btn" data-a="logout" id="logoutBtn" title="Esci dal gestionale" aria-label="Esci dal gestionale">⎋ Esci</button>` : ""}</div><p>Sedute one to one e pagamenti, una cartella per persona.</p>
     <div id="saveStatus" class="status ${store.status==="ok"?"":store.status}">${esc(statusText())}</div></div>
     <div class="actions">
       <button class="btn ghost" data-a="import">Importa documenti</button>
@@ -2809,14 +2911,40 @@ function listHTML(){
   const nPt = clients.filter(c=>c.personal !== false).length;                  // chi fa personal (anche se fa anche check)
   const SD = statsData();                                           // una volta sola per il riquadro del mese
   const hid = !!settings.homeHideMoney;
-  h += alertsPanelHTML() + `<div class="money-eye"><button type="button" class="eye-btn" id="moneyEye" data-a="toggleHomeMoney" aria-pressed="${hid}" title="${hid ? "Mostra gli importi" : "Nascondi gli importi"}">${hid ? "🙈" : "👁"}<span>${hid ? "Mostra importi" : "Nascondi importi"}</span></button></div>
+  // ---- filtro: Totale / Personal 1 to 1 / Consulenze (agisce su “Generale” e sul mese)
+  const sc = homeScope();
+  const ptDueOf = c => round2(Math.max(stats(c).due, 0) + c.packages.reduce((t,p)=>t + Math.max(stats(pkgClient(c,p)).due, 0), 0));
+  const G = sc === "pt" ? (()=>{ const cl = clients.filter(c=>c.personal !== false), dc = clients.filter(c=>ptDueOf(c) > 0);
+      const only = cl.filter(c=>!ckOn(c)).length;
+      return [["allClients", cl.length, `${cl.length === 1 ? "cliente" : "clienti"} personal 1 to 1`, "", ""],
+              ["onlyClients", only, `${only === 1 ? "cliente" : "clienti"} solo personal`, "senza consulenze", ""],
+              ["ptClients", cl.filter(c=>{ const s = stats(c); return s.total > 0 && !s.complete; }).length, "pacchetti in corso", "", ""],
+              ["dueClients", dc.length, dc.length === 1 ? "cliente da regolarizzare" : "clienti da regolarizzare", "personal 1 to 1", dc.length ? "c-owed" : ""],
+              ["ptLeft", sLeft, "sedute da fare", "", ""],
+              ["dueCell", hm(round2(clients.reduce((t,c)=>t + ptDueOf(c), 0))), "da incassare", "quote personal non saldate", "c-owed"]]; })()
+    : sc === "ck" ? (()=>{ const cl = clients.filter(ckOn), dc = clients.filter(c=>checkDue(c) > 0);
+      const open = cl.filter(c=>c.check.pkg && ckDoneOf(c.check, c.check.pkg) < c.check.pkg.count);
+      const left = open.reduce((t,c)=>t + c.check.pkg.count - ckDoneOf(c.check, c.check.pkg), 0);
+      const only = cl.filter(c=>c.personal === false).length;
+      return [["allClients", cl.length, `${cl.length === 1 ? "cliente" : "clienti"} con le consulenze`, "", ""],
+              ["onlyClients", only, `${only === 1 ? "cliente" : "clienti"} solo consulenze`, "senza personal", ""],
+              ["ptClients", open.length, "pacchetti consulenze in corso", "", ""],
+              ["dueClients", dc.length, dc.length === 1 ? "cliente da regolarizzare" : "clienti da regolarizzare", "consulenze", dc.length ? "c-owed" : ""],
+              ["ptLeft", left, "consulenze da fare", "nei pacchetti in corso", ""],
+              ["dueCell", hm(round2(clients.reduce((t,c)=>t + checkDue(c), 0))), "da incassare", "quote delle consulenze non saldate", "c-owed"]]; })()
+    : [["allClients", clients.length, clients.length === 1 ? "cliente" : "clienti", "tutte le persone", ""],
+       ["onlyClients", clients.filter(c=>c.personal === false && ckOn(c)).length, clients.filter(c=>c.personal === false && ckOn(c)).length === 1 ? "cliente solo consulenze" : "clienti solo consulenze", "senza personal", ""],
+       ["ptClients", nPt, `${nPt === 1 ? "cliente" : "clienti"} personal 1 to 1`, "", ""],
+       ["dueClients", nDueClients, nDueClients === 1 ? "cliente da regolarizzare" : "clienti da regolarizzare", "personal e consulenze", nDueClients ? "c-owed" : ""],
+       ["ptLeft", sLeft, "sedute personal 1 to 1 da fare", "", ""],
+       ["dueCell", hm(due), "da incassare", "quote non saldate dai clienti", "c-owed"]];
+  const SCOPES = [["all","📊 Totale"],["pt","🏋️ Personal"],["ck","📋 Consulenze"]];
+  h += alertsPanelHTML() + `<div class="dash-bar">
+    <div class="scope-sw" role="group" aria-label="Cosa vedere nelle tabelle">${SCOPES.map(([v,l])=>`<button type="button" class="fsw-b${sc === v ? " on" : ""}" data-a="homeScope" data-v="${v}" aria-pressed="${sc === v}">${l}</button>`).join("")}</div>
+    <div class="money-eye"><button type="button" class="eye-btn" id="moneyEye" data-a="toggleHomeMoney" aria-pressed="${hid}" title="${hid ? "Mostra gli importi" : "Nascondi gli importi"}">${hid ? "🙈" : "👁"}<span>${hid ? "Mostra importi" : "Nascondi importi"}</span></button></div></div>
   <div class="dash dash-gen" id="dashGen" aria-label="Situazione generale">
-    <div class="dash-title"><span class="dt-ico" aria-hidden="true">📊</span><b>Generale</b></div>
-    <div class="dc" id="allClients"><b>${clients.length}</b><span>${clients.length === 1 ? "cliente" : "clienti"}</span><small>tutte le persone</small></div>
-    <div class="dc" id="ptClients"><b>${nPt}</b><span>${nPt === 1 ? "cliente" : "clienti"} personal 1 to 1</span></div>
-    <div class="dc ${nDueClients ? "c-owed" : ""}" id="dueClients"><b>${nDueClients}</b><span>${nDueClients === 1 ? "cliente da regolarizzare" : "clienti da regolarizzare"}</span><small>personal e check</small></div>
-    <div class="dc" id="ptLeft"><b>${sLeft}</b><span>sedute personal 1 to 1 da fare</span></div>
-    <div class="dc c-owed" id="dueCell"><b>${hm(due)}</b><span>da incassare</span><small>quote non saldate dai clienti</small></div>
+    <div class="dash-title"><span class="dt-ico" aria-hidden="true">📊</span><b>Generale</b>${sc !== "all" ? `<span>${sc === "pt" ? "solo personal 1 to 1" : "solo consulenze"}</span>` : ""}</div>
+    ${G.map(([id, v, lab, sm, cls])=>`<div class="dc ${cls}" id="${id}"><b>${v}</b><span>${lab}</span>${sm ? `<small>${sm}</small>` : ""}</div>`).join("\n    ")}
   </div>
   ${monthDashHTML(SD)}
   <div class="searchbar" role="search">
@@ -2963,6 +3091,7 @@ function ticksHTML(s){
   return `<span class="ticks"><span class="tick${paid ? " on" : ""}">${paid ? "✓" : "○"} Pagato</span><span class="tick${s.complete ? " on" : ""}">${s.complete ? "✓" : "○"} Sedute completate</span></span>`;
 }
 /* ======================= LATO CHECK DELLA CARTELLA ======================= */
+let actsOpen = !!window.__actsOpen;                                       // tasti “⋯ Altro” aperti (sul telefono)
 const detailSide = {};                                                      // lato aperto nella cartella: "pt" o "ck"
 const sideOf = c => detailSide[c.id] || cardViewOf(c);
 function sideSwitchHTML(c, side){
@@ -2980,9 +3109,13 @@ function ckTimeline(k){
 }
 function checkAlerts(c){
   const k = c.check, p = k && k.pkg, out = [];
-  if(!ckOn(c) || !p || !p.count) return out;
+  if(!ckOn(c) || !p) return out;
+  const credit = round2(ckPaidOf(p) - p.price);                          // pagato più del pacchetto: lo segnalo, non lo nascondo
+  if(p.price > 0 && credit > 0.004) out.push({k:"ckcredit", w:2, t:`pacchetto consulenze pagato ${eur(credit)} in più (credito del cliente)`});
+  if(!p.count) return out;
   const left = p.count - ckDoneOf(k, p);
-  if(left <= 0) out.push({k:"ckdone", w:1, t:"pacchetto consulenze completato"});
+  if(left < 0) out.push({k:"ckover", w:2, t: left === -1 ? "1 consulenza segnata oltre il pacchetto" : `${-left} consulenze segnate oltre il pacchetto`});
+  else if(left === 0) out.push({k:"ckdone", w:1, t:"pacchetto consulenze completato"});
   else if(left === 1) out.push({k:"cknear", w:1, t:"manca 1 consulenza del pacchetto check"});
   return out;
 }
@@ -2997,21 +3130,22 @@ function checkDetailHTML(c){
     ${contact ? `<p class="contact">${contact}</p>` : `<div style="height:10px"></div>`}
     ${!ckOn(c) && !ckHasData(k) ? `<p class="none ck-empty">Il servizio Check non è ancora attivo per questo cliente: compila qui sotto quando vuoi (si attiva da solo).</p>` : ""}
     <p class="pkg-line">${p ? `📋 Pacchetto consulenze${p.start ? ` dal ${itDate(p.start)}` : ""}` : "📋 Nessun pacchetto di consulenze in corso"}</p>
-    <div class="big-count" id="ckBigCount">${p ? (complete ? `Completato: ${done} su ${p.count}` : `Fatte ${done} su ${p.count}, ne mancano ${Math.max(p.count - done, 0)}`) : singles.length ? `${singles.length} ${singles.length === 1 ? "consulenza singola" : "consulenze singole"}` : "Nessuna consulenza ancora"}</div>
-    ${p && p.count ? `<p class="per-ses" id="ckPerLine">Pacchetto ${eur(p.price)} · ${p.count} consulenze → <b>${eur(ckPerOneOf(p))}/consulenza</b></p>` : ""}
+    <div class="big-count" id="ckBigCount">${p ? (p.count && done > p.count ? `Fatte ${done} su ${p.count} (oltre il pacchetto)` : complete ? `Completato: ${done} su ${p.count}` : `Fatte ${done} su ${p.count}, ne mancano ${Math.max(p.count - done, 0)}`) : singles.length ? `${singles.length} ${singles.length === 1 ? "consulenza singola" : "consulenze singole"}` : "Nessuna consulenza ancora"}</div>
+    ${p && p.count ? `<p class="per-ses" id="ckPerLine">Pacchetto ${eur(p.price)} · ${pl(p.count, "consulenza", "consulenze")} → <b>${eur(ckPerOneOf(p))}/consulenza</b></p>` : ""}
     ${p && p.count ? `<div id="ckDots">${dotsHTML(Math.min(done, p.count), p.count, 40, true)}</div>
       <span class="ticks"><span class="tick${p.price > 0 && due <= 0 ? " on" : ""}">${p.price > 0 && due <= 0 ? "✓" : "○"} Pagato</span><span class="tick${complete ? " on" : ""}">${complete ? "✓" : "○"} Consulenze completate</span></span>` : ""}
     ${ca.length ? `<p class="alert-box" id="ckAlert">⚠ ${esc(ca.map(x=>x.t).join(" · ").replace(/^./, m=>m.toUpperCase()))}.${ca.some(x=>x.k === "ckdone") ? " Ora può fare consulenze singole o un nuovo pacchetto." : ""}</p>` : ""}
-    <div class="head-actions">
+    <div class="head-actions${actsOpen ? " open" : ""}">
       ${p && !complete ? `<button class="btn primary" data-a="ckAddCons" id="ckAddConsBtn">Segna consulenza</button>` : ""}
       ${p ? `<button class="btn" data-a="ckAddRate" id="ckAddRateBtn">Aggiungi rata</button>` : ""}
-      <button class="btn ${!p || complete ? "primary" : ""}" data-a="ckNewPkg" id="ckNewPkgBtn">Nuovo pacchetto consulenze</button>
-      <button class="btn" data-a="ckAddSingle" id="ckAddSingleBtn">Consulenza singola</button>
-      <button class="btn" data-a="ckAddDiary" id="ckAddDiaryBtn">Peso / programma / nota</button>
-      <button class="btn" data-a="share">Invia al cliente</button>
-      <button class="btn" data-a="export">${cloudAvailable() ? "Esporta o salva la scheda" : "Esporta in Word o PDF"}</button>
-      <button class="btn ghost" data-a="editCheck">Modifica dati</button>
-      <button class="btn danger" data-a="delClient">Elimina cartella</button>
+      <button class="btn ${!p || complete ? "primary" : "sec"}" data-a="ckNewPkg" id="ckNewPkgBtn">Nuovo pacchetto consulenze</button>
+      <button class="btn ${!p || complete ? "" : "sec"}" data-a="ckAddSingle" id="ckAddSingleBtn">Consulenza singola</button>
+      <button class="btn sec" data-a="ckAddDiary" id="ckAddDiaryBtn">Peso / programma / nota</button>
+      <button class="btn sec" data-a="share">Invia al cliente</button>
+      <button class="btn sec" data-a="export">${cloudAvailable() ? "Esporta o salva la scheda" : "Esporta in Word o PDF"}</button>
+      <button class="btn ghost sec" data-a="editCheck">Modifica dati</button>
+      <button class="btn danger sec" data-a="delClient">Elimina cartella</button>
+      <button type="button" class="btn ghost more-btn" data-a="moreActs" aria-expanded="${actsOpen}">${actsOpen ? "▴ Meno" : "⋯ Altro"}</button>
     </div>
   </div>`;
   // ---- pacchetto in corso e pagamenti (campi modificabili)
@@ -3026,7 +3160,9 @@ function checkDetailHTML(c){
         <div class="stepper"><button data-ckstep="done" data-d="-1" aria-label="Togli l'ultima consulenza segnata">−</button><input id="ckfDone" type="text" value="${done}" readonly aria-readonly="true"><button data-ckstep="done" data-d="1" aria-label="Segna una consulenza fatta oggi">+</button></div></div>
       <div class="field"><label for="ckfPrice">Totale da pagare (€)</label><input class="big" id="ckfPrice" type="text" data-ckf="price" value="${fmtIn(p.price)}" autocomplete="off"></div>
       <div class="field"><label for="ckfPaid">Già pagato (€)</label><div class="row2"><input class="big" id="ckfPaid" type="text" data-ckf="paid" value="${fmtIn(paid)}" autocomplete="off"><button class="btn small" data-a="ckAddRate">+ Rata</button></div></div>
-      <div class="field ${due > 0 ? "due" : "ok"}" id="ckDueBox"><label>Ancora da saldare</label><div class="val" id="ckDueVal">${eur(due)}</div></div>
+      ${p.price > 0 && round2(paid - p.price) > 0.004
+        ? `<div class="field ok" id="ckDueBox"><label>Credito del cliente</label><div class="val" id="ckDueVal">${eur(round2(paid - p.price))}</div></div>`
+        : `<div class="field ${due > 0 ? "due" : "ok"}" id="ckDueBox"><label>Ancora da saldare</label><div class="val" id="ckDueVal">${eur(due)}</div></div>`}
       <div class="field ok"><label>Consulenze ancora da fare</label><div class="val" id="ckLeftVal">${Math.max(p.count - done, 0)}</div></div>
     </div>`;
   h += `</section>`;
@@ -3064,7 +3200,7 @@ function checkDetailHTML(c){
       const cur = q === p, d = ckDoneOf(k, q), fine = cur ? (q.count && d >= q.count ? "completato" : "in corso") : (q.end ? itDate(q.end) : "—");
       return `<tr class="${cur ? "cur" : ""}" data-start="${itDate(q.start)}" data-fine="${fine}"><td class="date">${itDate(q.start)}</td><td class="date">${cur ? `<span class="in-corso">${fine}</span>` : fine}</td><td class="num">${d} / ${q.count || "—"}</td><td class="num">${hm(q.price)}</td><td class="num">${q.count ? hm(ckPerOneOf(q)) : "—"}</td></tr>`; }).join("") + `</tbody></table>`;
     h += `<ul class="pkg-hist-list">` + pkRows.map(q=>{ const cur = q === p, d = ckDoneOf(k, q);
-      return `<li class="${cur ? "cur" : ""}"><b>${itDate(q.start)} → ${cur ? `<span class="in-corso">${q.count && d >= q.count ? "completato" : "in corso"}</span>` : (q.end ? itDate(q.end) : "—")}</b><span>${d} di ${q.count || "—"} consulenze · ${hm(q.price)}${q.count ? ` · <b class="pps">${hm(ckPerOneOf(q))}/consulenza</b>` : ""}</span></li>`; }).join("") + `</ul>`;
+      return `<li class="${cur ? "cur" : ""}"><b>${itDate(q.start)} → ${cur ? `<span class="in-corso">${q.count && d >= q.count ? "completato" : "in corso"}</span>` : (q.end ? itDate(q.end) : "—")}</b><span>${d} di ${q.count || "—"} ${q.count === 1 ? "consulenza" : "consulenze"} · ${hm(q.price)}${q.count ? ` · <b class="pps">${hm(ckPerOneOf(q))}/consulenza</b>` : ""}</span></li>`; }).join("") + `</ul>`;
   }
   h += `</div></section>`;
   // ---- storico peso e note
@@ -3183,7 +3319,7 @@ async function ckNewPkg(id){
   const c = getClient(id); if(!c) return;
   const k = normCheck(c.check), p = k.pkg;
   const warn = [];
-  if(p){ const d = ckDoneOf(k, p), due = round2(p.price - ckPaidOf(p)); if(p.count && d < p.count) warn.push(`mancano ancora ${p.count - d} consulenze`); if(due > 0) warn.push(`restano da saldare ${eur(due)}`); }
+  if(p){ const d = ckDoneOf(k, p), due = round2(p.price - ckPaidOf(p)); if(p.count && d < p.count) warn.push(p.count - d === 1 ? "manca ancora 1 consulenza" : `mancano ancora ${p.count - d} consulenze`); if(due > 0) warn.push(`restano da saldare ${eur(due)}`); }
   $("cnWarn").textContent = p ? (warn.length ? `Il pacchetto in corso va nello storico (${warn.join(", ")}).` : "Il pacchetto in corso va nello storico.") : "";
   $("cnStart").value = today(); $("cnCount").value = p && p.count ? p.count : ""; $("cnPrice").value = p && p.price ? fmtIn(p.price) : ""; $("cnPaid").value = ""; $("cnErr").textContent = "";
   if(await ask("dlgCkPkg") !== "ok") return;
@@ -3247,15 +3383,16 @@ function detailHTML(c){
     <div id="bigDots">${dotsHTML(s.done,s.total,40,true,s.lost)}</div>
     <div id="headTicks">${ticksHTML(s)}</div>
     <div id="headAlert">${headAlertHTML(c)}</div>
-    <div class="head-actions">
+    <div class="head-actions${actsOpen ? " open" : ""}">
       <button class="btn ${s.complete ? "" : "primary"}" data-a="addSes" id="addSesBtn">Segna seduta</button>
       <button class="btn" data-a="addPay">Aggiungi rata</button>
-      <button class="btn ${s.complete ? "primary" : ""}" data-a="newPkg" id="newPkgBtn">Nuovo pacchetto</button>
-      <button class="btn" data-a="addSingle" id="addSingleBtn">Seduta singola</button>
-      <button class="btn" data-a="share">Invia al cliente</button>
-      <button class="btn" data-a="export">${cloudAvailable() ? "Esporta o salva la scheda" : "Esporta in Word o PDF"}</button>
-      <button class="btn ghost" data-a="edit">Modifica dati</button>
-      <button class="btn danger" data-a="delClient">Elimina cartella</button>
+      <button class="btn ${s.complete ? "primary" : "sec"}" data-a="newPkg" id="newPkgBtn">Nuovo pacchetto</button>
+      <button class="btn sec" data-a="addSingle" id="addSingleBtn">Seduta singola</button>
+      <button class="btn sec" data-a="share">Invia al cliente</button>
+      <button class="btn sec" data-a="export">${cloudAvailable() ? "Esporta o salva la scheda" : "Esporta in Word o PDF"}</button>
+      <button class="btn ghost sec" data-a="edit">Modifica dati</button>
+      <button class="btn danger sec" data-a="delClient">Elimina cartella</button>
+      <button type="button" class="btn ghost more-btn" data-a="moreActs" aria-expanded="${actsOpen}">${actsOpen ? "▴ Meno" : "⋯ Altro"}</button>
     </div>
   </div>
   ${followHTML(c)}
@@ -4276,6 +4413,9 @@ async function handle(a, el){
     case "toggleHist": { const k = el.dataset.h; if(k in histOpen){ histOpen[k] = !histOpen[k]; render(); } return; }
     case "pickStatsYear": return pickStatsYear();
     case "toggleHomeMoney": settings.homeHideMoney = !settings.homeHideMoney; saveSettings(); render(); return;
+    case "logout": return appLogout();
+    case "moreActs": { actsOpen = !actsOpen; render(); return; }
+    case "homeScope": { const v = ["pt","ck"].includes(el.dataset.v) ? el.dataset.v : "all"; if(settings.homeScope !== v){ settings.homeScope = v; saveSettings(); } render(); return; }
     case "dataMenu": return dataMenu();
     case "exportDocs": return exportDocs();
     case "openStats": statsOpen = true; openId = null; render(); window.scrollTo({top:0}); return;
@@ -4524,7 +4664,7 @@ async function newPackage(id, thenSession){
   let note = active
     ? `Il pacchetto attuale${s.start ? ` (iniziato il ${itDate(s.start)})` : ""}, ${s.done} su ${s.total}${s.complete ? ", completato" : ""}, va nello storico della cartella con le sue sedute e i suoi pagamenti. Il nuovo parte da 0 sedute fatte e 0 € pagati.`
     : "Il pacchetto attuale non ha ancora sedute né pagamenti: viene semplicemente sostituito da quello nuovo.";
-  if(active && !s.complete && s.total > 0) note += `\n\nAttenzione: il pacchetto attuale non è completato (mancano ${s.left} sedute).`;
+  if(active && !s.complete && s.total > 0) note += `\n\nAttenzione: il pacchetto attuale non è completato (${s.left === 1 ? "manca 1 seduta" : `mancano ${s.left} sedute`}).`;
   $("pkgNote").textContent = note;
   const canCarry = active && s.due !== 0;
   $("pCarryL").hidden = !canCarry; $("pCarry").checked = true;
@@ -4771,9 +4911,9 @@ function nameFromFile(fn){
   return fn.replace(/\.[^.]+$/,"").replace(/_+/g," ").replace(/\s*\(\d+\)\s*$/,"").replace(/\s+/g," ").trim() || "Senza nome";
 }
 const CLIENT_COPY_MSG = "Questo è il riepilogo per il cliente: non contiene tutti i dati, quindi non si può reimportare. Usa una scheda creata con “Esporta”.";
-function pdfSubject(buf){
+function pdfSubject(buf, tag){
   const txt = new TextDecoder("latin1").decode(new Uint8Array(buf));
-  const m = txt.match(/\/Subject\s*\((PTGEST1:[A-Za-z0-9+\/=\\\r\n]+)\)/);
+  const m = txt.match(new RegExp("/Subject\\s*\\((" + (tag || "PTGEST1") + ":[A-Za-z0-9+\\/=\\\\\\r\\n]+)\\)"));
   return m ? m[1].replace(/\\\r?\n/g,"").replace(/\\(.)/g,"$1").replace(/[\r\n]/g,"") : "";
 }
 async function readFile(f){
@@ -4785,6 +4925,7 @@ async function readFile(f){
   const isOldDoc = head[0]===0xD0 && head[1]===0xCF;
 
   if(isPdf){
+    const sp = pdfSubject(buf, "PTSPESE1"); if(sp) return {__expenses: JSON.parse(b64dec(sp.slice(9)))};   // file delle spese di gestione
     if(/\/Subject\s*\(PTCLIENT\)/.test(new TextDecoder("latin1").decode(new Uint8Array(buf)))) throw new Error(CLIENT_COPY_MSG);
     const subj = pdfSubject(buf);
     if(!subj) throw new Error("Questo PDF non è stato creato dal gestionale (oppure è stato modificato), quindi non posso leggerne i dati. Usa un PDF esportato da qui o un file Word.");
@@ -4797,7 +4938,11 @@ async function readFile(f){
     const docXml = z.file("word/document.xml");
     if(!docXml) throw new Error("Il file non è un documento Word (.docx).");
     const core = z.file("docProps/core.xml");
-    if(core && /<dc:subject>PTCLIENT<\/dc:subject>/.test(await core.async("string"))) throw new Error(CLIENT_COPY_MSG);
+    const coreStr = core ? await core.async("string") : "", spm = coreStr.match(/PTSPESE1:([A-Za-z0-9+\/=]+)/);
+    if(spm) return {__expenses: JSON.parse(b64dec(spm[1]))};                // file delle spese di gestione
+    const gm = coreStr.match(/PTGEST1:([A-Za-z0-9+\/=]+)/);                    // scheda con tutti i dati (backup): copia identica
+    if(gm){ try{ const c = normalize(JSON.parse(b64dec(gm[1]))); c.id = uid(); c.name = name; return c; }catch(_){ /* dati illeggibili: uso le tabelle */ } }
+    if(core && /<dc:subject>PTCLIENT<\/dc:subject>/.test(coreStr)) throw new Error(CLIENT_COPY_MSG);
     const c = clientFromTables(docxTables(await docXml.async("string")), name);
     if(!c) throw new Error("Nel documento non ho trovato le tabelle della scheda cliente. Usa un file esportato da questo gestionale.");
     // dati che nelle tabelle non ci sono (check, diario, pesi, servizi): li prendo da quelli conservati nel Word
@@ -4846,6 +4991,7 @@ $("importInput").addEventListener("change", async e=>{
     for(const f of files){
       try{
         const nc = await readFile(f);
+        if(nc && nc.__expenses){ const n = mergeExpenses(nc.__expenses); done++; toast(n ? `Spese di gestione ripristinate: ${n} ${n === 1 ? "voce" : "voci"}` : "Spese di gestione già presenti"); continue; }
         const ex = clients.find(c=>c.name.toLowerCase()===nc.name.toLowerCase());
         if(ex){
           $("conflictText").textContent = `Esiste già una cartella chiamata “${ex.name}”. Vuoi aggiornarla con i dati del file “${f.name}”, oppure creare una nuova cartella separata?`;
@@ -5044,7 +5190,10 @@ function syncDocs(){
     : n === 1 ? `Verrà creata una scheda ${f}. Sul telefono si apre la condivisione (WhatsApp, Mail, File…), al computer viene scaricata.`
     : `Verranno create ${n} schede ${f}. Sul telefono le condividi tutte insieme se il telefono lo permette, altrimenti (e al computer) arrivano in un unico file ZIP.`;
   $("docsOk").textContent = n > 1 ? `Esporta ${n} schede` : "Esporta";
+  if(!docsExpTouched) $("docsExp").checked = n > 1 && expData().items.length > 0;   // spese incluse quando esporti più clienti (si può cambiare)
 }
+let docsExpTouched = false;
+$("docsExp").addEventListener("change", ()=>{ docsExpTouched = true; });
 $("docsList").addEventListener("change", syncDocs);
 document.querySelectorAll('input[name="docsFmt"]').forEach(r=>r.addEventListener("change", syncDocs));
 $("docsAll").addEventListener("click", ()=>{ $("docsList").querySelectorAll("input").forEach(i=>i.checked = true); syncDocs(); });
@@ -5053,6 +5202,24 @@ $("fDocs").addEventListener("submit", e=>{
   if(!e.submitter || e.submitter.value !== "ok") return;
   if(!docsChecked().length){ e.preventDefault(); $("docsErr").textContent = "Scegli almeno un cliente da esportare."; }
 });
+/* file “Spese di gestione”: tutte le voci e i pagamenti, con data, tipo e attività */
+async function makeExpFile(kind){
+  const d = expData();
+  const rows = [...d.pays].sort((x,y)=>(x.date||"").localeCompare(y.date||"")).map(p=>{ const it = d.items.find(x=>x.id === p.itemId) || {};
+    return {date:p.date, name: it.name || p.name || "Spesa", kind: (KIND[it.kind] || KIND.monthly).adj || "", area: EXP_AREA[expArea(it)], amount: Number(p.amount)||0}; });
+  const data = {items:d.items, pays:d.pays, skips:d.skips};
+  if(kind === "pdf"){ const jsPDF = await lib("jspdf"); return buildExpPdf(rows, data, jsPDF).output("blob"); }
+  const JSZip = await lib("jszip"); return (await buildExpDocx(rows, data, JSZip)).generateAsync({type:"blob", mimeType:MIME.docx});
+}
+/* ripristino delle spese da file: aggiunge solo quello che manca (nessun doppione) */
+function mergeExpenses(src){
+  const d = expData(), s = src && typeof src === "object" ? src : {};
+  const ids = k => new Set(d[k].map(x=>x.id));
+  const add = (k, list) => { const have = ids(k); const nw = (Array.isArray(list) ? list : []).filter(x=>x && x.id && !have.has(x.id)); d[k] = [...d[k], ...nw]; return nw.length; };
+  const n = add("items", s.items) + add("pays", s.pays); add("skips", s.skips);
+  settings.expenses = d; saveSettings(); render();
+  return n;
+}
 async function exportDocs(){
   if(exporting || !clients.length) return;
   const sorted = [...clients].sort((a,b)=>a.name.localeCompare(b.name,"it"));
@@ -5060,8 +5227,9 @@ async function exportDocs(){
   const last = settings.docsFmt === "pdf" ? "pdf" : "docx";
   document.querySelectorAll('input[name="docsFmt"]').forEach(r=>r.checked = r.value === last);
   syncDocs();
+  $("docsExpW").hidden = !expData().items.length; docsExpTouched = false; $("docsExp").checked = clients.length > 1 && !!expData().items.length;
   if(await ask("dlgDocs") !== "ok") return;
-  const kind = docsFmt(), ids = docsChecked();
+  const kind = docsFmt(), ids = docsChecked(), withExp = !!($("docsExp") && $("docsExp").checked && expData().items.length);
   if(settings.docsFmt !== kind){ settings.docsFmt = kind; saveSettings(); }
   const list = sorted.filter(c=>ids.includes(c.id));
   if(!list.length) return;
@@ -5074,6 +5242,7 @@ async function exportDocs(){
       used.add(nm.toLowerCase());
       files.push({name:`${nm}.${kind}`, blob: await makeFullFile(c, kind)});
     }
+    if(withExp) files.push({name:`Spese di gestione.${kind}`, blob: await makeExpFile(kind)});
     const touch = !!(window.matchMedia && matchMedia("(pointer:coarse)").matches);
     if(files.length === 1) ok = await saveFile(files[0].blob, files[0].name, touch);
     else {
@@ -5146,12 +5315,12 @@ function incomeMonths(c, undated, noCheck){
   return out;
 }
 /* quanto resta da incassare dei pacchetti iniziati in un mese */
-function dueForMonth(k){
-  let t = clients.reduce((s,c)=>{ if(!ckOn(c)) return s; const kk = c.check, p = kk.pkg;
+function dueForMonth(k, scope){
+  let t = scope === "pt" ? 0 : clients.reduce((s,c)=>{ if(!ckOn(c)) return s; const kk = c.check, p = kk.pkg;
     const pk = p && (p.start||"").slice(0,7) === k ? Math.max(round2(p.price - ckPaidOf(p)), 0) : 0;
     const sg = ckSingles(kk).filter(e=>!e.paid && (e.date||"").slice(0,7) === k).reduce((x,e)=>x + e.amount, 0);
     return s + pk + sg; }, 0);
-  clients.forEach(c=>allPackages(c).forEach(p=>{
+  if(scope !== "ck") clients.forEach(c=>allPackages(c).forEach(p=>{
     if(!isDate(p.start) || p.start.slice(0,7) !== k) return;
     t += Math.max(round2((Number(p.price)||0) - (Number(p.paid)||0) - (p.current ? 0 : (Number(p.carriedOut)||0))), 0);
   }));
@@ -5225,7 +5394,7 @@ function statsData(ptOnly){                                               // ptO
     incomeMonths(c, noDate, ptOnly).forEach(([k, v])=>add(k, "income", v));      // soldi nel mese d'inizio del pacchetto
     sessionMonths(c, noDateSes).forEach(([k, n])=>add(k, "sessions", n));
   });
-  Object.entries(expByMonth()).forEach(([k,v])=>add(k, "expense", v));     // spese di gestione pagate
+  Object.entries(expByMonth(ptOnly ? "pt" : undefined)).forEach(([k,v])=>add(k, "expense", v));     // spese di gestione pagate (solo personal: quelle del personal e quelle di entrambi)
   Object.values(byMonth).forEach(m=>{ m.income = round2(m.income); m.expense = round2(m.expense); m.net = round2(m.income - m.expense); });
   const keys = Object.keys(byMonth).sort();
   /* mesi dal primo con attività a quello attuale, compresi quelli vuoti */
@@ -5308,7 +5477,7 @@ function checkStatsHTML(){
   const mPkg = cks.reduce((t,c)=>t + [c.check.pkg, ...c.check.pkgs].filter(p=>p && p.count > 0 && (p.start||"").slice(0,7) === m).length, 0);
   const mClients = cks.filter(inMonth).length;
   const mInc = round2(clients.reduce((t,c)=>t + checkIncomeMonths(c).filter(([k])=>k === m).reduce((s,[,v])=>s + v, 0), 0));
-  const mExp = round2(expByMonth()[m] || 0);
+  const mExp = round2(expByMonth("ck")[m] || 0);                             // spese delle consulenze e quelle di entrambi
   return `<h2 class="st-sec" id="ckStatsTitle">📋 Statistiche andamento check</h2>
   <div class="dash dashck ck-gen" id="ckGen" aria-label="Check, dati generali">
     <div class="dash-title"><span class="dt-ico" aria-hidden="true">📊</span><b>Generale</b></div>
@@ -5344,7 +5513,7 @@ function statsHTML(){
   const act = D.per.filter(p=>p.active).length;
   const pkgs = D.per.reduce((t,p)=>t + p.packages, 0);
   const allIncome = round2(clients.reduce((s,c)=>s + allPackages(c).reduce((t,p)=>t + (Number(p.paid)||0), 0), 0));   // solo personal
-  const allExp = round2(expData().pays.reduce((t,p)=>t + (Number(p.amount)||0), 0));
+  const allExp = round2(expData().pays.filter(p=>expInScope(p.itemId, "pt")).reduce((t,p)=>t + (Number(p.amount)||0), 0));   // spese del personal e di entrambi
   const allDone = clients.reduce((s,c)=>s + (Number(c.doneSessions)||0) + c.packages.reduce((t,p)=>t + (Number(p.doneSessions)||0), 0), 0);
   const personal = D.per.filter(p=>p.packages > 0).length;                       // chi ha fatto almeno un pacchetto
   const singleOnly = D.per.filter(p=>p.packages === 0 && p.singles > 0).length;    // solo sedute singole (1 persona anche con più sedute)
@@ -5386,7 +5555,7 @@ function statsHTML(){
   const withAct = ks.filter(k=>k <= nowK || D.month(k).income || D.month(k).sessions || D.month(k).expense);   // i mesi dell'anno scelto (i vuoti contano come “peggiori”)
   if(withAct.length){
     const rank = (f) => { const s = [...withAct].sort((a,b)=>D.month(b)[f]-D.month(a)[f] || a.localeCompare(b)); const n = Math.min(3, Math.floor(s.length/2) || 1); return {best:s.slice(0,n), worst:s.slice(-n).reverse().filter(k=>!s.slice(0,n).includes(k))}; };
-    const row = (k, f) => `<li><span>${esc(monthLabel(k))}</span><b>${f==="sessions" ? `${D.month(k).sessions} sedute` : money(D.month(k)[f])}</b></li>`;
+    const row = (k, f) => `<li><span>${esc(monthLabel(k))}</span><b>${f==="sessions" ? `${D.month(k).sessions} ${D.month(k).sessions === 1 ? "seduta" : "sedute"}` : money(D.month(k)[f])}</b></li>`;
     h += `<section class="block stats-block"><h3>Mesi migliori e peggiori del ${year}</h3><div class="bw">`;
     const useExp = true, moneyF = "net";
     if(!hide){ const r = rank(moneyF); h += `<div><h4>${useExp ? "Per guadagno netto" : "Per incassi"}</h4><p class="lbl ok">▲ Migliori</p><ol>${r.best.map(k=>row(k,moneyF)).join("")}</ol>${r.worst.length ? `<p class="lbl bad">▼ Peggiori</p><ol>${r.worst.map(k=>row(k,moneyF)).join("")}</ol>` : ""}</div>`; }
@@ -5416,7 +5585,7 @@ function statsHTML(){
       <span class="rr-top"><b>${esc(p.c.name)}</b><span class="pill ${p.active ? "on" : ""}">${p.active ? "attivo" : "non attivo"}</span></span>
       <span class="rr-grid">
         <span><i>Rinnovi</i>${p.renewals}</span>
-        <span><i>Pacchetto tipico</i>${p.typical ? `${p.typical.sessions} sedute${hide ? "" : ` · ${eur(p.typical.price)}`}` : "—"}</span>
+        <span><i>Pacchetto tipico</i>${p.typical ? `${pl(p.typical.sessions, "seduta", "sedute")}${hide ? "" : ` · ${eur(p.typical.price)}`}` : "—"}</span>
         <span><i>Rinnova ogni</i>${p.every !== null ? `~${p.every} giorni` : "—"}</span>
         <span><i>Incassato</i>${money(p.earned)}</span>
         <span><i>Sedute fatte</i>${p.sessions}</span>
@@ -5440,7 +5609,7 @@ const fmtSeries = (f, v) => SERIES[f].money ? money(v) : `${v} ${v === 1 ? "sedu
 const BAR3 = {pt:{label:"Guadagno personal", cls:"s-pt"}, ck:{label:"Guadagno check", cls:"s-ck"}, exp:{label:"Spese", cls:"s-exp"}};
 function chartsHTML(D, year, hide){
   const ks = MONTHS.map((_,i)=>`${year}-${String(i+1).padStart(2,"0")}`), DF = statsData();
-  const val = (k, f) => f === "pt" ? round2(D.month(k).income) : f === "ck" ? round2(DF.month(k).income - D.month(k).income) : round2(D.month(k).expense || 0);
+  const val = (k, f) => f === "pt" ? round2(D.month(k).income) : f === "ck" ? round2(DF.month(k).income - D.month(k).income) : round2(DF.month(k).expense || 0);   // spese: tutte
   let on = Array.isArray(settings.chartSeries) ? settings.chartSeries.filter(x=>BAR3[x]) : ["pt","ck","exp"];
   if(!on.length) on = ["pt","ck","exp"];
   let h = `<section class="block stats-block" id="chartBlock"><div class="bh"><h3>Andamento del ${year}: personal, check e spese</h3></div>`;
@@ -5551,10 +5720,10 @@ function earnMonthKey(D){
   return earnSel && earnSel <= last ? earnSel : nowK;
 }
 /* spese di gestione pagate nei mesi indicati, divise per tipo (mensili, annuali, una tantum) */
-function expByKind(keys){
+function expByKind(keys, scope){
   const d = expData(), set = new Set(keys), out = {monthly:0, yearly:0, once:0};
   d.pays.forEach(p=>{
-    if(!isDate(p.date) || !set.has(p.date.slice(0,7))) return;
+    if(!isDate(p.date) || !set.has(p.date.slice(0,7)) || !expInScope(p.itemId, scope)) return;
     const it = d.items.find(x=>x.id === p.itemId), k = it && KIND[it.kind] ? it.kind : "monthly";
     out[k] = round2(out[k] + (Number(p.amount)||0));
   });
@@ -5564,16 +5733,39 @@ function kindLine(bk, fmt){
   const f = fmt || hm;
   return [["monthly","mensili"],["yearly","annuali"],["once","una tantum"]].filter(([k])=>bk[k] > 0).map(([k,l])=>`${l} ${f(bk[k])}`).join(" · ");
 }
+/* mesi in cui il cliente ha fatto qualcosa: sedute personal (anche senza data, distribuite con le regole delle statistiche) e consulenze */
+function activityMonths(c, scope){
+  const s = new Set();
+  if(scope !== "ck") sessionMonths(c, null).forEach(([k, n])=>{ if(k && n > 0) s.add(k); });
+  if(scope !== "pt" && c.check) (c.check.log || []).forEach(e=>{ if((e.kind === "pkg" || e.kind === "single") && isDate(e.date)) s.add(e.date.slice(0,7)); });
+  return s;
+}
+/* clienti attivi in un mese e, tra questi, quelli nuovi (prima attività in assoluto in quel mese) */
+function activeInMonth(k, scope){
+  let act = 0, nw = 0;
+  clients.forEach(c=>{ const ms = activityMonths(c, scope); if(!ms.has(k)) return; act++; if([...ms].sort()[0] === k) nw++; });
+  return {act, nw, old: act - nw};
+}
+/* guadagno e spese di un mese secondo il filtro della home */
+const homeScope = () => ["pt","ck"].includes(settings.homeScope) ? settings.homeScope : "all";
+function scopedMonth(k, scope){
+  if(scope === "pt") return statsData(true).month(k);
+  if(scope === "ck") return {income: round2(clients.reduce((t,c)=>t + checkIncomeMonths(c).filter(([x])=>x === k).reduce((s,[,v])=>s + v, 0), 0)), expense: round2(expByMonth("ck")[k] || 0)};
+  return statsData().month(k);
+}
 function monthDashHTML(D){
-  const k = earnMonthKey(D), nowK = today().slice(0,7), m = D.month(k);
-  const inc = m.income, exp = m.expense || 0, net = round2(inc - exp), dueM = dueForMonth(k), bk = expByKind([k]);
-  const nPk = clients.reduce((t,c)=>t + allPackages(c).filter(p=>isDate(p.start) && p.start.slice(0,7) === k && pkgUsed(p)).length, 0);
-  const ml = esc(monthLabel(k));
+  const sc = homeScope(), k = earnMonthKey(D), nowK = today().slice(0,7), m = scopedMonth(k, sc);
+  const inc = m.income, exp = m.expense || 0, net = round2(inc - exp), dueM = dueForMonth(k, sc), bk = expByKind([k], sc);
+  const nPk = sc === "ck" ? clients.reduce((t,c)=>t + (c.check ? [c.check.pkg, ...c.check.pkgs].filter(p=>p && (p.start||"").slice(0,7) === k).length : 0), 0)
+    : clients.reduce((t,c)=>t + allPackages(c).filter(p=>isDate(p.start) && p.start.slice(0,7) === k && pkgUsed(p)).length, 0);
+  const ml = esc(monthLabel(k)), AC = activeInMonth(k, sc);
   const expDetail = exp > 0 ? [["monthly","mensili"],["yearly","annuali"],["once","una tantum"]].filter(([x])=>bk[x] > 0)
       .map(([x,l])=>x === "yearly" ? `annuali ${hm(bk[x])} (pagate in questo mese)` : `${l} ${hm(bk[x])}`).join(" · ") : "nessuna spesa di gestione";
   return `<div class="dash dash-month" id="dashMonth" aria-label="Il mese scelto">
     <button type="button" class="dash-title month-pick" id="earnPick" data-a="pickMonth" data-m="${k}" aria-label="Scegli il mese da vedere">
       <span class="dt-ico" aria-hidden="true">📅</span><b>${esc(monthCap(k))}&nbsp;▾</b><span>${k === nowK ? "mese in corso" : "tocca per cambiare"}</span></button>
+    <div class="dc" id="activeCell"><b id="activeValue">${AC.act}</b><span>${AC.act === 1 ? "cliente attivo" : "clienti attivi"} nel mese</span><small>${AC.nw} ${AC.nw === 1 ? "nuovo" : "nuovi"} · ${AC.old} già ${AC.old === 1 ? "cliente" : "clienti"}</small></div>
+    <div class="dc" id="newCell"><b id="newValue">${AC.nw}</b><span>${AC.nw === 1 ? "nuovo cliente" : "nuovi clienti"}</span><small>prima ${sc === "ck" ? "consulenza" : sc === "pt" ? "seduta personal" : "attività"} a ${ml}</small></div>
     <div class="dc c-in" id="earnCell" data-a="pickMonth" role="button" tabindex="0"><b id="earnValue">${hm(inc)}</b><span>guadagno del mese</span><small id="earnInfo">incassato · ${nPk} ${nPk === 1 ? "pacchetto iniziato" : "pacchetti iniziati"} a ${ml}</small></div>
     <div class="dc c-owed" id="dueMonthCell"><b id="dueMonthValue">${hm(dueM)}</b><span>ancora da incassare</span><small>quote non saldate dei pacchetti di ${ml}</small></div>
     <div class="dc c-exp" id="expMonthCell" data-a="openExp" role="button" tabindex="0"><b id="expMonthValue">${hm(exp)}</b><span>spese del mese</span><small id="expKinds">${expDetail}</small></div>
@@ -5592,7 +5784,7 @@ function renderMonthGrid(){
   $("mpYear").textContent = pickYear;
   $("mpPrev").disabled = yi <= 0; $("mpNext").disabled = yi >= years.length - 1;
   $("mpGrid").innerHTML = MONTHS_LONG.map((l,i)=>{
-    const k = `${pickYear}-${String(i+1).padStart(2,"0")}`, inc = monthTarget === "ck" ? ckInc(k) : D.month(k).income, future = k > nowK && !inc;
+    const k = `${pickYear}-${String(i+1).padStart(2,"0")}`, inc = monthTarget === "ck" ? ckInc(k) : monthTarget === "home" ? scopedMonth(k, homeScope()).income : D.month(k).income, future = k > nowK && !inc;
     return `<button type="button" class="mp-m${k === sel ? " sel" : ""}${k === nowK ? " now" : ""}" data-m="${k}"${future ? " disabled" : ""}>
       <b>${l.charAt(0).toUpperCase() + l.slice(1)}</b><span>${future ? "—" : hm(inc)}</span></button>`;
   }).join("");
@@ -5674,7 +5866,7 @@ function statsText(){
   }
   L.push("", "CLIENTI");
   [...D.per].sort((a,b)=>b.renewals-a.renewals || b.earned-a.earned).forEach(x=>{
-    L.push(`  ${x.c.name} (${x.active ? "attivo" : "non attivo"}): rinnovi ${x.renewals}, pacchetto tipico ${x.typical ? `${x.typical.sessions} sedute · ${eur(x.typical.price)}` : "—"}, rinnova ogni ${x.every !== null ? `~${x.every} giorni` : "—"}, incassato ${eur(x.earned)}, ultima attività ${x.last ? itDate(x.last) : "—"}`);
+    L.push(`  ${x.c.name} (${x.active ? "attivo" : "non attivo"}): rinnovi ${x.renewals}, pacchetto tipico ${x.typical ? `${pl(x.typical.sessions, "seduta", "sedute")} · ${eur(x.typical.price)}` : "—"}, rinnova ogni ${x.every !== null ? `~${x.every} giorni` : "—"}, incassato ${eur(x.earned)}, ultima attività ${x.last ? itDate(x.last) : "—"}`);
   });
   return L.join("\r\n") + "\r\n";
 }
@@ -5706,9 +5898,17 @@ const periodLabel = (it, p) => it.kind === "yearly" ? p : monthLabel(p);
 /* “da pagare” solo per le spese ricorrenti con il promemoria acceso, non pagate e non saltate */
 const expDue = (it, pays) => isRecurring(it) && it.remind !== false && !(it.start && it.start > today()) && !expPaidNow(it, pays).length && !expSkippedNow(it);
 function expDueCount(){ const d = expData(); return d.items.filter(it=>expDue(it, d.pays)).length; }
-function expByMonth(){
+/* a quale lato appartiene una spesa: "all" = entrambi (conta in Personal e in Consulenze, e una volta sola nel Totale) */
+const EXP_AREA = {all:"Entrambi", pt:"Personal 1 to 1", ck:"Consulenze"};
+const expArea = it => it && EXP_AREA[it.area] ? it.area : "all";
+function expInScope(itemId, scope){
+  if(!scope || scope === "all") return true;
+  const it = expData().items.find(x=>x.id === itemId), ar = expArea(it);
+  return ar === "all" || ar === scope;
+}
+function expByMonth(scope){
   const m = {};
-  expData().pays.forEach(p=>{ if(isDate(p.date)){ const k = p.date.slice(0,7); m[k] = round2((m[k]||0) + (Number(p.amount)||0)); } });
+  expData().pays.forEach(p=>{ if(isDate(p.date) && expInScope(p.itemId, scope)){ const k = p.date.slice(0,7); m[k] = round2((m[k]||0) + (Number(p.amount)||0)); } });
   return m;
 }
 const monthlyCost = () => round2(expData().items.reduce((a,it)=>a + (it.kind === "yearly" ? (Number(it.amount)||0)/12 : it.kind === "monthly" ? (Number(it.amount)||0) : 0), 0));
@@ -5749,6 +5949,7 @@ function expHTML(){
       const amt = kind === "once" ? M(it.amount) : `${M(it.amount)} / ${KIND[kind].per}`;
       h += `<div class="exp-card${late ? " due" : ""}${it.remind === false || kind === "once" ? " quiet" : ""}" data-exp="${esc(it.id)}">
         <div class="exp-top"><b>${esc(it.name)}</b><span class="amt">${amt}</span></div>
+        <p class="exp-area"><span class="miss-st area-${expArea(it)}">${expArea(it) === "pt" ? "🏋️ " : expArea(it) === "ck" ? "📋 " : "⚖️ "}${EXP_AREA[expArea(it)]}</span></p>
         <p class="exp-state">${esc(state)}</p>
         ${it.note ? `<p class="exp-note">${esc(it.note)}</p>` : ""}
         ${kind !== "once" && expSkips(it).length ? `<p class="skips"><span>Saltati:</span> ${[...expSkips(it)].sort((x,y)=>x.period.localeCompare(y.period)).map(sk=>`<span class="skip">${esc(periodLabel(it, sk.period))}<button class="x" data-a="unskipExp" data-id="${esc(sk.id)}" aria-label="Annulla il salto di ${esc(periodLabel(it, sk.period))}" title="Annulla il salto">✕</button></span>`).join("")}</p>` : ""}
@@ -5812,13 +6013,15 @@ async function expForm(id){
   $("xStart").value = it ? (it.start || "") : ""; $("xNote").value = it ? (it.note || "") : "";
   document.querySelectorAll('input[name="xKind"]').forEach(r=>r.checked = r.value === (it ? (it.kind || "monthly") : "monthly"));
   $("xRemind").checked = it ? it.remind !== false : true;
+  document.querySelectorAll('input[name="xArea"]').forEach(r=>r.checked = r.value === expArea(it));
   expEditing = it; $("xPayNow").checked = false; $("expErr").textContent = "";
   syncExpDlg();
   const answer = await ask("dlgExp"); expEditing = null;
   if(answer !== "ok") return;
   const kind = xKind(), once = kind === "once";
   const nd = expData(), rec = {id: it ? it.id : uid(), name:$("xName").value.trim(), kind,
-    amount: round2(parseNum($("xAmount").value)), start: isDate($("xStart").value) ? $("xStart").value : (once ? today() : ""), note:$("xNote").value.trim()};
+    amount: round2(parseNum($("xAmount").value)), start: isDate($("xStart").value) ? $("xStart").value : (once ? today() : ""), note:$("xNote").value.trim(),
+    area: (document.querySelector('input[name="xArea"]:checked') || {}).value || "all"};
   if(!once) rec.remind = $("xRemind").checked;
   nd.items = it ? nd.items.map(x=>x.id === it.id ? rec : x) : [...nd.items, rec];
   if(once){                                                   // una tantum: il pagamento è la spesa stessa
