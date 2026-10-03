@@ -2945,7 +2945,7 @@ function listHTML(){
   const G = sc === "pt" ? (()=>{ const cl = clients.filter(usesPt), dc = clients.filter(ptReg);
       const noPkg = cl.filter(c=>!hasActivePt(c)).length, nIn = cl.filter(hasActivePt).length;
       return [["allClients", cl.length, `${cl.length === 1 ? "cliente" : "clienti"} personal 1 to 1`, "", ""],
-              ["onlyClients", noPkg, `${noPkg === 1 ? "cliente" : "clienti"} senza pacchetto attivo`, "pacchetto finito, in attesa di rinnovo, sedute singole o mai un pacchetto", ""],
+              ["onlyClients", noPkg, `${noPkg === 1 ? "cliente" : "clienti"} senza pacchetto attivo (attualmente)`, "da rinnovare o mai iniziato o che hanno fatto sedute singole", ""],
               ["ptClients", nIn, nIn === 1 ? "pacchetto in corso" : "pacchetti in corso", "", ""],
               ["dueClients", dc.length, dc.length === 1 ? "cliente da regolarizzare" : "clienti da regolarizzare", "saldo o sedute da completare", dc.length ? "c-owed" : ""],
               ["ptLeft", sLeft, sLeft === 1 ? "seduta da fare" : "sedute da fare", "", ""],
