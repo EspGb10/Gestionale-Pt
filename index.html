@@ -464,18 +464,8 @@ dialog textarea{min-height:64px;resize:vertical}
 .hint{font-size:.85rem;color:var(--muted);margin:6px 0 0;font-weight:400}
 .err{color:var(--danger);font-size:.88rem;margin:6px 0 0;min-height:1em}
 
-.choice{display:grid;gap:10px}
-.choice button{display:flex;align-items:center;gap:14px;text-align:left;width:100%;padding:14px;border:1.5px solid var(--line);border-radius:10px;background:var(--chalk)}
-.choice button:hover{border-color:var(--moss)}
-.choice .ico{flex:0 0 auto;width:46px;height:54px;border-radius:4px 12px 4px 4px;display:grid;place-items:center;color:#fff;font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:1rem}
-.choice .ico.w{background:#2B579A}
-.choice .ico.p{background:#B42318}
-.choice strong{display:block;font-size:1.05rem}
-.choice small{color:var(--muted)}
-.choice .ico.t{background:#0061FE}
-.choice button[hidden],dialog .seg label[hidden]{display:none}
+dialog .seg label[hidden]{display:none}
 
-.follow{border-left:5px solid var(--moss)}
 td.act{white-space:nowrap;position:sticky;right:0;background:var(--paper);box-shadow:-8px 0 8px -8px rgba(0,0,0,.25)}
 th:last-child{position:sticky;right:0;background:var(--paper)}
 a.btn{text-decoration:none}
@@ -643,7 +633,6 @@ body.has-syncbar{padding-top:calc(34px + env(safe-area-inset-top,0px))}
 .tick{display:inline-block;font-size:.78rem;font-weight:700;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:transparent}
 .tick.on{background:var(--moss);border-color:var(--moss);color:var(--on-moss)}
 #headTicks .ticks{margin:6px 0 10px}
-.openbtns{display:grid;gap:8px}
 .pkg-line{margin:2px 0 4px;font-size:.95rem;color:var(--muted)}
 .done-badge{display:inline-block;background:var(--moss);color:var(--on-moss);font-weight:700;border-radius:999px;padding:3px 12px;font-size:.9rem}
 .folder .pk{display:block;font-size:.82rem;font-weight:600;color:var(--muted);margin:-2px 0 6px}
@@ -663,24 +652,7 @@ dialog label[hidden]{display:none}
 dialog label.check.carry{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-weight:600}
 dialog label.check.carry input{width:22px;height:22px;flex:none;margin-top:1px}
 dialog label.check.carry[hidden]{display:none}
-.folder .sh{display:block;margin-top:6px;font-size:.8rem;font-weight:600;color:var(--moss)}
-.folder .sh.stale{color:var(--owed)}
-.follow .state{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin:4px 0 12px;font-size:.95rem}
-.follow .svc{display:inline-block;padding:3px 10px;border-radius:999px;font-weight:600;font-size:.82rem;background:var(--moss-soft);color:var(--moss)}
-.follow .svc.dbx{background:#DCE8FF;color:#0048BD}
-.follow .stale{color:var(--owed);font-weight:600}
-.follow .fresh{color:var(--moss);font-weight:600}
-.follow .acts{display:flex;flex-wrap:wrap;gap:8px}
-.seg.multi input:checked + span::before{content:"✓ "}
-#followSvcHint,#linkText,#linkWarn{white-space:pre-line}
-.lk-t{margin:10px 0 2px;font-weight:700;font-size:.9rem}
-.linkbox{display:flex;gap:8px;margin:6px 0 4px}
-.linkbox input{flex:1;min-width:0;font-size:14px!important}
-.bigbtns{display:grid;gap:8px;margin-top:12px}
-.bigbtns a{text-decoration:none;text-align:center}
 .warn{background:var(--owed-soft);color:var(--pine);border-radius:8px;padding:10px 12px;font-size:.88rem;margin:10px 0 0}
-@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .follow .svc.dbx{background:#15294D;color:#9DBEFF} }
-:root[data-theme="dark"] .follow .svc.dbx{background:#15294D;color:#9DBEFF}
 
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--pine);color:var(--chalk);padding:10px 16px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;text-align:center;z-index:10}
 .toast.show{opacity:1}
@@ -1065,7 +1037,6 @@ dialog p.hint.warn-hint{background:var(--owed-soft);color:var(--pine);border-rad
   <h3>Rinomina cliente</h3>
   <label for="nName">Nome e cognome</label>
   <input id="nName" autocomplete="off">
-  <label class="check carry" id="nFolderL" hidden><input type="checkbox" id="nFolder" checked><span id="nFolderText"></span></label>
   <p class="err" id="nErr" role="alert"></p>
   <div class="dlg-actions">
     <button class="btn ghost" value="cancel" formnovalidate>Annulla</button>
@@ -1146,22 +1117,6 @@ dialog p.hint.warn-hint{background:var(--owed-soft);color:var(--pine);border-rad
   </div>
 </form></dialog>
 
-<dialog id="dlgExport"><form method="dialog">
-  <h3 id="dlgExportTitle">Esporta cartella</h3>
-  <p class="note-box" id="exportNote"></p>
-  <div id="destWrap" hidden style="margin-bottom:14px">
-    <label style="margin-top:0">Dove salvarla</label>
-    <div class="seg" id="destSeg"><label id="destDeviceL"><input type="radio" name="dest" value="device" checked><span>Dispositivo</span></label><label><input type="radio" name="dest" value="drive"><span>Drive</span></label><label><input type="radio" name="dest" value="dropbox"><span>Dropbox</span></label></div>
-    <p class="hint" id="destHint"></p>
-  </div>
-  <div class="choice">
-    <button value="docx" id="chDocx"><span class="ico w">DOCX</span><span><strong>Documento Word</strong><small>Modificabile, e si può reimportare</small></span></button>
-    <button value="pdf" id="chPdf"><span class="ico p">PDF</span><span><strong>Documento PDF</strong><small>Da inviare o stampare, e si può reimportare</small></span></button>
-    <button value="txt" id="chTxt" hidden><span class="ico t">TXT</span><span><strong>File di testo</strong><small>Dropbox accetta solo testo: si legge da telefono e si può reimportare</small></span></button>
-  </div>
-  <div class="dlg-actions"><button class="btn ghost" value="cancel">Annulla</button></div>
-</form></dialog>
-
 <dialog id="dlgShare"><form method="dialog" id="fShare">
   <h3 id="shareTitle">Invia dati al cliente</h3>
   <p class="hint" style="margin:-6px 0 8px">Scegli cosa vedrà il cliente: nel file entrano solo le caselle spuntate. Le tue scelte vengono ricordate per questa cartella.</p>
@@ -1178,64 +1133,6 @@ dialog p.hint.warn-hint{background:var(--owed-soft);color:var(--pine);border-rad
   <div class="dlg-actions">
     <button class="btn ghost" value="cancel" formnovalidate>Annulla</button>
     <button class="btn primary" value="ok" id="shareOk">Crea e invia</button>
-  </div>
-</form></dialog>
-
-<dialog id="dlgFollow"><form method="dialog" id="fFollow">
-  <h3 id="followTitle">Segui l'andamento con il cliente</h3>
-  <p class="note-box">Creo una cartella solo per questo cliente e la condivido con la sua email, in sola lettura. Ogni volta che premi “Aggiorna per il cliente” il riepilogo nella cartella viene sostituito con quello nuovo: il cliente riapre lo stesso link e vede i dati aggiornati.</p>
-  <label>Dove (puoi sceglierli entrambi)</label>
-  <div class="seg multi"><label><input type="checkbox" name="followSvc" value="drive"><span>Google Drive</span></label><label><input type="checkbox" name="followSvc" value="dropbox"><span>Dropbox</span></label></div>
-  <p class="hint" id="followSvcHint"></p>
-  <label for="followEmail">Email del cliente</label>
-  <input id="followEmail" type="email" autocomplete="off" placeholder="es. mario.rossi@gmail.com">
-  <p class="err" id="followErr" role="alert"></p>
-  <label for="followFolder">Nome della cartella</label>
-  <input id="followFolder" autocomplete="off" placeholder="es. Personal Francesco">
-  <p class="hint" id="followFolderHint"></p>
-  <h4 id="followWhatL">Cosa vedrà il cliente</h4>
-  <div class="seg seg-wrap what-seg" role="radiogroup" aria-labelledby="followWhatL" style="margin-top:10px"><label><input type="radio" name="followWhat" value="ck"><span><i class="wi">📋 </i>Check</span></label><label><input type="radio" name="followWhat" value="pt"><span><i class="wi">🏋️ </i>Personal 1 to 1</span></label><label><input type="radio" name="followWhat" value="both"><span>Entrambi</span></label></div>
-  <p class="hint" id="followWhatHint"></p>
-  <div id="followBoxes"></div>
-  <label for="followMsg">Messaggio per il cliente (facoltativo, resta finché non lo cambi)</label>
-  <textarea id="followMsg" placeholder="es. Ottimo lavoro questo mese! Ci vediamo lunedì."></textarea>
-  <label for="followTrainer">Il tuo nome (facoltativo)</label>
-  <input id="followTrainer" autocomplete="off" placeholder="es. Marco Verdi">
-  <div class="dlg-actions">
-    <button class="btn ghost" value="cancel" formnovalidate>Annulla</button>
-    <button class="btn primary" value="ok" id="followOk">Condividi e aggiorna</button>
-  </div>
-</form></dialog>
-
-<dialog id="dlgOpen"><form method="dialog">
-  <h3 id="openTitle"></h3>
-  <p id="openText" style="white-space:pre-line"></p>
-  <div class="bigbtns"><a class="btn primary" id="openLink" href="#" target="_blank" rel="noopener">Apri</a>
-    <a class="btn ghost" id="openWeb" href="#" target="_blank" rel="noopener" hidden>Apri nel browser</a></div>
-  <div class="dlg-actions"><button class="btn" value="ok">Chiudi</button></div>
-</form></dialog>
-
-<dialog id="dlgLink"><form method="dialog">
-  <h3 id="linkTitle">Link per il cliente</h3>
-  <p id="linkText"></p>
-  <div id="linkRows"></div>
-  <div class="bigbtns">
-    <a class="btn primary" id="linkWa" href="#" target="_blank" rel="noopener">Mandalo su WhatsApp</a>
-    <a class="btn ghost" id="linkMail" href="#" target="_blank" rel="noopener">Mandalo per email</a>
-  </div>
-  <p class="warn" id="linkWarn" hidden></p>
-  <div class="dlg-actions"><button class="btn" value="ok">Fatto</button></div>
-</form></dialog>
-
-<dialog id="dlgRename"><form method="dialog" id="fRename">
-  <h3>Rinomina cartella</h3>
-  <p class="note-box">La cartella viene rinominata su Google Drive e su Dropbox. Il link che il cliente ha già ricevuto continua a funzionare.</p>
-  <label for="renameInput">Nuovo nome</label>
-  <input id="renameInput" autocomplete="off" placeholder="es. Personal Francesco">
-  <p class="err" id="renameErr" role="alert"></p>
-  <div class="dlg-actions">
-    <button class="btn ghost" value="cancel" formnovalidate>Annulla</button>
-    <button class="btn primary" value="ok">Rinomina</button>
   </div>
 </form></dialog>
 
@@ -1317,7 +1214,7 @@ function normalize(c){
     check: normCheck(c.check),                                               // servizio check (consulenze)
     ptOnAt: /^\d{4}-\d{2}-\d{2}$/.test(c.ptOnAt||"") ? c.ptOnAt : "",   // personal riattivato a mano in questa data (dopo i 5 mesi di fermo)
     share: normShare(c.share),
-    follow: normFollow(c.follow)
+    follow: c.follow && typeof c.follow === "object" ? c.follow : null       // (dati della vecchia condivisione con il cliente: conservati così come sono, non più usati)
   };
 }
 /* scelte di “Invia dati al cliente”, ricordate per ogni cartella: servizio (check / personal / entrambi), caselle dei due riquadri, formato.
@@ -1326,22 +1223,6 @@ function normShare(s){
   if(!s || typeof s !== "object" || !(s.inc || s.pt || s.ck)) return null;
   const B = o => { const r = {}; if(o && typeof o === "object") Object.keys(o).forEach(k=>{ if(typeof o[k] === "boolean") r[k] = o[k]; }); return r; };
   return {what: ["ck","pt","both"].includes(s.what) ? s.what : "", ck: B(s.ck), pt: B(s.pt || s.inc), format: s.format === "docx" ? "docx" : "pdf"};
-}
-/* Condivisione con il cliente (cartella su Drive o Dropbox, aggiornata da te) */
-function normFollow(f){
-  if(!f || typeof f !== "object") return null;
-  const o = x => x && typeof x === "object" ? x : {};
-  const d = o(f.drive), x = o(f.dropbox), S = v => String(v || "");
-  /* versioni precedenti: un solo servizio (svc) oppure l'oggetto services */
-  const legacyOn = s => f.services && typeof f.services === "object" ? !!f.services[s] : f.svc === s;
-  return {
-    email: S(f.email), message: S(f.message), folderName: S(f.folderName),
-    inc: f.inc && typeof f.inc === "object" ? {...f.inc} : null,
-    sel: normShare(f.sel || (f.inc && typeof f.inc === "object" ? {inc:f.inc, what:"pt"} : null)),   // cosa vede il cliente: stessi riquadri di “Invia dati al cliente”
-    drive: {on: typeof d.on === "boolean" ? d.on : legacyOn("drive"), folderId:S(d.folderId), folderName:S(d.folderName), renameTo:S(d.renameTo), fileId:S(d.fileId), sharedWith:S(d.sharedWith)},
-    dropbox: {on: typeof x.on === "boolean" ? x.on : legacyOn("dropbox"), id:S(x.id || x.folderId), path:S(x.path), folderName:S(x.folderName), renameTo:S(x.renameTo), fileId:S(x.fileId), filePath:S(x.filePath), sharedWith:S(x.sharedWith), url:S(x.url)},
-    updated: S(f.updated), sig: S(f.sig)
-  };
 }
 /* Pacchetti conclusi, tenuti nello storico della cartella */
 /* Lezioni saltate non recuperabili: si scalano dal pacchetto ma non sono sedute fatte */
@@ -1670,12 +1551,6 @@ function pkgHistory(c){
   if(Number(c.totalSessions) > 0) rows.push({start:c.start||"", end:c.closed || closeDateOf(c), total:Number(c.totalSessions)||0, price:round2((Number(c.price)||0) - (Number(c.carriedIn)||0)), current:true});
   return rows.sort((a,b)=>(a.start||"9999").localeCompare(b.start||"9999"));
 }
-function dPkgHistory(c){
-  const W = DC.W, wd = [2300, 2300, 1500, W-6100];
-  const rows = [dHeadRow(["Inizio","Fine","Sedute","Costo del pacchetto"], wd)];
-  pkgHistory(c).forEach(r=>rows.push(wRow([wCell(wPara(wRun(itDate(r.start))), wd[0]), wCell(wPara(wRun(r.end ? itDate(r.end) : (r.current ? "in corso" : "—"))), wd[1]), wCell(wPara(wRun(String(r.total))), wd[2]), wCell(wPara(wRun(eurDoc(r.price))), wd[3])])));
-  return wTable(rows, wd);
-}
 /* tabella delle lezioni saltate (Data · Esito): si rilegge all'importazione */
 function dMisses(c){
   const W = DC.W, wd = [2400, W-2400];
@@ -1774,8 +1649,8 @@ function docxFullBody(c, what){
   return b;
 }
 /* ===== Riepilogo da mandare al cliente (solo ciò che scegli) =====
-   Il documento viene prima descritto una volta sola (shareDoc), poi scritto in Word, PDF o testo:
-   così i tre formati contengono sempre le stesse cose, nello stesso ordine (prima Check, poi Personal 1 to 1). */
+   Il documento viene prima descritto una volta sola (shareDoc), poi scritto in Word o in PDF:
+   così i due formati contengono sempre le stesse cose, nello stesso ordine (prima Check, poi Personal 1 to 1). */
 const docPerSes = (price, n) => n > 0 ? round2((Number(price) || 0) / n) : 0;
 function sharePtSections(c, inc){
   const s = stats(c), av = shareAvail(c).pt, on = k => !!(inc && inc[k] && av[k]), out = [];
@@ -1831,7 +1706,7 @@ function shareCkSections(c, inc){
   const rows = [], boxes = [];
   if(p){
     const d = ckDoneOf(k, p), paid = ckPaidOf(p), due = Math.max(round2(p.price - paid), 0), left = Math.max(p.count - d, 0);
-    const settled = p.price > 0 && due <= 0.004, complete = p.count > 0 && d >= p.count, credit = round2(paid - p.price);
+    const settled = p.price > 0 && due <= 0.004, complete = p.count > 0 && d >= p.count;
     if(on("consulenze")) boxes.push([`${d} su ${p.count}`, complete ? "consulenze completate" : "consulenze fatte", complete ? "ok" : "plain"], [String(left), left === 1 ? "consulenza mancante" : "consulenze mancanti", "plain"]);
     if(on("pagamenti")) boxes.push([eurDoc(paid), "pagato", "ok"], [eurDoc(due), settled ? "SALDATO" : "da saldare", due > 0 ? "owed" : "ok"]);
     if(on("consulenze")){
@@ -2131,7 +2006,6 @@ function pdfKit(jsPDF){
     if(withNotes) K.table([{t:"N°",w:14,muted:true},{t:"Data",w:32},{t:"Note seduta",w:CW-46}], list.map((x,i)=>[String(i+1), itDate(x.date), x.note||"—"]));
     else K.table([{t:"N°",w:14,muted:true},{t:"Data",w:CW-14}], list.map((x,i)=>[String(i+1), itDate(x.date)]));
   };
-  K.pkgHistory = c => K.table([{t:"Inizio",w:45},{t:"Fine",w:45},{t:"Sedute",w:30},{t:"Costo del pacchetto",w:CW-120}], pkgHistory(c).map(r=>[itDate(r.start), r.end ? itDate(r.end) : (r.current ? "in corso" : "—"), String(r.total), eurDoc(r.price)]));
   K.expTable = rows => K.table([{t:"Data",w:24},{t:"Voce",w:58},{t:"Tipo",w:26},{t:"Attività",w:34},{t:"Importo",w:CW-142}], rows);
   K.misses = c => K.table([{t:"Data",w:40},{t:"Esito",w:CW-40}], missSorted(c).map(x=>[itDate(x.date), MISS_DOC.lost]));
   K.payments = c => {
@@ -2211,81 +2085,6 @@ function sharePdf(doc, jsPDF){
   return K.doc;
 }
 function buildClientPdf(c, jsPDF, o){ return sharePdf(shareDoc(c, o), jsPDF); }
-
-/* ===== TESTO (per Dropbox, che accetta solo file di testo) ===== */
-const tLine = "────────────────────────────────────────";
-function tDots(done, total){
-  const n = Math.max(total, done); if(!n) return "";
-  const shown = Math.min(n, 40);
-  let t = ""; for(let i=0;i<shown;i++) t += i < done ? "●" : "○";
-  return t + (n > shown ? ` +${n-shown}` : "");
-}
-function tHead(t){ return `\n${t.toUpperCase()}\n${tLine}\n`; }
-function tKv(rows){ return rows.filter(r=>r[1]!==undefined).map(r=>`${r[0]}: ${r[1] === "" ? "—" : r[1]}`).join("\n") + "\n"; }
-function tSessions(c, withNotes){
-  if(!c.sessionLog.length) return "Nessuna seduta registrata.\n";
-  return [...c.sessionLog].sort(byDateAsc).map((x,i)=>`${String(i+1).padStart(3," ")}.  ${itDate(x.date)}${withNotes && x.note ? "   " + x.note : ""}`).join("\n") + "\n";
-}
-function tMisses(c){
-  return missSorted(c).map(x=>`  ${itDate(x.date)}   ${MISS_DOC.lost}`).join("\n") + "\n";
-}
-function tPayments(c){
-  if(!c.payLog.length) return "Nessun pagamento registrato.\n";
-  return [...c.payLog].sort(byDateAsc).map(x=>`${itDate(x.date)}   ${eurDoc(x.amount)}${x.method ? "   " + x.method : ""}${x.note ? "   " + x.note : ""}`).join("\n") + "\n";
-}
-const tSess = s => sessRows(s);
-const tPay = s => [["Totale da pagare", eurDoc(s.price)], ...carriedInRows(s), ["Già pagato", eurDoc(s.paid)], ...carriedOutRows(s), [s.due<0?"Credito":"Da saldare", eurDoc(Math.abs(s.due))], ...payStateRows(s)];
-function tPackages(c, o){
-  let t = "";
-  pastPackages(c).forEach(p=>{
-    const pc = pkgClient(c, p), s = stats(pc);
-    t += tHead(pkgTitle(p)) + tKv([...tSess(s), ...(o.pay ? tPay(s) : [])]);
-    if(o.sessions && pc.sessionLog.length) t += "Sedute:\n" + tSessions(pc, o.notes);
-    if(o.sessions && (pc.missLog || []).length) t += "Lezioni saltate:\n" + tMisses(pc);
-    if(o.payments && pc.payLog.length) t += "Pagamenti:\n" + tPayments(pc);
-  });
-  return t;
-}
-
-/* Scheda completa in testo: leggibile, e con in fondo il codice per reimportarla */
-function buildFullText(c, what){
-  const s = stats(c), P = fullParts(c, what);
-  const bar = t => `\n\n════════  ${t.toUpperCase()}  ════════\n`;
-  let t = `SCHEDA CLIENTE${what === "ck" ? " · CHECK" : what === "pt" ? " · PERSONAL 1 TO 1" : ""}\n${c.name}\nAggiornata al ${itDate(today())}\n`;
-  if(P.ck){
-    if(P.both) t += bar(PART_LABEL.ck);
-    checkFullSections(c).forEach(([h, rows])=>{ t += tHead(h) + tKv(rows); });
-  }
-  if(!P.pt) t += tHead("Dati cliente") + tKv([["Telefono", c.phone], ["Email", c.email]]);
-  else {
-    if(P.both) t += bar(PART_LABEL.pt);
-    t += tHead("Pacchetto e pagamenti") + tKv([...tSess(s), ...tPay(s)]);
-    const d = tDots(s.done, s.total); if(d) t += d + "\n";
-    t += tHead("Dati cliente e allenamento") + tKv([["Telefono", c.phone], ["Email", c.email], ["Volte a settimana", c.freq===""?"":String(c.freq)],
-         ["Giorni di allenamento", c.days.join(", ")], ["Allenamento", c.training], ["Note", c.notes]]);
-    t += tHead("Storico sedute") + tSessions(c, true);
-    if((c.missLog || []).length) t += tHead("Lezioni saltate") + tMisses(c);
-    t += tHead("Storico pagamenti") + tPayments(c);
-    t += tPackages(c, {pay:true, sessions:true, notes:true, payments:true});
-  }
-  t += `\n${tLine}\nCodice per reimportare la scheda nel gestionale (non modificarlo):\nPTGEST1:${b64enc(JSON.stringify(partData(c, what)))}\n`;
-  return t;
-}
-/* Riepilogo in testo per il cliente (solo ciò che scegli) */
-function shareText(doc){
-  let t = `${doc.label}\n${doc.name}\n${doc.date}${doc.trainer ? "\nPersonal trainer: " + doc.trainer : ""}\n`;
-  if(doc.message) t += tHead("Messaggio dal tuo personal trainer") + doc.message + "\n";
-  doc.sections.forEach(x=>{
-    if(x.t === "part") t += `\n\n════════  ${x.title.toUpperCase()}  ════════\n`;
-    else if(x.t === "dots"){ const d = tDots(x.done, x.total); if(d) t += "\n" + d + "\n"; }
-    else if(x.t === "h") t += tHead(x.title);
-    else if(x.t === "kv") t += tKv(x.rows);
-    else if(x.t === "table") t += x.rows.map(r=>"  " + r.filter(v=>v !== "").join("   ")).join("\n") + "\n";
-    else if(x.t === "text") t += (x.text || "—") + "\n";
-  });
-  return t;
-}
-function buildClientText(c, o){ return shareText(shareDoc(c, o)); }
 
 /* ===== IMPORT: lettura tabelle ===== */
 function xmlDecode(s){ return s.replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&#(\d+);/g,(m,d)=>String.fromCharCode(d)).replace(/&amp;/g,"&"); }
@@ -2377,7 +2176,7 @@ let clients = [];
 let openId = null;
 let query = "";
 let loaded = false;
-let settings = {trainerName:"", driveFolderId:"", exportDest:"device", backupDest:"drive", followSvcs:["drive"]};
+let settings = {trainerName:""};
 const SETTINGS_KEY = "pt_settings_v1";
 const SETTINGS_ID = "_settings";
 
@@ -2393,7 +2192,7 @@ const toInt = v => { const n = parseInt(String(v||"").replace(/\D/g,""), 10); re
    File HTML: i dati stanno nel browser (localStorage). */
 const store = {
   mode: "local",   // "cloud" | "local"
-  col: null, downloads: null, mcp: null,
+  col: null, downloads: null,
   pending: new Map(),   // id -> {timer, writing, ver, savedVer}
   dirty: new Map(),     // id -> cliente non ancora confermato dal server
   deleting: new Set(),
@@ -2682,8 +2481,8 @@ async function initStore(){
   let db = null, user = null, uidv = null;
   if(window.claude && typeof window.claude.use === "function"){
     try{
-      [db, user, store.downloads, store.mcp] = await Promise.all([
-        window.claude.use("db"), window.claude.use("user"), window.claude.use("downloads"), window.claude.use("mcp")
+      [db, user, store.downloads] = await Promise.all([
+        window.claude.use("db"), window.claude.use("user"), window.claude.use("downloads")
       ]);
       if(db && user) uidv = await user.id();
     }catch(e){ console.warn(e); db = null; }
@@ -2706,7 +2505,7 @@ function applySnapshot(snap){
   const map = new Map();
   snap.docs.forEach(d=>{
     const data = d.data(); if(!data) return;
-    if(d.id === SETTINGS_ID){ if(settingsWrites > 0) return; settings = {trainerName:"", driveFolderId:"", exportDest:"device", backupDest:"drive", followSvcs:["drive"], ...clone(data)}; return; }
+    if(d.id === SETTINGS_ID){ if(settingsWrites > 0) return; settings = {trainerName:"", ...clone(data)}; return; }
     map.set(d.id, normalize({...clone(data), id:d.id}));
   });
   store.dirty.forEach((c,id)=>map.set(id, c));        // le modifiche non ancora salvate vincono
@@ -2802,197 +2601,6 @@ function setStatus(s, msg){
 }
 document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState === "hidden") flushAll(); });
 window.addEventListener("pagehide", flushAll);
-
-/* ======================= CLOUD: GOOGLE DRIVE E DROPBOX ======================= */
-const DRIVE = "Google Drive", DROPBOX = "Dropbox", DRIVE_FOLDER = "Gestionale PT";
-const DBX_ROOT = "/Gestionale PT";
-const SVC_NAME = {drive:"Google Drive", dropbox:"Dropbox"};
-const cloudAvailable = () => !!store.mcp;
-/* indirizzi per aprire le cartelle nell'app o nel sito di Dropbox e Drive */
-const dbxWebUrl = path => "https://www.dropbox.com/home" + String(path||DBX_ROOT).split("/").map(encodeURIComponent).join("/");
-const driveWebUrl = id => id ? `https://drive.google.com/drive/folders/${id}` : "https://drive.google.com/drive/my-drive";
-/* Su iPhone l'app Dropbox si apre con il suo indirizzo speciale; Dropbox non permette di saltare
-   a una cartella precisa dell'app, per questo sotto c'è anche il sito */
-const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-const DBX_APP = "dbapi-2://";
-const dbxOpenUrl = path => isIOS ? DBX_APP : dbxWebUrl(path);
-const dbxOpenLabel = () => isIOS ? "Apri l'app Dropbox" : "Apri la cartella su Dropbox";
-async function showOpen(title, text, url, label, webUrl){
-  $("openTitle").textContent = title; $("openText").textContent = text;
-  $("openLink").href = url; $("openLink").textContent = label;
-  $("openWeb").hidden = !webUrl; if(webUrl) $("openWeb").href = webUrl;
-  await ask("dlgOpen");
-}
-const dbxAppHint = where => isIOS ? `\n\nNell'app Dropbox tocca la cartella “${where}”.` : "";
-const driveAvailable = cloudAvailable;
-const STOP_CODES = ["server_not_connected","server_not_found","needs_reauth","not_in_manifest","consent_required","blocked_by_policy","approval_required","selection_required","not_granted","capability_disabled","capability_removed"];
-
-function cloudErrorText(e, svc){
-  const N = SVC_NAME[svc] || "il servizio", code = e && e.code;
-  const where = svc === "dropbox" ? `nella cartella “${DRIVE_FOLDER}” su Dropbox` : `nella cartella “${DRIVE_FOLDER}” sul tuo Drive`;
-  switch(code){
-    case "server_not_connected": case "server_not_found":
-      return `${N} non è collegato. Collegalo da claude.ai in Impostazioni → Connettori, poi riprova.`;
-    case "needs_reauth":
-      return `Il collegamento con ${N} è scaduto. Ricollegalo da claude.ai in Impostazioni → Connettori, poi riprova.`;
-    case "selection_required":
-      return `Hai più account ${N} collegati: scegli quale usare nel messaggio che compare in alto, poi riprova.`;
-    case "not_in_manifest": case "consent_required":
-      return `Non hai dato il permesso di usare ${N} in questa pagina. Riprova e, quando te lo chiede, scegli di consentire.`;
-    case "blocked_by_policy": case "approval_required":
-      return `Le impostazioni del tuo account non permettono a questa pagina di usare ${N}.`;
-    case "server_unavailable": case "upstream_error": case "cancelled":
-      return `${N} non ha risposto in tempo. L'operazione potrebbe essere andata a buon fine comunque: controlla ${where} prima di riprovare.`;
-    case "tool_error":
-      return `${N} ha rifiutato l'operazione` + (e.message ? ": " + e.message : ".");
-    case "not_granted": case "capability_disabled": case "capability_removed":
-      return `${N} non è disponibile in questa visualizzazione.`;
-    default:
-      return `Non sono riuscito a completare l'operazione su ${N}. Riprova tra poco.`;
-  }
-}
-const driveErrorText = e => cloudErrorText(e, "drive");
-/* Il codice Dropbox (es. ALREADY_EXISTS) arriva nel messaggio o nella risposta completa dell'errore */
-const errHas = (e, word) => !!e && e.code === "tool_error" && new RegExp(word).test(String(e.message || "") + " " + (()=>{ try{ return JSON.stringify(e.result || ""); }catch(_){ return ""; } })());
-
-async function mcpCall(server, tool, input){
-  const r = await store.mcp.callTool(server, tool, input, {cache:false});
-  let p = r && r.payload;
-  if(typeof p === "string"){ try{ p = JSON.parse(p); }catch(_){ } }
-  return p && typeof p === "object" ? p : {};
-}
-const driveCall = (tool, input) => mcpCall(DRIVE, tool, input);
-const dbxCall = (tool, input) => mcpCall(DROPBOX, tool, input);
-
-function stampNow(){
-  const d = new Date(), p = n => String(n).padStart(2,"0");
-  return `${p(d.getDate())}-${p(d.getMonth()+1)}-${d.getFullYear()} ore ${p(d.getHours())}.${p(d.getMinutes())}`;
-}
-
-/* ---------- Google Drive ---------- */
-async function driveMainFolder(){
-  if(settings.driveFolderId) return settings.driveFolderId;
-  const found = await driveCall("search_files", {query:`title = '${DRIVE_FOLDER}' and mimeType = 'application/vnd.google-apps.folder'`, pageSize:5, excludeContentSnippets:true});
-  const f = Array.isArray(found.files) ? found.files.find(x=>x && x.id && x.canAddChildren !== false) : null;
-  let id = f && f.id;
-  if(!id){
-    const made = await driveCall("create_file", {title:DRIVE_FOLDER, contentMimeType:"application/vnd.google-apps.folder"});
-    id = made.id;
-  }
-  if(!id) throw {code:"tool_error", message:"cartella non creata"};
-  settings.driveFolderId = id; saveSettings();
-  return id;
-}
-async function driveSubFolder(parentId, title){
-  const made = await driveCall("create_file", {title, parentId, contentMimeType:"application/vnd.google-apps.folder"});
-  if(!made.id) throw {code:"tool_error", message:"cartella non creata"};
-  return made.id;
-}
-/* Crea una sottocartella della cartella principale; se la principale è stata eliminata, la ricrea una volta */
-async function driveSubOfMain(title){
-  const main = await driveMainFolder();
-  try{ return await driveSubFolder(main, title); }
-  catch(e){
-    if(e && e.code === "tool_error" && settings.driveFolderId === main){ settings.driveFolderId = ""; return await driveSubFolder(await driveMainFolder(), title); }
-    throw e;
-  }
-}
-function blobToBase64(blob){
-  return new Promise((res, rej)=>{ const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1] || ""); r.onerror = () => rej(r.error); r.readAsDataURL(blob); });
-}
-async function driveUpload(blob, filename, parentId){
-  const ext = filename.split(".").pop();
-  const b64 = await blobToBase64(blob);
-  const res = await driveCall("create_file", {title:filename, parentId, base64Content:b64, contentMimeType:MIME[ext] || "application/octet-stream", disableConversionToGoogleType:true});
-  if(!res.id) throw {code:"tool_error", message:"file non creato"};
-  return res;
-}
-async function driveSave(blob, filename){
-  const folder = await driveMainFolder();
-  try{ return await driveUpload(blob, filename, folder); }
-  catch(e){
-    if(e && e.code === "tool_error" && settings.driveFolderId === folder){
-      settings.driveFolderId = ""; const again = await driveMainFolder();
-      return await driveUpload(blob, filename, again);
-    }
-    throw e;
-  }
-}
-
-/* ---------- Dropbox (solo file di testo) ---------- */
-const dbxName = s => safeName(s).replace(/[.\s]+$/,"").normalize("NFC") || "Cliente";
-let dbxRootOk = false;
-async function dbxEnsureFolder(path){
-  try{ await dbxCall("create_folder", {path}); }
-  catch(e){ if(!errHas(e, "ALREADY_EXISTS")) throw e; }
-}
-async function dbxRoot(force){
-  if(dbxRootOk && !force) return DBX_ROOT;
-  await dbxEnsureFolder(DBX_ROOT);
-  dbxRootOk = true; return DBX_ROOT;
-}
-/* Crea un file di testo; se esiste già un file con lo stesso nome ne sceglie uno libero */
-async function dbxWriteText(folder, filename, content){
-  const dot = filename.lastIndexOf("."), base = filename.slice(0, dot), ext = filename.slice(dot);
-  for(let i=1; i<=5; i++){
-    const path = `${folder}/${i===1 ? base : `${base} (${i})`}${ext}`.normalize("NFC");
-    try{
-      const r = await dbxCall("create_file", {path, content});
-      const f = r.file || {};
-      return {path: f.path_display || path, name: f.name || filename, id: f.file_id || ""};
-    }catch(e){ if(!errHas(e, "ALREADY_EXISTS")) throw e; }
-  }
-  throw {code:"tool_error", message:"esistono già troppi file con questo nome"};
-}
-/* Salva nella cartella principale; se è stata eliminata la ricrea una volta */
-async function dbxSaveText(filename, content){
-  await dbxRoot();
-  try{ return await dbxWriteText(DBX_ROOT, filename, content); }
-  catch(e){
-    if(errHas(e, "PARENT_NOT_FOUND")){ await dbxRoot(true); return await dbxWriteText(DBX_ROOT, filename, content); }
-    throw e;
-  }
-}
-async function dbxDelete(path){ return dbxCall("delete", {entries:[{source_path:path}]}); }
-/* Ritrova una cartella dal suo codice (o percorso): funziona anche se l'hai rinominata dall'app Dropbox.
-   null = non esiste più */
-async function dbxResolve(idOrPath){
-  try{
-    const r = await dbxCall("get_file_metadata", {path_or_file_id:idOrPath});
-    const f = r.folder;
-    if(r.metadata_type !== "folder" || !f || !f.path_display) return null;
-    return {id: f.id || "", path: f.path_display, name: f.name || f.path_display.split("/").pop()};
-  }catch(e){ if(errHas(e, "NOT_FOUND")) return null; throw e; }
-}
-/* Le operazioni lunghe di Dropbox (rinomina) finiscono in un secondo momento: aspetto l'esito */
-async function dbxWaitJob(r){
-  for(let i=0; i<8 && r && r.status === "in_progress" && r.operation_id; i++)
-    r = await dbxCall("check_job_status", {operation_id:r.operation_id, wait_ms:3000});
-  return r || {};
-}
-async function dbxRenameFolder(folderId, parentPath, newName){
-  const r = await dbxWaitJob(await dbxCall("move", {entries:[{source_path:folderId, destination_path:`${parentPath}/${newName}`.normalize("NFC")}]}));
-  if(r.status !== "completed") throw {code:"server_unavailable", message:"rinomina non ancora confermata"};
-  const e = (r.move_result && r.move_result.entries || [])[0];
-  if(!e || e.entry_status !== "success"){
-    const fc = e && e.failure ? String(e.failure.error_code || "") : "";
-    throw {code:"tool_error", conflict:/conflict/.test(fc), message:(e && e.failure && (e.failure.message || fc)) || "rinomina non riuscita"};
-  }
-  const o = e.object || {};
-  return {path: o.path_display || `${parentPath}/${newName}`, name: o.name || newName};
-}
-/* Drive: la cartella esiste ancora? (se è nel cestino Drive risponde "non trovata") */
-async function driveResolve(id){
-  try{
-    const r = await driveCall("get_file_metadata", {fileId:id, excludeContentSnippets:true});
-    if(!r || !r.id || r.trashed === true) return null;
-    return {id:r.id, name:r.title || ""};
-  }catch(e){
-    const t = e && e.code === "tool_error" ? String(e.message||"") + " " + (()=>{ try{ return JSON.stringify(e.result||""); }catch(_){ return ""; } })() : "";
-    if(/not\s*found|notFound|404/i.test(t)) return null;
-    throw e;
-  }
-}
 
 /* ======================= LIBRERIE ======================= */
 const LIBS = {
@@ -3194,7 +2802,6 @@ function listHTML(){
     const s=stats(c); sDone+=s.done; sLeft+=(c.personal !== false ? s.left : 0); paid+=s.paid; due+=Math.max(s.due,0) + checkDue(c);
     c.packages.forEach(p=>{ const ps=stats(pkgClient(c,p)); sDone+=ps.done; paid+=ps.paid; due+=Math.max(ps.due,0); });   // anche i pacchetti vecchi
   });
-  const needCount = clients.filter(followNeeds).length;
   const q = query.trim();
   const found = clients.filter(c=>nameMatches(c.name, q));
   const list = found.filter(FILTERS[listFilter] ? FILTERS[listFilter].test : ()=>true).sort((a,b)=>a.name.localeCompare(b.name,"it"));
@@ -3207,10 +2814,6 @@ function listHTML(){
       ${clients.length ? `<button class="btn ghost" data-a="exportDocs" id="exportDocsBtn">Esporta dati programma</button>` : ""}
       ${clients.length ? `<button class="btn ghost" data-a="openStats">📊 Statistiche andamento</button>` : ""}
       <button class="btn ghost" data-a="openExp" id="expBtn">💸 Spese di gestione${expDueCount() ? ` <span class="badge">${expDueCount()} da pagare</span>` : ""}</button>
-      ${cloudAvailable() && clients.length ? `<button class="btn ghost" data-a="backup">Backup su Drive o Dropbox</button>` : ""}
-      ${cloudAvailable() ? `<a class="btn ghost" id="openDbx" href="${dbxOpenUrl(DBX_ROOT)}" target="_blank" rel="noopener">${isIOS ? "Apri l'app Dropbox" : "Apri su Dropbox"}</a>
-        <a class="btn ghost" id="openDrive" href="${driveWebUrl(settings.driveFolderId)}" target="_blank" rel="noopener">Apri su Drive</a>` : ""}
-      ${cloudAvailable() && needCount ? `<button class="btn" data-a="followAll">Aggiorna i clienti condivisi (${needCount})</button>` : ""}
       <button class="btn primary" data-a="newClient">Nuova cartella</button>
     </div></header>`;
 
@@ -3296,7 +2899,6 @@ function listHTML(){
       ${both
         ? `<span class="fviews"><span class="fv${view === "ck" ? "" : " off"}" aria-hidden="${view !== "ck"}">${checkCardHTML(c)}</span><span class="fv${view === "pt" ? "" : " off"}" aria-hidden="${view !== "pt"}">${ptCard}</span></span>`
         : view === "ck" ? checkCardHTML(c) : ptCard}
-      ${c.follow && cloudAvailable() ? `<span class="sh${followNeeds(c)?" stale":""}">${followNeeds(c) ? "Condiviso · da aggiornare" : "Condiviso · aggiornato"}</span>` : ""}
     </button>
     ${both ? `<div class="fsw" role="group" aria-label="Cosa vedere di ${esc(c.name)}">
       <button type="button" class="fsw-b${view === "ck" ? " on" : ""}" data-a="cardView" data-id="${esc(c.id)}" data-v="ck" aria-pressed="${view === "ck"}">📋 Check</button>
@@ -3403,7 +3005,7 @@ document.addEventListener("keydown", e=>{
 });
 
 function dangerZoneHTML(){
-  if(!clients.length && !cloudAvailable()) return "";
+  if(!clients.length) return "";
   return `<div class="danger-zone"><button class="wipe" data-a="wipeAll">🗑 Cancella tutto…</button></div>`;
 }
 /* due spunte automatiche: pagato tutto / sedute finite (le vede anche il cliente nel riepilogo) */
@@ -3743,7 +3345,6 @@ function detailHTML(c){
       <button type="button" class="btn ghost more-btn" data-a="moreActs" aria-expanded="${actsOpen}">${actsOpen ? "▴ Meno" : "⋯ Altro"}</button>
     </div>
   </div>
-  ${followHTML(c)}
   <section class="block">
     <h3>Pacchetto in corso e pagamenti</h3>
     <p class="sub">Tutti i campi si possono cambiare in qualsiasi momento: vengono salvati appena li modifichi. Quando il pacchetto finisce, premi “Nuovo pacchetto”: questo va nello storico e si riparte da zero.</p>
@@ -4110,31 +3711,10 @@ async function makeFullFile(c, kind, what){
   const jsPDF = await lib("jspdf");
   return buildPdf(c, jsPDF, what).output("blob");
 }
-/* Finestra "Esporta": dove salvare (dispositivo, Drive, Dropbox) e in che formato */
-function syncDest(){
-  const el = document.querySelector('input[name="dest"]:checked');
-  const dest = el ? el.value : "device";
-  const dbx = dest === "dropbox";
-  $("chDocx").hidden = dbx; $("chPdf").hidden = dbx; $("chTxt").hidden = !dbx;
-  $("destHint").textContent = dbx ? "Dropbox da qui accetta solo file di testo: niente Word o PDF. Il file si apre dal telefono e si può reimportare nel gestionale."
-    : dest === "drive" ? `Il file va nella cartella “${DRIVE_FOLDER}” del tuo Google Drive, identico a quello scaricato.` : "";
-}
-document.querySelectorAll('input[name="dest"]').forEach(r=>r.addEventListener("change", syncDest));
-function setDest(value, allowDevice){
-  $("destDeviceL").hidden = !allowDevice;
-  const v = !allowDevice && value === "device" ? "drive" : value;
-  document.querySelectorAll('input[name="dest"]').forEach(r=>r.checked = r.value === v);
-  syncDest();
-}
-function chosenDest(){
-  const el = document.querySelector('input[name="dest"]:checked');
-  return el ? el.value : "device";
-}
-
 /* ======================= INVIA DATI AL CLIENTE ======================= */
 /* Selettore riutilizzabile: tre tasti (Check / Personal 1 to 1 / Entrambi) e due riquadri di caselle,
    ognuno con “Seleziona tutto / Deseleziona tutto”. Le voci che il cliente non ha restano grigie e non spuntabili.
-   Lo usano “Invia dati al cliente” e “Segui l'andamento con il cliente”. */
+   Lo usa “Invia dati al cliente”. */
 const SEL_TITLE = {ck:"Selezione Check", pt:"Selezione Personal 1 to 1"};
 function makeSel(boxId, whatName, hintId, errId){
   const st = {c:null, sel:{ck:{}, pt:{}}};
@@ -4261,496 +3841,6 @@ async function shareClient(id){
   }finally{ exporting = false; }
 }
 
-async function backupToCloud(){
-  if(exporting || !clients.length || !cloudAvailable()) return;
-  $("dlgExportTitle").textContent = "Backup di tutti i clienti";
-  $("exportNote").textContent = `Salva la scheda completa di ogni cliente (${clients.length}) in una nuova cartella con la data di oggi, dentro “${DRIVE_FOLDER}”. Da lì potrai riprenderle e reimportarle quando vuoi.`;
-  $("destWrap").hidden = false;
-  setDest(settings.backupDest || "drive", false);
-  const kind = await ask("dlgExport");
-  if(!["docx","pdf","txt"].includes(kind)) return;
-  const svc = chosenDest() === "dropbox" ? "dropbox" : "drive";
-  if(settings.backupDest !== svc){ settings.backupDest = svc; saveSettings(); }
-  exporting = true;
-  const list = [...clients].sort((a,b)=>a.name.localeCompare(b.name,"it"));
-  let saved = 0; const failed = [];
-  const folderName = `Backup ${stampNow()}`;
-  let openUrl = "";
-  try{
-    let sub;
-    try{
-      if(svc === "drive"){ sub = await driveSubOfMain(folderName); openUrl = driveWebUrl(sub); }
-      else {
-        await dbxRoot();
-        sub = `${DBX_ROOT}/${folderName}`; openUrl = dbxOpenUrl(sub);
-        try{ await dbxEnsureFolder(sub); }
-        catch(e){ if(errHas(e, "PARENT_NOT_FOUND")){ await dbxRoot(true); await dbxEnsureFolder(sub); } else throw e; }
-      }
-    }catch(e){ console.error(e); await messageBox("Backup non riuscito", cloudErrorText(e, svc)); return; }
-
-    for(let i=0;i<list.length;i++){
-      const c = list[i];
-      toast(`Backup su ${SVC_NAME[svc]}: ${i+1} di ${list.length}…`);
-      try{
-        if(svc === "drive"){ const blob = await makeFullFile(c, kind); await driveUpload(blob, `${safeName(c.name)}.${kind}`, sub); }
-        else await dbxWriteText(sub, `${dbxName(c.name)}.txt`, buildFullText(c));
-        saved++;
-      }catch(e){
-        console.error(e);
-        if(e && e.message === "offline"){ failed.push(`${c.name}: ${OFFLINE_MSG}`); break; }
-        failed.push(`${c.name}: ${cloudErrorText(e, svc)}`);
-        if(e && STOP_CODES.includes(e.code)) break;
-      }
-    }
-  } finally { exporting = false; }
-  if(!failed.length) await showOpen("Backup completato", `${saved} ${saved===1?"cliente salvato":"clienti salvati"} su ${SVC_NAME[svc]}, nella cartella “${folderName}” dentro “${DRIVE_FOLDER}”.` + (svc === "dropbox" ? dbxAppHint(`${DRIVE_FOLDER} → ${folderName}`) : ""),
-    openUrl, svc === "dropbox" ? dbxOpenLabel() : "Apri la cartella su Drive", svc === "dropbox" && isIOS ? dbxWebUrl(`${DBX_ROOT}/${folderName}`) : "");
-  else await messageBox(saved ? `Backup parziale: ${saved} di ${list.length} salvati` : "Backup non riuscito", failed.slice(0,4).join("\n\n") + (failed.length>4 ? `\n\n…e altri ${failed.length-4}.` : ""));
-}
-
-/* ======================= SEGUI L'ANDAMENTO CON IL CLIENTE ======================= */
-/* Per ogni cliente una cartella su Google Drive, su Dropbox o su entrambi, condivisa in sola lettura
-   con la sua email. Le cartelle si riconoscono dal loro codice interno: si possono rinominare
-   (dal gestionale o dalle app) senza perdere il collegamento né il link del cliente. */
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const SVCS = ["drive","dropbox"];
-function hashStr(s){ let h = 5381; for(let i=0;i<s.length;i++) h = ((h<<5) + h + s.charCodeAt(i)) | 0; return (h>>>0).toString(36); }
-function followSig(c, f){
-  return hashStr(JSON.stringify([c.name, c.totalSessions, c.doneSessions, c.price, c.paid, c.freq, c.days, c.training, c.notes,
-    c.sessionLog, c.payLog, c.start, c.carriedIn, c.packages, c.missLog, c.check, f.sel || f.inc, f.message, settings.trainerName || "", SVCS.filter(s=>f[s].on)]));
-}
-const svcOn = (f, s) => !!(f && f[s] && f[s].on);
-const activeSvcs = f => SVCS.filter(s=>svcOn(f, s));
-const followStale = c => !!(c.follow && c.follow.updated && c.follow.sig !== followSig(c, c.follow));
-const followNeeds = c => !!(c.follow && activeSvcs(c.follow).length && (!c.follow.updated || followStale(c)));
-const hasFolder = (f, s) => !!(f && f[s] && (s === "drive" ? f[s].folderId : (f[s].id || f[s].path)));
-function followLinks(f){
-  const out = [];
-  if(svcOn(f,"drive") && f.drive.folderId) out.push({svc:"drive", url:`https://drive.google.com/drive/folders/${f.drive.folderId}`});
-  if(svcOn(f,"dropbox") && f.dropbox.url) out.push({svc:"dropbox", url:f.dropbox.url});
-  return out;
-}
-function fmtWhen(iso){
-  const d = new Date(iso); if(isNaN(d)) return "";
-  const p = n => String(n).padStart(2,"0");
-  return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} alle ${p(d.getHours())}.${p(d.getMinutes())}`;
-}
-const itemText = x => typeof x === "string" ? x : (x && (x.message || x.error || x.reason)) || JSON.stringify(x);
-
-/* Nome della cartella: lo scegli tu (es. "Personal Francesco"); il gestionale propone lo stesso schema ai clienti successivi */
-const firstName = n => String(n||"").trim().split(/\s+/)[0] || "";
-function suggestFolder(c){
-  const pat = settings.folderPattern && typeof settings.folderPattern === "object" ? settings.folderPattern : {prefix:"Cliente - ", part:"full"};
-  return `${pat.prefix || ""}${pat.part === "first" ? firstName(c.name) : c.name}`.trim();
-}
-function learnFolderPattern(c, folder){
-  const f = folder.trim(), low = f.toLowerCase(), full = c.name.trim(), first = firstName(c.name);
-  let pat = null;
-  if(full && low.endsWith(full.toLowerCase())) pat = {prefix: f.slice(0, f.length - full.length), part:"full"};
-  else if(first && low.endsWith(first.toLowerCase())) pat = {prefix: f.slice(0, f.length - first.length), part:"first"};
-  if(pat) settings.folderPattern = pat;
-}
-/* nome attuale della cartella (quello visto l'ultima volta sul servizio) */
-function currentFolder(c){
-  const f = c.follow; if(!f) return suggestFolder(c);
-  for(const s of [...activeSvcs(f), ...SVCS]) if(hasFolder(f, s) && f[s].folderName) return f[s].folderName;
-  return f.folderName || suggestFolder(c);
-}
-
-function followHTML(c){
-  if(!cloudAvailable()) return "";
-  const f = c.follow;
-  let h = `<section class="block follow"><h3>Segui l'andamento con il cliente</h3>`;
-  if(!f || !activeSvcs(f).length){
-    return h + `<p class="sub">Condividi con ${esc(c.name)} una cartella su Google Drive, su Dropbox o su tutti e due, con il suo riepilogo. Dopo le sedute la aggiorni con un tocco, e lui vede sempre i dati nuovi dallo stesso link.</p>
-      <div class="acts"><button class="btn primary" data-a="follow">Condividi con il cliente</button></div></section>`;
-  }
-  const chips = activeSvcs(f).map(s=>s === "dropbox" ? `<span class="svc dbx">Dropbox</span>` : `<span class="svc">Google Drive</span>`).join("");
-  const stale = followStale(c);
-  const when = !f.updated ? `<span class="stale">Non ancora inviato</span>`
-    : stale ? `<span class="stale">Ci sono novità da mandare</span>`
-    : `<span class="fresh">Aggiornato il ${esc(fmtWhen(f.updated))}</span>`;
-  const names = [...new Set(activeSvcs(f).filter(s=>hasFolder(f,s) && f[s].folderName).map(s=>f[s].folderName))];
-  h += `<div class="state">${chips}<span>${esc(f.email)}</span>${when}</div>
-    <p class="hint" style="margin:-6px 0 10px">Cartella: ${names.length ? names.map(n=>`“${esc(n)}”`).join(" e ") : `“${esc(f.folderName || suggestFolder(c))}” (sarà creata al primo invio)`}${stale && f.updated ? ` · ultimo invio ${esc(fmtWhen(f.updated))}` : ""}</p>`;
-  h += `<div class="acts">
-    <button class="btn ${!f.updated || stale ? "primary" : ""}" data-a="followUpdate">Aggiorna per il cliente</button>
-    ${followLinks(f).length ? `<button class="btn" data-a="followLink">Manda il link al cliente</button>` : ""}
-    ${svcOn(f,"dropbox") && f.dropbox.path ? `<a class="btn" id="openCliDbx" href="${isIOS ? (f.dropbox.url || DBX_APP) : dbxWebUrl(f.dropbox.path)}" target="_blank" rel="noopener">Apri su Dropbox</a>` : ""}
-    ${svcOn(f,"drive") && f.drive.folderId ? `<a class="btn" id="openCliDrive" href="${driveWebUrl(f.drive.folderId)}" target="_blank" rel="noopener">Apri su Drive</a>` : ""}
-    ${SVCS.some(s=>hasFolder(f, s)) ? `<button class="btn ghost" data-a="followRename">Rinomina cartella</button>` : ""}
-    <button class="btn ghost" data-a="follow">Impostazioni</button>
-    <button class="btn ghost" data-a="followStop">Smetti di condividere</button>
-  </div></section>`;
-  return h;
-}
-
-/* ---- finestra impostazioni ---- */
-let followCtx = null;
-const followSel = makeSel("followBoxes", "followWhat", "followWhatHint", "followErr");
-/* scelte della condivisione: quelle salvate per la condivisione, altrimenti quelle di “Invia dati al cliente” */
-function followSelOf(c, f){
-  const d = shareDefaults(c), sl = f && f.sel;
-  if(sl){ ["ck","pt"].forEach(g=>Object.keys(sl[g] || {}).forEach(k=>{ if(k in d[g]) d[g][k] = !!sl[g][k]; })); d.what = sl.what || d.what; }
-  return d;
-}
-const chosenSvcs = () => [...document.querySelectorAll('input[name="followSvc"]:checked')].map(i=>i.value);
-function syncFollowSvc(){
-  const on = chosenSvcs(), t = [];
-  if(on.includes("drive")) t.push("Google Drive: il cliente riceve un PDF e lo apre con un account Google collegato a questa email (Gmail o telefono Android vanno bene).");
-  if(on.includes("dropbox")) t.push("Dropbox: il cliente riceve un file di testo (da qui Dropbox non accetta Word o PDF) ed entra con un account Dropbox di questa email; se non ce l'ha, lo crea gratis dall'invito.");
-  if(!on.length) t.push("Scegli Google Drive, Dropbox o tutti e due.");
-  $("followSvcHint").textContent = t.join("\n");
-  const f = followCtx && followCtx.follow;
-  const exists = !!f && on.some(s=>hasFolder(f, s));
-  $("followFolderHint").textContent = exists
-    ? "Puoi rinominarla quando vuoi: il link del cliente resta lo stesso. Puoi anche rinominarla dall'app Drive o Dropbox, il gestionale la ritrova lo stesso."
-    : "Verrà creata con questo nome dentro “Gestionale PT”. Il cliente vede solo questa cartella.";
-  $("followErr").textContent = "";
-}
-document.querySelectorAll('input[name="followSvc"]').forEach(r=>r.addEventListener("change", syncFollowSvc));
-$("followEmail").addEventListener("input", ()=>{ $("followErr").textContent = ""; });
-$("followFolder").addEventListener("input", ()=>{ $("followErr").textContent = ""; });
-$("fFollow").addEventListener("submit", e=>{
-  if(!e.submitter || e.submitter.value !== "ok") return;
-  const stop = (msg, el) => { e.preventDefault(); $("followErr").textContent = msg; if(el) el.focus(); };
-  if(!chosenSvcs().length) return stop("Scegli dove condividere: Google Drive, Dropbox o tutti e due.");
-  if(!EMAIL_RE.test($("followEmail").value.trim())) return stop("Scrivi l'email del cliente: serve per dargli accesso alla cartella.", $("followEmail"));
-  const fn = $("followFolder").value.trim();
-  if(!fn || !safeName(fn).replace(/[._\s]/g,"")) return stop("Scrivi il nome della cartella, ad esempio “Personal Francesco”.", $("followFolder"));
-  const p = followSel.problem($("followMsg").value.trim());
-  if(p) return stop(p === "Scegli almeno una casella da includere." ? "Scegli almeno una cosa da mostrare al cliente." : p);
-});
-
-async function followSetup(id, focusFolder){
-  const c = getClient(id); if(!c || exporting) return;
-  const f = c.follow && activeSvcs(c.follow).length ? c.follow : (c.follow || null);
-  const active = f && activeSvcs(f).length ? activeSvcs(f)
-    : (Array.isArray(settings.followSvcs) && settings.followSvcs.length ? settings.followSvcs : ["drive"]);
-  $("followTitle").textContent = focusFolder ? `Rinomina la cartella di ${c.name}` : (f && activeSvcs(f).length ? `Condivisione con ${c.name}` : `Condividi con ${c.name}`);
-  document.querySelectorAll('input[name="followSvc"]').forEach(r=>r.checked = active.includes(r.value));
-  const initialFolder = currentFolder(c);
-  followCtx = {follow: f, initialFolder};
-  $("followFolder").value = initialFolder;
-  $("followEmail").value = f && f.email ? f.email : (c.email || "");
-  { const fs = followSelOf(c, f); followSel.open(c, fs, shareStartWhat(c, fs.what)); }
-  $("followMsg").value = f ? f.message : "";
-  $("followTrainer").value = settings.trainerName || "";
-  $("followOk").textContent = f && f.updated ? "Salva e aggiorna" : "Condividi e aggiorna";
-  syncFollowSvc();
-  if(focusFolder) setTimeout(()=>{ const i = $("followFolder"); i.focus(); i.select(); }, 60);
-  const answer = await ask("dlgFollow");
-  followCtx = null;
-  if(answer !== "ok") return;
-
-  const sel = followSel.value();
-  const svcs = chosenSvcs(), email = $("followEmail").value.trim();
-  const folder = $("followFolder").value.trim().replace(/\s+/g," ");
-  const renamed = folder !== initialFolder;
-  const trainer = $("followTrainer").value.trim();
-  if(trainer !== (settings.trainerName||"")) settings.trainerName = trainer;
-  settings.followSvcs = svcs;
-  if(!f || !f.updated || renamed) learnFolderPattern(c, folder);
-  saveSettings();
-
-  const cur = getClient(id); if(!cur) return;
-  const n = clone(cur);
-  const base = n.follow || normFollow({});
-  const nf = {...base, email, inc: {...sel.pt}, sel: normShare({what:sel.what, ck:sel.ck, pt:sel.pt}), message:$("followMsg").value.trim(), folderName: folder};
-  const notes = [];
-  for(const s of SVCS){
-    const was = svcOn(base, s);
-    nf[s] = {...base[s], on: svcs.includes(s)};
-    if(renamed && hasFolder(base, s)) nf[s].renameTo = folder;
-    if(was && !nf[s].on && hasFolder(base, s) && base[s].sharedWith)
-      notes.push(`Non aggiorno più la cartella su ${SVC_NAME[s]}, ma ${base[s].sharedWith} la vede ancora con l'ultimo riepilogo. Se vuoi, togli la condivisione dall'app ${SVC_NAME[s]}.`);
-  }
-  n.follow = nf;
-  if(!n.email) n.email = email;               // la ricordo anche nei dati del cliente
-  commit(n, true); render();
-  await runFollowUpdate(id, true, notes);
-}
-
-/* ---- aggiornamento: Google Drive ---- */
-async function driveFollowStep(c0, f, opt, notes, save){
-  const d = f.drive, want = safeName(f.folderName || suggestFolder(c0));
-  let blob;
-  try{ blob = buildClientPdf(c0, await lib("jspdf"), opt).output("blob"); }
-  catch(e){ throw {code:"build", message: e && e.message === "offline" ? OFFLINE_MSG : "Non sono riuscito a creare il PDF. Riprova."}; }
-  const create = async name => { const t = safeName(name); d.folderId = await driveSubOfMain(t); d.folderName = t; d.sharedWith = ""; d.fileId = ""; d.renameTo = ""; save(); };
-  if(d.folderId){
-    const cur = await driveResolve(d.folderId);
-    if(cur){ if(cur.name) d.folderName = cur.name; }        // se l'hai rinominata dall'app Drive
-    else {                                                   // eliminata o nel cestino: la ricreo
-      const had = !!d.sharedWith;
-      await create(d.renameTo || d.folderName || want);
-      if(had) notes.push("Su Google Drive la cartella del cliente non c'era più: l'ho ricreata e condivisa di nuovo. Il vecchio link non funziona più, mandagli quello nuovo.");
-    }
-  } else await create(want);
-  if(d.renameTo){
-    const t = safeName(d.renameTo);
-    if(t !== d.folderName){
-      const r = await driveCall("update_file", {fileId:d.folderId, title:t});
-      d.folderName = String(r.title || t);
-    }
-    d.renameTo = ""; save();
-  }
-  const up = await driveUpload(blob, `Riepilogo ${safeName(c0.name)} (agg. ${stampNow()}).pdf`, d.folderId);
-  const oldFile = d.fileId; d.fileId = up.id; save();
-  if(oldFile){ try{ await driveCall("trash_file", {fileId:oldFile}); }catch(e){ console.warn(e); } }
-  if(d.sharedWith.toLowerCase() !== f.email.toLowerCase()){
-    const prev = d.sharedWith;
-    await driveCall("share_file", {fileId:d.folderId, emailAddress:f.email, role:"reader"});
-    d.sharedWith = f.email; save();
-    if(prev) notes.push(`${prev} può ancora vedere la cartella su Google Drive. Se non deve più vederla, apri la cartella, Condividi, e rimuovi quell'indirizzo.`);
-    return true;
-  }
-  return false;
-}
-
-/* ---- aggiornamento: Dropbox ---- */
-async function dbxFollowStep(c0, f, opt, notes, save){
-  const x = f.dropbox, want = dbxName(f.folderName || suggestFolder(c0)), text = buildClientText(c0, opt);
-  await dbxRoot();
-  const create = async name => {
-    const base = dbxName(name); let cand = base, i = 2, made = null;
-    for(let tries = 0; !made && tries < 30; tries++){
-      try{ const r = await dbxCall("create_folder", {path:`${DBX_ROOT}/${cand}`}); made = r.folder || {}; }
-      catch(e){
-        if(errHas(e, "ALREADY_EXISTS")) cand = `${base} (${i++})`;
-        else if(errHas(e, "PARENT_NOT_FOUND") && tries === 0) await dbxRoot(true);
-        else throw e;
-      }
-    }
-    if(!made) throw {code:"tool_error", message:"esistono già troppe cartelle con questo nome"};
-    x.id = String(made.file_id || ""); x.path = String(made.path_display || `${DBX_ROOT}/${cand}`); x.folderName = String(made.name || cand);
-    x.sharedWith = ""; x.url = ""; x.fileId = ""; x.filePath = ""; x.renameTo = ""; save();
-    if(cand !== base) notes.push(`Su Dropbox esisteva già una cartella “${base}”: ho creato “${cand}”. Puoi rinominarla quando vuoi.`);
-  };
-  if(x.id || x.path){
-    const cur = await dbxResolve(x.id || x.path);           // dal codice: funziona anche se rinominata dall'app
-    if(cur){ x.id = cur.id || x.id; x.path = cur.path; x.folderName = cur.name; }
-    else {                                                   // eliminata: la ricreo
-      const had = !!x.url;
-      await create(x.renameTo || x.folderName || want);
-      if(had) notes.push("Su Dropbox la cartella del cliente non c'era più: l'ho ricreata e condivisa di nuovo. Il vecchio link non funziona più, mandagli quello nuovo.");
-    }
-  } else await create(want);
-  if(x.renameTo){
-    const t = dbxName(x.renameTo);
-    if(t !== x.folderName){
-      const parent = x.path.slice(0, x.path.lastIndexOf("/"));
-      try{ const r = await dbxRenameFolder(x.id || x.path, parent, t); x.path = r.path; x.folderName = r.name; }
-      catch(e){
-        if(!(e && e.code === "tool_error")) throw e;
-        notes.push(`Non ho potuto rinominare la cartella su Dropbox in “${t}”${e.conflict ? ": esiste già una cartella con questo nome" : ""}. Ho lasciato “${x.folderName}”.`);
-      }
-    }
-    x.renameTo = ""; save();
-  }
-  const w = await dbxWriteText(x.path, `Riepilogo ${dbxName(c0.name)} (agg. ${stampNow()}).txt`, text);
-  const oldFile = x.fileId || x.filePath;
-  x.fileId = w.id || ""; x.filePath = w.path; save();
-  if(oldFile && oldFile !== x.fileId && oldFile.toLowerCase() !== w.path.toLowerCase()){ try{ await dbxDelete(oldFile); }catch(e){ console.warn(e); } }
-  if(x.sharedWith.toLowerCase() !== f.email.toLowerCase() || !x.url){
-    const prev = x.sharedWith;
-    const r = await dbxCall("create_shared_link", {path_or_file_id: x.id || x.path, emails:[f.email]});
-    if(r.url) x.url = String(r.url);
-    const okList = Array.isArray(r.shared_with) ? r.shared_with.map(s=>itemText(s).toLowerCase()) : null;
-    const errs = Array.isArray(r.share_errors) ? r.share_errors.map(itemText).filter(Boolean) : [];
-    const invited = okList ? okList.some(s=>s.includes(f.email.toLowerCase())) : !errs.length;
-    save();
-    if(invited && !r.warning){
-      x.sharedWith = f.email; save();
-      if(prev && prev.toLowerCase() !== f.email.toLowerCase()) notes.push(`${prev} può ancora vedere la cartella su Dropbox. Se non deve più vederla, apri la cartella, Condividi, e rimuovi quell'indirizzo.`);
-      return true;
-    }
-    notes.push(`Il riepilogo su Dropbox è aggiornato, ma Dropbox non ha invitato ${f.email}${errs.length ? ": " + errs.join("; ") : "."} Puoi invitarlo tu dall'app Dropbox: apri la cartella “${x.folderName}” e tocca Condividi.`);
-    return !!x.url;
-  }
-  return false;
-}
-
-async function followUpdate(id){
-  const c0 = getClient(id); if(!c0 || !c0.follow) return {ok:false, error:"Condivisione non impostata."};
-  const f = clone(c0.follow), svcs = activeSvcs(f), notes = [], errors = [];
-  if(!svcs.length) return {ok:false, error:"Scegli almeno un servizio nelle impostazioni di condivisione."};
-  const fs = followSelOf(c0, f);
-  const opt = {what: fs.what || "both", ck: fs.ck, pt: {...fs.pt, noteSedute: !!(fs.pt.noteSedute && fs.pt.storicoSedute)}, message:f.message, trainer:settings.trainerName || ""};
-  const sig = followSig(c0, f);
-  const save = done => {
-    const cur = getClient(id); if(!cur || !cur.follow) return;
-    const n = clone(cur);
-    n.follow = {...n.follow, drive:{...f.drive, on:n.follow.drive.on}, dropbox:{...f.dropbox, on:n.follow.dropbox.on}};
-    if(done){ n.follow.updated = new Date().toISOString(); n.follow.sig = sig; }
-    commit(n, true);
-  };
-  let newShare = false, stop = false;
-  for(const s of svcs){
-    try{ if(await (s === "drive" ? driveFollowStep : dbxFollowStep)(c0, f, opt, notes, ()=>save(false))) newShare = true; }
-    catch(e){
-      console.error(e); save(false);
-      errors.push(`${SVC_NAME[s]}: ${e && e.code === "build" ? e.message : e && e.message === "offline" ? OFFLINE_MSG : cloudErrorText(e, s)}`);
-      if(e && STOP_CODES.includes(e.code)) stop = true;
-    }
-  }
-  if(errors.length){
-    const partial = errors.length < svcs.length;
-    return {ok:false, partial, stop, notes, newShare, error: (partial ? "Una delle cartelle è aggiornata, l'altra no.\n\n" : "") + errors.join("\n\n")};
-  }
-  save(true);
-  return {ok:true, notes, newShare};
-}
-
-async function runFollowUpdate(id, fromSetup, extraNotes){
-  if(exporting) return;
-  const c = getClient(id); if(!c || !c.follow) return;
-  exporting = true;
-  const where = activeSvcs(c.follow).map(s=>SVC_NAME[s]).join(" e ");
-  toast(`Sto aggiornando la cartella di ${c.name} su ${where}…`);
-  let r;
-  try{ r = await followUpdate(id); } finally { exporting = false; }
-  render();
-  $("toast").classList.remove("show");
-  const notes = [...(extraNotes || []), ...(r.notes || [])];
-  if(!r.ok){
-    await messageBox(r.partial ? "Aggiornamento solo in parte" : "Aggiornamento non riuscito", r.error + (notes.length ? "\n\n" + notes.join("\n\n") : ""));
-    if(r.newShare) return showFollowLink(id, []);
-    return;
-  }
-  if(r.newShare || fromSetup) return showFollowLink(id, notes);
-  if(notes.length) await messageBox("Riepilogo aggiornato", notes.join("\n\n"));
-  else toast(`Riepilogo aggiornato per ${c.name}`);
-}
-
-async function updateAllFollow(){
-  if(exporting) return;
-  const list = clients.filter(followNeeds).sort((a,b)=>a.name.localeCompare(b.name,"it"));
-  if(!list.length){ toast("Tutti i clienti condivisi sono già aggiornati"); return; }
-  exporting = true;
-  let ok = 0; const failed = [], notes = [];
-  try{
-    for(let i=0;i<list.length;i++){
-      toast(`Aggiorno i clienti: ${i+1} di ${list.length}…`);
-      const r = await followUpdate(list[i].id);
-      (r.notes || []).forEach(n=>notes.push(`${list[i].name}: ${n}`));
-      if(r.ok) ok++;
-      else { failed.push(`${list[i].name}: ${r.error}`); if(r.stop) break; }
-    }
-  } finally { exporting = false; }
-  render();
-  if(!failed.length && !notes.length){ toast(`Aggiornati ${ok} ${ok===1?"cliente":"clienti"}`); return; }
-  await messageBox(failed.length ? `Aggiornati ${ok} di ${list.length}` : `Aggiornati ${ok} ${ok===1?"cliente":"clienti"}`, [...failed, ...notes].slice(0,5).join("\n\n"));
-}
-
-/* ---- link da mandare al cliente ---- */
-function waNumber(phone){
-  let d = String(phone||"").replace(/[^\d+]/g,"");
-  if(d.startsWith("+")) return d.slice(1);
-  if(d.startsWith("00")) return d.slice(2);
-  if(/^3\d{8,9}$/.test(d)) return "39" + d;      // cellulare italiano senza prefisso
-  return d;
-}
-async function showFollowLink(id, notes){
-  const c = getClient(id); if(!c || !c.follow) return;
-  const f = c.follow, links = followLinks(f);
-  if(!links.length){ if(notes && notes.length) await messageBox("Riepilogo aggiornato", notes.join("\n\n")); return; }
-  const first = firstName(c.name);
-  $("linkTitle").textContent = links.length > 1 ? `Cartelle di ${c.name}` : `Cartella di ${c.name}`;
-  const t = [];
-  if(links.some(l=>l.svc==="drive")) t.push(`Google Drive: ${f.email} può vedere la cartella in sola lettura, con l'account Google di questa email. Google di solito gli manda anche un'email.`);
-  if(links.some(l=>l.svc==="dropbox")) t.push(`Dropbox: ${f.email} è invitato in sola lettura. Deve entrare in Dropbox con questa email (se non ha un account, lo crea gratis).`);
-  t.push("Mandagli il link una volta sola: ogni volta che premi “Aggiorna per il cliente”, dentro trova il riepilogo nuovo. Anche se rinomini la cartella, il link resta lo stesso.");
-  $("linkText").textContent = t.join("\n\n");
-  $("linkRows").innerHTML = links.map(l=>`<p class="lk-t">${SVC_NAME[l.svc]}</p>
-    <div class="linkbox"><input readonly value="${esc(l.url)}" aria-label="Link ${SVC_NAME[l.svc]}"><button type="button" class="btn small" data-copy="${esc(l.url)}">Copia</button></div>`).join("");
-  const body = links.length > 1 ? links.map(l=>`${SVC_NAME[l.svc]}: ${l.url}`).join("\n") : links[0].url;
-  const msg = `Ciao ${first}! Qui trovi il riepilogo dei tuoi allenamenti: lo aggiorno io dopo le sedute, quindi il link resta sempre lo stesso.\n${body}`;
-  $("linkWa").href = `https://wa.me/${waNumber(c.phone)}?text=${encodeURIComponent(msg)}`;
-  $("linkMail").href = `mailto:${encodeURIComponent(f.email)}?subject=${encodeURIComponent("Il riepilogo dei tuoi allenamenti")}&body=${encodeURIComponent(msg)}`;
-  $("linkWarn").hidden = !(notes && notes.length);
-  $("linkWarn").textContent = notes && notes.length ? notes.join("\n\n") : "";
-  await ask("dlgLink");
-}
-$("linkRows").addEventListener("click", async e=>{
-  const b = e.target.closest("button[data-copy]"); if(!b) return;
-  const v = b.dataset.copy;
-  try{ await navigator.clipboard.writeText(v); toast("Link copiato"); }
-  catch(_){ const i = b.previousElementSibling; i.focus(); i.select(); try{ document.execCommand("copy"); toast("Link copiato"); }catch(__){ toast("Tieni premuto il link per copiarlo"); } }
-});
-
-/* ---- rinomina subito, senza aggiornare il riepilogo ---- */
-$("renameInput").addEventListener("input", ()=>{ $("renameErr").textContent = ""; });
-$("fRename").addEventListener("submit", e=>{
-  if(!e.submitter || e.submitter.value !== "ok") return;
-  const v = $("renameInput").value.trim();
-  if(!v || !safeName(v).replace(/[._\s]/g,"")){ e.preventDefault(); $("renameErr").textContent = "Scrivi il nuovo nome, ad esempio “Personal Francesco”."; $("renameInput").focus(); }
-});
-async function followRename(id){
-  const c = getClient(id); if(!c || !c.follow || exporting) return;
-  const before = currentFolder(c);
-  $("renameInput").value = before; $("renameErr").textContent = "";
-  setTimeout(()=>{ const i = $("renameInput"); i.focus(); i.select(); }, 60);
-  if(await ask("dlgRename") !== "ok") return;
-  const name = $("renameInput").value.trim().replace(/\s+/g," ");
-  if(!name || name === before) return;
-  await renameFolders(id, name, true);
-}
-/* rinomina le cartelle del cliente su Drive e Dropbox (stesso codice, stesso link) */
-async function renameFolders(id, name, report){
-  const c = getClient(id); if(!c || !c.follow) return {errs:[], notes:[]};
-  learnFolderPattern(c, name); saveSettings();
-  const f = clone(c.follow), notes = [], errs = [];
-  f.folderName = name;
-  exporting = true;
-  toast(`Rinomino la cartella in “${name}”…`);
-  try{
-    for(const s of SVCS){
-      if(!hasFolder(f, s)) continue;
-      try{
-        if(s === "drive"){
-          if(!(await driveResolve(f.drive.folderId))){ f.drive.renameTo = name; notes.push("Su Google Drive la cartella non c'è più: la ricreo con il nuovo nome al prossimo aggiornamento."); continue; }
-          const r = await driveCall("update_file", {fileId:f.drive.folderId, title:safeName(name)});
-          f.drive.folderName = String(r.title || safeName(name)); f.drive.renameTo = "";
-        } else {
-          const cur = await dbxResolve(f.dropbox.id || f.dropbox.path);
-          if(!cur){ f.dropbox.renameTo = name; notes.push("Su Dropbox la cartella non c'è più: la ricreo con il nuovo nome al prossimo aggiornamento."); continue; }
-          const r = await dbxRenameFolder(cur.id || f.dropbox.id, cur.path.slice(0, cur.path.lastIndexOf("/")), dbxName(name));
-          f.dropbox.id = cur.id || f.dropbox.id; f.dropbox.path = r.path; f.dropbox.folderName = r.name; f.dropbox.renameTo = "";
-        }
-      }catch(e){
-        console.error(e);
-        errs.push(e && e.conflict ? `${SVC_NAME[s]}: esiste già una cartella con questo nome. Scegline un altro.` : `${SVC_NAME[s]}: ${cloudErrorText(e, s)}`);
-      }
-    }
-  } finally { exporting = false; }
-  const cur = getClient(id);
-  if(cur && cur.follow){
-    const n = clone(cur);
-    n.follow = {...n.follow, folderName: errs.length && !notes.length && errs.length >= SVCS.filter(s=>hasFolder(f,s)).length ? n.follow.folderName : name,
-      drive:{...f.drive, on:n.follow.drive.on}, dropbox:{...f.dropbox, on:n.follow.dropbox.on}};
-    commit(n, true);
-  }
-  render(); $("toast").classList.remove("show");
-  if(!report) return {errs, notes};
-  if(errs.length) await messageBox("Rinomina non completata", [...errs, ...notes].join("\n\n"));
-  else if(notes.length) await messageBox("Cartella rinominata", notes.join("\n\n"));
-  else toast(`Cartella rinominata in “${name}”. Il link del cliente non cambia.`);
-  return {errs, notes};
-}
-
-async function followStop(id){
-  const c = getClient(id); if(!c || !c.follow) return;
-  const f = c.follow, on = activeSvcs(f).filter(s=>hasFolder(f, s));
-  const where = on.map(s=>`${SVC_NAME[s]} (cartella “${f[s].folderName || currentFolder(c)}”)`).join(" e ") || "Drive o Dropbox";
-  if(!(await messageBox(`Smettere di condividere con ${c.name}?`,
-    `Il gestionale non aggiornerà più le sue cartelle. Attenzione: il cliente continua a vedere l'ultimo riepilogo finché non togli la condivisione da ${where}: apri la cartella, Condividi, e rimuovi la sua email. Oppure elimini la cartella.`,
-    {ok:"Smetti di condividere", cancel:"Annulla", danger:true}))) return;
-  const cur = getClient(id); if(!cur) return;
-  const n = clone(cur); n.follow = null; commit(n, true); render();
-  toast("Condivisione tolta dal gestionale");
-}
-
 async function handle(a, el){
   const id = openId;
   const c = id ? getClient(id) : null;
@@ -4801,13 +3891,6 @@ async function handle(a, el){
     case "renameClient": return getClient(el.dataset.id) && renameClient(el.dataset.id);
     case "back": openId = null; render(); window.scrollTo({top:0}); return;
     case "share": return c && shareClient(c.id);
-    case "backup": return backupToCloud();
-    case "follow": return c && followSetup(c.id);
-    case "followUpdate": return c && runFollowUpdate(c.id, false);
-    case "followLink": return c && showFollowLink(c.id, []);
-    case "followRename": return c && followRename(c.id);
-    case "followStop": return c && followStop(c.id);
-    case "followAll": return updateAllFollow();
     case "import": $("importInput").value=""; $("importInput").click(); return;
     case "ptReactivate": {                                                  // personal fermo da 5 mesi: lo riattivo a mano (i 5 mesi ripartono da oggi)
       if(!c) return;
@@ -5081,48 +4164,16 @@ $("fDel").addEventListener("submit", e=>{
   if($("delType").value.trim().toUpperCase() !== "CANCELLA"){ e.preventDefault(); $("delErr").textContent = "Scrivi CANCELLA per confermare."; $("delType").focus(); }
 });
 $("delType").addEventListener("input", ()=>{ $("delErr").textContent = ""; });
-/* elimina su Dropbox e aspetta l'esito; se non esiste già più, va bene lo stesso */
-async function dbxDeleteWait(ref){
-  const r = await dbxWaitJob(await dbxDelete(ref));
-  const e = ((r && (r.delete_result || r).entries) || [])[0];
-  if((r && r.status === "failed") || (e && e.entry_status && e.entry_status !== "success")){
-    if(await dbxResolve(ref)) throw {code:"tool_error", message:"Dropbox non ha eliminato la cartella"};
-  }
-}
-async function driveTrashFolder(id){
-  try{ await driveCall("trash_file", {fileId:id}); }
-  catch(e){ if(await driveResolve(id)) throw e; }            // già eliminata: va bene
-}
-async function driveFindMain(){
-  const found = await driveCall("search_files", {query:`title = '${DRIVE_FOLDER}' and mimeType = 'application/vnd.google-apps.folder'`, pageSize:5, excludeContentSnippets:true});
-  const f = Array.isArray(found.files) ? found.files.find(x=>x && x.id) : null;
-  return f ? f.id : "";
-}
 async function deleteClient(id){
   const c = getClient(id); if(!c || exporting) return;
-  const f = c.follow, opts = [];
-  if(cloudAvailable() && f){
-    if(hasFolder(f, "dropbox")) opts.push({k:"dropbox", label:`Elimina anche la sua cartella su Dropbox (“${f.dropbox.folderName || currentFolder(c)}”)`});
-    if(hasFolder(f, "drive")) opts.push({k:"drive", label:`Elimina anche la sua cartella su Google Drive (“${f.drive.folderName || currentFolder(c)}”, va nel cestino)`});
-  }
   const sel = await delDialog({title:`Eliminare la cartella di ${c.name}?`,
-    text:"Tutti i suoi dati nel gestionale verranno cancellati: sedute, pagamenti e pacchetti. Se vuoi tenerne una copia, esportala prima." +
-      (opts.length ? "\n\nLe sue cartelle nel cloud restano, a meno che tu non le spunti qui sotto. Se le elimini, il cliente non potrà più vederle." : ""),
-    opts, ok:"Elimina cartella"});
+    text:"Tutti i suoi dati nel gestionale verranno cancellati: sedute, pagamenti, pacchetti e consulenze. Se vuoi tenerne una copia, esportala prima con “Esporta dati programma”.",
+    opts:[], ok:"Elimina cartella"});
   if(!sel) return;
-  const errs = [];
-  if(sel.length){
-    exporting = true; toast("Elimino le cartelle nel cloud…");
-    try{
-      if(sel.includes("dropbox")){ try{ await dbxDeleteWait(f.dropbox.id || f.dropbox.path); }catch(e){ console.error(e); errs.push("Dropbox: " + cloudErrorText(e, "dropbox")); } }
-      if(sel.includes("drive")){ try{ await driveTrashFolder(f.drive.folderId); }catch(e){ console.error(e); errs.push("Google Drive: " + cloudErrorText(e, "drive")); } }
-    } finally { exporting = false; }
-  }
   openId = null;
   await removeClient(id);
   render(); window.scrollTo({top:0});
-  if(errs.length) await messageBox("Cartella eliminata dal gestionale", "Non sono riuscito a eliminare tutto nel cloud:\n\n" + errs.join("\n\n"));
-  else toast(sel.length ? "Cartella eliminata, anche nel cloud" : "Cartella eliminata");
+  toast("Cartella eliminata");
 }
 /* caselle alternative (una sola scelta): spuntandone una si toglie l'altra, e ne resta sempre una */
 $("delOpts").addEventListener("change", e=>{
@@ -5135,76 +4186,36 @@ async function wipeAll(){
   const n = clients.length, nc = `${n} ${n === 1 ? "cartella" : "cartelle"}`;
   const opts = [{k:"data", group:"wipe", on:true, label:`Solo i dati: cartelle dei clienti (${nc}), sedute, pagamenti, pacchetti e spese di gestione. Il programma resta con le tue impostazioni e riparte da zero, pronto all'uso.`},
                 {k:"all", group:"wipe", label:`Tutto: dati e impostazioni del programma (soglia avvisi, preferenze, occhietto…), come il primo giorno.`}];
-  if(cloudAvailable()){
-    opts.push({k:"dropbox", label:`Anche la cartella “${DRIVE_FOLDER}” su Dropbox, con tutto quello che contiene`});
-    opts.push({k:"drive", label:`Anche la cartella “${DRIVE_FOLDER}” su Google Drive, con tutto quello che contiene (va nel cestino)`});
-  }
   const sel = await delDialog({title:"Cancellare tutto?",
-    text:"Scegli cosa cancellare. Non si può annullare: scarica SEMPRE prima il backup ZIP, è l'unico modo per recuperare i dati." +
-      (cloudAvailable() ? "\n\nSe elimini anche le cartelle nel cloud, i clienti con cui le hai condivise non le vedranno più." : ""),
+    text:"Scegli cosa cancellare. Non si può annullare: scarica SEMPRE prima il backup ZIP, è l'unico modo per recuperare i dati.",
     opts, ok:"Cancella tutto", typeWord:true, backup: clients.length > 0});
   if(!sel) return;
   exporting = true; toast("Sto cancellando…");
-  const errs = [];
   try{
-    if(sel.includes("dropbox")){
-      try{ await dbxDeleteWait(DBX_ROOT); dbxRootOk = false; }
-      catch(e){ console.error(e); errs.push("Dropbox: " + cloudErrorText(e, "dropbox")); }
-    }
-    if(sel.includes("drive")){
-      try{ const fid = settings.driveFolderId || await driveFindMain(); if(fid) await driveTrashFolder(fid); settings.driveFolderId = ""; }
-      catch(e){ console.error(e); errs.push("Google Drive: " + cloudErrorText(e, "drive")); }
-    }
     for(const cid of clients.map(x=>x.id)) await removeClient(cid);
-    if(!sel.includes("all")){                                        // solo i dati: tengo le impostazioni, tolgo le spese
-      settings.expenses = {items:[], pays:[], skips:[]}; await saveSettings();
-    } else {
-    settings = {trainerName:"", driveFolderId: settings.driveFolderId || "", exportDest:"device", backupDest:"drive", followSvcs:["drive"], lastBackup: settings.lastBackup || ""};
-    await saveSettings();
-    }
+    if(!sel.includes("all")) settings.expenses = {items:[], pays:[], skips:[]};          // solo i dati: tengo le impostazioni, tolgo le spese
+    else settings = {trainerName:"", lastBackup: settings.lastBackup || ""};
     await saveSettings();
   } finally { exporting = false; }
   openId = null; query = ""; openPkgs.clear();
   render(); window.scrollTo({top:0});
-  if(errs.length) await messageBox("Dati cancellati, cloud solo in parte", "I dati del gestionale sono stati cancellati, ma:\n\n" + errs.join("\n\n"));
-  else toast("Tutto cancellato");
+  toast("Tutto cancellato");
 }
 
 /* ======================= RINOMINA CLIENTE ======================= */
-function syncNameDlg(){
-  const c = nameCtx && getClient(nameCtx); if(!c) return;
-  const nn = $("nName").value.trim().replace(/\s+/g," ");
-  const f = c.follow, has = !!(f && SVCS.some(s=>hasFolder(f, s)) && cloudAvailable());
-  $("nFolderL").hidden = !has;
-  if(has){
-    const target = suggestFolder({name: nn || c.name});
-    $("nFolderText").textContent = `Rinomina anche la sua cartella condivisa (“${currentFolder(c)}” → “${target}”). Il link del cliente non cambia.`;
-  }
-  $("nErr").textContent = "";
-}
-let nameCtx = null;
-$("nName").addEventListener("input", syncNameDlg);
+$("nName").addEventListener("input", ()=>{ $("nErr").textContent = ""; });
 $("fName").addEventListener("submit", e=>{
   if(!e.submitter || e.submitter.value !== "ok") return;
   if(!$("nName").value.trim()){ e.preventDefault(); $("nErr").textContent = "Scrivi il nome del cliente."; $("nName").focus(); }
 });
 async function renameClient(id){
   const c = getClient(id); if(!c || exporting) return;
-  nameCtx = id; $("nName").value = c.name; $("nFolder").checked = true; syncNameDlg();
+  $("nName").value = c.name; $("nErr").textContent = "";
   setTimeout(()=>{ const i = $("nName"); i.focus(); i.select(); }, 60);
-  const r = await ask("dlgName"); nameCtx = null;
-  if(r !== "ok") return;
+  if(await ask("dlgName") !== "ok") return;
   const name = $("nName").value.trim().replace(/\s+/g," ");
   const cur = getClient(id); if(!cur || !name) return;
-  const alsoFolder = !$("nFolderL").hidden && $("nFolder").checked;
-  const folderTarget = suggestFolder({name});
   if(name !== cur.name){ const n = clone(cur); n.name = name; commit(n, true); render(); }
-  if(alsoFolder && folderTarget !== currentFolder(getClient(id))){
-    const res = await renameFolders(id, folderTarget, false);
-    if(res.errs.length){ await messageBox("Nome cambiato, cartella no", [...res.errs, ...res.notes].join("\n\n")); return; }
-    if(res.notes.length){ await messageBox("Nome cambiato", res.notes.join("\n\n")); return; }
-    toast(`Rinominato in “${name}”, anche la cartella condivisa`); return;
-  }
   toast(name !== c.name ? `Rinominato in “${name}”` : "Nome invariato");
 }
 
@@ -5443,7 +4454,7 @@ const partsTxt = t => [t.ck ? "Check" : "", t.pt ? "Personal 1 to 1" : ""].filte
 function drawImport(keep){
   const what = impWhat(), prev = keep ? new Set([...$("impList").querySelectorAll("input:checked")].map(i=>i.value)) : null;
   $("impList").innerHTML = impItems.map((it, i)=>{
-    const has = {ck: impHasCk(it), pt: impHasPt(it)}, take = impTake(it, what), can = take.ck || take.pt;
+    const take = impTake(it, what), can = take.ck || take.pt;
     const exists = clients.some(c=>c.name.toLowerCase() === it.c.name.toLowerCase());
     const info = !can ? `nessun dato ${what === "ck" ? "Check" : "Personal 1 to 1"} nel file` : `${partsTxt(take)}${exists ? " · esiste già" : ""}`;
     return `<label class="check${can ? "" : " dis"}"><input type="checkbox" value="${i}"${can ? "" : " disabled"}${can && (!prev || prev.has(String(i))) ? " checked" : ""}><span>${esc(it.c.name)} <small>${esc(info)}</small></span></label>`;
@@ -5537,7 +4548,7 @@ $("importInput").addEventListener("change", async e=>{
 const FULL_FMT = "gestionale-pt-backup";
 function fullBackup(){
   const keep = {};
-  ["trainerName","folderPattern","alertLeft","exportDest","backupDest","followSvcs","expenses"].forEach(k=>{ if(settings[k] !== undefined) keep[k] = clone(settings[k]); });
+  ["trainerName","alertLeft","expenses"].forEach(k=>{ if(settings[k] !== undefined) keep[k] = clone(settings[k]); });
   return {format:FULL_FMT, version:1, exported:new Date().toISOString(), app:"Gestionale Personal Trainer",
           settings:keep, clients:[...clients].sort((a,b)=>a.name.localeCompare(b.name,"it")).map(clone)};
 }
@@ -5642,7 +4653,7 @@ async function importFull(file){
   if(!data || data.format !== FULL_FMT){
     await messageBox("File non riconosciuto", `“${file.name}” non è un file di dati del gestionale. Usa un file creato con “⚙ Dati” → “Esporta dati”.`); return;
   }
-  const S_KEYS = ["trainerName","folderPattern","alertLeft","exportDest","backupDest","followSvcs"];
+  const S_KEYS = ["trainerName","alertLeft"];
   let replaceExp = false;
   const applySettings = async ()=>{
     const s = data.settings && typeof data.settings === "object" ? data.settings : {};
