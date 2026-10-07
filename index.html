@@ -237,7 +237,6 @@ svg.pie .slice{stroke:var(--paper);stroke-width:1}
 .ck-block .c-owed b{color:var(--owed)}
 .ck-block .ck-notes{white-space:pre-wrap;border-left:3px solid var(--moss);padding:6px 10px;margin:10px 0 0}
 .ck-line{display:block;font-size:.85rem;font-weight:700;color:var(--moss);margin:2px 0 4px}
-#shareWhatW[hidden],#shareChecks[hidden],#shareCkNote[hidden]{display:none}
 /* statistiche check: due tabelle da 5 valori */
 .st-sec{font-family:"Barlow Condensed",sans-serif;font-size:1.5rem;margin:22px 0 10px}
 .dash.dashck{grid-template-columns:repeat(6,1fr)}
@@ -521,7 +520,11 @@ header.top.has-logout .title-row{padding-right:82px}            /* spazio per �
 .logout-btn:hover,.logout-btn:focus-visible{color:var(--danger);border-color:var(--danger)}
 .data-btn{font-size:.8rem;font-weight:600;padding:4px 11px;min-height:32px;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--pine);cursor:pointer;opacity:.85}
 .data-btn:hover{opacity:1;border-color:var(--pine)}
-.docs-head{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-top:14px}
+.docs-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:6px 10px;margin-top:14px}
+.docs-head .btn.small{white-space:nowrap}
+.checks .check small{color:var(--muted);font-weight:500}
+.conf-btns{display:grid;gap:8px;margin-top:14px}
+.conf-btns .btn{width:100%;white-space:normal;height:auto;min-height:44px;padding-top:8px;padding-bottom:8px}
 .docs-head label{margin:0}
 #docsList{max-height:40vh;overflow:auto}
 .stats-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px;margin-top:6px}
@@ -694,6 +697,27 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
 .seg input:checked + span{background:var(--moss);color:var(--on-moss);border-color:var(--moss)}
 .seg input:focus-visible + span{outline:3px solid var(--moss);outline-offset:2px}
 .note-box{background:var(--chalk);border-radius:8px;padding:10px 12px;font-size:.88rem;color:var(--muted);margin:0 0 12px}
+/* “Invia dati al cliente”: riquadri SELEZIONE CHECK e SELEZIONE PERSONAL 1 to 1 */
+.sel-box{border:1.5px solid var(--moss);border-radius:12px;padding:10px 12px 2px;margin:14px 0 0;background:var(--paper)}
+.sel-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 10px}
+dialog .sel-head h4{margin:0;padding:0;border:none;font-size:1.3rem;letter-spacing:.03em;text-transform:uppercase;color:var(--moss)}
+.sel-head .btn.small{min-height:36px;white-space:nowrap}
+@media (max-width:480px){ dialog .sel-head h4{font-size:1.16rem} .sel-head .btn.small{font-size:.82rem;padding:0 10px} .sel-box{padding:10px 10px 2px} }
+.sel-box .checks{margin:6px 0 0}
+.sel-box .check:last-child{border-bottom:none}
+.sel-box .check small.na{display:inline-block;margin-left:4px;font-size:.74rem;font-weight:600;color:var(--muted);white-space:nowrap}
+dialog p.sel-why{margin:6px 0 2px;font-size:.86rem;font-weight:600;color:var(--pine)}
+.sel-box.off{border-color:var(--line);border-style:dashed;background:var(--chalk)}
+dialog .sel-box.off .sel-head h4{color:var(--muted)}
+.sel-box.off .check{padding:5px 2px;font-size:.88rem}
+.sel-box.off .check input{width:18px;height:18px}
+.what-seg span{white-space:nowrap}
+.what-seg .wi{font-style:normal}
+@media (max-width:480px){ dialog .seg.seg-wrap.what-seg{flex-wrap:nowrap;gap:6px} .what-seg .wi{display:none} dialog .what-seg span{padding:10px 4px;font-size:.92rem} }
+@media (max-width:340px){ dialog .seg.seg-wrap.what-seg{flex-wrap:wrap} }
+dialog p.hint.warn-hint{background:var(--owed-soft);color:var(--pine);border-radius:8px;padding:8px 10px;font-weight:600}
+.idle-lab{display:block;margin:4px 0 2px;font-size:.8rem;font-weight:700;color:var(--owed)}
+.alert-box.idle-box{font-weight:500}
 
 @media (max-width:560px){
   .fields{grid-template-columns:1fr}
@@ -722,6 +746,10 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
 .type-legend{margin:6px 4px 10px;font-size:.82rem;color:var(--muted);line-height:1.5}
 .link-inline{border:none;background:none;padding:0;font:inherit;color:var(--moss);font-weight:700;text-decoration:underline;cursor:pointer}
 .ck-cur-type .sub{margin:2px 0 8px}
+.miss-st.ck-type-check{background:#EEF1EC;border-color:#B9C4B4;color:#3E4A44}
+.ck-pkg-of{font-size:.78rem;color:var(--muted);margin-left:2px}
+#clPkgTypeW[hidden]{display:none}
+.miss-st.ck-tag-extra{background:#FFF4E0;border-color:#E8C27A;color:#8A5A00}
 </style>
 </head>
 <body>
@@ -740,25 +768,11 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
   </div>
   <h4>Servizi</h4>
   <div class="svc-sw" role="group" aria-label="Servizi del cliente">
-    <label class="svc"><input type="checkbox" id="cSvcPt" checked><span>🏋️ Personal 1 to 1</span></label>
     <label class="svc"><input type="checkbox" id="cSvcCk"><span>📋 Check</span></label>
+    <label class="svc"><input type="checkbox" id="cSvcPt" checked><span>🏋️ Personal 1 to 1</span></label>
   </div>
+  <p class="hint" id="cSvcIdle" hidden></p>
   <p class="err" id="cSvcErr" role="alert"></p>
-  <div id="cPtW">
-  <div id="cKindW"><label>Tipo</label>
-    <div class="seg"><label><input type="radio" name="cKind" value="pkg" checked><span>Pacchetto</span></label><label><input type="radio" name="cKind" value="single"><span>Seduta singola</span></label></div></div>
-  <h4 id="cPkgH">Pacchetto personal 1 to 1</h4>
-  <label for="cStart" id="cStartL">Data di inizio del pacchetto</label>
-  <input id="cStart" type="date">
-  <div class="two" id="cSesW">
-    <div><label for="cTotal">Sedute nel pacchetto</label><input id="cTotal" type="text" placeholder="es. 10"></div>
-    <div><label for="cDone">Sedute già fatte</label><input id="cDone" type="text" placeholder="0"></div>
-  </div>
-  <div class="two">
-    <div><label for="cPrice" id="cPriceL">Totale da pagare (€)</label><input id="cPrice" type="text" placeholder="es. 400"></div>
-    <div><label for="cPaid" id="cPaidL">Già pagato / acconto (€)</label><input id="cPaid" type="text" placeholder="0"></div>
-  </div>
-  </div>
   <div id="cCkW" hidden>
     <h4>Check</h4>
     <div class="seg"><label><input type="radio" name="ckKind" value="single" checked><span>Consulenza singola</span></label><label><input type="radio" name="ckKind" value="pkg"><span>Pacchetto di più consulenze</span></label></div>
@@ -795,12 +809,27 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
       <p class="err" id="fkErr" role="alert"></p>
     </fieldset>
   </div>
+  <div id="cPtW">
+  <div id="cKindW"><label>Tipo</label>
+    <div class="seg"><label><input type="radio" name="cKind" value="pkg" checked><span>Pacchetto</span></label><label><input type="radio" name="cKind" value="single"><span>Seduta singola</span></label></div></div>
+  <h4 id="cPkgH">Pacchetto personal 1 to 1</h4>
+  <label for="cStart" id="cStartL">Data di inizio del pacchetto</label>
+  <input id="cStart" type="date">
+  <div class="two" id="cSesW">
+    <div><label for="cTotal">Sedute nel pacchetto</label><input id="cTotal" type="text" placeholder="es. 10"></div>
+    <div><label for="cDone">Sedute già fatte</label><input id="cDone" type="text" placeholder="0"></div>
+  </div>
+  <div class="two">
+    <div><label for="cPrice" id="cPriceL">Totale da pagare (€)</label><input id="cPrice" type="text" placeholder="es. 400"></div>
+    <div><label for="cPaid" id="cPaidL">Già pagato / acconto (€)</label><input id="cPaid" type="text" placeholder="0"></div>
+  </div>
+  </div>
   <h4>Informazioni facoltative</h4>
   <div class="two">
-    <div><label for="cFreq">Quante volte a settimana</label><input id="cFreq" type="text" placeholder="es. 3"></div>
+    <div><label for="cFreq">Quante volte a settimana</label><input id="cFreq" type="text" placeholder="es. 3 · 0 se non si allena"></div>
     <div></div>
   </div>
-  <label>In quali giorni si allena</label>
+  <label>In quali giorni si allena (facoltativo)</label>
   <div class="days" id="cDays"></div>
   <label for="cTraining">Allenamento</label>
   <textarea id="cTraining" placeholder="Obiettivo, tipo di scheda, livello…"></textarea>
@@ -830,11 +859,13 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
 </form></dialog>
 
 <dialog id="dlgDocs"><form method="dialog" id="fDocs">
-  <h3>Esporta documenti</h3>
-  <p class="note-box">La scheda completa di ogni cliente (dati, sedute, pagamenti, pacchetti e anche le note private). La puoi condividere su WhatsApp o salvare in una cartella del computer, e poi reimportarla con “Importa documenti”: diventa di nuovo una cartella normale. Per mandare un riepilogo al cliente, senza le note private, usa “Invia al cliente” dentro la sua cartella.</p>
-  <label>Formato</label>
-  <div class="seg"><label><input type="radio" name="docsFmt" value="docx" checked><span>Word</span></label><label><input type="radio" name="docsFmt" value="pdf"><span>PDF</span></label></div>
-  <div class="docs-head"><label>Clienti</label><span><button type="button" class="btn small ghost" id="docsAll">Tutti</button> <button type="button" class="btn small ghost" id="docsNone">Nessuno</button></span></div>
+  <h3>Esporta dati programma</h3>
+  <p class="note-box">La scheda completa delle cartelle che scegli, con tutti i dati e anche le note private: è per te, non per il cliente. La puoi salvare o condividere, e poi ricaricarla con “Importa dati programma”: torna a essere una cartella. Per mandare qualcosa al cliente usa “Invia dati al cliente” dentro la sua cartella.</p>
+  <label id="docsWhatL">Quali dati esportare</label>
+  <div class="seg seg-wrap what-seg" role="radiogroup" aria-labelledby="docsWhatL"><label><input type="radio" name="docsWhat" value="ck"><span><i class="wi">📋 </i>Check</span></label><label><input type="radio" name="docsWhat" value="pt"><span><i class="wi">🏋️ </i>Personal 1 to 1</span></label><label><input type="radio" name="docsWhat" value="both" checked><span>Entrambi</span></label></div>
+  <label id="docsFmtL">Formato</label>
+  <div class="seg" role="radiogroup" aria-labelledby="docsFmtL"><label><input type="radio" name="docsFmt" value="docx" checked><span>Word</span></label><label><input type="radio" name="docsFmt" value="pdf"><span>PDF</span></label></div>
+  <div class="docs-head"><label>Cartelle</label><span><button type="button" class="btn small ghost" id="docsAll">Seleziona tutto</button> <button type="button" class="btn small ghost" id="docsNone">Deseleziona tutto</button></span></div>
   <div class="checks" id="docsList"></div>
   <label class="check carry" id="docsExpW"><input type="checkbox" id="docsExp" checked><span>💸 Includi le spese di gestione <small>(un file con tutte le spese: data, voce, tipo e attività)</small></span></label>
   <p class="hint" id="docsHint"></p>
@@ -845,13 +876,28 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
   </div>
 </form></dialog>
 
+<dialog id="dlgImport"><form method="dialog" id="fImport">
+  <h3>Importa dati programma</h3>
+  <p class="note-box" id="impNote">Scegli quali cartelle caricare e quali dati prendere. Se una cartella con lo stesso nome esiste già, ti chiedo cosa fare.</p>
+  <label id="impWhatL">Quali dati importare</label>
+  <div class="seg seg-wrap what-seg" role="radiogroup" aria-labelledby="impWhatL"><label><input type="radio" name="impWhat" value="ck"><span><i class="wi">📋 </i>Check</span></label><label><input type="radio" name="impWhat" value="pt"><span><i class="wi">🏋️ </i>Personal 1 to 1</span></label><label><input type="radio" name="impWhat" value="both" checked><span>Entrambi</span></label></div>
+  <div class="docs-head"><label>Cartelle trovate nei file</label><span><button type="button" class="btn small ghost" id="impAll">Seleziona tutto</button> <button type="button" class="btn small ghost" id="impNone">Deseleziona tutto</button></span></div>
+  <div class="checks" id="impList"></div>
+  <p class="hint" id="impHint"></p>
+  <p class="err" id="impErr" role="alert"></p>
+  <div class="dlg-actions">
+    <button class="btn ghost" value="cancel" formnovalidate>Annulla</button>
+    <button class="btn primary" value="ok" id="impOk">Importa</button>
+  </div>
+</form></dialog>
+
 <dialog id="dlgExp"><form method="dialog" id="fExp">
   <h3 id="expTitle">Nuova spesa</h3>
   <label for="xName">Nome della spesa</label>
   <input id="xName" autocomplete="off" placeholder="es. Affitto sala, Struttura, Assicurazione">
   <label>A quale attività si riferisce?</label>
-  <div class="seg seg-wrap"><label><input type="radio" name="xArea" value="all" checked><span>⚖️ Entrambi</span></label><label><input type="radio" name="xArea" value="pt"><span>🏋️ Personal</span></label><label><input type="radio" name="xArea" value="ck"><span>📋 Consulenze</span></label></div>
-  <p class="hint">“Entrambi”: conta sia nel personal sia nelle consulenze, e una volta sola nel totale.</p>
+  <div class="seg seg-wrap"><label><input type="radio" name="xArea" value="all" checked><span>⚖️ Entrambi</span></label><label><input type="radio" name="xArea" value="ck"><span>📋 Consulenze</span></label><label><input type="radio" name="xArea" value="pt"><span>🏋️ Personal</span></label></div>
+  <p class="hint">“Entrambi”: conta sia nelle consulenze sia nel personal, e una volta sola nel totale.</p>
   <label>Ogni quanto si paga</label>
   <div class="seg seg-wrap"><label><input type="radio" name="xKind" value="monthly" checked><span>Mensile</span></label><label><input type="radio" name="xKind" value="yearly"><span>Annuale</span></label><label><input type="radio" name="xKind" value="once"><span>Una tantum</span></label></div>
   <p class="hint" id="xKindHint"></p>
@@ -932,13 +978,18 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
   <h3 id="clTitle">Segna consulenza</h3>
   <p class="hint">Tutto facoltativo: segna solo quello che ti serve. Si può modificare o cancellare quando vuoi.</p>
   <label>Che cosa segni</label>
-  <div class="seg seg-wrap" id="clTypeW"><label><input type="radio" name="clType" value="pkg" checked><span>📦 Consulenza del pacchetto</span></label><label><input type="radio" name="clType" value="single"><span>💶 Consulenza singola</span></label><label><input type="radio" name="clType" value="none"><span>📝 Solo diario</span></label></div>
+  <div class="seg seg-wrap" id="clTypeW"><label><input type="radio" name="clType" value="pkg" checked><span>📦 Consulenza del pacchetto</span></label><label><input type="radio" name="clType" value="single"><span>💶 Consulenza singola</span></label><label><input type="radio" name="clType" value="extra"><span>➕ Extra fuori pacchetto</span></label><label><input type="radio" name="clType" value="none"><span>📝 Solo diario</span></label></div>
   <p class="hint" id="clTypeHint"></p>
   <label for="clDate">Data</label><input id="clDate" type="date">
-  <div id="clSingleW" hidden><div class="two"><div><label for="clAmount">Importo (€)</label><input id="clAmount" type="text" autocomplete="off" placeholder="es. 50"></div>
+  <div id="clPkgTypeW">
+    <label>Tipo di questa consulenza (facoltativo)</label>
+    <div class="seg seg-wrap ck-type-seg"><label><input type="radio" name="clPkgCkType" value="" checked><span id="clPkgTypeSame">Come il pacchetto</span></label><label><input type="radio" name="clPkgCkType" value="diet"><span>🥗 Dieta</span></label><label><input type="radio" name="clPkgCkType" value="plan"><span>📝 Scheda</span></label><label><input type="radio" name="clPkgCkType" value="both"><span>🥗📝 Dieta + scheda</span></label><label><input type="radio" name="clPkgCkType" value="check"><span>✔ Solo check</span></label></div>
+    <p class="hint">Nelle tabelle il cliente conta sempre con il tipo del pacchetto.</p>
+  </div>
+  <div id="clSingleW" hidden><div class="two"><div><label for="clAmount" id="clAmountL">Importo (€)</label><input id="clAmount" type="text" autocomplete="off" placeholder="es. 50"></div>
     <div><label class="check carry" style="margin-top:28px"><input type="checkbox" id="clPaid" checked><span>Già pagata</span></label>
     <label>Tipo di consulenza (facoltativo)</label>
-  <div class="seg seg-wrap ck-type-seg"><label><input type="radio" name="clCkType" value="" checked><span>— non specificato</span></label><label><input type="radio" name="clCkType" value="diet"><span>🥗 Dieta</span></label><label><input type="radio" name="clCkType" value="plan"><span>📝 Scheda</span></label><label><input type="radio" name="clCkType" value="both"><span>🥗📝 Dieta + scheda</span></label></div></div></div></div>
+  <div class="seg seg-wrap ck-type-seg"><label><input type="radio" name="clCkType" value="" checked><span>— non specificato</span></label><label><input type="radio" name="clCkType" value="diet"><span>🥗 Dieta</span></label><label><input type="radio" name="clCkType" value="plan"><span>📝 Scheda</span></label><label><input type="radio" name="clCkType" value="both"><span>🥗📝 Dieta + scheda</span></label><label><input type="radio" name="clCkType" value="check"><span>✔ Solo check</span></label></div></div></div></div>
   <label class="check carry"><input type="checkbox" id="clProg"><span>📄 Programma aggiornato</span></label>
   <label for="clKg">Peso (kg, facoltativo)</label><input id="clKg" type="text" autocomplete="off" placeholder="es. 78,5 — lascia vuoto se non si è pesato">
   <label>Canale (facoltativo)</label>
@@ -1112,26 +1163,21 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
 </form></dialog>
 
 <dialog id="dlgShare"><form method="dialog" id="fShare">
-  <h3 id="shareTitle">Invia al cliente</h3>
-  <p class="hint" style="margin:-6px 0 8px">Scegli cosa vedrà il cliente. Le tue scelte vengono ricordate per questa cartella.</p>
-  <div id="shareWhatW">
-    <label>Cosa inviare</label>
-    <div class="seg"><label><input type="radio" name="shareWhat" value="pt" checked><span>🏋️ Pacchetto personal 1 to 1</span></label><label><input type="radio" name="shareWhat" value="ck"><span>📋 Pacchetto check</span></label></div>
-    <p class="hint">Si invia un pacchetto alla volta: per mandarli entrambi, ripeti l'invio.</p>
-  </div>
-  <div class="checks" id="shareChecks"></div>
-  <p class="hint" id="shareCkNote" hidden>Il documento riporta il tuo check: tipo, consulenze, costo, costo a consulenza, pagato e da saldare (per la consulenza singola: importo e mesi pagati).</p>
+  <h3 id="shareTitle">Invia dati al cliente</h3>
+  <p class="hint" style="margin:-6px 0 8px">Scegli cosa vedrà il cliente: nel file entrano solo le caselle spuntate. Le tue scelte vengono ricordate per questa cartella.</p>
+  <label id="shareWhatL">Cosa inviare</label>
+  <div class="seg seg-wrap what-seg" id="shareWhatSeg" role="radiogroup" aria-labelledby="shareWhatL"><label><input type="radio" name="shareWhat" value="ck"><span><i class="wi">📋 </i>Check</span></label><label><input type="radio" name="shareWhat" value="pt"><span><i class="wi">🏋️ </i>Personal 1 to 1</span></label><label><input type="radio" name="shareWhat" value="both"><span>Entrambi</span></label></div>
+  <p class="hint" id="shareWhatHint"></p>
+  <div id="shareBoxes"></div>
   <p class="err" id="shareErr" role="alert"></p>
-  <label for="shareMsg">Messaggio per il cliente (facoltativo)</label>
-  <textarea id="shareMsg" placeholder="es. Ottimo lavoro questo mese! Ci vediamo lunedì."></textarea>
   <label for="shareTrainer">Il tuo nome (compare nel documento, facoltativo)</label>
   <input id="shareTrainer" autocomplete="off" placeholder="es. Marco Verdi">
-  <label>Formato del file</label>
-  <div class="seg"><label><input type="radio" name="shareFmt" value="pdf"><span>PDF</span></label><label><input type="radio" name="shareFmt" value="docx"><span>Word</span></label></div>
+  <label id="shareFmtL">Formato del file</label>
+  <div class="seg" role="radiogroup" aria-labelledby="shareFmtL"><label><input type="radio" name="shareFmt" value="pdf"><span>PDF</span></label><label><input type="radio" name="shareFmt" value="docx"><span>Word</span></label></div>
   <p class="hint">Sul telefono si apre la condivisione, da cui lo mandi su WhatsApp o per email. Al computer il file viene scaricato e lo alleghi tu.</p>
   <div class="dlg-actions">
     <button class="btn ghost" value="cancel" formnovalidate>Annulla</button>
-    <button class="btn primary" value="ok">Crea e invia</button>
+    <button class="btn primary" value="ok" id="shareOk">Crea e invia</button>
   </div>
 </form></dialog>
 
@@ -1147,8 +1193,10 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
   <label for="followFolder">Nome della cartella</label>
   <input id="followFolder" autocomplete="off" placeholder="es. Personal Francesco">
   <p class="hint" id="followFolderHint"></p>
-  <h4>Cosa vedrà il cliente</h4>
-  <div class="checks" id="followChecks"></div>
+  <h4 id="followWhatL">Cosa vedrà il cliente</h4>
+  <div class="seg seg-wrap what-seg" role="radiogroup" aria-labelledby="followWhatL" style="margin-top:10px"><label><input type="radio" name="followWhat" value="ck"><span><i class="wi">📋 </i>Check</span></label><label><input type="radio" name="followWhat" value="pt"><span><i class="wi">🏋️ </i>Personal 1 to 1</span></label><label><input type="radio" name="followWhat" value="both"><span>Entrambi</span></label></div>
+  <p class="hint" id="followWhatHint"></p>
+  <div id="followBoxes"></div>
   <label for="followMsg">Messaggio per il cliente (facoltativo, resta finché non lo cambi)</label>
   <textarea id="followMsg" placeholder="es. Ottimo lavoro questo mese! Ci vediamo lunedì."></textarea>
   <label for="followTrainer">Il tuo nome (facoltativo)</label>
@@ -1194,10 +1242,11 @@ dialog .seg input{position:absolute;opacity:0;width:1px;height:1px;padding:0}
 <dialog id="dlgConflict"><form method="dialog">
   <h3>Cartella già esistente</h3>
   <p id="conflictText"></p>
-  <div class="dlg-actions">
+  <div class="conf-btns">
+    <button class="btn primary" value="add">Aggiungi ai dati che ci sono già</button>
+    <button class="btn" value="replace">Sostituisci con i dati del file</button>
+    <button class="btn" value="new">Crea una cartella nuova separata</button>
     <button class="btn ghost" value="cancel">Salta questo file</button>
-    <button class="btn" value="new">Crea nuova cartella</button>
-    <button class="btn primary" value="update">Aggiorna cartella</button>
   </div>
 </form></dialog>
 
@@ -1266,9 +1315,17 @@ function normalize(c){
     missLog: normMisses(c.missLog),                                          // lezioni saltate
     personal: c.personal !== false,                                          // servizio personal 1 to 1
     check: normCheck(c.check),                                               // servizio check (consulenze)
-    share: c.share && typeof c.share === "object" && c.share.inc ? {inc:{...c.share.inc}, format:c.share.format==="docx"?"docx":"pdf"} : null,
+    ptOnAt: /^\d{4}-\d{2}-\d{2}$/.test(c.ptOnAt||"") ? c.ptOnAt : "",   // personal riattivato a mano in questa data (dopo i 5 mesi di fermo)
+    share: normShare(c.share),
     follow: normFollow(c.follow)
   };
+}
+/* scelte di “Invia dati al cliente”, ricordate per ogni cartella: servizio (check / personal / entrambi), caselle dei due riquadri, formato.
+   Le scelte salvate dalla versione precedente (solo personal, in “inc”) vengono convertite. */
+function normShare(s){
+  if(!s || typeof s !== "object" || !(s.inc || s.pt || s.ck)) return null;
+  const B = o => { const r = {}; if(o && typeof o === "object") Object.keys(o).forEach(k=>{ if(typeof o[k] === "boolean") r[k] = o[k]; }); return r; };
+  return {what: ["ck","pt","both"].includes(s.what) ? s.what : "", ck: B(s.ck), pt: B(s.pt || s.inc), format: s.format === "docx" ? "docx" : "pdf"};
 }
 /* Condivisione con il cliente (cartella su Drive o Dropbox, aggiornata da te) */
 function normFollow(f){
@@ -1280,6 +1337,7 @@ function normFollow(f){
   return {
     email: S(f.email), message: S(f.message), folderName: S(f.folderName),
     inc: f.inc && typeof f.inc === "object" ? {...f.inc} : null,
+    sel: normShare(f.sel || (f.inc && typeof f.inc === "object" ? {inc:f.inc, what:"pt"} : null)),   // cosa vede il cliente: stessi riquadri di “Invia dati al cliente”
     drive: {on: typeof d.on === "boolean" ? d.on : legacyOn("drive"), folderId:S(d.folderId), folderName:S(d.folderName), renameTo:S(d.renameTo), fileId:S(d.fileId), sharedWith:S(d.sharedWith)},
     dropbox: {on: typeof x.on === "boolean" ? x.on : legacyOn("dropbox"), id:S(x.id || x.folderId), path:S(x.path), folderName:S(x.folderName), renameTo:S(x.renameTo), fileId:S(x.fileId), filePath:S(x.filePath), sharedWith:S(x.sharedWith), url:S(x.url)},
     updated: S(f.updated), sig: S(f.sig)
@@ -1317,7 +1375,10 @@ const ckNum = v => { const n = Number(v); return isFinite(n) && n > 0 ? Math.rou
 /* tipo di consulenza (facoltativo): dieta, scheda, dieta + scheda */
 const CK_TYPES = {diet:"Dieta", plan:"Scheda", both:"Dieta + scheda"};
 const ckType = t => CK_TYPES[t] ? t : "";
-const ckTypeLabel = t => CK_TYPES[t] || "";
+const ckTypeLabel = t => CK_TYPES[t] || (t === "check" ? "Solo check" : "");
+/* tipo della singola consulenza DENTRO un pacchetto (facoltativo): può essere diverso dal pacchetto, anche “solo check”.
+   Nelle tabelle conta sempre il tipo del pacchetto. */
+const ckEntryType = t => CK_TYPES[t] || t === "check" ? t : "";
 function normCkPkg(p, fallbackId){
   if(!p || typeof p !== "object") return null;
   return { id: String(p.id || fallbackId || uid()), start: ckDate(p.start), end: ckDate(p.end), type: ckType(p.type),
@@ -1347,7 +1408,7 @@ function normCheck(x){
     // i mesi pagati della consulenza singola diventano consulenze singole con la loro data e importo
     const ma = (x.monthAmt && typeof x.monthAmt === "object") ? x.monthAmt : {};
     (Array.isArray(x.months) ? x.months : []).filter(m=>/^\d{4}-\d{2}$/.test(m)).forEach(m=>{
-      log.push({id: "cks-" + m, date: m + "-01", kind: "single", amount: ckNum(ma[m]) || ckNum(x.price), paid: true, check: true, program: false, channel: "", score: 0, note: "", weightId: ""});
+      log.push({id: "cks-" + m, date: m + "-01", kind: "single", pkgId: "", amount: ckNum(ma[m]) || ckNum(x.price), paid: true, type: "", extra: false, check: true, program: false, channel: "", score: 0, note: "", weightId: ""});
     });
   }
   rawLog.forEach(e=>{
@@ -1355,25 +1416,61 @@ function normCheck(x){
     let pkgId = String(e.pkgId || "");
     if(!v2 && e.check !== false && pkg && (!pkg.start || !e.date || e.date >= pkg.start)){ kind = "pkg"; pkgId = pkg.id; }   // conversione
     log.push({id: String(e.id || uid()), date: ckDate(e.date), kind, pkgId: kind === "pkg" ? pkgId : "",
-      amount: kind === "single" ? ckNum(e.amount) : 0, paid: kind === "single" ? e.paid !== false : false, type: kind === "single" ? ckType(e.type) : "",
+      amount: kind === "single" ? ckNum(e.amount) : 0, paid: kind === "single" ? e.paid !== false : false, type: kind === "single" || kind === "pkg" ? ckEntryType(e.type) : "", extra: kind === "single" && !!e.extra,
       check: kind ? true : e.check === true, program: !!e.program, channel: String(e.channel || ""),
       score: Math.max(0, Math.min(5, Math.round(Number(e.score) || 0))), note: String(e.note || ""), weightId: String(e.weightId || "")});
   });
   return { on: !!x.on, notes: String(x.notes || ""), pkg, pkgs, log, curType: ckType(x.curType),   // curType: tipo attuale scelto a mano ("" = automatico)
     weights: (Array.isArray(x.weights) ? x.weights : []).filter(w=>w && Number(w.kg) > 0).map(w=>({id: String(w.id || uid()), date: ckDate(w.date), kg: Math.round(Number(w.kg) * 10) / 10})) };
 }
-/* tipo di consulenza ATTUALE del cliente: quello scelto a mano nella cartella, altrimenti quello dell'ultima consulenza con un tipo */
+/* tipo di consulenza ATTUALE del cliente (per la tabella Generale):
+   - scelto a mano nella cartella → vince sempre;
+   - in automatico, seguendo le consulenze in ordine di data (quelle del pacchetto con il tipo del pacchetto; extra e “solo check” non contano):
+     · verso “dieta + scheda” si passa subito;
+     · ogni altro cambio richiede almeno 5 mesi dall'ultima consulenza del tipo attuale E, dopo quei 5 mesi, 2 consulenze del tipo nuovo. */
+const addMonthsIso = (d, n) => { const x = new Date(d + "T12:00:00"); x.setMonth(x.getMonth() + n); return x.toISOString().slice(0,10); };
 function currentCkType(c){
   const k = c && c.check; if(!k) return "";
   if(ckType(k.curType)) return k.curType;
   const pks = [k.pkg, ...(k.pkgs || [])].filter(Boolean);
-  const cons = (k.log || []).filter(e=>e.kind === "pkg" || e.kind === "single").sort((x,y)=>(y.date || "").localeCompare(x.date || ""));
-  for(const e of cons){ const t = e.kind === "single" ? e.type : ((pks.find(p=>p.id === e.pkgId)) || {}).type; if(ckType(t)) return t; }
-  return "";
+  const seq = (k.log || []).filter(e=>(e.kind === "pkg" || e.kind === "single") && !e.extra && /^\d{4}-\d{2}-\d{2}$/.test(e.date || ""))
+    .map(e=>({d: e.date, t: ckType(e.kind === "single" ? e.type : ((pks.find(p=>p.id === e.pkgId)) || {}).type)}))
+    .filter(x=>x.t).sort((x,y)=>x.d.localeCompare(y.d));
+  let cur = "", last = "", count = {};
+  for(const x of seq){
+    if(!cur || x.t === cur){ cur = x.t; last = x.d; count = {}; continue; }   // primo tipo, o conferma del tipo attuale
+    if(x.t === "both"){ cur = "both"; last = x.d; count = {}; continue; }    // verso dieta + scheda: subito
+    if(x.d >= addMonthsIso(last, 5)){                                         // dopo 5 mesi contano le consulenze del tipo nuovo
+      count[x.t] = (count[x.t] || 0) + 1;
+      if(count[x.t] >= 2){ cur = x.t; last = x.d; count = {}; }
+    }
+  }
+  return cur;
 }
 const autoCkType = c => { const k = c && c.check; if(!k) return ""; const save = k.curType; k.curType = ""; const t = currentCkType(c); k.curType = save; return t; };
 /* pacchetto personal ATTIVO: c'è un pacchetto con sedute non ancora finite (fatte + saltate), anche se non pagato */
 const hasActivePt = c => { const s = stats(c); return s.total > 0 && !s.complete; };
+/* Personal 1 to 1 NON ATTIVO: dall'ultima seduta fatta sono passati almeno 5 mesi (es. ultima seduta il 10 marzo → non attivo dal 10 agosto).
+   Vale per chi non ha un pacchetto in corso, ha un pacchetto finito o fa solo sedute singole.
+   Resta sempre attivo chi ha un pacchetto con sedute da fare o un saldo da completare.
+   Torna attivo da solo con una nuova seduta o un nuovo pacchetto, oppure riattivandolo a mano (ptOnAt: i 5 mesi ripartono da quel giorno). */
+const PT_IDLE_MONTHS = 5;
+function ptLastDate(c){
+  const ds = [], ok = d => /^\d{4}-\d{2}-\d{2}$/.test(d || "");
+  const take = o => { (o.sessionLog || []).forEach(x=>ds.push(x.date)); (o.missLog || []).forEach(x=>ds.push(x.date)); ds.push(o.start); };
+  take(c); (c.packages || []).forEach(take); ds.push(c.closed, c.ptOnAt);
+  return ds.filter(ok).sort().pop() || "";
+}
+function ptIdleSince(c){                                                   // "" = attivo; altrimenti il giorno da cui risulta non attivo
+  if(!c) return "";
+  const s = stats(c);
+  if(s.total > 0 && !s.complete) return "";                              // pacchetto con sedute da fare
+  if(s.due > 0.004 || (c.packages || []).some(p=>stats(pkgClient(c, p)).due > 0.004)) return "";   // saldo da completare
+  const ref = ptLastDate(c); if(!ref) return "";
+  const lim = addMonthsIso(ref, PT_IDLE_MONTHS);
+  return today() >= lim ? lim : "";
+}
+const ptIdle = c => !!ptIdleSince(c);
 const ckOn = c => !!(c && c.check && c.check.on);
 const ckPaidOf = p => Math.round((p.payLog || []).reduce((t,x)=>t + x.amount, 0) * 100) / 100;
 const ckDoneOf = (k, p) => p ? (k.log || []).filter(e=>e.kind === "pkg" && e.pkgId === p.id).length : 0;
@@ -1468,24 +1565,66 @@ function wTable(rows, widths, o={}){
   return `<w:tbl><w:tblPr><w:tblW w:w="${widths.reduce((a,b)=>a+b,0)}" w:type="dxa"/><w:tblLayout w:type="fixed"/><w:tblBorders>${b}</w:tblBorders><w:tblCellMar>${mar}</w:tblCellMar><w:tblLook w:val="04A0" w:firstRow="1" w:lastRow="0" w:firstColumn="0" w:lastColumn="0" w:noHBand="1" w:noVBand="1"/></w:tblPr><w:tblGrid>${widths.map(w=>`<w:gridCol w:w="${w}"/>`).join("")}</w:tblGrid>${rows.join("")}</w:tbl>`;
 }
 function wRow(cells, header){ return `<w:tr>${header?`<w:trPr><w:tblHeader/><w:cantSplit/></w:trPr>`:`<w:trPr><w:cantSplit/></w:trPr>`}${cells.join("")}</w:tr>`; }
-/* ===== Cosa si può inviare al cliente ===== */
-const SHARE_ITEMS = [
-  {k:"sedute",           label:"Sedute fatte e rimanenti",               def:true},
-  {k:"pagamenti",        label:"Pagamenti: pagato e da saldare",         def:true},
-  {k:"storicoSedute",    label:"Storico delle sedute con le date",       def:true},
-  {k:"noteSedute",       label:"Note di ogni seduta (cosa avete fatto)", def:true},
-  {k:"storicoPagamenti", label:"Storico dei pagamenti",                  def:false},
-  {k:"storicoPacchetti", label:"Storico pacchetti cliente (date, sedute e costo)", def:false},
-  {k:"giorni",           label:"Giorni e volte a settimana",             def:true},
-  {k:"allenamento",      label:"Descrizione dell'allenamento",           def:true},
-  {k:"note",             label:"Note (di solito private)",               def:false}
+/* ===== Cosa si può inviare al cliente: due riquadri, CHECK e PERSONAL 1 to 1 =====
+   base:true → casella già spuntata la prima volta (si può togliere); le altre partono vuote.
+   Le scelte vengono ricordate per ogni cartella (c.share). */
+const SHARE_CK = [
+  {k:"consulenze",       label:"Consulenze fatte, mancanti e totali del pacchetto", base:true},
+  {k:"pagamenti",        label:"Costo del pacchetto, pagato e da saldare",          base:true},
+  {k:"tipo",             label:"Tipo di consulenza (dieta, scheda, dieta + scheda)"},
+  {k:"costoCons",        label:"Costo a consulenza"},
+  {k:"storico",          label:"Storico consulenze dei pacchetti, con le date"},
+  {k:"singole",          label:"Consulenze singole"},
+  {k:"extra",            label:"Consulenze extra fuori pacchetto"},
+  {k:"diario",           label:"Diario: programma aggiornato, aderenza e note delle consulenze"},
+  {k:"storicoPagamenti", label:"Storico pagamenti"},
+  {k:"storicoPacchetti", label:"Storico pacchetti di consulenze precedenti"},
+  {k:"peso",             label:"Storico peso"},
+  {k:"note",             label:"Note sul cliente e sui check (di solito private)"}
 ];
+const SHARE_PT = [
+  {k:"sedute",           label:"Sedute fatte, mancanti e totali del pacchetto", base:true},
+  {k:"pagamenti",        label:"Costo del pacchetto, pagato e da saldare",      base:true},
+  {k:"costoSeduta",      label:"Costo a seduta"},
+  {k:"storicoSedute",    label:"Storico sedute con le date"},
+  {k:"noteSedute",       label:"Note di ogni seduta (cosa avete fatto)", sub:"storicoSedute"},
+  {k:"lezioniSaltate",   label:"Lezioni saltate"},
+  {k:"storicoPagamenti", label:"Storico pagamenti (rate)"},
+  {k:"storicoPacchetti", label:"Storico pacchetti (date, sedute e costo)"},
+  {k:"seduteSingole",    label:"Sedute singole"},
+  {k:"giorni",           label:"Giorni e volte a settimana"},
+  {k:"allenamento",      label:"Descrizione dell'allenamento"},
+  {k:"note",             label:"Note sul cliente (di solito private)"}
+];
+const SHARE_LISTS = {ck: SHARE_CK, pt: SHARE_PT};
+/* scelte di partenza: quelle ricordate per la cartella, altrimenti solo le voci di base */
 function shareDefaults(c){
-  const inc = {}; SHARE_ITEMS.forEach(i=>inc[i.k] = i.def);
-  if(c && c.share && c.share.inc) SHARE_ITEMS.forEach(i=>{ if(typeof c.share.inc[i.k]==="boolean") inc[i.k] = c.share.inc[i.k]; });
-  return {inc, format: c && c.share && c.share.format==="docx" ? "docx" : "pdf"};
+  const sh = c && c.share, sel = {what: (sh && sh.what) || "", ck:{}, pt:{}, format: sh && sh.format === "docx" ? "docx" : "pdf"};
+  ["ck","pt"].forEach(g=>SHARE_LISTS[g].forEach(i=>{ sel[g][i.k] = !!i.base; if(sh && sh[g] && typeof sh[g][i.k] === "boolean") sel[g][i.k] = sh[g][i.k]; }));
+  return sel;
 }
-
+/* quali voci hanno davvero qualcosa da mostrare per questo cliente (le altre restano grigie, non spuntabili) */
+function shareAvail(c){
+  const k = c.check || normCheck(null), p = k.pkg, s = stats(c), log = k.log || [];
+  const ck = { consulenze: !!p, pagamenti: !!p, tipo: !!((p && ckType(p.type)) || currentCkType(c)), costoCons: !!(p && p.count > 0 && p.price > 0),
+    storico: log.some(e=>e.kind === "pkg"), singole: log.some(e=>e.kind === "single" && !e.extra), extra: log.some(e=>e.kind === "single" && e.extra),
+    diario: checkDiaryRows(c).length > 0, storicoPagamenti: checkPayRows(c).length > 0, storicoPacchetti: (k.pkgs || []).length > 0,
+    peso: (k.weights || []).length > 0, note: !!k.notes };
+  const hasPkg = s.total > 0 || s.done > 0;
+  const pt = { sedute: hasPkg, pagamenti: hasPkg || s.price > 0 || s.paid > 0, costoSeduta: s.total > 0 && round2(s.price - s.carriedIn) > 0,
+    storicoSedute: (c.sessionLog || []).length > 0, noteSedute: (c.sessionLog || []).some(x=>x.note), lezioniSaltate: (c.missLog || []).length > 0,
+    storicoPagamenti: (c.payLog || []).length > 0, storicoPacchetti: pkgHistory(c).some(r=>!r.current), seduteSingole: (c.packages || []).some(isSingle),
+    giorni: !!(c.freq || (c.days || []).length), allenamento: !!c.training, note: !!c.notes };
+  return {ck, pt};
+}
+/* un servizio si può inviare se ha almeno una voce disponibile; il personal anche solo se è attivo (regola dei 5 mesi) */
+function shareSvc(c){
+  const a = shareAvail(c), ckAny = Object.values(a.ck).some(Boolean), ptAny = Object.values(a.pt).some(Boolean), idle = ptIdleSince(c);
+  return { ck: ckAny, pt: ptAny && !idle, idle,
+    ckWhy: ckAny ? "" : "Questo cliente non ha ancora dati del Check.",
+    ptWhy: !ptAny ? "Questo cliente non ha ancora dati del Personal 1 to 1."
+      : idle ? `Personal 1 to 1 non attivo dal ${itDate(idle)}: nessuna seduta da più di ${PT_IDLE_MONTHS} mesi. Per inviarlo, riattivalo dalla cartella.` : "" };
+}
 /* ===== WORD: blocchi ===== */
 const DC = {PINE:"1C2B24", MOSS:"2F6B4F", MUTED:"5E6B64", OWED:"B45309", W:9638};
 function dHeader(label, name, sub){
@@ -1493,18 +1632,18 @@ function dHeader(label, name, sub){
          wPara(wRun(name), {style:"Title"}) +
          wPara(wRun(sub, {color:DC.MUTED, size:20}), {after:280});
 }
-function dBoxes(items){
+function dBoxes(items, keep){                                               // keep: resta nella stessa pagina di quello che segue
   const n = items.length, w = Math.floor(DC.W / n);
   const white = `<w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="single" w:sz="36" w:color="FFFFFF"/>`;
   return wTable([wRow(items.map(([v,l,fill,col]) => wCell(
-    wPara(wRun(v, {bold:true, size:32, color:col}), {align:"center", after:20}) +
-    wPara(wRun(l, {size:17, color:DC.MUTED}), {align:"center"}), w, {fill})))],
+    wPara(wRun(v, {bold:true, size:32, color:col}), {align:"center", after:20, keepNext:!!keep}) +
+    wPara(wRun(l, {size:17, color:DC.MUTED}), {align:"center", keepNext:!!keep}), w, {fill})))],
     Array(n).fill(w), {borders:white, margins:`<w:top w:w="160" w:type="dxa"/><w:left w:w="80" w:type="dxa"/><w:bottom w:w="160" w:type="dxa"/><w:right w:w="80" w:type="dxa"/>`});
 }
-function dDots(done, total){
+function dDots(done, total, keep){
   const n = Math.max(total, done);
   if(!(n > 0 && n <= 60)) return "";
-  return wPara([wRun("Avanzamento  ", {size:18, color:DC.MUTED}), wRun("●".repeat(done), {color:DC.MOSS, size:24}), wRun("○".repeat(Math.max(total-done,0)), {color:"9DB5A6", size:24})], {before:200, after:0});
+  return wPara([wRun("Avanzamento  ", {size:18, color:DC.MUTED}), wRun("●".repeat(done), {color:DC.MOSS, size:24}), wRun("○".repeat(Math.max(total-done,0)), {color:"9DB5A6", size:24})], {before:200, after:0, keepNext:!!keep});
 }
 function dHeading(t){ return wPara(wRun(t), {style:"Heading1"}); }
 function dKv(rows){
@@ -1595,11 +1734,32 @@ function dPackages(c, o){
   return b;
 }
 
-/* Scheda completa (per te: si può reimportare) */
-function docxFullBody(c){
-  const s = stats(c);
+/* Scheda completa (per te: si può reimportare). Prima la parte Check, poi la parte Personal 1 to 1.
+   what: "both" (tutto), "ck" (solo la parte Check), "pt" (solo la parte Personal): serve a “Esporta dati programma”. */
+const hasPtData = c => Number(c.totalSessions) > 0 || Number(c.doneSessions) > 0 || Number(c.price) > 0 || Number(c.paid) > 0
+  || (c.sessionLog || []).length > 0 || (c.payLog || []).length > 0 || (c.missLog || []).length > 0 || (c.packages || []).length > 0;
+function fullParts(c, what){
+  const ck = what !== "pt" && hasCheckData(c), pt = what !== "ck";
+  return {ck, pt, both: ck && pt};
+}
+/* i dati che viaggiano dentro il file per poterlo reimportare: tutto, oppure solo la parte scelta */
+function partData(c, what){
+  const d = JSON.parse(JSON.stringify(c)); delete d.id;
+  if(what === "ck") return {name:d.name, phone:d.phone, email:d.email, check:d.check, part:"ck"};
+  if(what === "pt"){ delete d.check; d.part = "pt"; }
+  return d;
+}
+const PART_LABEL = {ck:"Check", pt:"Personal 1 to 1"};
+function docxFullBody(c, what){
+  const s = stats(c), P = fullParts(c, what);
   const contact = [c.phone, c.email].filter(Boolean).join("   |   ");
-  let b = dHeader("SCHEDA CLIENTE", c.name, (contact?contact+"\n":"") + "Aggiornata al " + itDate(today()));
+  let b = dHeader(what === "ck" ? "SCHEDA CLIENTE · CHECK" : what === "pt" ? "SCHEDA CLIENTE · PERSONAL 1 TO 1" : "SCHEDA CLIENTE", c.name, (contact?contact+"\n":"") + "Aggiornata al " + itDate(today()));
+  if(P.ck){
+    if(P.both) b += dPart(PART_LABEL.ck);
+    checkFullSections(c).forEach(([t, rows])=>{ b += dHeading(t) + dKv(rows); });
+  }
+  if(!P.pt) return b + dHeading("Dati cliente") + dKv([["Telefono", c.phone], ["Email", c.email]]);
+  if(P.both) b += dPart(PART_LABEL.pt);
   b += dBoxes([...dBoxSess(s), ...dBoxPay(s)]);
   b += dDots(s.done, s.total);
   b += dHeading("Pacchetto e pagamenti");
@@ -1610,28 +1770,139 @@ function docxFullBody(c){
   b += dHeading("Storico sedute") + dSessions(c, true);
   if((c.missLog || []).length) b += dHeading("Lezioni saltate") + dMisses(c);
   b += dHeading("Storico pagamenti") + dPayments(c);
-  if(hasCheckData(c)) checkFullSections(c).forEach(([t, rows])=>{ b += dHeading(t) + dKv(rows); });
   b += dPackages(c, {pay:true, sessions:true, notes:true, payments:true});
   return b;
 }
-/* Riepilogo da mandare al cliente (solo ciò che scegli) */
-function docxClientBody(c, o){
-  const s = stats(c), inc = o.inc;
-  let b = dHeader("RIEPILOGO ALLENAMENTI", c.name, "Aggiornato al " + itDate(today()) + (o.trainer ? "\nPersonal trainer: " + o.trainer : ""));
-  if(o.message) b += dMessage("Messaggio dal tuo personal trainer", o.message);
-  const boxes = [...(inc.sedute?dBoxSess(s):[]), ...(inc.pagamenti?dBoxPay(s):[])];
-  if(boxes.length) b += dBoxes(boxes);
-  if(inc.sedute) b += dDots(s.done, s.total);
-  if(inc.sedute) b += dHeading("Il tuo pacchetto") + dKv(rowsSess(s));
-  if(inc.pagamenti) b += dHeading("Pagamenti") + dKv(rowsPay(s).map(r=>r[2]?[r[0],r[1],{bold:true,color:DC[r[2].color]}]:r));
+/* ===== Riepilogo da mandare al cliente (solo ciò che scegli) =====
+   Il documento viene prima descritto una volta sola (shareDoc), poi scritto in Word, PDF o testo:
+   così i tre formati contengono sempre le stesse cose, nello stesso ordine (prima Check, poi Personal 1 to 1). */
+const docPerSes = (price, n) => n > 0 ? round2((Number(price) || 0) / n) : 0;
+function sharePtSections(c, inc){
+  const s = stats(c), av = shareAvail(c).pt, on = k => !!(inc && inc[k] && av[k]), out = [];
+  const due = Math.max(s.due, 0), settled = s.price > 0 && s.due <= 0.004;
+  const boxes = [];
+  if(on("sedute")) boxes.push([`${s.done} su ${s.total}`, s.complete ? "sedute completate" : "sedute fatte", s.complete ? "ok" : "plain"], [String(s.left), s.left === 1 ? "seduta mancante" : "sedute mancanti", "plain"]);
+  if(on("pagamenti")) boxes.push([eurDoc(s.paid), "pagato", "ok"], [eurDoc(due), settled ? "SALDATO" : "da saldare", due > 0 ? "owed" : "ok"]);
+  if(boxes.length) out.push({t:"boxes", items:boxes});
+  if(on("sedute")) out.push({t:"dots", done:s.done, total:s.total});
+  const rows = [];
+  if(on("sedute")){
+    if(s.start) rows.push(["Inizio pacchetto", itDate(s.start)]);
+    rows.push(["Sedute totali del pacchetto", String(s.total)], ["Sedute effettuate", String(s.done)]);
+    if(s.lost) rows.push(["Lezioni saltate (non recuperabili)", String(s.lost)]);
+    rows.push(["Sedute mancanti", String(s.left)]);
+    if(s.complete) rows.push(["Stato sedute", "Completato"]);
+  }
+  if(on("pagamenti")){
+    rows.push(["Costo del pacchetto", eurDoc(s.price)], ...carriedInRows(s), ["Pagato", eurDoc(s.paid)], ["Da saldare", eurDoc(due), {bold:true, tone: due > 0 ? "owed" : "ok"}]);
+    if(settled) rows.push(["Stato pagamento", "SALDATO", {bold:true, tone:"ok"}]);
+    if(s.due < -0.004) rows.push(["Credito del cliente", eurDoc(-s.due)]);
+  }
+  if(on("costoSeduta")) rows.push(["Costo a seduta", eurDoc(docPerSes(round2(s.price - s.carriedIn), s.total))]);
+  if(rows.length) out.push({t:"h", title:"Il tuo pacchetto"}, {t:"kv", rows});
   const tr = [];
-  if(inc.giorni){ tr.push(["Volte a settimana", c.freq===""?"":String(c.freq)]); tr.push(["Giorni di allenamento", c.days.join(", ")]); }
-  if(inc.allenamento) tr.push(["Allenamento", c.training]);
-  if(tr.length) b += dHeading("Il tuo allenamento") + dKv(tr);
-  if(inc.note) b += dHeading("Note") + wPara(wRun(c.notes || "—"), {before:60});
-  if(inc.storicoSedute) b += dHeading("Storico sedute") + dSessions(c, !!inc.noteSedute);
-  if(inc.storicoPagamenti) b += dHeading("Storico pagamenti") + dPayments(c);
-  if(inc.storicoPacchetti && pkgHistory(c).length) b += dHeading("Storico pacchetti cliente") + dPkgHistory(c);
+  if(on("giorni")){ if(c.freq) tr.push(["Volte a settimana", String(c.freq)]); if(c.days.length) tr.push(["Giorni di allenamento", c.days.join(", ")]); }
+  if(on("allenamento")) tr.push(["Allenamento", c.training]);
+  if(tr.length) out.push({t:"h", title:"Il tuo allenamento"}, {t:"kv", rows:tr});
+  if(on("storicoSedute")){
+    const list = [...c.sessionLog].sort(byDateAsc), notes = on("noteSedute");
+    out.push({t:"h", title:"Storico sedute"}, {t:"table",
+      cols: notes ? [{t:"N°", f:.08, muted:true}, {t:"Data", f:.18}, {t:"Note seduta", f:.74}] : [{t:"N°", f:.08, muted:true}, {t:"Data", f:.92}],
+      rows: list.map((x,i)=>notes ? [String(i+1), itDate(x.date), x.note || "—"] : [String(i+1), itDate(x.date)])});
+  }
+  if(on("lezioniSaltate")) out.push({t:"h", title:"Lezioni saltate"}, {t:"table", cols:[{t:"Data", f:.25}, {t:"Esito", f:.75}], rows: missSorted(c).map(x=>[itDate(x.date), MISS_DOC.lost])});
+  if(on("storicoPagamenti")){
+    const rws = [...c.payLog].sort(byDateAsc).map(x=>[itDate(x.date), eurDoc(x.amount), x.method || "—", x.note || "—"]);
+    rws.push(["Totale", eurDoc(c.payLog.reduce((a,p)=>a + (Number(p.amount)||0), 0)), "", ""]);
+    out.push({t:"h", title:"Storico pagamenti"}, {t:"table", total:true, cols:[{t:"Data", f:.18}, {t:"Importo", f:.2, right:true, bold:true}, {t:"Metodo", f:.2}, {t:"Note", f:.42}], rows:rws});
+  }
+  if(on("seduteSingole")){
+    const sg = c.packages.filter(isSingle).sort((x,y)=>(x.start||"").localeCompare(y.start||""));
+    out.push({t:"h", title:"Sedute singole"}, {t:"table", cols:[{t:"Data", f:.3}, {t:"Costo", f:.3}, {t:"Stato", f:.4}],
+      rows: sg.map(p=>[itDate(p.start), eurDoc(p.price), (Number(p.paid)||0) >= (Number(p.price)||0) - 0.004 ? "pagata" : "da pagare"])});
+  }
+  if(on("storicoPacchetti")) out.push({t:"h", title:"Storico pacchetti"}, {t:"table", cols:[{t:"Inizio", f:.25}, {t:"Fine", f:.25}, {t:"Sedute", f:.17}, {t:"Costo del pacchetto", f:.33}],
+    rows: pkgHistory(c).map(r=>[itDate(r.start) || "—", r.end ? itDate(r.end) : (r.current ? "in corso" : "—"), String(r.total), eurDoc(r.price)])});
+  if(on("note")) out.push({t:"h", title:"Note"}, {t:"text", text:c.notes});
+  return out;
+}
+function shareCkSections(c, inc){
+  const k = c.check, p = k.pkg, av = shareAvail(c).ck, on = x => !!(inc && inc[x] && av[x]), out = [];
+  const rows = [], boxes = [];
+  if(p){
+    const d = ckDoneOf(k, p), paid = ckPaidOf(p), due = Math.max(round2(p.price - paid), 0), left = Math.max(p.count - d, 0);
+    const settled = p.price > 0 && due <= 0.004, complete = p.count > 0 && d >= p.count, credit = round2(paid - p.price);
+    if(on("consulenze")) boxes.push([`${d} su ${p.count}`, complete ? "consulenze completate" : "consulenze fatte", complete ? "ok" : "plain"], [String(left), left === 1 ? "consulenza mancante" : "consulenze mancanti", "plain"]);
+    if(on("pagamenti")) boxes.push([eurDoc(paid), "pagato", "ok"], [eurDoc(due), settled ? "SALDATO" : "da saldare", due > 0 ? "owed" : "ok"]);
+    if(on("consulenze")){
+      if(p.start) rows.push(["Inizio pacchetto", itDate(p.start)]);
+      rows.push(["Consulenze totali del pacchetto", String(p.count)], ["Consulenze effettuate", String(d)], ["Consulenze mancanti", String(left)]);
+      if(complete) rows.push(["Stato consulenze", "Completato"]);
+    }
+  }
+  if(on("tipo")) rows.push(["Tipo di consulenza", ckTypeLabel((p && ckType(p.type)) || currentCkType(c))]);
+  if(p){
+    const paid = ckPaidOf(p), due = Math.max(round2(p.price - paid), 0), settled = p.price > 0 && due <= 0.004, credit = round2(paid - p.price);
+    if(on("pagamenti")){
+      rows.push(["Costo del pacchetto", eurDoc(p.price)], ["Pagato", eurDoc(paid)], ["Da saldare", eurDoc(due), {bold:true, tone: due > 0 ? "owed" : "ok"}]);
+      if(settled) rows.push(["Stato pagamento", "SALDATO", {bold:true, tone:"ok"}]);
+      if(p.price > 0 && credit > 0.004) rows.push(["Credito del cliente", eurDoc(credit)]);
+    }
+    if(on("costoCons")) rows.push(["Costo a consulenza", eurDoc(ckPerOneOf(p))]);
+  }
+  if(boxes.length) out.push({t:"boxes", items:boxes});
+  if(rows.length) out.push({t:"h", title: p ? "Il tuo pacchetto di consulenze" : "Le tue consulenze"}, {t:"kv", rows});
+  const cons = checkConsRows(c, e=>e.kind === "pkg" ? on("storico") : e.extra ? on("extra") : on("singole"));
+  if(cons.length) out.push({t:"h", title:"Storico consulenze"}, {t:"kv", rows:cons});
+  if(on("diario")) out.push({t:"h", title:"Diario"}, {t:"kv", rows:checkDiaryRows(c)});
+  if(on("storicoPagamenti")){
+    const tot = round2(checkPaidTotal(c));
+    out.push({t:"h", title:"Storico pagamenti"}, {t:"kv", rows:[...checkPayRows(c), ["Totale pagato", eurDoc(tot), {bold:true}]]});
+  }
+  if(on("storicoPacchetti")) out.push({t:"h", title:"Pacchetti di consulenze precedenti"}, {t:"kv",
+    rows: [...k.pkgs].sort((a,b)=>(a.start||"").localeCompare(b.start||"")).map(q=>[`${q.start ? "dal " + itDate(q.start) : "—"}${q.end ? " al " + itDate(q.end) : ""}`,
+      `${ckType(q.type) ? ckTypeLabel(q.type) + " · " : ""}${ckDoneOf(k, q)} di ${q.count || "—"} ${q.count === 1 ? "consulenza" : "consulenze"} · ${eurDoc(q.price)}`])});
+  if(on("peso")) out.push({t:"h", title:"Storico peso"}, {t:"kv", rows:[...k.weights].sort((x,y)=>(x.date||"").localeCompare(y.date||"")).map(w=>[itDate(w.date), String(Number(w.kg).toFixed(1)).replace(".", ",") + " kg"])});
+  if(on("note")) out.push({t:"h", title:"Note"}, {t:"text", text:k.notes});
+  return out;
+}
+/* o = {what:"ck"|"pt"|"both", ck:{…}, pt:{…}, trainer, message} */
+function shareDoc(c, o){
+  const svc = shareSvc(c), what = o.what === "ck" || o.what === "pt" ? o.what : "both";
+  const ckS = what !== "pt" && svc.ck ? shareCkSections(c, o.ck || {}) : [];
+  const ptS = what !== "ck" && svc.pt ? sharePtSections(c, o.pt || {}) : [];
+  const both = ckS.length > 0 && ptS.length > 0;
+  return { label: both ? "RIEPILOGO" : ckS.length ? "RIEPILOGO CHECK" : "RIEPILOGO PERSONAL 1 TO 1", name: c.name,
+    date: "Aggiornato al " + itDate(today()), trainer: o.trainer || "", message: o.message || "",
+    sections: [...(both ? [{t:"part", title:"Check"}] : []), ...ckS, ...(both ? [{t:"part", title:"Personal 1 to 1"}] : []), ...ptS],
+    hasCk: ckS.length > 0, hasPt: ptS.length > 0, empty: !ckS.length && !ptS.length && !o.message };
+}
+/* --- Word --- */
+const D_TONE = {ok:["D7E6DC", "MOSS"], plain:["EEF1EC", "PINE"], owed:["FCEBD3", "OWED"]};
+function dPart(title){
+  const none = `<w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="nil"/>`;
+  return wPara("", {before:320, keepNext:true}) + wTable([wRow([wCell(wPara(wRun(title.toUpperCase(), {bold:true, color:"FFFFFF", size:26, spacing:30}), {keepNext:true}), DC.W, {fill:DC.MOSS})])], [DC.W],
+    {borders:none, margins:`<w:top w:w="130" w:type="dxa"/><w:left w:w="200" w:type="dxa"/><w:bottom w:w="130" w:type="dxa"/><w:right w:w="200" w:type="dxa"/>`});
+}
+function dGenTable(sec){
+  let left = DC.W; const wd = sec.cols.map((cl,i)=>{ const w = i === sec.cols.length - 1 ? left : Math.round(DC.W * cl.f); left -= w; return w; });
+  const rows = [dHeadRow(sec.cols.map(cl=>cl.t), wd)];
+  sec.rows.forEach((r, ri)=>{ const tot = sec.total && ri === sec.rows.length - 1;
+    rows.push(wRow(r.map((v,i)=>wCell(wPara(wRun(v, {bold: tot || !!sec.cols[i].bold, color: sec.cols[i].muted && !tot ? DC.MUTED : DC.PINE})), wd[i], tot ? {fill:"EEF1EC"} : {})))); });
+  return wTable(rows, wd);
+}
+function shareDocx(doc){
+  let b = dHeader(doc.label, doc.name, doc.date + (doc.trainer ? "\nPersonal trainer: " + doc.trainer : ""));
+  if(doc.message) b += dMessage("Messaggio dal tuo personal trainer", doc.message);
+  doc.sections.forEach(x=>{
+    if(x.t === "part") b += dPart(x.title);
+    else if(x.t === "boxes") b += dBoxes(x.items.map(([v,l,tone])=>[v, l, D_TONE[tone][0], DC[D_TONE[tone][1]]]), true);
+    else if(x.t === "dots") b += dDots(x.done, x.total, true);
+    else if(x.t === "h") b += dHeading(x.title);
+    else if(x.t === "kv") b += dKv(x.rows.map(r=>r[2] ? [r[0], r[1], {bold:!!r[2].bold, color: r[2].tone ? DC[D_TONE[r[2].tone][1]] : DC.PINE}] : r));
+    else if(x.t === "table") b += dGenTable(x);
+    else if(x.t === "text") b += wPara(wRun(x.text || "—"), {before:60});
+  });
   return b;
 }
 /* dicitura in fondo a ogni pagina dei documenti (Word e PDF) */
@@ -1673,11 +1944,11 @@ function zipDocx(p, JSZip){
   z.file("docProps/core.xml", p.core);
   return z;
 }
-async function buildDocx(c, JSZip){
-  const data = {...c}; delete data.id;                                   // tutti i dati, per reimportare la scheda senza perdere niente
-  return zipDocx(docxParts(docxFullBody(c), c.name, c.name, "PTGEST1", "PTGEST1:" + b64enc(JSON.stringify(data))), JSZip);
+async function buildDocx(c, JSZip, what){
+  const data = partData(c, what);                                        // i dati per reimportare la scheda senza perdere niente
+  return zipDocx(docxParts(docxFullBody(c, what), c.name, c.name, "PTGEST1", "PTGEST1:" + b64enc(JSON.stringify(data))), JSZip);
 }
-async function buildClientDocx(c, JSZip, o){ return zipDocx(docxParts(docxClientBody(c, o), "Riepilogo per " + c.name, "Riepilogo " + c.name, "PTCLIENT"), JSZip); }
+async function buildClientDocx(c, JSZip, o){ return zipDocx(docxParts(shareDocx(shareDoc(c, o)), "Riepilogo per " + c.name, "Riepilogo " + c.name, "PTCLIENT"), JSZip); }
 
 /* ===== file “Spese di gestione” (backup): tabella leggibile + tutti i dati per il ripristino ===== */
 function expDocRows(rows){ return rows.map(r=>[r.date ? itDate(r.date) : "—", r.name, r.kind, r.area, eurDoc(r.amount)]); }
@@ -1716,53 +1987,35 @@ function checkRows(c){
   return rows;
 }
 /* storico consulenze in ordine di data: “pacchetto 2/4” o “singola 50 €” */
-function checkConsRows(c){
+function checkConsRows(c, pick){
   const k = c.check, num = {};
   [...(k.pkgs || []), ...(k.pkg ? [k.pkg] : [])].forEach(p=>{ k.log.filter(e=>e.kind === "pkg" && e.pkgId === p.id).sort((a,b)=>(a.date||"").localeCompare(b.date||"")).forEach((e,i)=>{ num[e.id] = `${i + 1}/${p.count || "?"}`; }); });
-  return [...k.log].filter(e=>e.kind).sort((a,b)=>(a.date||"").localeCompare(b.date||"")).map(e=>[itDate(e.date),
-    e.kind === "pkg" ? `Consulenza del pacchetto ${num[e.id] || ""}${(()=>{ const p = [k.pkg, ...(k.pkgs || [])].find(q=>q && q.id === e.pkgId); return p && ckType(p.type) ? ` · ${ckTypeLabel(p.type)}` : ""; })()}`
-      : `Consulenza singola${ckType(e.type) ? ` · ${ckTypeLabel(e.type)}` : ""} · ${eurDoc(e.amount)}${e.paid ? "" : " (da pagare)"}`]);
+  return [...k.log].filter(e=>e.kind && (!pick || pick(e))).sort((a,b)=>(a.date||"").localeCompare(b.date||"")).map(e=>[itDate(e.date),
+    e.kind === "pkg" ? `Consulenza del pacchetto ${num[e.id] || ""}${(()=>{ const p = [k.pkg, ...(k.pkgs || [])].find(q=>q && q.id === e.pkgId);
+        if(ckEntryType(e.type)) return ` · ${ckTypeLabel(e.type)}${p && ckType(p.type) ? ` (pacchetto: ${ckTypeLabel(p.type).toLowerCase()})` : ""}`;
+        return p && ckType(p.type) ? ` · ${ckTypeLabel(p.type)}` : ""; })()}`
+      : `${e.extra ? "Consulenza extra fuori pacchetto" : "Consulenza singola"}${ckEntryType(e.type) ? ` · ${ckTypeLabel(e.type)}` : ""} · ${e.extra && !e.amount ? "gratuita" : eurDoc(e.amount)}${e.amount && !e.paid ? " (da pagare)" : ""}`]);
 }
 function checkPayRows(c){
   const k = c.check;
   return [...[k.pkg, ...(k.pkgs || [])].filter(Boolean).flatMap(p=>p.payLog.map(x=>({d:x.date, t:`Rata pacchetto${p.start ? ` dal ${itDate(p.start)}` : ""}${ckType(p.type) ? ` · ${ckTypeLabel(p.type)}` : ""}`, a:x.amount}))),
-    ...ckSingles(k).filter(e=>e.paid).map(e=>({d:e.date, t:`Consulenza singola${ckType(e.type) ? ` · ${ckTypeLabel(e.type)}` : ""}`, a:e.amount}))].sort((x,y)=>(x.d||"").localeCompare(y.d||"")).map(x=>[x.d ? itDate(x.d) : "—", `${eurDoc(x.a)} · ${x.t}`]);
+    ...ckSingles(k).filter(e=>e.paid && e.amount > 0).map(e=>({d:e.date, t:`${e.extra ? "Consulenza extra" : "Consulenza singola"}${ckEntryType(e.type) ? ` · ${ckTypeLabel(e.type)}` : ""}`, a:e.amount}))].sort((x,y)=>(x.d||"").localeCompare(y.d||"")).map(x=>[x.d ? itDate(x.d) : "—", `${eurDoc(x.a)} · ${x.t}`]);
+}
+function checkDiaryRows(c){
+  const k = c.check || {log:[]};
+  return [...(k.log || [])].sort((x,y)=>(x.date||"").localeCompare(y.date||"")).filter(e=>e.program || e.channel || e.score || e.note || !e.kind).map(e=>[itDate(e.date),
+    [e.kind === "pkg" ? "consulenza del pacchetto" : e.kind === "single" ? (e.extra ? "consulenza extra" : "consulenza singola") : "", e.program ? "programma aggiornato" : "", e.channel, e.score ? `aderenza ${e.score}/5` : "", e.note].filter(Boolean).join(" · ") || "—"]);
 }
 function checkFullSections(c){
   const k = c.check, kg = v => String(Number(v).toFixed(1)).replace(".", ",") + " kg";
   const main = [["Servizio check", k.on ? "attivo" : "non attivo"], ...checkRows(c).map(r=>[r[0], r[1]]), ...(k.notes ? [["Note sul cliente e sui check", k.notes]] : [])];
   const cons = checkConsRows(c), pays = checkPayRows(c);
-  const pkgs = [...(k.pkgs || [])].sort((a,b)=>(a.start||"").localeCompare(b.start||"")).map(p=>[`${itDate(p.start)} → ${p.end ? itDate(p.end) : "—"}`, `${ckType(p.type) ? ckTypeLabel(p.type) + " · " : ""}${ckDoneOf(k, p)} di ${p.count || "—"} consulenze · ${eurDoc(p.price)}`]);
-  const diary = [...k.log].sort((x,y)=>(x.date||"").localeCompare(y.date||"")).filter(e=>e.program || e.channel || e.score || e.note || !e.kind).map(e=>[itDate(e.date),
-    [e.kind === "pkg" ? "consulenza del pacchetto" : e.kind === "single" ? "consulenza singola" : "", e.program ? "programma aggiornato" : "", e.channel, e.score ? `aderenza ${e.score}/5` : "", e.note].filter(Boolean).join(" · ") || "—"]);
+  const pkgs = [...(k.pkgs || [])].sort((a,b)=>(a.start||"").localeCompare(b.start||"")).map(p=>[`${p.start ? "dal " + itDate(p.start) : "—"}${p.end ? " al " + itDate(p.end) : ""}`, `${ckType(p.type) ? ckTypeLabel(p.type) + " · " : ""}${ckDoneOf(k, p)} di ${p.count || "—"} ${p.count === 1 ? "consulenza" : "consulenze"} · ${eurDoc(p.price)}`]);   // (niente freccia: nel PDF non si stampa)
+  const diary = checkDiaryRows(c);
   const ws = [...(k.weights || [])].sort((x,y)=>(x.date||"").localeCompare(y.date||"")).map(w=>[itDate(w.date), kg(w.kg)]);
   return [["Check", main], ...(cons.length ? [["Storico consulenze", cons]] : []), ...(pays.length ? [["Pagamenti check", pays]] : []),
     ...(pkgs.length ? [["Pacchetti di consulenze passati", pkgs]] : []), ...(diary.length ? [["Diario (peso, programma, note)", diary]] : []), ...(ws.length ? [["Storico peso", ws]] : [])];
 }
-/* ===== Riepilogo del CHECK per il cliente (Word e PDF) ===== */
-function docxCheckBody(c, o){
-  let b = dHeader("RIEPILOGO CHECK", c.name, "Aggiornato al " + itDate(today()) + (o.trainer ? "\nPersonal trainer: " + o.trainer : ""));
-  if(o.message) b += dMessage("Messaggio dal tuo personal trainer", o.message);
-  b += dHeading(c.check.pkg ? "Il tuo pacchetto di consulenze" : "Le tue consulenze") + dKv(checkRows(c).map(r=>r[2] ? [r[0], r[1], {bold:true, color:DC[r[2].color]}] : [r[0], r[1]]));
-  const cons = checkConsRows(c), pays = checkPayRows(c);
-  if(cons.length) b += dHeading("Le tue consulenze") + dKv(cons);
-  if(pays.length) b += dHeading("Pagamenti") + dKv(pays);
-  return b;
-}
-async function buildCheckDocx(c, JSZip, o){ return zipDocx(docxParts(docxCheckBody(c, o), "Riepilogo check per " + c.name, "Riepilogo check " + c.name, "PTCHECK"), JSZip); }
-function buildCheckPdf(c, jsPDF, o){
-  const K = pdfKit(jsPDF);
-  K.header("RIEPILOGO CHECK", c.name, "Aggiornato al " + itDate(today()) + (o.trainer ? "      Personal trainer: " + o.trainer : ""));
-  if(o.message) K.message("Messaggio dal tuo personal trainer", o.message);
-  K.heading(c.check.pkg ? "Il tuo pacchetto di consulenze" : "Le tue consulenze");
-  K.kv(checkRows(c).map(r=>r[2] ? [r[0], r[1], {bold:true}] : [r[0], r[1]]));
-  const cons = checkConsRows(c), pays = checkPayRows(c);
-  if(cons.length){ K.heading("Le tue consulenze"); K.kv(cons); }
-  if(pays.length){ K.heading("Pagamenti"); K.kv(pays); }
-  K.footer("Riepilogo check per " + c.name);
-  return K.doc;
-}
-
 /* ===== PDF: blocchi ===== */
 function pdfKit(jsPDF){
   const doc = new jsPDF({unit:"mm", format:"a4"});
@@ -1816,6 +2069,12 @@ function pdfKit(jsPDF){
       else { draw(C.dotOff); doc.circle(cx, cy, r, "S"); }
     }
     y += Math.ceil(n/perRow)*step + 2;
+  };
+  K.part = t => {                                                          // fascia verde che apre la parte “Check” o “Personal 1 to 1”
+    ensure(95); y += 7;                                                  // se nella pagina resta poco spazio, la parte comincia su una pagina nuova
+    fill(C.moss); doc.rect(M, y, CW, 9.5, "F");
+    color([255,255,255]); font("bold", 11.5); doc.text(t.toUpperCase(), M + 4, y + 6.5, {charSpace:0.4});
+    y += 11.5;
   };
   K.heading = t => {
     ensure(22); y += 8;
@@ -1905,47 +2164,53 @@ function pdfKit(jsPDF){
   return K;
 }
 
-/* Scheda completa (per te: si può reimportare) */
-function buildPdf(c, jsPDF){
-  const K = pdfKit(jsPDF), s = stats(c);
+/* Scheda completa (per te: si può reimportare): prima Check, poi Personal 1 to 1 */
+function buildPdf(c, jsPDF, what){
+  const K = pdfKit(jsPDF), s = stats(c), P = fullParts(c, what);
   const contact = [c.phone, c.email].filter(Boolean).join("   |   ");
-  K.header("SCHEDA CLIENTE", c.name, (contact ? contact + "      " : "") + "Aggiornata al " + itDate(today()));
-  K.boxesFor(s, true, true);
-  K.dots(s.done, s.total);
-  K.heading("Pacchetto e pagamenti"); K.kv([...K.rowsSess(s), ...K.rowsPay(s)]);
-  K.heading("Dati cliente e allenamento");
-  K.kv([["Telefono", c.phone], ["Email", c.email], ["Volte a settimana", c.freq===""?"":String(c.freq)],
-        ["Giorni di allenamento", c.days.join(", ")], ["Allenamento", c.training], ["Note", c.notes]]);
-  K.heading("Storico sedute"); K.sessions(c, true);
-  if((c.missLog || []).length){ K.heading("Lezioni saltate"); K.misses(c); }
-  K.heading("Storico pagamenti"); K.payments(c);
-  if(hasCheckData(c)) checkFullSections(c).forEach(([t, rows])=>{ K.heading(t); K.kv(rows); });
-  K.packages(c, {pay:true, sessions:true, notes:true, payments:true});
+  K.header(what === "ck" ? "SCHEDA CLIENTE - CHECK" : what === "pt" ? "SCHEDA CLIENTE - PERSONAL 1 TO 1" : "SCHEDA CLIENTE", c.name, (contact ? contact + "      " : "") + "Aggiornata al " + itDate(today()));
+  if(P.ck){
+    if(P.both) K.part(PART_LABEL.ck);
+    checkFullSections(c).forEach(([t, rows])=>{ K.heading(t); K.kv(rows); });
+  }
+  if(!P.pt){ K.heading("Dati cliente"); K.kv([["Telefono", c.phone], ["Email", c.email]]); }
+  else {
+    if(P.both) K.part(PART_LABEL.pt);
+    K.boxesFor(s, true, true);
+    K.dots(s.done, s.total);
+    K.heading("Pacchetto e pagamenti"); K.kv([...K.rowsSess(s), ...K.rowsPay(s)]);
+    K.heading("Dati cliente e allenamento");
+    K.kv([["Telefono", c.phone], ["Email", c.email], ["Volte a settimana", c.freq===""?"":String(c.freq)],
+          ["Giorni di allenamento", c.days.join(", ")], ["Allenamento", c.training], ["Note", c.notes]]);
+    K.heading("Storico sedute"); K.sessions(c, true);
+    if((c.missLog || []).length){ K.heading("Lezioni saltate"); K.misses(c); }
+    K.heading("Storico pagamenti"); K.payments(c);
+    K.packages(c, {pay:true, sessions:true, notes:true, payments:true});
+  }
   K.footer(c.name);
-  const data = {...c}; delete data.id;
-  K.doc.setProperties({title:c.name, subject:"PTGEST1:" + b64enc(JSON.stringify(data)), creator:"Gestionale Personal Trainer"});
+  K.doc.setProperties({title:c.name, subject:"PTGEST1:" + b64enc(JSON.stringify(partData(c, what))), creator:"Gestionale Personal Trainer"});
   return K.doc;
 }
 /* Riepilogo da mandare al cliente (solo ciò che scegli) */
-function buildClientPdf(c, jsPDF, o){
-  const K = pdfKit(jsPDF), s = stats(c), inc = o.inc;
-  K.header("RIEPILOGO ALLENAMENTI", c.name, "Aggiornato al " + itDate(today()) + (o.trainer ? "      Personal trainer: " + o.trainer : ""));
-  if(o.message) K.message("Messaggio dal tuo personal trainer", o.message);
-  K.boxesFor(s, inc.sedute, inc.pagamenti);
-  if(inc.sedute){ K.dots(s.done, s.total); K.heading("Il tuo pacchetto"); K.kv(K.rowsSess(s)); }
-  if(inc.pagamenti){ K.heading("Pagamenti"); K.kv(K.rowsPay(s)); }
-  const tr = [];
-  if(inc.giorni){ tr.push(["Volte a settimana", c.freq===""?"":String(c.freq)]); tr.push(["Giorni di allenamento", c.days.join(", ")]); }
-  if(inc.allenamento) tr.push(["Allenamento", c.training]);
-  if(tr.length){ K.heading("Il tuo allenamento"); K.kv(tr); }
-  if(inc.note){ K.heading("Note"); K.text(c.notes); }
-  if(inc.storicoSedute){ K.heading("Storico sedute"); K.sessions(c, !!inc.noteSedute); }
-  if(inc.storicoPagamenti){ K.heading("Storico pagamenti"); K.payments(c); }
-  if(inc.storicoPacchetti && pkgHistory(c).length){ K.heading("Storico pacchetti cliente"); K.pkgHistory(c); }
-  K.footer("Riepilogo per " + c.name);
-  K.doc.setProperties({title:"Riepilogo " + c.name, subject:"PTCLIENT", creator:"Gestionale Personal Trainer"});
+function sharePdf(doc, jsPDF){
+  const K = pdfKit(jsPDF), C = K.C;
+  const TONE = {ok:[C.mossSoft, C.moss], plain:[C.chalk, C.pine], owed:[C.owedSoft, C.owed]};
+  K.header(doc.label, doc.name, doc.date + (doc.trainer ? "      Personal trainer: " + doc.trainer : ""));
+  if(doc.message) K.message("Messaggio dal tuo personal trainer", doc.message);
+  doc.sections.forEach(x=>{
+    if(x.t === "part") K.part(x.title);
+    else if(x.t === "boxes") K.boxes(x.items.map(([v,l,tone])=>[v, l, TONE[tone][0], TONE[tone][1]]));
+    else if(x.t === "dots") K.dots(x.done, x.total);
+    else if(x.t === "h") K.heading(x.title);
+    else if(x.t === "kv") K.kv(x.rows.map(r=>r[2] ? [r[0], r[1], {bold:!!r[2].bold, color: r[2].tone ? TONE[r[2].tone][1] : C.pine}] : r));
+    else if(x.t === "table"){ let left = K.CW; K.table(x.cols.map((cl,i)=>{ const w = i === x.cols.length - 1 ? left : Math.round(K.CW * cl.f); left -= w; return {t:cl.t, w, right:cl.right, bold:cl.bold, muted:cl.muted}; }), x.rows, x.total); }
+    else if(x.t === "text") K.text(x.text);
+  });
+  K.footer("Riepilogo per " + doc.name);
+  K.doc.setProperties({title:"Riepilogo " + doc.name, subject:"PTCLIENT", creator:"Gestionale Personal Trainer"});
   return K.doc;
 }
+function buildClientPdf(c, jsPDF, o){ return sharePdf(shareDoc(c, o), jsPDF); }
 
 /* ===== TESTO (per Dropbox, che accetta solo file di testo) ===== */
 const tLine = "────────────────────────────────────────";
@@ -1983,39 +2248,44 @@ function tPackages(c, o){
 }
 
 /* Scheda completa in testo: leggibile, e con in fondo il codice per reimportarla */
-function buildFullText(c){
-  const s = stats(c);
-  let t = `SCHEDA CLIENTE\n${c.name}\nAggiornata al ${itDate(today())}\n`;
-  t += tHead("Pacchetto e pagamenti") + tKv([...tSess(s), ...tPay(s)]);
-  const d = tDots(s.done, s.total); if(d) t += d + "\n";
-  t += tHead("Dati cliente e allenamento") + tKv([["Telefono", c.phone], ["Email", c.email], ["Volte a settimana", c.freq===""?"":String(c.freq)],
-       ["Giorni di allenamento", c.days.join(", ")], ["Allenamento", c.training], ["Note", c.notes]]);
-  t += tHead("Storico sedute") + tSessions(c, true);
-  if((c.missLog || []).length) t += tHead("Lezioni saltate") + tMisses(c);
-  t += tHead("Storico pagamenti") + tPayments(c);
-  if(hasCheckData(c)) checkFullSections(c).forEach(([h, rows])=>{ t += tHead(h) + tKv(rows); });
-  t += tPackages(c, {pay:true, sessions:true, notes:true, payments:true});
-  const data = {...c}; delete data.id;
-  t += `\n${tLine}\nCodice per reimportare la scheda nel gestionale (non modificarlo):\nPTGEST1:${b64enc(JSON.stringify(data))}\n`;
+function buildFullText(c, what){
+  const s = stats(c), P = fullParts(c, what);
+  const bar = t => `\n\n════════  ${t.toUpperCase()}  ════════\n`;
+  let t = `SCHEDA CLIENTE${what === "ck" ? " · CHECK" : what === "pt" ? " · PERSONAL 1 TO 1" : ""}\n${c.name}\nAggiornata al ${itDate(today())}\n`;
+  if(P.ck){
+    if(P.both) t += bar(PART_LABEL.ck);
+    checkFullSections(c).forEach(([h, rows])=>{ t += tHead(h) + tKv(rows); });
+  }
+  if(!P.pt) t += tHead("Dati cliente") + tKv([["Telefono", c.phone], ["Email", c.email]]);
+  else {
+    if(P.both) t += bar(PART_LABEL.pt);
+    t += tHead("Pacchetto e pagamenti") + tKv([...tSess(s), ...tPay(s)]);
+    const d = tDots(s.done, s.total); if(d) t += d + "\n";
+    t += tHead("Dati cliente e allenamento") + tKv([["Telefono", c.phone], ["Email", c.email], ["Volte a settimana", c.freq===""?"":String(c.freq)],
+         ["Giorni di allenamento", c.days.join(", ")], ["Allenamento", c.training], ["Note", c.notes]]);
+    t += tHead("Storico sedute") + tSessions(c, true);
+    if((c.missLog || []).length) t += tHead("Lezioni saltate") + tMisses(c);
+    t += tHead("Storico pagamenti") + tPayments(c);
+    t += tPackages(c, {pay:true, sessions:true, notes:true, payments:true});
+  }
+  t += `\n${tLine}\nCodice per reimportare la scheda nel gestionale (non modificarlo):\nPTGEST1:${b64enc(JSON.stringify(partData(c, what)))}\n`;
   return t;
 }
 /* Riepilogo in testo per il cliente (solo ciò che scegli) */
-function buildClientText(c, o){
-  const s = stats(c), inc = o.inc;
-  let t = `RIEPILOGO ALLENAMENTI\n${c.name}\nAggiornato al ${itDate(today())}${o.trainer ? "\nPersonal trainer: " + o.trainer : ""}\n`;
-  if(o.message) t += tHead("Messaggio dal tuo personal trainer") + o.message + "\n";
-  if(inc.sedute){ t += tHead("Il tuo pacchetto") + tKv(tSess(s)); const d = tDots(s.done, s.total); if(d) t += d + "\n"; }
-  if(inc.pagamenti) t += tHead("Pagamenti") + tKv(tPay(s));
-  const tr = [];
-  if(inc.giorni){ tr.push(["Volte a settimana", c.freq===""?"":String(c.freq)]); tr.push(["Giorni di allenamento", c.days.join(", ")]); }
-  if(inc.allenamento) tr.push(["Allenamento", c.training]);
-  if(tr.length) t += tHead("Il tuo allenamento") + tKv(tr);
-  if(inc.note) t += tHead("Note") + (c.notes || "—") + "\n";
-  if(inc.storicoSedute) t += tHead("Storico sedute") + tSessions(c, !!inc.noteSedute);
-  if(inc.storicoPagamenti) t += tHead("Storico pagamenti") + tPayments(c);
-  if(inc.storicoPacchetti && pkgHistory(c).length) t += tHead("Storico pacchetti cliente") + pkgHistory(c).map(r=>`  ${itDate(r.start)} → ${r.end ? itDate(r.end) : (r.current ? "in corso" : "—")}   ${r.total} sedute   ${eurDoc(r.price)}`).join("\n") + "\n";
+function shareText(doc){
+  let t = `${doc.label}\n${doc.name}\n${doc.date}${doc.trainer ? "\nPersonal trainer: " + doc.trainer : ""}\n`;
+  if(doc.message) t += tHead("Messaggio dal tuo personal trainer") + doc.message + "\n";
+  doc.sections.forEach(x=>{
+    if(x.t === "part") t += `\n\n════════  ${x.title.toUpperCase()}  ════════\n`;
+    else if(x.t === "dots"){ const d = tDots(x.done, x.total); if(d) t += "\n" + d + "\n"; }
+    else if(x.t === "h") t += tHead(x.title);
+    else if(x.t === "kv") t += tKv(x.rows);
+    else if(x.t === "table") t += x.rows.map(r=>"  " + r.filter(v=>v !== "").join("   ")).join("\n") + "\n";
+    else if(x.t === "text") t += (x.text || "—") + "\n";
+  });
   return t;
 }
+function buildClientText(c, o){ return shareText(shareDoc(c, o)); }
 
 /* ===== IMPORT: lettura tabelle ===== */
 function xmlDecode(s){ return s.replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&#(\d+);/g,(m,d)=>String.fromCharCode(d)).replace(/&amp;/g,"&"); }
@@ -2849,7 +3119,8 @@ function softRender(){
 const hm = v => settings.homeHideMoney ? "•••" : eur(v);
 /* cartellina: lato Personal o lato Check (lo switch compare solo a chi ha entrambi) */
 const cardView = {};
-const cardViewOf = c => (c.personal !== false && ckOn(c)) ? (cardView[c.id] || "pt") : (c.personal === false && ckOn(c) ? "ck" : "pt");
+const ptShown = c => c.personal !== false && !ptIdle(c);                    // il personal compare sulla cartellina se è acceso e attivo (regola dei 5 mesi)
+const cardViewOf = c => (ptShown(c) && ckOn(c)) ? (cardView[c.id] || "ck") : (ckOn(c) ? "ck" : "pt");
 function checkCardHTML(c){
   const k = c.check, p = k.pkg, sg = ckSingles(k);
   if(p){
@@ -2932,8 +3203,8 @@ function listHTML(){
     <div><div class="title-row"><h1>I miei clienti</h1><button class="data-btn" data-a="dataMenu" title="Esporta o importa i dati del programma" aria-label="Dati del programma: esporta o importa">⚙ Dati</button>${store.mode === "sync" ? `<button class="logout-btn" data-a="logout" id="logoutBtn" title="Esci dal gestionale" aria-label="Esci dal gestionale">⎋ Esci</button>` : ""}</div><p>Sedute one to one e pagamenti, una cartella per persona.</p>
     <div id="saveStatus" class="status ${store.status==="ok"?"":store.status}">${esc(statusText())}</div></div>
     <div class="actions">
-      <button class="btn ghost" data-a="import">Importa documenti</button>
-      ${clients.length ? `<button class="btn ghost" data-a="exportDocs">Esporta documenti</button>` : ""}
+      <button class="btn ghost" data-a="import" id="importBtn">Importa dati programma</button>
+      ${clients.length ? `<button class="btn ghost" data-a="exportDocs" id="exportDocsBtn">Esporta dati programma</button>` : ""}
       ${clients.length ? `<button class="btn ghost" data-a="openStats">📊 Statistiche andamento</button>` : ""}
       <button class="btn ghost" data-a="openExp" id="expBtn">💸 Spese di gestione${expDueCount() ? ` <span class="badge">${expDueCount()} da pagare</span>` : ""}</button>
       ${cloudAvailable() && clients.length ? `<button class="btn ghost" data-a="backup">Backup su Drive o Dropbox</button>` : ""}
@@ -2946,19 +3217,22 @@ function listHTML(){
   if(!clients.length){
     return h + `<div class="empty"><h2>Ancora nessuna cartella</h2>
       <p>Crea la cartella del tuo primo cliente, oppure importa una scheda (Word, PDF o testo): la cartella prende il nome del file.</p>
-      <div class="actions"><button class="btn ghost" data-a="import">Importa documenti</button><button class="btn primary" data-a="newClient">Crea la prima cartella</button></div></div>` + dangerZoneHTML();
+      <div class="actions"><button class="btn ghost" data-a="import">Importa dati programma</button><button class="btn primary" data-a="newClient">Crea la prima cartella</button></div></div>` + dangerZoneHTML();
   }
   const ptReg = c => owesPtMoney(c) || hasActivePt(c);                   // personal: saldo da completare o sedute da completare
   const nDueClients = clients.filter(c=>ptReg(c) || checkDue(c) > 0.004).length;
-  const nPt = clients.filter(usesPt).length;                  // chi fa personal (anche se fa anche check)
+  const ptNow = c => usesPt(c) && !ptIdle(c);                               // fa personal ed è attivo (non fermo da 5 mesi)
+  const nPt = clients.filter(ptNow).length;                   // chi fa personal (anche se fa anche check)
+  const nIdle = clients.filter(c=>usesPt(c) && ptIdle(c)).length;
+  const idleTxt = nIdle ? `${nIdle === 1 ? "1 non attivo" : `${nIdle} non attivi`} da più di ${PT_IDLE_MONTHS} mesi: non ${nIdle === 1 ? "contato" : "contati"}` : "";
   const SD = statsData();                                           // una volta sola per il riquadro del mese
   const hid = !!settings.homeHideMoney;
   // ---- filtro: Totale / Personal 1 to 1 / Consulenze (agisce su “Generale” e sul mese)
   const sc = homeScope();
   const ptDueOf = c => round2(Math.max(stats(c).due, 0) + c.packages.reduce((t,p)=>t + Math.max(stats(pkgClient(c,p)).due, 0), 0));
-  const G = sc === "pt" ? (()=>{ const cl = clients.filter(usesPt), dc = clients.filter(ptReg);
+  const G = sc === "pt" ? (()=>{ const cl = clients.filter(ptNow), dc = clients.filter(ptReg);
       const noPkg = cl.filter(c=>!hasActivePt(c)).length, nIn = cl.filter(hasActivePt).length;
-      return [["allClients", cl.length, `${cl.length === 1 ? "cliente" : "clienti"} personal 1 to 1`, "", ""],
+      return [["allClients", cl.length, `${cl.length === 1 ? "cliente" : "clienti"} personal 1 to 1`, idleTxt, ""],
               ["onlyClients", noPkg, `${noPkg === 1 ? "cliente" : "clienti"} senza pacchetto attivo (attualmente)`, "da rinnovare o mai iniziato o che hanno fatto sedute singole", ""],
               ["ptClients", nIn, nIn === 1 ? "pacchetto in corso" : "pacchetti in corso", "", ""],
               ["dueClients", dc.length, dc.length === 1 ? "cliente da regolarizzare" : "clienti da regolarizzare", "saldo o sedute da completare", dc.length ? "c-owed" : ""],
@@ -2978,12 +3252,12 @@ function listHTML(){
               ["ptLeft", left, left === 1 ? "consulenza da fare" : "consulenze da fare", "nei pacchetti in corso", ""],
               ["dueCell", hm(round2(clients.reduce((t,c)=>t + checkDue(c), 0))), "da incassare", "quote delle consulenze non saldate", "c-owed"]]; })()
     : [["allClients", clients.length, clients.length === 1 ? "cliente" : "clienti", "tutte le persone", ""],
-       ["onlyClients", clients.filter(c=>usesCk(c) && !usesPt(c)).length, clients.filter(c=>usesCk(c) && !usesPt(c)).length === 1 ? "cliente solo consulenze" : "clienti solo consulenze", "senza personal", ""],
-       ["ptClients", nPt, `${nPt === 1 ? "cliente" : "clienti"} personal 1 to 1`, "", ""],
+       ["onlyClients", clients.filter(c=>usesCk(c) && !ptNow(c)).length, clients.filter(c=>usesCk(c) && !ptNow(c)).length === 1 ? "cliente solo consulenze" : "clienti solo consulenze", "senza personal attivo", ""],
+       ["ptClients", nPt, `${nPt === 1 ? "cliente" : "clienti"} personal 1 to 1`, idleTxt, ""],
        ["dueClients", nDueClients, nDueClients === 1 ? "cliente da regolarizzare" : "clienti da regolarizzare", "saldo o sedute da completare", nDueClients ? "c-owed" : ""],
        ["ptLeft", sLeft, sLeft === 1 ? "seduta personal 1 to 1 da fare" : "sedute personal 1 to 1 da fare", "", ""],
        ["dueCell", hm(due), "da incassare", "quote non saldate dai clienti", "c-owed"]];
-  const SCOPES = [["all","📊 Totale"],["pt","🏋️ Personal"],["ck","📋 Consulenze"]];
+  const SCOPES = [["all","📊 Totale"],["ck","📋 Consulenze"],["pt","🏋️ Personal"]];
   h += alertsPanelHTML() + `<div class="dash-bar">
     <div class="scope-sw" role="group" aria-label="Cosa vedere nelle tabelle">${SCOPES.map(([v,l])=>`<button type="button" class="fsw-b${sc === v ? " on" : ""}" data-a="homeScope" data-v="${v}" aria-pressed="${sc === v}">${l}</button>`).join("")}</div>
     <div class="money-eye"><button type="button" class="eye-btn" id="moneyEye" data-a="toggleHomeMoney" aria-pressed="${hid}" title="${hid ? "Mostra gli importi" : "Nascondi gli importi"}">${hid ? "🙈" : "👁"}<span>${hid ? "Mostra importi" : "Nascondi importi"}</span></button></div></div>
@@ -3006,26 +3280,27 @@ function listHTML(){
   h += `<div class="folders">`;
   list.forEach(c=>{
     const s = stats(c), f = freqText(c);
-    const both = c.personal !== false && ckOn(c), view = cardViewOf(c);
+    const both = ptShown(c) && ckOn(c), view = cardViewOf(c), idle = ptIdleSince(c);
     const ptCard = `
       ${s.start ? `<span class="pk">Pacchetto dal ${itDate(s.start)}</span>` : ""}
       ${(s.total || s.done) ? `${dotsHTML(s.done,s.total,20,false,s.lost)}
       <span class="row"><span>Sedute</span><strong>${s.done} su ${s.total}</strong></span>
       ${payBarHTML(s)}
       <span class="row"><span>${s.due<0?"Credito":"Da saldare"}</span><strong class="${s.due>0?"due":""}">${hm(Math.abs(s.due))}</strong></span>` : singleCardHTML(c)}
+      ${idle ? `<span class="idle-lab" data-idle="1">💤 Personal non attivo dal ${itDate(idle)}</span>` : ""}
       ${f?`<span class="freq">${esc(f)}</span>`:""}
       ${ticksHTML(s)}
       ${alertsFor(c).length ? `<span class="alert">⚠ ${esc(alertText(c))}</span>` : ""}`;
     h += `<div class="fwrap${both ? " has-sw" : ""}"><button class="folder" data-a="open" data-id="${esc(c.id)}">
       <span class="fname">${esc(c.name)}</span>
       ${both
-        ? `<span class="fviews"><span class="fv${view === "pt" ? "" : " off"}" aria-hidden="${view !== "pt"}">${ptCard}</span><span class="fv${view === "ck" ? "" : " off"}" aria-hidden="${view !== "ck"}">${checkCardHTML(c)}</span></span>`
+        ? `<span class="fviews"><span class="fv${view === "ck" ? "" : " off"}" aria-hidden="${view !== "ck"}">${checkCardHTML(c)}</span><span class="fv${view === "pt" ? "" : " off"}" aria-hidden="${view !== "pt"}">${ptCard}</span></span>`
         : view === "ck" ? checkCardHTML(c) : ptCard}
       ${c.follow && cloudAvailable() ? `<span class="sh${followNeeds(c)?" stale":""}">${followNeeds(c) ? "Condiviso · da aggiornare" : "Condiviso · aggiornato"}</span>` : ""}
     </button>
     ${both ? `<div class="fsw" role="group" aria-label="Cosa vedere di ${esc(c.name)}">
-      <button type="button" class="fsw-b${view === "pt" ? " on" : ""}" data-a="cardView" data-id="${esc(c.id)}" data-v="pt" aria-pressed="${view === "pt"}">🏋️ Personal</button>
-      <button type="button" class="fsw-b${view === "ck" ? " on" : ""}" data-a="cardView" data-id="${esc(c.id)}" data-v="ck" aria-pressed="${view === "ck"}">📋 Check</button></div>` : ""}
+      <button type="button" class="fsw-b${view === "ck" ? " on" : ""}" data-a="cardView" data-id="${esc(c.id)}" data-v="ck" aria-pressed="${view === "ck"}">📋 Check</button>
+      <button type="button" class="fsw-b${view === "pt" ? " on" : ""}" data-a="cardView" data-id="${esc(c.id)}" data-v="pt" aria-pressed="${view === "pt"}">🏋️ Personal</button></div>` : ""}
     <div class="ftools">
       <button class="ftool" data-a="quickEdit" data-id="${esc(c.id)}" data-v="${view}" title="Modifica" aria-label="Modifica ${esc(c.name)}">✎</button>
       <button class="ftool" data-a="renameClient" data-id="${esc(c.id)}" title="Rinomina" aria-label="Rinomina ${esc(c.name)}">Aa</button>
@@ -3041,7 +3316,7 @@ function alertsFor(c){
   const s = stats(c), th = alertLeft(), out = [];
   const ending = s.total > 0 && (s.complete || s.left <= th);
   if(s.total > 0){
-    if(s.complete) out.push({k:"done", w:2, t:"Pacchetto finito"});
+    if(s.complete){ if(!ptIdle(c)) out.push({k:"done", w:2, t:"Pacchetto finito"}); }
     else if(s.left <= th) out.push({k:"near", w:1, t: s.left === 1 ? "Manca 1 seduta" : `Mancano ${s.left} sedute`});
   }
   if(s.due > 0 && ending) out.push({k:"due", w:3, t:`da saldare ${hm(s.due)}`});
@@ -3142,15 +3417,16 @@ const detailSide = {};                                                      // l
 const sideOf = c => detailSide[c.id] || cardViewOf(c);
 const CK_ICON = {diet:"🥗", plan:"📝", both:"🥗📝"};
 const typeChip = t => ckType(t) ? `<span class="miss-st ck-type ck-type-${t}">${CK_ICON[t]} ${ckTypeLabel(t)}</span>` : `<span class="miss-st ck-type">Consulenza</span>`;
+const entryChip = t => t === "check" ? `<span class="miss-st ck-type ck-type-check">✔ Solo check</span>` : typeChip(t);
 const typeText = t => ckType(t) ? ckTypeLabel(t) : "consulenza / check";
 const typeSegHTML = (name, cur) => `<div class="seg seg-wrap ck-type-seg"><label><input type="radio" name="${name}" value=""${!ckType(cur) ? " checked" : ""}><span>— non specificato</span></label>` +
   Object.keys(CK_TYPES).map(t=>`<label><input type="radio" name="${name}" value="${t}"${cur === t ? " checked" : ""}><span>${CK_ICON[t]} ${ckTypeLabel(t)}</span></label>`).join("") + `</div>`;
 const readType = name => ckType((document.querySelector(`input[name="${name}"]:checked`) || {}).value || "");
 const setType = (name, t) => document.querySelectorAll(`input[name="${name}"]`).forEach(r=>r.checked = r.value === (ckType(t) || ""));
 function sideSwitchHTML(c, side){
-  return `<div class="side-sw" role="group" aria-label="Personal 1 to 1 o Check">
-    <button type="button" class="fsw-b${side === "pt" ? " on" : ""}" data-a="sideView" data-v="pt" aria-pressed="${side === "pt"}"><span class="sw-ico">🏋️ </span>Personal<span class="sw-long"> 1 to 1</span></button>
-    <button type="button" class="fsw-b${side === "ck" ? " on" : ""}" data-a="sideView" data-v="ck" aria-pressed="${side === "ck"}"><span class="sw-ico">📋 </span>Check</button></div>`;
+  return `<div class="side-sw" role="group" aria-label="Check o Personal 1 to 1">
+    <button type="button" class="fsw-b${side === "ck" ? " on" : ""}" data-a="sideView" data-v="ck" aria-pressed="${side === "ck"}"><span class="sw-ico">📋 </span>Check</button>
+    <button type="button" class="fsw-b${side === "pt" ? " on" : ""}" data-a="sideView" data-v="pt" aria-pressed="${side === "pt"}"><span class="sw-ico">🏋️ </span>Personal<span class="sw-long"> 1 to 1</span></button></div>`;
 }
 const kgTxt = v => `${String(Number(v).toFixed(1)).replace(".", ",")} kg`;
 const ckStars = n => n ? `<span class="stars" aria-label="aderenza ${n} su 5">${"★".repeat(n)}<span class="off">${"★".repeat(5 - n)}</span></span>` : "";
@@ -3193,9 +3469,9 @@ function checkDetailHTML(c){
       ${p ? `<button class="btn" data-a="ckAddRate" id="ckAddRateBtn">Aggiungi rata</button>` : ""}
       <button class="btn ${!p || complete ? "primary" : "sec"}" data-a="ckNewPkg" id="ckNewPkgBtn">Nuovo pacchetto consulenze</button>
       <button class="btn ${!p || complete ? "" : "sec"}" data-a="ckAddSingle" id="ckAddSingleBtn">Consulenza singola</button>
+      ${p && !complete ? `<button class="btn" data-a="ckAddExtra" id="ckAddExtraBtn">+ Consulenza extra</button>` : ""}
       <button class="btn sec" data-a="ckAddDiary" id="ckAddDiaryBtn">Peso / programma / nota</button>
-      <button class="btn sec" data-a="share">Invia al cliente</button>
-      <button class="btn sec" data-a="export">${cloudAvailable() ? "Esporta o salva la scheda" : "Esporta in Word o PDF"}</button>
+      <button class="btn sec" data-a="share" id="shareBtn">Invia dati al cliente</button>
       <button class="btn ghost sec" data-a="editCheck">Modifica dati</button>
       <button class="btn danger sec" data-a="delClient">Elimina cartella</button>
       <button type="button" class="btn ghost more-btn" data-a="moreActs" aria-expanded="${actsOpen}">${actsOpen ? "▴ Meno" : "⋯ Altro"}</button>
@@ -3204,7 +3480,7 @@ function checkDetailHTML(c){
   // ---- tipo di consulenza attuale del cliente (per la tabella Generale)
   { const auto = autoCkType(c), man = ckType(c.check.curType);
     h += `<section class="block ck-cur-type" id="ckCurTypeBlock"><h3>Tipo di consulenza del cliente</h3>
-      <p class="sub">Conta nella tabella Generale. In automatico è quello dell'ultima consulenza${auto ? ` (ora: <b>${CK_ICON[auto]} ${ckTypeLabel(auto)}</b>)` : " (nessun tipo ancora scelto)"}; puoi sceglierlo tu a mano. I mesi passati restano come erano.</p>
+      <p class="sub">Conta nella tabella Generale${auto ? ` (in automatico ora: <b>${CK_ICON[auto]} ${ckTypeLabel(auto)}</b>)` : " (nessun tipo ancora scelto)"}. In automatico: a “dieta + scheda” si passa subito; per gli altri cambi servono almeno 5 mesi e poi 2 consulenze del tipo nuovo. Puoi sceglierlo tu a mano. I mesi passati restano come erano.</p>
       <div class="ck-type-row">${[["", `🔄 Automatico${auto ? ` (${ckTypeLabel(auto).toLowerCase()})` : ""}`], ...Object.keys(CK_TYPES).map(t=>[t, `${CK_ICON[t]} ${ckTypeLabel(t)}`])].map(([v, l])=>
         `<button type="button" class="btn small ${man === v ? "primary" : "ghost"}" data-a="ckCurType" data-v="${v}" aria-pressed="${man === v}">${l}</button>`).join("")}</div></section>`; }
   // ---- pacchetto in corso e pagamenti (campi modificabili)
@@ -3231,13 +3507,14 @@ function checkDetailHTML(c){
   const avg = scored.length ? round2(scored.reduce((t,e)=>t + e.score, 0) / scored.length) : 0, lastProg = [...rows].reverse().find(e=>e.program);
   const nCons = rows.filter(e=>e.kind).length;
   h += `<section class="block hist-sec" id="ckConsBlock">${histHead("ckCons", "Storico consulenze", `${nCons} ${nCons === 1 ? "consulenza" : "consulenze"}`, `<button class="btn small primary" data-a="ckAddCons2">+ Consulenza</button>`)}<div class="hist-body"${histOpen.ckCons ? "" : " hidden"}>
-    <p class="sub">In ordine di data: consulenze del pacchetto e singole nello stesso elenco.${scored.length ? ` Aderenza al percorso media <b id="ckAvg">${String(avg).replace(".", ",")}</b>/5.` : ""}${lastProg ? ` Programma aggiornato il <b id="ckLastProg">${itDate(lastProg.date)}</b>.` : ""}</p>`;
+    <p class="sub">In ordine di data: consulenze del pacchetto, singole ed extra fuori pacchetto nello stesso elenco.${scored.length ? ` Aderenza al percorso media <b id="ckAvg">${String(avg).replace(".", ",")}</b>/5.` : ""}${lastProg ? ` Programma aggiornato il <b id="ckLastProg">${itDate(lastProg.date)}</b>.` : ""}</p>`;
   if(!rows.length) h += `<p class="none">Ancora nessuna consulenza. Usa “Segna consulenza”, “Consulenza singola” o “Peso / programma / nota”.</p>`;
   else h += `<div class="miss-list">` + rows.map(e=>{ const w = e.weightId ? k.weights.find(x=>x.id === e.weightId) : null;
       const pkOf = e.kind === "pkg" ? [...(k.pkgs || []), ...(k.pkg ? [k.pkg] : [])].find(q=>q.id === e.pkgId) : null;
       const per = e.kind === "pkg" ? (pkOf ? ckPerOneOf(pkOf) : 0) : e.kind === "single" ? e.amount : 0;     // quanto ci guadagni a consulenza
       const ePk = e.kind === "pkg" ? [k.pkg, ...k.pkgs].find(q=>q && q.id === e.pkgId) : null;
-      const tag = e.kind === "pkg" ? `<span class="miss-st ok ck-tag-pkg">📦 Pacchetto ${num[e.id] || ""}</span>${typeChip(ePk && ePk.type)}` : e.kind === "single" ? `<span class="miss-st ck-tag-single">💶 Singola${e.paid ? "" : " · da pagare"}</span>${typeChip(e.type)}` : `<span class="miss-st">📝 Diario</span>`;
+      const tag = e.kind === "pkg" ? `<span class="miss-st ok ck-tag-pkg">📦 Pacchetto ${num[e.id] || ""}</span>${ckEntryType(e.type) ? `${entryChip(e.type)}${ePk && ckType(ePk.type) ? `<span class="ck-pkg-of">pacchetto: ${ckTypeLabel(ePk.type).toLowerCase()}</span>` : ""}` : typeChip(ePk && ePk.type)}` : e.kind === "single" && e.extra ? `<span class="miss-st ck-tag-extra">➕ Extra fuori pacchetto${e.amount ? (e.paid ? "" : " · da pagare") : " · gratuita"}</span>${ckEntryType(e.type) ? entryChip(e.type) : ""}`
+        : e.kind === "single" ? `<span class="miss-st ck-tag-single">💶 Singola${e.paid ? "" : " · da pagare"}</span>${entryChip(e.type)}` : `<span class="miss-st">📝 Diario</span>`;
       const eurTag = e.kind && per > 0 ? `<span class="ck-per-tag">${hm(per)}/consulenza</span>` : "";
       return `<div class="miss-row ck-log-row ck-${e.kind || "diary"}"><b>${itDate(e.date)}</b>${tag}${eurTag}${e.program ? `<span class="miss-st prog">📄 programma aggiornato</span>` : ""}${w ? `<span class="miss-st">⚖️ ${kgTxt(w.kg)}</span>` : ""}${e.channel ? `<span class="miss-st">${esc(e.channel)}</span>` : ""}${ckStars(e.score)}
       ${e.note ? `<span class="ck-log-note">${esc(e.note)}</span>` : ""}<span class="row-acts"><button class="x" data-a="ckLogEdit" data-id="${esc(e.id)}" aria-label="Modifica la voce del ${itDate(e.date)}">✎</button><button class="x" data-a="ckLogDel" data-id="${esc(e.id)}" aria-label="Elimina la voce del ${itDate(e.date)}">✕</button></span></div>`; }).join("") + `</div>`;
@@ -3315,8 +3592,9 @@ function applyLogEntry(k, entry, kgVal){
 const clType = () => (document.querySelector('input[name="clType"]:checked') || {}).value || "pkg";
 function syncClType(){
   const t = clType();
-  $("clSingleW").hidden = t !== "single";
-  $("clTypeHint").textContent = t === "pkg" ? "Conta come consulenza del pacchetto in corso." : t === "single" ? "Consulenza pagata a parte, con il suo importo." : "Solo diario: peso, programma aggiornato o una nota, senza contare una consulenza.";
+  $("clSingleW").hidden = t !== "single" && t !== "extra"; $("clPkgTypeW").hidden = t !== "pkg";
+  $("clAmountL").textContent = t === "extra" ? "Importo (€) · 0 = gratuita, offerta da te" : "Importo (€)";
+  $("clTypeHint").textContent = t === "pkg" ? "Conta come consulenza del pacchetto in corso." : t === "single" ? "Consulenza pagata a parte, con il suo importo." : t === "extra" ? "Consulenza in più tra le date del pacchetto: il pacchetto non cambia. Gratuita (0 €) o pagata a parte." : "Solo diario: peso, programma aggiornato o una nota, senza contare una consulenza.";
   $("clErr").textContent = "";
 }
 document.querySelectorAll('input[name="clType"]').forEach(r=>r.addEventListener("change", syncClType));
@@ -3325,12 +3603,16 @@ async function ckLogAdd(id, editId, type){
   const k = normCheck(c.check), ed = editId ? k.log.find(x=>x.id === editId) : null;
   const w = ed && ed.weightId ? k.weights.find(x=>x.id === ed.weightId) : null;
   const p = k.pkg, pkgFull = p && p.count > 0 && ckDoneOf(k, p) >= p.count && !(ed && ed.kind === "pkg");
-  const t0 = ed ? (ed.kind || "none") : (type || (p && !pkgFull ? "pkg" : "single"));
-  $("clTitle").textContent = ed ? "Modifica consulenza" : t0 === "single" ? "Consulenza singola" : t0 === "none" ? "Peso, programma o nota" : "Segna consulenza";
+  const t0 = ed ? (ed.extra ? "extra" : (ed.kind || "none")) : (type || (p && !pkgFull ? "pkg" : "single"));
+  $("clTitle").textContent = ed ? "Modifica consulenza" : t0 === "single" ? "Consulenza singola" : t0 === "extra" ? "Consulenza extra fuori pacchetto" : t0 === "none" ? "Peso, programma o nota" : "Segna consulenza";
   $("clDate").value = ed ? (ed.date || today()) : today(); $("clNote").value = ed ? ed.note : "";
   $("clProg").checked = ed ? ed.program : false; $("clKg").value = w ? String(w.kg).replace(".", ",") : ""; $("clErr").textContent = "";
   const lastSingle = [...ckSingles(k)].sort((a,b)=>(a.date||"").localeCompare(b.date||"")).pop();
-  $("clAmount").value = ed && ed.kind === "single" ? fmtIn(ed.amount) : (lastSingle ? fmtIn(lastSingle.amount) : ""); $("clPaid").checked = ed && ed.kind === "single" ? ed.paid : true; setType("clCkType", ed && ed.kind === "single" ? ed.type : "");
+  $("clAmount").value = ed && ed.kind === "single" ? fmtIn(ed.amount) : (lastSingle ? fmtIn(lastSingle.amount) : ""); $("clPaid").checked = ed && ed.kind === "single" ? ed.paid : true;
+  document.querySelectorAll('input[name="clCkType"]').forEach(r=>r.checked = r.value === (ed && ed.kind === "single" ? ckEntryType(ed.type) : ""));
+  if(t0 === "extra" && !ed) $("clAmount").value = "0";                       // di base gratuita (offerta)
+  document.querySelectorAll('input[name="clPkgCkType"]').forEach(r=>r.checked = r.value === (ed && ed.kind === "pkg" ? ckEntryType(ed.type) : ""));
+  { const pk = k.pkg; $("clPkgTypeSame").textContent = pk && ckType(pk.type) ? `Come il pacchetto (${ckTypeLabel(pk.type).toLowerCase()})` : "Come il pacchetto"; }
   const pkOpt = document.querySelector('input[name="clType"][value="pkg"]');
   pkOpt.disabled = !p || pkgFull; pkOpt.closest("label").classList.toggle("disabled", pkOpt.disabled);
   document.querySelectorAll('input[name="clType"]').forEach(r=>r.checked = r.value === (t0 === "pkg" && pkOpt.disabled ? "single" : t0));
@@ -3339,9 +3621,12 @@ async function ckLogAdd(id, editId, type){
   syncClType();
   if(await ask("dlgCkLog") !== "ok") return;
   const type1 = clType(), kgVal = parseNum($("clKg").value);
-  const entry = {id: ed ? ed.id : uid(), date: $("clDate").value || today(), kind: type1 === "none" ? "" : type1,
+  const entry = {id: ed ? ed.id : uid(), date: $("clDate").value || today(), kind: type1 === "none" ? "" : type1 === "extra" ? "single" : type1,
     pkgId: type1 === "pkg" ? (ed && ed.kind === "pkg" ? ed.pkgId : (k.pkg ? k.pkg.id : "")) : "",
-    amount: type1 === "single" ? parseNum($("clAmount").value) : 0, paid: type1 === "single" ? $("clPaid").checked : false, type: type1 === "single" ? readType("clCkType") : "",
+    amount: type1 === "single" || type1 === "extra" ? Math.max(parseNum($("clAmount").value) || 0, 0) : 0,
+    paid: type1 === "single" || type1 === "extra" ? ($("clPaid").checked || !(parseNum($("clAmount").value) > 0)) : false,
+    extra: type1 === "extra",
+    type: type1 === "single" || type1 === "extra" ? ckEntryType((document.querySelector('input[name="clCkType"]:checked') || {}).value || "") : type1 === "pkg" ? ckEntryType((document.querySelector('input[name="clPkgCkType"]:checked') || {}).value || "") : "",
     check: type1 !== "none", program: $("clProg").checked,
     channel: (document.querySelector('input[name="clChan"]:checked') || {}).value || "",
     score: Number((document.querySelector('input[name="clScore"]:checked') || {}).value || 0), note: $("clNote").value.trim()};
@@ -3356,6 +3641,7 @@ $("fCkLog").addEventListener("submit", e=>{
   if(!e.submitter || e.submitter.value !== "ok") return;
   const kg = $("clKg").value.trim(), v = parseNum(kg), t = clType();
   if(kg && !(v > 20 && v < 400)){ e.preventDefault(); $("clErr").textContent = "Il peso va scritto in kg, ad esempio 78,5 (oppure lascialo vuoto)."; $("clKg").focus(); return; }
+  if(t === "extra" && parseNum($("clAmount").value) < 0){ e.preventDefault(); $("clErr").textContent = "L'importo non può essere negativo (0 = gratuita)."; return; }
   if(t === "single" && !(parseNum($("clAmount").value) > 0)){ e.preventDefault(); $("clErr").textContent = "Scrivi l'importo della consulenza singola, ad esempio 50."; $("clAmount").focus(); return; }
   if(t === "none" && !$("clProg").checked && !kg && !$("clNote").value.trim()){ e.preventDefault(); $("clErr").textContent = "Spunta “Programma aggiornato”, oppure scrivi il peso o una nota."; }
 });
@@ -3438,6 +3724,7 @@ function detailHTML(c){
     <div class="dh-top"><h2>${esc(c.name)}</h2>${sideSwitchHTML(c, "pt")}</div>
     ${contact?`<p class="contact">${contact}</p>`:`<div style="height:10px"></div>`}
     ${c.personal === false && !s.total && !c.packages.length ? `<p class="none ck-empty">Il servizio Personal 1 to 1 non è ancora attivo per questo cliente: compila qui sotto quando vuoi (si attiva da solo).</p>` : ""}
+    ${(()=>{ const idle = ptIdleSince(c); return idle ? `<p class="alert-box idle-box" id="ptIdleBox">💤 <b>Personal 1 to 1 non attivo dal ${itDate(idle)}</b>: nessuna seduta da più di ${PT_IDLE_MONTHS} mesi. Qui sotto trovi tutto lo storico. Torna attivo da solo con “Nuovo pacchetto” o “Seduta singola”, oppure <button type="button" class="link-inline" data-a="ptReactivate" id="ptReactivateBtn">riattivalo adesso</button>.</p>` : ""; })()}
     <p class="pkg-line" id="pkgLine">${pkgLineHTML(s)}</p>
     <div class="big-count" id="bigCount">${countText(s)}</div>
     <p class="per-ses" id="perSes">${perSesLine(c, s)}</p>
@@ -3450,8 +3737,7 @@ function detailHTML(c){
       <button class="btn" data-a="addPay">Aggiungi rata</button>
       <button class="btn ${s.complete ? "primary" : "sec"}" data-a="newPkg" id="newPkgBtn">Nuovo pacchetto</button>
       <button class="btn sec" data-a="addSingle" id="addSingleBtn">Seduta singola</button>
-      <button class="btn sec" data-a="share">Invia al cliente</button>
-      <button class="btn sec" data-a="export">${cloudAvailable() ? "Esporta o salva la scheda" : "Esporta in Word o PDF"}</button>
+      <button class="btn sec" data-a="share" id="shareBtn">Invia dati al cliente</button>
       <button class="btn ghost sec" data-a="edit">Modifica dati</button>
       <button class="btn danger sec" data-a="delClient">Elimina cartella</button>
       <button type="button" class="btn ghost more-btn" data-a="moreActs" aria-expanded="${actsOpen}">${actsOpen ? "▴ Meno" : "⋯ Altro"}</button>
@@ -3703,11 +3989,13 @@ async function clientForm(existing, opts){
   $("cTotal").value = isNew ? "" : v.totalSessions; $("cDone").value = isNew ? "" : v.doneSessions;
   $("cPrice").value = isNew ? "" : fmtIn(v.price); $("cPaid").value = isNew ? "" : fmtIn(v.paid);
   $("cStart").value = isNew ? today() : v.start;
-  $("cFreq").value = v.freq || ""; $("cTraining").value = v.training; $("cNotes").value = v.notes;
+  $("cFreq").value = v.freq === "" || v.freq == null ? "" : String(v.freq); $("cTraining").value = v.training; $("cNotes").value = v.notes;
   $("cDays").querySelectorAll("input").forEach(i=>i.checked = v.days.includes(i.value));
   $("cKindW").hidden = !isNew; document.querySelectorAll('input[name="cKind"]').forEach(r=>r.checked = r.value === "pkg");
   const ck = normCheck(v.check), nowM = today().slice(0,7);
-  $("cSvcPt").checked = isNew ? true : v.personal !== false; $("cSvcCk").checked = isNew ? false : ck.on;
+  const idle0 = isNew ? "" : ptIdleSince(v), ptWas = isNew ? true : (v.personal !== false && !idle0);
+  $("cSvcPt").checked = ptWas; $("cSvcCk").checked = isNew ? false : ck.on;
+  $("cSvcIdle").hidden = !idle0; $("cSvcIdle").textContent = idle0 ? `💤 Personal 1 to 1 non attivo dal ${itDate(idle0)} (nessuna seduta da più di ${PT_IDLE_MONTHS} mesi): accendilo qui sopra per riattivarlo. Lo storico resta nella cartella.` : "";
   // check: il pacchetto in corso si modifica qui; la consulenza singola, se la compili, viene aggiunta allo storico
   const pk = ck.pkg;
   document.querySelectorAll('input[name="ckKind"]').forEach(r=>r.checked = r.value === (pk || isNew ? "pkg" : "single"));
@@ -3738,7 +4026,8 @@ async function clientForm(existing, opts){
     start: /^\d{4}-\d{2}-\d{2}$/.test($("cStart").value) ? $("cStart").value : ""
   };
   // servizi: personal 1 to 1 e/o check
-  data.personal = $("cSvcPt").checked;
+  data.personal = $("cSvcPt").checked === ptWas && !isNew ? v.personal !== false : $("cSvcPt").checked;   // se non hai toccato il tasto, resta com'era
+  if(!isNew && $("cSvcPt").checked && !ptWas && idle0) data.ptOnAt = today();                             // riacceso a mano dopo i 5 mesi: riparte da oggi
   { const k = normCheck(v.check), kind = ckKind();
     k.on = $("cSvcCk").checked; k.notes = $("ckNotes").value.trim();
     if(kind === "pkg"){
@@ -3813,14 +4102,13 @@ async function saveFile(blob, filename, share){
 const safeName = n => n.replace(/[\\/:*?"<>|\u0000-\u001f]/g,"_").trim() || "Cliente";
 
 let exporting = false;
-const EXPORT_NOTE = "È la scheda completa, con tutti i dati e anche le note private: serve a te come copia di sicurezza e per reimportarla. Per mandare qualcosa al cliente usa “Invia al cliente”.";
-async function makeFullFile(c, kind){
+async function makeFullFile(c, kind, what){
   if(kind === "docx"){
     const JSZip = await lib("jszip");
-    return (await buildDocx(c, JSZip)).generateAsync({type:"blob", mimeType:MIME.docx});
+    return (await buildDocx(c, JSZip, what)).generateAsync({type:"blob", mimeType:MIME.docx});
   }
   const jsPDF = await lib("jspdf");
-  return buildPdf(c, jsPDF).output("blob");
+  return buildPdf(c, jsPDF, what).output("blob");
 }
 /* Finestra "Esporta": dove salvare (dispositivo, Drive, Dropbox) e in che formato */
 function syncDest(){
@@ -3843,120 +4131,134 @@ function chosenDest(){
   return el ? el.value : "device";
 }
 
-async function exportClient(id){
-  const c = getClient(id); if(!c || exporting) return;
-  $("dlgExportTitle").textContent = `Scheda completa di ${c.name}`;
-  $("exportNote").textContent = EXPORT_NOTE;
-  $("destWrap").hidden = !cloudAvailable();
-  setDest(cloudAvailable() ? settings.exportDest : "device", true);
-  const kind = await ask("dlgExport");
-  if(!["docx","pdf","txt"].includes(kind)) return;
-  const dest = cloudAvailable() ? chosenDest() : "device";
-  if(cloudAvailable() && dest !== settings.exportDest){ settings.exportDest = dest; saveSettings(); }
-  if(dest === "drive" || dest === "dropbox") return exportToCloud(id, kind, dest);
-  exporting = true;
-  toast("Sto preparando il documento…");
-  try{
-    const fresh = getClient(id) || c;
-    const blob = kind === "txt" ? new Blob([buildFullText(fresh)], {type:"text/plain;charset=utf-8"}) : await makeFullFile(fresh, kind);
-    const ok = await saveFile(blob, `${safeName(fresh.name)}.${kind}`);
-    if(ok) toast(kind==="docx" ? "Documento Word pronto" : kind==="pdf" ? "Documento PDF pronto" : "File di testo pronto");
-  }catch(e){
-    console.error(e);
-    await messageBox("Esportazione non riuscita", e && e.message==="offline" ? OFFLINE_MSG : "Non sono riuscito a creare il documento. Riprova.");
-  }finally{ exporting = false; }
+/* ======================= INVIA DATI AL CLIENTE ======================= */
+/* Selettore riutilizzabile: tre tasti (Check / Personal 1 to 1 / Entrambi) e due riquadri di caselle,
+   ognuno con “Seleziona tutto / Deseleziona tutto”. Le voci che il cliente non ha restano grigie e non spuntabili.
+   Lo usano “Invia dati al cliente” e “Segui l'andamento con il cliente”. */
+const SEL_TITLE = {ck:"Selezione Check", pt:"Selezione Personal 1 to 1"};
+function makeSel(boxId, whatName, hintId, errId){
+  const st = {c:null, sel:{ck:{}, pt:{}}};
+  const box = () => $(boxId);
+  const what = () => { const el = document.querySelector(`input[name="${whatName}"]:checked`); return el && ["ck","pt","both"].includes(el.value) ? el.value : "both"; };
+  function hint(){
+    if(!hintId || !st.c) return;
+    const svc = shareSvc(st.c), w = what(); let t = "", bad = false;
+    if(!svc.ck && !svc.pt){ t = svc.idle ? svc.ptWhy : "Questo cliente non ha ancora dati da inviare."; bad = true; }
+    else if(w === "ck" && !svc.ck){ t = svc.ckWhy; bad = true; }
+    else if(w === "pt" && !svc.pt){ t = svc.ptWhy; bad = true; }
+    else if(w === "both" && !svc.ck) t = `Il file conterrà solo la parte Personal 1 to 1. ${svc.ckWhy}`;
+    else if(w === "both" && !svc.pt) t = `Il file conterrà solo la parte Check. ${svc.ptWhy}`;
+    else if(w === "both") t = "Un unico file: prima la parte Check, poi la parte Personal 1 to 1.";
+    $(hintId).textContent = t; $(hintId).hidden = !t; $(hintId).classList.toggle("warn-hint", bad);
+  }
+  function sync(){
+    box().querySelectorAll("input[data-sub]").forEach(i=>{                  // la voce “figlia” vale solo se è spuntata quella da cui dipende
+      const par = box().querySelector(`input[data-g="${i.dataset.g}"][value="${i.dataset.sub}"]`), ok = !!i.dataset.can && !!par && par.checked && !par.disabled;
+      i.disabled = !ok; i.closest(".check").classList.toggle("dis", !ok);
+    });
+    box().querySelectorAll(".sel-all").forEach(b=>{
+      const ins = [...box().querySelectorAll(`input[data-g="${b.dataset.g}"][data-can]`)];
+      b.disabled = !ins.length; b.textContent = ins.length && ins.every(i=>i.checked) ? "Deseleziona tutto" : "Seleziona tutto";
+    });
+  }
+  function draw(){
+    const c = st.c; if(!c) return;
+    const av = shareAvail(c), svc = shareSvc(c), w = what();
+    const order = svc.ck || !svc.pt ? ["ck","pt"] : ["pt","ck"];             // prima il servizio che il cliente ha; con entrambi, prima Check
+    box().innerHTML = order.map(g=>{
+      const chosen = w === "both" || w === g, has = svc[g], off = !chosen || !has;
+      const why = !has ? svc[g + "Why"] : !chosen ? "Non incluso in questo invio: per aggiungerlo scegli “Entrambi” qui sopra." : "";
+      return `<section class="sel-box${off ? " off" : ""}" data-g="${g}" aria-label="${SEL_TITLE[g]}">
+        <div class="sel-head"><h4>${SEL_TITLE[g]}</h4><button type="button" class="btn small ghost sel-all" data-g="${g}">Seleziona tutto</button></div>
+        ${why ? `<p class="sel-why">${esc(why)}</p>` : ""}
+        <div class="checks">${SHARE_LISTS[g].map(i=>{ const can = !off && av[g][i.k];
+          return `<label class="check${i.sub ? " sub" : ""}${can ? "" : " dis"}" data-k="${i.k}"><input type="checkbox" value="${i.k}" data-g="${g}"${i.sub ? ` data-sub="${i.sub}"` : ""}${can ? ` data-can="1"` : " disabled"}${can && st.sel[g][i.k] ? " checked" : ""}><span>${esc(i.label)}${!off && !av[g][i.k] ? ` <small class="na">· non presente</small>` : ""}</span></label>`; }).join("")}</div>
+      </section>`; }).join("");
+    hint(); sync();
+  }
+  $(boxId).addEventListener("change", e=>{
+    const i = e.target; if(!i.dataset || !i.dataset.g) return;
+    st.sel[i.dataset.g][i.value] = i.checked; sync(); if(errId) $(errId).textContent = "";
+  });
+  $(boxId).addEventListener("click", e=>{
+    const b = e.target.closest(".sel-all"); if(!b || b.disabled) return;
+    const g = b.dataset.g, ins = [...box().querySelectorAll(`input[data-g="${g}"][data-can]`)], all = ins.every(i=>i.checked);
+    ins.forEach(i=>{ i.checked = !all; st.sel[g][i.value] = !all; });
+    sync(); if(errId) $(errId).textContent = "";
+  });
+  document.querySelectorAll(`input[name="${whatName}"]`).forEach(r=>r.addEventListener("change", ()=>{ draw(); if(errId) $(errId).textContent = ""; }));
+  return {
+    open(c, sel, w){
+      st.c = c; st.sel = {ck:{...sel.ck}, pt:{...sel.pt}};
+      document.querySelectorAll(`input[name="${whatName}"]`).forEach(r=>r.checked = r.value === w);
+      draw();
+    },
+    client(){ return st.c; },
+    value(){ return {what: what(), ck:{...st.sel.ck}, pt:{...st.sel.pt}}; },
+    /* che cosa manca per poter creare il file ("" = tutto a posto) */
+    problem(extraText){
+      const c = st.c; if(!c) return "Cartella non trovata.";
+      const v = this.value(), svc = shareSvc(c);
+      if(!shareDoc(c, v).empty || extraText) return "";
+      if(!svc.ck && !svc.pt) return svc.idle ? svc.ptWhy : "Questo cliente non ha ancora dati da inviare.";
+      if(v.what === "ck" && !svc.ck) return svc.ckWhy;
+      if(v.what === "pt" && !svc.pt) return svc.ptWhy;
+      return "Scegli almeno una casella da includere.";
+    }
+  };
 }
-
-function fillShareChecks(inc){
-  $("shareChecks").innerHTML = SHARE_ITEMS.map(i=>`<label class="check${i.k==="noteSedute"?" sub":""}" data-k="${i.k}"><input type="checkbox" value="${i.k}"${inc[i.k]?" checked":""}><span>${esc(i.label)}</span></label>`).join("");
-  syncShareChecks();
+/* servizio proposto all'apertura: quello ricordato, altrimenti il lato che stai guardando; mai uno che il cliente non ha */
+function shareStartWhat(c, remembered){
+  const svc = shareSvc(c); let w = ["ck","pt","both"].includes(remembered) ? remembered : (sideOf(c) === "pt" ? "pt" : "ck");
+  if(w === "ck" && !svc.ck && svc.pt) w = "pt";
+  if(w === "pt" && !svc.pt && svc.ck) w = "ck";
+  return w;
 }
-function syncShareChecks(){
-  const hist = $("shareChecks").querySelector('input[value="storicoSedute"]');
-  const sub = $("shareChecks").querySelector('input[value="noteSedute"]');
-  if(hist && sub){ sub.disabled = !hist.checked; sub.closest(".check").classList.toggle("dis", !hist.checked); }
-  $("shareErr").textContent = "";
-}
-$("shareChecks").addEventListener("change", syncShareChecks);
-const shareWhat = () => (document.querySelector('input[name="shareWhat"]:checked') || {}).value === "ck" ? "ck" : "pt";
-function syncShareWhat(){ const ck = shareWhat() === "ck"; $("shareChecks").hidden = ck; $("shareCkNote").hidden = !ck; $("shareErr").textContent = ""; }
-document.querySelectorAll('input[name="shareWhat"]').forEach(r=>r.addEventListener("change", syncShareWhat));
+const shareSel = makeSel("shareBoxes", "shareWhat", "shareWhatHint", "shareErr");
 $("fShare").addEventListener("submit", e=>{
   if(!e.submitter || e.submitter.value !== "ok") return;
-  if(shareWhat() === "ck") return;                                   // il riepilogo check ha sempre il suo contenuto
-  const any = [...$("shareChecks").querySelectorAll("input:checked")].some(i=>!i.disabled && i.value!=="noteSedute");
-  if(!any && !$("shareMsg").value.trim()){ e.preventDefault(); $("shareErr").textContent = "Scegli almeno una cosa da includere."; }
+  const p = shareSel.problem(); if(p){ e.preventDefault(); $("shareErr").textContent = p; }
 });
 
 async function shareClient(id){
   const c = getClient(id); if(!c || exporting) return;
   const d = shareDefaults(c);
-  $("shareTitle").textContent = `Invia a ${c.name}`;
-  fillShareChecks(d.inc);
-  $("shareMsg").value = "";
+  $("shareTitle").textContent = `Invia dati a ${c.name}`;
+  $("shareErr").textContent = "";
   $("shareTrainer").value = settings.trainerName || "";
   document.querySelectorAll('input[name="shareFmt"]').forEach(r=>r.checked = r.value===d.format);
-  // cosa inviare: personal o check (uno per volta); a chi ha un solo servizio non si chiede
-  const hasPt = c.personal !== false, hasCk = ckOn(c) || ckHasData(c.check);
-  $("shareWhatW").hidden = !(hasPt && hasCk);
-  const def = hasPt && hasCk ? (sideOf(c) === "ck" ? "ck" : "pt") : (hasCk ? "ck" : "pt");
-  document.querySelectorAll('input[name="shareWhat"]').forEach(r=>r.checked = r.value === def); syncShareWhat();
+  shareSel.open(c, d, shareStartWhat(c, d.what));
   if(await ask("dlgShare") !== "ok") return;
-  const what = shareWhat();
 
-  const inc = {};
-  $("shareChecks").querySelectorAll("input").forEach(i=>inc[i.value] = i.checked);
+  const v = shareSel.value();
   const fmtEl = document.querySelector('input[name="shareFmt"]:checked');
   const format = fmtEl && fmtEl.value === "docx" ? "docx" : "pdf";
-  const message = $("shareMsg").value.trim();
   const trainer = $("shareTrainer").value.trim();
 
   if(trainer !== (settings.trainerName||"")){ settings.trainerName = trainer; saveSettings(); }
   const cur = getClient(id); if(!cur) return;
-  const newShare = {inc, format};
+  const newShare = normShare({what:v.what, ck:v.ck, pt:v.pt, format});
   if(JSON.stringify(cur.share) !== JSON.stringify(newShare)){ const n = clone(cur); n.share = newShare; commit(n, true); }
 
-  const opt = {inc: inc.storicoSedute ? inc : {...inc, noteSedute:false}, message, trainer};
+  const opt = {what:v.what, ck:v.ck, pt:{...v.pt, noteSedute: !!(v.pt.noteSedute && v.pt.storicoSedute)}, trainer};
   exporting = true;
   toast("Sto preparando il riepilogo…");
   try{
-    const fresh = getClient(id) || cur;
+    const fresh = getClient(id) || cur, doc = shareDoc(fresh, opt);
     let blob;
     if(format === "docx"){
       const JSZip = await lib("jszip");
-      blob = await (await (what === "ck" ? buildCheckDocx : buildClientDocx)(fresh, JSZip, opt)).generateAsync({type:"blob", mimeType:MIME.docx});
+      blob = await (await buildClientDocx(fresh, JSZip, opt)).generateAsync({type:"blob", mimeType:MIME.docx});
     } else {
       const jsPDF = await lib("jspdf");
-      blob = (what === "ck" ? buildCheckPdf : buildClientPdf)(fresh, jsPDF, opt).output("blob");
+      blob = buildClientPdf(fresh, jsPDF, opt).output("blob");
     }
-    const ok = await saveFile(blob, `${safeName(fresh.name)} - ${what === "ck" ? "check" : "riepilogo"}.${format}`, true);
+    const ok = await saveFile(blob, `${safeName(fresh.name)} - ${doc.hasCk && doc.hasPt ? "riepilogo" : doc.hasCk ? "check" : "personal"}.${format}`, true);
     if(ok) toast("Riepilogo per il cliente pronto");
   }catch(e){
     console.error(e);
     await messageBox("Invio non riuscito", e && e.message==="offline" ? OFFLINE_MSG : "Non sono riuscito a creare il riepilogo. Riprova.");
   }finally{ exporting = false; }
-}
-
-async function exportToCloud(id, kind, svc){
-  const c = getClient(id); if(!c) return;
-  exporting = true;
-  toast(`Sto salvando su ${SVC_NAME[svc]}…`);
-  try{
-    if(svc === "dropbox"){
-      try{
-        const r = await dbxSaveText(`${dbxName(c.name)}.txt`, buildFullText(c));
-        await showOpen("Salvato su Dropbox", `Il file “${r.path.split("/").pop()}” è nella cartella “${DRIVE_FOLDER}” di Dropbox.` + dbxAppHint(DRIVE_FOLDER), dbxOpenUrl(DBX_ROOT), dbxOpenLabel(), isIOS ? dbxWebUrl(DBX_ROOT) : "");
-      }catch(e){ console.error(e); await messageBox("Salvataggio su Dropbox non riuscito", cloudErrorText(e, "dropbox")); }
-      return;
-    }
-    let blob;
-    try{ blob = await makeFullFile(c, kind); }
-    catch(e){ console.error(e); await messageBox("Salvataggio non riuscito", e && e.message==="offline" ? OFFLINE_MSG : "Non sono riuscito a creare il documento. Riprova."); return; }
-    try{
-      await driveSave(blob, `${safeName(c.name)}.${kind}`);
-      await showOpen("Salvato su Google Drive", `Il file “${safeName(c.name)}.${kind}” è nella cartella “${DRIVE_FOLDER}” del tuo Drive.`, driveWebUrl(settings.driveFolderId), "Apri la cartella su Drive");
-    }catch(e){ console.error(e); await messageBox("Salvataggio su Drive non riuscito", driveErrorText(e)); }
-  } finally { exporting = false; }
 }
 
 async function backupToCloud(){
@@ -4015,7 +4317,7 @@ const SVCS = ["drive","dropbox"];
 function hashStr(s){ let h = 5381; for(let i=0;i<s.length;i++) h = ((h<<5) + h + s.charCodeAt(i)) | 0; return (h>>>0).toString(36); }
 function followSig(c, f){
   return hashStr(JSON.stringify([c.name, c.totalSessions, c.doneSessions, c.price, c.paid, c.freq, c.days, c.training, c.notes,
-    c.sessionLog, c.payLog, c.start, c.carriedIn, c.packages, f.inc, f.message, settings.trainerName || "", SVCS.filter(s=>f[s].on)]));
+    c.sessionLog, c.payLog, c.start, c.carriedIn, c.packages, c.missLog, c.check, f.sel || f.inc, f.message, settings.trainerName || "", SVCS.filter(s=>f[s].on)]));
 }
 const svcOn = (f, s) => !!(f && f[s] && f[s].on);
 const activeSvcs = f => SVCS.filter(s=>svcOn(f, s));
@@ -4085,15 +4387,12 @@ function followHTML(c){
 
 /* ---- finestra impostazioni ---- */
 let followCtx = null;
-function followChecks(inc){
-  $("followChecks").innerHTML = SHARE_ITEMS.map(i=>`<label class="check${i.k==="noteSedute"?" sub":""}"><input type="checkbox" value="${i.k}"${inc[i.k]?" checked":""}><span>${esc(i.label)}</span></label>`).join("");
-  syncFollowChecks();
-}
-function syncFollowChecks(){
-  const hist = $("followChecks").querySelector('input[value="storicoSedute"]');
-  const sub = $("followChecks").querySelector('input[value="noteSedute"]');
-  if(hist && sub){ sub.disabled = !hist.checked; sub.closest(".check").classList.toggle("dis", !hist.checked); }
-  $("followErr").textContent = "";
+const followSel = makeSel("followBoxes", "followWhat", "followWhatHint", "followErr");
+/* scelte della condivisione: quelle salvate per la condivisione, altrimenti quelle di “Invia dati al cliente” */
+function followSelOf(c, f){
+  const d = shareDefaults(c), sl = f && f.sel;
+  if(sl){ ["ck","pt"].forEach(g=>Object.keys(sl[g] || {}).forEach(k=>{ if(k in d[g]) d[g][k] = !!sl[g][k]; })); d.what = sl.what || d.what; }
+  return d;
 }
 const chosenSvcs = () => [...document.querySelectorAll('input[name="followSvc"]:checked')].map(i=>i.value);
 function syncFollowSvc(){
@@ -4109,7 +4408,6 @@ function syncFollowSvc(){
     : "Verrà creata con questo nome dentro “Gestionale PT”. Il cliente vede solo questa cartella.";
   $("followErr").textContent = "";
 }
-$("followChecks").addEventListener("change", syncFollowChecks);
 document.querySelectorAll('input[name="followSvc"]').forEach(r=>r.addEventListener("change", syncFollowSvc));
 $("followEmail").addEventListener("input", ()=>{ $("followErr").textContent = ""; });
 $("followFolder").addEventListener("input", ()=>{ $("followErr").textContent = ""; });
@@ -4120,8 +4418,8 @@ $("fFollow").addEventListener("submit", e=>{
   if(!EMAIL_RE.test($("followEmail").value.trim())) return stop("Scrivi l'email del cliente: serve per dargli accesso alla cartella.", $("followEmail"));
   const fn = $("followFolder").value.trim();
   if(!fn || !safeName(fn).replace(/[._\s]/g,"")) return stop("Scrivi il nome della cartella, ad esempio “Personal Francesco”.", $("followFolder"));
-  const any = [...$("followChecks").querySelectorAll("input:checked")].some(i=>!i.disabled && i.value!=="noteSedute");
-  if(!any && !$("followMsg").value.trim()) return stop("Scegli almeno una cosa da mostrare al cliente.");
+  const p = followSel.problem($("followMsg").value.trim());
+  if(p) return stop(p === "Scegli almeno una casella da includere." ? "Scegli almeno una cosa da mostrare al cliente." : p);
 });
 
 async function followSetup(id, focusFolder){
@@ -4135,7 +4433,7 @@ async function followSetup(id, focusFolder){
   followCtx = {follow: f, initialFolder};
   $("followFolder").value = initialFolder;
   $("followEmail").value = f && f.email ? f.email : (c.email || "");
-  followChecks(f && f.inc ? {...shareDefaults(c).inc, ...f.inc} : shareDefaults(c).inc);
+  { const fs = followSelOf(c, f); followSel.open(c, fs, shareStartWhat(c, fs.what)); }
   $("followMsg").value = f ? f.message : "";
   $("followTrainer").value = settings.trainerName || "";
   $("followOk").textContent = f && f.updated ? "Salva e aggiorna" : "Condividi e aggiorna";
@@ -4145,7 +4443,7 @@ async function followSetup(id, focusFolder){
   followCtx = null;
   if(answer !== "ok") return;
 
-  const inc = {}; $("followChecks").querySelectorAll("input").forEach(i=>inc[i.value] = i.checked);
+  const sel = followSel.value();
   const svcs = chosenSvcs(), email = $("followEmail").value.trim();
   const folder = $("followFolder").value.trim().replace(/\s+/g," ");
   const renamed = folder !== initialFolder;
@@ -4158,7 +4456,7 @@ async function followSetup(id, focusFolder){
   const cur = getClient(id); if(!cur) return;
   const n = clone(cur);
   const base = n.follow || normFollow({});
-  const nf = {...base, email, inc, message:$("followMsg").value.trim(), folderName: folder};
+  const nf = {...base, email, inc: {...sel.pt}, sel: normShare({what:sel.what, ck:sel.ck, pt:sel.pt}), message:$("followMsg").value.trim(), folderName: folder};
   const notes = [];
   for(const s of SVCS){
     const was = svcOn(base, s);
@@ -4277,8 +4575,8 @@ async function followUpdate(id){
   const c0 = getClient(id); if(!c0 || !c0.follow) return {ok:false, error:"Condivisione non impostata."};
   const f = clone(c0.follow), svcs = activeSvcs(f), notes = [], errors = [];
   if(!svcs.length) return {ok:false, error:"Scegli almeno un servizio nelle impostazioni di condivisione."};
-  const inc = {...shareDefaults(c0).inc, ...(f.inc || {})};
-  const opt = {inc: inc.storicoSedute ? inc : {...inc, noteSedute:false}, message:f.message, trainer:settings.trainerName || ""};
+  const fs = followSelOf(c0, f);
+  const opt = {what: fs.what || "both", ck: fs.ck, pt: {...fs.pt, noteSedute: !!(fs.pt.noteSedute && fs.pt.storicoSedute)}, message:f.message, trainer:settings.trainerName || ""};
   const sig = followSig(c0, f);
   const save = done => {
     const cur = getClient(id); if(!cur || !cur.follow) return;
@@ -4502,7 +4800,6 @@ async function handle(a, el){
     case "quickDel": return getClient(el.dataset.id) && deleteClient(el.dataset.id);
     case "renameClient": return getClient(el.dataset.id) && renameClient(el.dataset.id);
     case "back": openId = null; render(); window.scrollTo({top:0}); return;
-    case "export": return c && exportClient(c.id);
     case "share": return c && shareClient(c.id);
     case "backup": return backupToCloud();
     case "follow": return c && followSetup(c.id);
@@ -4512,6 +4809,11 @@ async function handle(a, el){
     case "followStop": return c && followStop(c.id);
     case "followAll": return updateAllFollow();
     case "import": $("importInput").value=""; $("importInput").click(); return;
+    case "ptReactivate": {                                                  // personal fermo da 5 mesi: lo riattivo a mano (i 5 mesi ripartono da oggi)
+      if(!c) return;
+      const n = clone(c); n.personal = true; n.ptOnAt = today(); commit(n, true); render(); toast("Personal 1 to 1 riattivato");
+      return;
+    }
     case "addSes": return c && addSession(c.id);
     case "addSingle": return c && addSingle(c.id);
     case "sideView": { if(c){ const v = el.dataset.v === "ck" ? "ck" : "pt"; detailSide[c.id] = v; cardView[c.id] = v; render(); window.scrollTo(0, 0); } return; }
@@ -4530,6 +4832,7 @@ async function handle(a, el){
     case "ckSinglePaid": { if(c) ckSave(c.id, kk=>{ const e = kk.log.find(x=>x.id === el.dataset.id); if(e) e.paid = true; }, "Consulenza singola pagata"); return; }
     case "ckNewPkg": return c && ckNewPkg(c.id);
     case "ckCurType": { if(!c) return; const v = ckType(el.dataset.v); ckSave(c.id, kk=>{ kk.curType = v; }, v ? `Tipo del cliente: ${ckTypeLabel(v)} (scelto a mano)` : "Tipo del cliente: automatico"); return; }
+    case "ckAddExtra": return c && ckLogAdd(c.id, null, "extra");
     case "ckPkgType": { if(!c) return; const v = ckType(el.dataset.v); ckSave(c.id, kk=>{ if(kk.pkg) kk.pkg.type = v; }, v ? `Tipo del pacchetto: ${ckTypeLabel(v)}` : "Tipo del pacchetto tolto"); return; }
     case "wAdd": return c && wAdd(c.id);
     case "wEdit": return c && wAdd(c.id, el.dataset.id);
@@ -4974,7 +5277,14 @@ async function editPackage(id, pkgId){
 function nameFromFile(fn){
   return fn.replace(/\.[^.]+$/,"").replace(/_+/g," ").replace(/\s*\(\d+\)\s*$/,"").replace(/\s+/g," ").trim() || "Senza nome";
 }
-const CLIENT_COPY_MSG = "Questo è il riepilogo per il cliente: non contiene tutti i dati, quindi non si può reimportare. Usa una scheda creata con “Esporta”.";
+const CLIENT_COPY_MSG = "Questo è il riepilogo per il cliente: non contiene tutti i dati, quindi non si può reimportare. Usa un file creato con “Esporta dati programma”.";
+/* quale parte contiene il file: "ck" (solo Check), "pt" (solo Personal) oppure "both" (tutta la cartella) */
+const partOf = raw => raw && (raw.part === "ck" || raw.part === "pt") ? raw.part : "both";
+function fromData(raw, name){
+  const c = normalize(raw), part = partOf(raw);
+  c.id = uid(); c.name = part === "both" ? name : (name.replace(/\s*-\s*(check|personal)$/i, "").trim() || name);
+  c.__part = part; return c;
+}
 function pdfSubject(buf, tag){
   const txt = new TextDecoder("latin1").decode(new Uint8Array(buf));
   const m = txt.match(new RegExp("/Subject\\s*\\((" + (tag || "PTGEST1") + ":[A-Za-z0-9+\\/=\\\\\\r\\n]+)\\)"));
@@ -4993,8 +5303,7 @@ async function readFile(f){
     if(/\/Subject\s*\(PTCLIENT\)/.test(new TextDecoder("latin1").decode(new Uint8Array(buf)))) throw new Error(CLIENT_COPY_MSG);
     const subj = pdfSubject(buf);
     if(!subj) throw new Error("Questo PDF non è stato creato dal gestionale (oppure è stato modificato), quindi non posso leggerne i dati. Usa un PDF esportato da qui o un file Word.");
-    const c = normalize(JSON.parse(b64dec(subj.slice(8))));
-    c.id = uid(); c.name = name; return c;
+    return fromData(JSON.parse(b64dec(subj.slice(8))), name);
   }
   if(isZip){
     const JSZip = await lib("jszip");
@@ -5005,7 +5314,7 @@ async function readFile(f){
     const coreStr = core ? await core.async("string") : "", spm = coreStr.match(/PTSPESE1:([A-Za-z0-9+\/=]+)/);
     if(spm) return {__expenses: JSON.parse(b64dec(spm[1]))};                // file delle spese di gestione
     const gm = coreStr.match(/PTGEST1:([A-Za-z0-9+\/=]+)/);                    // scheda con tutti i dati (backup): copia identica
-    if(gm){ try{ const c = normalize(JSON.parse(b64dec(gm[1]))); c.id = uid(); c.name = name; return c; }catch(_){ /* dati illeggibili: uso le tabelle */ } }
+    if(gm){ try{ return fromData(JSON.parse(b64dec(gm[1])), name); }catch(_){ /* dati illeggibili: uso le tabelle */ } }
     if(core && /<dc:subject>PTCLIENT<\/dc:subject>/.test(coreStr)) throw new Error(CLIENT_COPY_MSG);
     const c = clientFromTables(docxTables(await docXml.async("string")), name);
     if(!c) throw new Error("Nel documento non ho trovato le tabelle della scheda cliente. Usa un file esportato da questo gestionale.");
@@ -5020,9 +5329,9 @@ async function readFile(f){
   const code = html.match(/PTGEST1:([A-Za-z0-9+\/=]+)/);
   if(code){
     let data; try{ data = JSON.parse(b64dec(code[1])); }catch(e){ throw new Error("Il codice in fondo al file è stato modificato o è incompleto, quindi non posso leggere i dati."); }
-    const c = normalize(data); c.id = uid(); c.name = name; return c;
+    return fromData(data, name);
   }
-  if(/^\uFEFF?\s*RIEPILOGO ALLENAMENTI/.test(html)) throw new Error(CLIENT_COPY_MSG);
+  if(/^\uFEFF?\s*RIEPILOGO( |\n|\r|$)/.test(html)) throw new Error(CLIENT_COPY_MSG);
   const dom = new DOMParser().parseFromString(html, "text/html");
   const tables = [...dom.querySelectorAll("table")].map(t=>[...t.querySelectorAll("tr")].map(tr=>[...tr.querySelectorAll("th,td")].map(td=>td.textContent.replace(/\s+/g," ").trim())));
   const c = clientFromTables(tables, name);
@@ -5031,6 +5340,130 @@ async function readFile(f){
 }
 
 let importing = false;
+/* ---- “Importa dati programma”: dopo aver letto i file scegli quali cartelle caricare e quali dati (Check, Personal o entrambi).
+   Se una cartella con lo stesso nome esiste già: aggiungi (senza doppioni), sostituisci, oppure cartella nuova. ---- */
+const impHasCk = it => it.part !== "pt" && (ckOn(it.c) || ckHasData(it.c.check));
+const impHasPt = it => it.part !== "ck" && (hasPtData(it.c) || !!(it.c.freq || it.c.days.length || it.c.training || it.c.notes) || !impHasCk(it));
+const impTake = (it, what) => ({ck: what !== "pt" && impHasCk(it), pt: what !== "ck" && impHasPt(it)});
+const PT_FIELDS = ["totalSessions","doneSessions","price","paid","freq","days","training","notes","sessionLog","payLog","start","closed","carriedIn","packages","missLog","personal","ptOnAt"];
+/* unione di due elenchi senza doppioni: una voce del file è già presente se ha lo stesso codice interno, oppure
+   (per i file senza codici uguali, o per una voce cancellata e riscritta) lo stesso contenuto, contato una volta sola */
+function mergeLog(a, b, sig){
+  const ids = new Set(a.map(x=>x.id)), bIds = new Set(b.map(x=>x && x.id));
+  const free = {}; a.forEach(x=>{ if(!bIds.has(x.id)){ const k = sig(x); free[k] = (free[k] || 0) + 1; } });   // voci della cartella non ancora abbinate a una del file
+  const out = [...a];
+  b.forEach(x=>{ if(!x || ids.has(x.id)) return; const k = sig(x); if(free[k] > 0){ free[k]--; return; } out.push(x); });
+  return out;
+}
+const SIG = { ses: x=>`${x.date || ""}|${x.note || ""}`, pay: x=>`${x.date || ""}|${round2(Number(x.amount) || 0)}|${x.method || ""}|${x.note || ""}`, miss: x=>`${x.date || ""}`,
+  rate: x=>`${x.date || ""}|${round2(Number(x.amount) || 0)}`, w: x=>`${x.date || ""}|${x.kg}`,
+  cons: x=>`${x.date || ""}|${x.kind || ""}|${x.extra ? 1 : 0}|${round2(Number(x.amount) || 0)}|${x.type || ""}|${x.note || ""}|${x.program ? 1 : 0}|${x.score || 0}`,
+  ckp: p=>`${p.start || ""}|${p.count || 0}|${round2(Number(p.price) || 0)}` };
+const pkgSig = p => [p.start || "", Number(p.totalSessions) || 0, round2(Number(p.price) || 0), isSingle(p) ? 1 : 0].join("|");
+/* unisce la parte Personal del file a una cartella esistente, senza doppioni */
+function mergePt(ex, nc){
+  const used = c => !!(Number(c.totalSessions) || Number(c.doneSessions) || Number(c.price) || Number(c.paid) || c.sessionLog.length || c.payLog.length || c.missLog.length);
+  const CUR = ["start","totalSessions","doneSessions","price","paid","carriedIn","sessionLog","payLog","missLog","closed"];
+  const asPkg = c => { const last = [...c.sessionLog].sort(byDateAsc).pop();
+    return normPackage({start:c.start, end: c.closed || closeDateOf(c) || (last ? last.date : ""), totalSessions:c.totalSessions, doneSessions:c.doneSessions, price:c.price, paid:c.paid,
+      carriedIn:c.carriedIn, carriedOut:0, sessionLog:c.sessionLog, payLog:c.payLog, missLog:c.missLog}); };
+  const addPast = p => { if(!ex.packages.some(q=>q.id === p.id || pkgSig(q) === pkgSig(p))) ex.packages.push(normPackage(clone(p))); };
+  ex.packages = mergeLog(ex.packages, nc.packages.map(p=>normPackage(clone(p))), pkgSig);   // pacchetti passati e sedute singole: solo quelli che mancano
+  if(used(nc)){
+    if(!used(ex)) CUR.forEach(k=>{ ex[k] = clone(nc[k]); });
+    else if((ex.start || "") === (nc.start || "")){                        // stesso pacchetto in corso: aggiungo solo quello che manca
+      const nSes = ex.sessionLog.length, nPay = ex.payLog.length;
+      ex.sessionLog = mergeLog(ex.sessionLog, nc.sessionLog, SIG.ses); ex.payLog = mergeLog(ex.payLog, nc.payLog, SIG.pay); ex.missLog = mergeLog(ex.missLog, nc.missLog, SIG.miss);
+      ex.totalSessions = Math.max(ex.totalSessions, nc.totalSessions);
+      ex.doneSessions = Math.max(ex.doneSessions, nc.doneSessions, ex.sessionLog.length > nSes ? ex.sessionLog.length : 0);   // se sono entrate sedute nuove, le conto
+      ex.price = Math.max(ex.price, nc.price);
+      ex.paid = round2(Math.max(ex.paid, nc.paid, ex.payLog.length > nPay ? ex.payLog.reduce((t,p)=>t + (Number(p.amount) || 0), 0) : 0));   // idem per le rate nuove
+    } else if((ex.start || "") < (nc.start || "")){                        // nel file c'è un pacchetto più recente: quello della cartella va nello storico
+      const old = asPkg(ex); CUR.forEach(k=>{ ex[k] = clone(nc[k]); }); addPast(old);
+    } else addPast(asPkg(nc));                                             // quello del file è più vecchio: va nello storico
+  }
+  if((ex.freq === "" || ex.freq == null) && nc.freq !== "" && nc.freq != null) ex.freq = nc.freq;
+  if(!ex.days.length) ex.days = [...nc.days];
+  if(!ex.training) ex.training = nc.training;
+  if(!ex.notes) ex.notes = nc.notes;
+  ex.personal = ex.personal !== false || nc.personal !== false;
+  if((nc.ptOnAt || "") > (ex.ptOnAt || "")) ex.ptOnAt = nc.ptOnAt;
+}
+/* unisce la parte Check del file a una cartella esistente, senza doppioni */
+function mergeCk(ex, nc){
+  const a = normCheck(ex.check), b = normCheck(clone(nc.check));
+  const lastCons = (k, p) => k.log.filter(e=>e.kind === "pkg" && e.pkgId === p.id).map(e=>e.date).filter(Boolean).sort().pop() || "";
+  /* i pacchetti del file che la cartella ha già (stesso codice, oppure stessa data, numero di consulenze e costo) prendono il codice della cartella */
+  const same = (q, p) => !!q && (q.id === p.id || SIG.ckp(q) === SIG.ckp(p));
+  const taken = new Set();                                                 // ogni pacchetto della cartella si abbina a un solo pacchetto del file
+  const twin = p => [a.pkg, ...a.pkgs].find(q=>q && q.id === p.id) || [a.pkg, ...a.pkgs].find(q=>q && !taken.has(q.id) && same(q, p)) || null;
+  [...b.pkgs, b.pkg].filter(Boolean).forEach(p=>{ const q = twin(p); if(!q) return; taken.add(q.id); if(q.id !== p.id){ b.log.forEach(e=>{ if(e.pkgId === p.id) e.pkgId = q.id; }); p.id = q.id; } });
+  const known = id => (a.pkg && a.pkg.id === id) || a.pkgs.some(q=>q.id === id);
+  b.pkgs.forEach(p=>{ if(!known(p.id)) a.pkgs.push(p); else { const q = a.pkgs.find(x=>x.id === p.id); if(q) q.payLog = mergeLog(q.payLog, p.payLog, SIG.rate); } });
+  if(b.pkg){
+    if(a.pkg && a.pkg.id === b.pkg.id){                                    // stesso pacchetto in corso
+      a.pkg.payLog = mergeLog(a.pkg.payLog, b.pkg.payLog, SIG.rate); a.pkg.count = Math.max(a.pkg.count, b.pkg.count); a.pkg.price = Math.max(a.pkg.price, b.pkg.price);
+      if(!a.pkg.type) a.pkg.type = b.pkg.type; if(!a.pkg.start) a.pkg.start = b.pkg.start;
+    } else if(!known(b.pkg.id)){
+      if(!a.pkg) a.pkg = b.pkg;
+      else if((a.pkg.start || "") <= (b.pkg.start || "")){ a.pkgs.push(Object.assign({}, a.pkg, {end: a.pkg.end || lastCons(a, a.pkg) || today()})); a.pkg = b.pkg; }
+      else a.pkgs.push(Object.assign({}, b.pkg, {end: b.pkg.end || lastCons(b, b.pkg) || b.pkg.start}));
+    }
+  }
+  { a.weights = mergeLog(a.weights, b.weights, SIG.w);                 // i pesi collegati alle consulenze: tengo il collegamento solo se il peso c'è
+    const before = new Set(a.log.map(e=>e.id)); a.log = mergeLog(a.log, b.log, x=>`${SIG.cons(x)}|${x.kind === "pkg" ? x.pkgId : ""}`);
+    const wIds = new Set(a.weights.map(w=>w.id)); a.log.forEach(e=>{ if(!before.has(e.id) && e.weightId && !wIds.has(e.weightId)) e.weightId = ""; }); }
+  if(!a.notes) a.notes = b.notes; if(!a.curType) a.curType = b.curType;
+  a.on = a.on || b.on;
+  ex.check = normCheck(a);
+}
+function impBuildNew(it, take){                                            // cartella nuova con le parti scelte
+  const c = it.c;
+  if(take.ck && take.pt) return normalize(Object.assign(clone(c), {id: uid()}));
+  if(take.ck) return normalize({id: uid(), name: c.name, phone: c.phone, email: c.email, personal: false, check: clone(c.check)});
+  return normalize(Object.assign(clone(c), {id: uid(), check: null}));
+}
+function impReplace(ex, it, take){                                         // le parti scelte prendono il posto di quelle della cartella
+  const n = clone(ex), c = it.c;
+  if(take.pt) PT_FIELDS.forEach(k=>{ n[k] = clone(c[k]); });
+  if(take.ck) n.check = clone(c.check);
+  if(c.phone) n.phone = c.phone; if(c.email) n.email = c.email;
+  return normalize(n);
+}
+function impMerge(ex, it, take){                                           // aggiungo ai dati che ci sono già, senza doppioni
+  const n = normalize(clone(ex));
+  if(take.pt) mergePt(n, it.c);
+  if(take.ck) mergeCk(n, it.c);
+  if(!n.phone) n.phone = it.c.phone; if(!n.email) n.email = it.c.email;
+  return normalize(n);
+}
+const impWhat = () => { const el = document.querySelector('input[name="impWhat"]:checked'); return el && ["ck","pt"].includes(el.value) ? el.value : "both"; };
+let impItems = [];
+const partsTxt = t => [t.ck ? "Check" : "", t.pt ? "Personal 1 to 1" : ""].filter(Boolean).join(" + ");
+function drawImport(keep){
+  const what = impWhat(), prev = keep ? new Set([...$("impList").querySelectorAll("input:checked")].map(i=>i.value)) : null;
+  $("impList").innerHTML = impItems.map((it, i)=>{
+    const has = {ck: impHasCk(it), pt: impHasPt(it)}, take = impTake(it, what), can = take.ck || take.pt;
+    const exists = clients.some(c=>c.name.toLowerCase() === it.c.name.toLowerCase());
+    const info = !can ? `nessun dato ${what === "ck" ? "Check" : "Personal 1 to 1"} nel file` : `${partsTxt(take)}${exists ? " · esiste già" : ""}`;
+    return `<label class="check${can ? "" : " dis"}"><input type="checkbox" value="${i}"${can ? "" : " disabled"}${can && (!prev || prev.has(String(i))) ? " checked" : ""}><span>${esc(it.c.name)} <small>${esc(info)}</small></span></label>`;
+  }).join("");
+  syncImport();
+}
+function syncImport(){
+  const n = $("impList").querySelectorAll("input:checked").length;
+  $("impErr").textContent = "";
+  $("impOk").textContent = n > 1 ? `Importa ${n} cartelle` : "Importa";
+  $("impHint").textContent = !n ? "Scegli almeno una cartella." : "";
+}
+$("impList").addEventListener("change", syncImport);
+document.querySelectorAll('input[name="impWhat"]').forEach(r=>r.addEventListener("change", ()=>drawImport(true)));
+$("impAll").addEventListener("click", ()=>{ $("impList").querySelectorAll("input:not(:disabled)").forEach(i=>i.checked = true); syncImport(); });
+$("impNone").addEventListener("click", ()=>{ $("impList").querySelectorAll("input").forEach(i=>i.checked = false); syncImport(); });
+$("fImport").addEventListener("submit", e=>{
+  if(!e.submitter || e.submitter.value !== "ok") return;
+  if(!$("impList").querySelectorAll("input:checked").length){ e.preventDefault(); $("impErr").textContent = "Scegli almeno una cartella da importare."; }
+});
 $("importInput").addEventListener("change", async e=>{
   let files = [...e.target.files]; e.target.value = "";
   if(!files.length || importing) return;
@@ -5038,7 +5471,7 @@ $("importInput").addEventListener("change", async e=>{
   const zips = files.filter(isZip);
   const fulls = files.filter(f=>!isZip(f) && (/\.json$/i.test(f.name) || /json/.test(f.type || "")));
   files = files.filter(f=>!isZip(f) && !fulls.includes(f));
-  for(const z of zips){                                    // ZIP di schede (da "Esporta documenti"): le apro una per una
+  for(const z of zips){                                    // ZIP di schede (da “Esporta dati programma”): le apro una per una
     try{
       const r = await unzipDocs(z);
       if(r.backup) fulls.push(z);
@@ -5046,35 +5479,55 @@ $("importInput").addEventListener("change", async e=>{
       else files.push(...r.files);
     }catch(err){ await messageBox("ZIP non letto", err && err.message === "offline" ? OFFLINE_MSG : `Non sono riuscito ad aprire “${z.name}”.`); }
   }
-  if(fulls.length) await messageBox("Questo è un file dei dati del programma",
-    `${fulls.map(f=>`“${f.name}”`).join(", ")}: “Importa documenti” legge solo schede Word, PDF o di testo.\n\nPer importare un backup tocca “⚙ Dati” accanto a “I miei clienti”, poi “Importa dati”.`);
+  if(fulls.length) await messageBox("Questo è un backup completo del programma",
+    `${fulls.map(f=>`“${f.name}”`).join(", ")}: “Importa dati programma” legge le schede Word, PDF o di testo create con “Esporta dati programma”.\n\nPer importare un backup completo tocca “⚙ Dati” accanto a “I miei clienti”, poi “Importa dati”.`);
   if(!files.length) return;
   importing = true;
-  let done = 0, lastId = null; const errors = [];
+  let done = 0, lastId = null, expDone = false; const errors = [], items = [];
   try{
+    // 1) leggo tutti i file
     for(const f of files){
       try{
         const nc = await readFile(f);
-        if(nc && nc.__expenses){ const n = mergeExpenses(nc.__expenses); done++; toast(n ? `Spese di gestione ripristinate: ${n} ${n === 1 ? "voce" : "voci"}` : "Spese di gestione già presenti"); continue; }
-        const ex = clients.find(c=>c.name.toLowerCase()===nc.name.toLowerCase());
-        if(ex){
-          $("conflictText").textContent = `Esiste già una cartella chiamata “${ex.name}”. Vuoi aggiornarla con i dati del file “${f.name}”, oppure creare una nuova cartella separata?`;
-          const r = await ask("dlgConflict");
-          if(r==="update"){ nc.id = ex.id; nc.follow = ex.follow; }
-          else if(r==="new"){ nc.follow = null; let i=2; while(clients.some(c=>c.name.toLowerCase()===`${nc.name} (${i})`.toLowerCase())) i++; nc.name = `${nc.name} (${i})`; }
-          else continue;
-        }
-        commit(nc, true); done++; lastId = nc.id;
+        if(nc && nc.__expenses){ const n = mergeExpenses(nc.__expenses); expDone = true; toast(n ? `Spese di gestione ripristinate: ${n} ${n === 1 ? "voce" : "voci"}` : "Spese di gestione già presenti"); continue; }
+        const part = nc.__part || "both"; delete nc.__part;
+        items.push({c: nc, part, file: f.name});
       }catch(err){
         console.error(err);
         errors.push(`${f.name}: ${err && err.message==="offline" ? OFFLINE_MSG : (err && err.message) || "non sono riuscito a leggerlo."}`);
       }
     }
-  } finally { importing = false; }
+    // 2) scelta delle cartelle e dei dati
+    if(items.length){
+      impItems = items.sort((a,b)=>a.c.name.localeCompare(b.c.name, "it"));
+      document.querySelectorAll('input[name="impWhat"]').forEach(r=>r.checked = r.value === "both");
+      drawImport(false);
+      const ans = await ask("dlgImport");
+      const what = impWhat(), chosen = ans === "ok" ? [...$("impList").querySelectorAll("input:checked")].map(i=>impItems[Number(i.value)]).filter(Boolean) : [];
+      // 3) carico le cartelle scelte
+      const madeNow = new Set();                                           // cartelle create in questo stesso caricamento (es. file Check + file Personal dello stesso cliente)
+      for(const it of chosen){
+        const take = impTake(it, what); if(!take.ck && !take.pt) continue;
+        const ex = clients.find(c=>c.name.toLowerCase() === it.c.name.toLowerCase());
+        let out;
+        if(!ex) { out = impBuildNew(it, take); madeNow.add(out.id); }
+        else if(madeNow.has(ex.id)) out = impMerge(ex, it, take);
+        else {
+          $("conflictText").textContent = `Esiste già una cartella chiamata “${ex.name}”. Cosa faccio con i dati (${partsTxt(take)}) del file “${it.file}”?\n\n• Aggiungi: unisco i dati a quelli della cartella. Sedute, pagamenti e consulenze già presenti non vengono duplicati.\n• Sostituisci: i dati ${partsTxt(take)} della cartella vengono sostituiti da quelli del file${take.ck && take.pt ? "" : "; il resto non viene toccato"}.\n• Cartella nuova: resta tutto com'è e ne creo una separata.`;
+          const r = await ask("dlgConflict");
+          if(r === "add") out = impMerge(ex, it, take);
+          else if(r === "replace") out = impReplace(ex, it, take);
+          else if(r === "new"){ out = impBuildNew(it, take); let i = 2; while(clients.some(c=>c.name.toLowerCase() === `${it.c.name} (${i})`.toLowerCase())) i++; out.name = `${it.c.name} (${i})`; out.follow = null; }
+          else continue;
+        }
+        commit(out, true); done++; lastId = out.id;
+      }
+    }
+  } finally { importing = false; impItems = []; }
   if(done){
     openId = done===1 ? lastId : null; render(); window.scrollTo({top:0});
     toast(done===1 ? "Cartella importata" : `${done} cartelle importate`);
-  }
+  } else if(expDone) render();
   if(errors.length) await messageBox(errors.length===1 ? "Un file non è stato importato" : "Alcuni file non sono stati importati", errors.join("\n\n"));
 });
 
@@ -5229,8 +5682,8 @@ async function importFull(file){
 }
 
 /* ======================= ESPORTA DOCUMENTI ======================= */
-/* Le schede complete dei clienti in Word o PDF: da condividere (WhatsApp, email) o salvare in una cartella,
-   e da reimportare con "Importa documenti" come cartelle normali */
+/* “Esporta dati programma”: le schede complete delle cartelle scelte in Word o PDF (tutto, solo Check o solo Personal),
+   da salvare o condividere e da ricaricare con “Importa dati programma” */
 async function unzipDocs(file){
   const JSZip = await lib("jszip");
   const zip = await JSZip.loadAsync(await file.arrayBuffer());
@@ -5247,12 +5700,23 @@ async function unzipDocs(file){
 }
 function docsChecked(){ return [...$("docsList").querySelectorAll("input:checked")].map(i=>i.value); }
 function docsFmt(){ const el = document.querySelector('input[name="docsFmt"]:checked'); return el ? el.value : "docx"; }
+const docsWhat = () => { const el = document.querySelector('input[name="docsWhat"]:checked'); return el && ["ck","pt"].includes(el.value) ? el.value : "both"; };
+/* una cartella si può esportare per la parte scelta solo se di quella parte ha qualcosa */
+const docsHas = (c, what) => what === "ck" ? hasCheckData(c) : what === "pt" ? (hasPtData(c) || c.personal !== false) : true;
+function drawDocs(keep){
+  const what = docsWhat(), prev = keep ? new Set(docsChecked()) : null;
+  const sorted = [...clients].sort((a,b)=>a.name.localeCompare(b.name,"it"));
+  $("docsList").innerHTML = sorted.map(c=>{ const can = docsHas(c, what);
+    return `<label class="check${can ? "" : " dis"}"><input type="checkbox" value="${esc(c.id)}"${can ? "" : " disabled"}${can && (!prev || prev.has(c.id)) ? " checked" : ""}><span>${esc(c.name)}${can ? "" : ` <small>nessun dato ${what === "ck" ? "Check" : "Personal 1 to 1"}</small>`}</span></label>`; }).join("");
+  syncDocs();
+}
 function syncDocs(){
-  const n = docsChecked().length, f = docsFmt() === "docx" ? "Word" : "PDF";
+  const n = docsChecked().length, f = docsFmt() === "docx" ? "Word" : "PDF", what = docsWhat();
+  const part = what === "ck" ? " con la sola parte Check" : what === "pt" ? " con la sola parte Personal 1 to 1" : "";
   $("docsErr").textContent = "";
-  $("docsHint").textContent = !n ? "Scegli almeno un cliente."
-    : n === 1 ? `Verrà creata una scheda ${f}. Sul telefono si apre la condivisione (WhatsApp, Mail, File…), al computer viene scaricata.`
-    : `Verranno create ${n} schede ${f}. Sul telefono le condividi tutte insieme se il telefono lo permette, altrimenti (e al computer) arrivano in un unico file ZIP.`;
+  $("docsHint").textContent = !n ? "Scegli almeno una cartella."
+    : n === 1 ? `Verrà creata una scheda ${f}${part}. Sul telefono si apre la condivisione (WhatsApp, Mail, File…), al computer viene scaricata.`
+    : `Verranno create ${n} schede ${f}${part}, una per cliente. Sul telefono le condividi tutte insieme se il telefono lo permette, altrimenti (e al computer) arrivano in un unico file ZIP.`;
   $("docsOk").textContent = n > 1 ? `Esporta ${n} schede` : "Esporta";
   if(!docsExpTouched) $("docsExp").checked = n > 1 && expData().items.length > 0;   // spese incluse quando esporti più clienti (si può cambiare)
 }
@@ -5260,11 +5724,12 @@ let docsExpTouched = false;
 $("docsExp").addEventListener("change", ()=>{ docsExpTouched = true; });
 $("docsList").addEventListener("change", syncDocs);
 document.querySelectorAll('input[name="docsFmt"]').forEach(r=>r.addEventListener("change", syncDocs));
-$("docsAll").addEventListener("click", ()=>{ $("docsList").querySelectorAll("input").forEach(i=>i.checked = true); syncDocs(); });
+document.querySelectorAll('input[name="docsWhat"]').forEach(r=>r.addEventListener("change", ()=>drawDocs(true)));
+$("docsAll").addEventListener("click", ()=>{ $("docsList").querySelectorAll("input:not(:disabled)").forEach(i=>i.checked = true); syncDocs(); });
 $("docsNone").addEventListener("click", ()=>{ $("docsList").querySelectorAll("input").forEach(i=>i.checked = false); syncDocs(); });
 $("fDocs").addEventListener("submit", e=>{
   if(!e.submitter || e.submitter.value !== "ok") return;
-  if(!docsChecked().length){ e.preventDefault(); $("docsErr").textContent = "Scegli almeno un cliente da esportare."; }
+  if(!docsChecked().length){ e.preventDefault(); $("docsErr").textContent = "Scegli almeno una cartella da esportare."; }
 });
 /* file “Spese di gestione”: tutte le voci e i pagamenti, con data, tipo e attività */
 async function makeExpFile(kind){
@@ -5287,13 +5752,14 @@ function mergeExpenses(src){
 async function exportDocs(){
   if(exporting || !clients.length) return;
   const sorted = [...clients].sort((a,b)=>a.name.localeCompare(b.name,"it"));
-  $("docsList").innerHTML = sorted.map(c=>`<label class="check"><input type="checkbox" value="${esc(c.id)}" checked><span>${esc(c.name)}</span></label>`).join("");
   const last = settings.docsFmt === "pdf" ? "pdf" : "docx";
   document.querySelectorAll('input[name="docsFmt"]').forEach(r=>r.checked = r.value === last);
-  syncDocs();
-  $("docsExpW").hidden = !expData().items.length; docsExpTouched = false; $("docsExp").checked = clients.length > 1 && !!expData().items.length;
+  document.querySelectorAll('input[name="docsWhat"]').forEach(r=>r.checked = r.value === "both");
+  $("docsExpW").hidden = !expData().items.length; docsExpTouched = false;
+  drawDocs(false);
+  $("docsExp").checked = clients.length > 1 && !!expData().items.length;
   if(await ask("dlgDocs") !== "ok") return;
-  const kind = docsFmt(), ids = docsChecked(), withExp = !!($("docsExp") && $("docsExp").checked && expData().items.length);
+  const kind = docsFmt(), ids = docsChecked(), what = docsWhat(), withExp = !!($("docsExp") && $("docsExp").checked && expData().items.length);
   if(settings.docsFmt !== kind){ settings.docsFmt = kind; saveSettings(); }
   const list = sorted.filter(c=>ids.includes(c.id));
   if(!list.length) return;
@@ -5304,7 +5770,7 @@ async function exportDocs(){
     for(const c of list){
       let nm = safeName(c.name), i = 2; while(used.has(nm.toLowerCase())) nm = `${safeName(c.name)} (${i++})`;
       used.add(nm.toLowerCase());
-      files.push({name:`${nm}.${kind}`, blob: await makeFullFile(c, kind)});
+      files.push({name:`${nm}${what === "ck" ? " - check" : what === "pt" ? " - personal" : ""}.${kind}`, blob: await makeFullFile(c, kind, what)});
     }
     if(withExp) files.push({name:`Spese di gestione.${kind}`, blob: await makeExpFile(kind)});
     const touch = !!(window.matchMedia && matchMedia("(pointer:coarse)").matches);
@@ -5516,8 +5982,8 @@ function profitHTML(){
   const P = statsPeriod(), ml = esc(P.inTxt), sk = f => round2(P.keys.reduce((t,k)=>t + (DF.month(k)[f] || 0), 0));
   const mm = {income: sk("income"), expense: sk("expense")}, ptM = round2(P.keys.reduce((t,k)=>t + DP.month(k).income, 0)), ckM = round2(mm.income - ptM);
   const AT = activeInPeriod(P.keys, "all");
-  const split = (p, c) => `personal ${money(p)} · check ${money(c)}`;
-  return `<h2 class="st-sec" id="pfTitle">💰 Profitti · personal + check</h2>
+  const split = (p, c) => `check ${money(c)} · personal ${money(p)}`;
+  return `<h2 class="st-sec" id="pfTitle">💰 Profitti · check + personal</h2>
   <div class="dash dashpf pf-gen" id="pfGen" aria-label="Profitti totali">
     <div class="dash-title"><span class="dt-ico" aria-hidden="true">📊</span><b>Totale</b><span>da quando hai iniziato</span></div>
     <div class="dc c-in"><b id="pfIncomeAll">${money(inAll)}</b><span>guadagni</span><small>${split(ptAll, ckAll)}</small></div>
@@ -5527,7 +5993,7 @@ function profitHTML(){
   <div class="dash dashpf pf-month" id="pfMonthDash" aria-label="Profitti del periodo scelto">
     ${periodBtnHTML("pfMonthPick")}
     <div class="dc"><b id="pfActive">${AT.act}</b><span>${AT.act === 1 ? "cliente attivo" : "clienti attivi"}</span><small>${AT.nw} ${AT.nw === 1 ? "nuovo" : "nuovi"} · ${AT.old} già ${AT.old === 1 ? "cliente" : "clienti"}</small></div>
-    <div class="dc"><b id="pfNew">${AT.nw}</b><span>${AT.nw === 1 ? "nuovo cliente" : "nuovi clienti"}</span><small>persone alla prima volta ${ml}: ${AT.br.pt} con il personal · ${AT.br.ck} con la consulenza</small></div>
+    <div class="dc"><b id="pfNew">${AT.nw}</b><span>${AT.nw === 1 ? "nuovo cliente" : "nuovi clienti"}</span><small>persone alla prima volta ${ml}: ${AT.br.ck} con la consulenza · ${AT.br.pt} con il personal</small></div>
     <div class="dc c-in"><b id="pfIncomeM">${money(mm.income)}</b><span>guadagni</span><small>${split(ptM, ckM)}</small></div>
     <div class="dc c-exp"><b id="pfExpM">${money(mm.expense || 0)}</b><span>spese</span><small>spese di gestione ${ml}</small></div>
     <div class="dc c-net"><b id="pfNetM">${money(round2(mm.income - (mm.expense || 0)))}</b><span>guadagno netto</span><small>guadagni − spese</small></div>
@@ -5541,7 +6007,7 @@ function checkStatsHTML(){
   const incAll = round2(clients.reduce((t,c)=>t + checkPaidTotal(c), 0));
   const P = statsPeriod(), inP = d => P.keys.includes((d || "").slice(0,7)), ml = esc(P.inTxt);
   const AC = activeInPeriod(P.keys, "ck");
-  const mSingle = clients.reduce((t,c)=>t + (c.check ? ckSingles(c.check).filter(e=>inP(e.date)).length : 0), 0);
+  const mSingle = clients.reduce((t,c)=>t + (c.check ? ckSingles(c.check).filter(e=>inP(e.date) && !(e.extra && !e.amount)).length : 0), 0);
   const mPkg = clients.reduce((t,c)=>t + (c.check ? [c.check.pkg, ...c.check.pkgs].filter(p=>p && p.count > 0 && inP(p.start)).length : 0), 0);
   const mInc = round2(clients.reduce((t,c)=>t + checkIncomeMonths(c).filter(([k])=>P.keys.includes(k)).reduce((s,[,v])=>s + v, 0), 0));
   const eck = expByMonth("ck"), mExp = round2(P.keys.reduce((t,k)=>t + (eck[k] || 0), 0));   // spese delle consulenze e quelle di entrambi
@@ -5640,7 +6106,7 @@ function statsHTML(){
   return h;
 }
 /* ======= Recap clienti per servizio: Personal 1 to 1 e Consulenze (chi fa entrambi compare in tutti e due) =======
-   Personal: non attivo se non rinnova (pacchetto o seduta singola) da più di 2 mesi, salvo un pacchetto ancora in corso con una seduta negli ultimi 2 mesi.
+   Personal: non attivo se non rinnova (pacchetto o seduta singola) da più di 3 mesi, salvo un pacchetto ancora in corso con una seduta negli ultimi 3 mesi.
    Consulenze: non attivo se non fa una consulenza da più di 3 mesi. */
 function monthsAgo(n){ const d = new Date(today() + "T12:00:00"); d.setMonth(d.getMonth() - n); return d.toISOString().slice(0,10); }
 function recapHTML(D, hide){
@@ -5651,13 +6117,13 @@ function recapHTML(D, hide){
     earned:(a,b)=>b.earned-a.earned,
     last:(a,b)=>(b.last||"").localeCompare(a.last||"")
   };
-  const lim2 = monthsAgo(2), lim3 = monthsAgo(3);
+  const lim3 = monthsAgo(3);
   // --- personal 1 to 1
   const pt = D.per.filter(p=>usesPt(p.c)).map(p=>{
     const c = p.c, buys = allPackages(c).filter(q=>pkgUsed(q) && isDate(q.start)).map(q=>q.start).sort();
     const lastBuy = buys.pop() || "", s = stats(c);
     const lastSes = [...(c.sessionLog || [])].map(x=>x.date).filter(isDate).sort().pop() || "";
-    const active = (lastBuy && lastBuy >= lim2) || (s.total > 0 && !s.complete && lastSes && lastSes >= lim2);
+    const active = (lastBuy && lastBuy >= lim3) || (s.total > 0 && !s.complete && lastSes && lastSes >= lim3);
     return Object.assign({}, p, {active, lastBuy});
   }).sort(sorters[sort] || sorters.renewals);
   // --- consulenze
@@ -5674,31 +6140,13 @@ function recapHTML(D, hide){
       pkgs: pks.length, done: cons.length, singles: singles.length, every: gaps.length ? Math.round(gaps.reduce((t,x)=>t + x, 0) / gaps.length) : null, typeTxt};
   }).sort(sorters[sort] || sorters.renewals);
   const nAct = list => list.filter(x=>x.active).length;
-  let h = `<section class="block stats-block hist-sec" id="recapBlock">${histHead("recap", "Recap clienti per servizio", `${pt.length} personal · ${ck.length} ${ck.length === 1 ? "consulenza" : "consulenze"}`,
+  let h = `<section class="block stats-block hist-sec" id="recapBlock">${histHead("recap", "Recap clienti per servizio", `${ck.length} ${ck.length === 1 ? "consulenza" : "consulenze"} · ${pt.length} personal`,
     `<select id="statsSort" aria-label="Ordina">
       <option value="renewals"${sort==="renewals"?" selected":""}>Chi rinnova di più</option>
       <option value="renewalsAsc"${sort==="renewalsAsc"?" selected":""}>Chi rinnova di meno</option>
       ${hide ? "" : `<option value="earned"${sort==="earned"?" selected":""}>Chi ha pagato di più</option>`}
       <option value="last"${sort==="last"?" selected":""}>Attività più recente</option>
     </select>`)}<div class="hist-body" id="hist-recap"${histOpen.recap ? "" : " hidden"}>`;
-  // personal
-  h += `<h4 class="recap-sec">🏋️ Personal 1 to 1 <small>${nAct(pt)} ${nAct(pt) === 1 ? "attivo" : "attivi"} su ${pt.length} · non attivo = non rinnova da più di 2 mesi</small></h4><div class="recap" id="recapPt">`;
-  if(!pt.length) h += `<p class="none">Nessun cliente personal.</p>`;
-  pt.forEach(p=>{
-    h += `<button class="recap-row" data-a="openSide" data-side="pt" data-id="${esc(p.c.id)}">
-      <span class="rr-top"><b>${esc(p.c.name)}</b><span class="pill ${p.active ? "on" : ""}">${p.active ? "attivo" : "non attivo"}</span></span>
-      <span class="rr-grid">
-        <span><i>Rinnovi</i>${p.renewals}</span>
-        <span><i>Pacchetto tipico</i>${p.typical ? `${pl(p.typical.sessions, "seduta", "sedute")}${hide ? "" : ` · ${eur(p.typical.price)}`}` : "—"}</span>
-        <span><i>Rinnova ogni</i>${p.every !== null ? `~${p.every} giorni` : "—"}</span>
-        <span><i>Incassato</i>${money(p.earned)}</span>
-        <span><i>Sedute fatte</i>${p.sessions}</span>
-        <span><i>Lezioni saltate</i>${p.lost}</span>
-        <span><i>Ultimo rinnovo</i>${p.lastBuy ? itDate(p.lastBuy) : "—"}</span>
-        <span><i>Ultima attività</i>${p.last ? itDate(p.last) : "—"}</span>
-      </span></button>`;
-  });
-  h += `</div>`;
   // consulenze
   h += `<h4 class="recap-sec">📋 Consulenze <small>${nAct(ck)} ${nAct(ck) === 1 ? "attivo" : "attivi"} su ${ck.length} · non attivo = nessuna consulenza da più di 3 mesi</small></h4><div class="recap" id="recapCk">`;
   if(!ck.length) h += `<p class="none">Nessun cliente con le consulenze.</p>`;
@@ -5715,6 +6163,24 @@ function recapHTML(D, hide){
         <span><i>Ultima consulenza</i>${x.last ? itDate(x.last) : "—"}</span>
       </span></button>`;
   });
+  h += `</div>`;
+  // personal
+  h += `<h4 class="recap-sec">🏋️ Personal 1 to 1 <small>${nAct(pt)} ${nAct(pt) === 1 ? "attivo" : "attivi"} su ${pt.length} · non attivo = non rinnova da più di 3 mesi</small></h4><div class="recap" id="recapPt">`;
+  if(!pt.length) h += `<p class="none">Nessun cliente personal.</p>`;
+  pt.forEach(p=>{
+    h += `<button class="recap-row" data-a="openSide" data-side="pt" data-id="${esc(p.c.id)}">
+      <span class="rr-top"><b>${esc(p.c.name)}</b><span class="pill ${p.active ? "on" : ""}">${p.active ? "attivo" : "non attivo"}</span></span>
+      <span class="rr-grid">
+        <span><i>Rinnovi</i>${p.renewals}</span>
+        <span><i>Pacchetto tipico</i>${p.typical ? `${pl(p.typical.sessions, "seduta", "sedute")}${hide ? "" : ` · ${eur(p.typical.price)}`}` : "—"}</span>
+        <span><i>Rinnova ogni</i>${p.every !== null ? `~${p.every} giorni` : "—"}</span>
+        <span><i>Incassato</i>${money(p.earned)}</span>
+        <span><i>Sedute fatte</i>${p.sessions}</span>
+        <span><i>Lezioni saltate</i>${p.lost}</span>
+        <span><i>Ultimo rinnovo</i>${p.lastBuy ? itDate(p.lastBuy) : "—"}</span>
+        <span><i>Ultima attività</i>${p.last ? itDate(p.last) : "—"}</span>
+      </span></button>`;
+  });
   h += `</div></div></section>`;
   return h;
 }
@@ -5728,16 +6194,17 @@ const SERIES = {
 const PIE_HUE = {income:[150,45], expense:[5,65], net:[200,18], sessions:[215,65]};
 const fmtSeries = (f, v) => SERIES[f].money ? money(v) : `${v} ${v === 1 ? "seduta" : "sedute"}`;
 /* istogramma dell'anno: guadagno personal, guadagno check, spese (3 voci, 3 colori, accendibili dalla legenda) */
-const BAR3 = {pt:{label:"Guadagno personal", cls:"s-pt"}, ck:{label:"Guadagno check", cls:"s-ck"}, exp:{label:"Spese", cls:"s-exp"}};
+const BAR3 = {ck:{label:"Guadagno check", cls:"s-ck"}, pt:{label:"Guadagno personal", cls:"s-pt"}, exp:{label:"Spese", cls:"s-exp"}};
 function chartsHTML(D, year, hide){
   const ks = MONTHS.map((_,i)=>`${year}-${String(i+1).padStart(2,"0")}`), DF = statsData();
   const val = (k, f) => f === "pt" ? round2(D.month(k).income) : f === "ck" ? round2(DF.month(k).income - D.month(k).income) : round2(DF.month(k).expense || 0);   // spese: tutte
   let on = Array.isArray(settings.chartSeries) ? settings.chartSeries.filter(x=>BAR3[x]) : ["pt","ck","exp"];
   if(!on.length) on = ["pt","ck","exp"];
-  let h = `<section class="block stats-block" id="chartBlock"><div class="bh"><h3>Andamento del ${year}: personal, check e spese</h3></div>`;
+  on = Object.keys(BAR3).filter(f=>on.includes(f));                       // sempre nello stesso ordine: check, personal, spese
+  let h = `<section class="block stats-block" id="chartBlock"><div class="bh"><h3>Andamento del ${year}: check, personal e spese</h3></div>`;
   if(hide){ h += `<p class="hint" id="chartHidden">Importi nascosti: tocca “👁 Mostra importi” per vedere il grafico.</p>`; }
   else {
-    const quick = [["pt","Solo personal",["pt"]],["ck","Solo check",["ck"]],["both","Entrambi",["pt","ck"]]];
+    const quick = [["ck","Solo check",["ck"]],["pt","Solo personal",["pt"]],["both","Entrambi",["pt","ck"]]];
     const cur = on.filter(x=>x !== "exp").sort().join(",");
     h += `<div class="seg small chart-quick" role="group" aria-label="Cosa vedere">` + quick.map(([id,l,v])=>`<button type="button" class="btn small ${cur === v.slice().sort().join(",") ? "primary" : "ghost"}" data-a="chartQuick" data-v="${id}">${l}</button>`).join("") + `</div>`;
     h += `<div class="legend" role="group" aria-label="Voci del grafico">` + Object.entries(BAR3).map(([f,x])=>`<label class="lg ${x.cls}"><input type="checkbox" name="chartSeries" value="${f}"${on.includes(f) ? " checked" : ""}><i></i><span>${x.label}</span></label>`).join("") + `</div>`;
