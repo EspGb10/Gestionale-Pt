@@ -17,8 +17,9 @@
 <style>
 :root{
   --chalk:#EEF1EC; --paper:#FFFFFF; --pine:#1C2B24; --moss:#2F6B4F; --moss-soft:#D7E6DC; --on-moss:#FFFFFF;
-  --folder:#E9DDBF; --folder-edge:#D4C39A; --owed:#B45309; --owed-soft:#FCEBD3;
-  --muted:#5E6B64; --line:#CFD6D0; --danger:#B42318;
+  --folder:#E9DDBF; --folder-edge:#D4C39A; --owed:#954306; --owed-soft:#FCEBD3;
+  --muted:#525E57; --line:#CFD6D0; --danger:#B42318; --on-danger:#FFFFFF;
+  color-scheme:light;                                                   /* caselle, calendari e barre del telefono nei colori giusti */
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
@@ -27,13 +28,15 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
   :root:not([data-theme="light"]){
     --chalk:#141B17; --paper:#1D2621; --pine:#E6ECE8; --moss:#6FBF93; --moss-soft:#24392D; --on-moss:#0E1C15;
     --folder:#3A3424; --folder-edge:#524A33; --owed:#F2A94B; --owed-soft:#3B2C17;
-    --muted:#9AA8A0; --line:#33403A; --danger:#F07167;
+    --muted:#9AA8A0; --line:#33403A; --danger:#F4877E; --on-danger:#1B0D0B;
+    color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --chalk:#141B17; --paper:#1D2621; --pine:#E6ECE8; --moss:#6FBF93; --moss-soft:#24392D; --on-moss:#0E1C15;
   --folder:#3A3424; --folder-edge:#524A33; --owed:#F2A94B; --owed-soft:#3B2C17;
-  --muted:#9AA8A0; --line:#33403A; --danger:#F07167;
+  --muted:#9AA8A0; --line:#33403A; --danger:#F4877E; --on-danger:#1B0D0B;
+  color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:inherit}
 html,body{margin:0}
@@ -62,7 +65,7 @@ a.btn.primary{color:var(--on-moss)}
 a.btn[hidden]{display:none}
 .btn.ghost{border-color:var(--line)}
 .btn.danger{border-color:var(--danger);color:var(--danger)}
-.btn.danger.fill{background:var(--danger);color:#fff}
+.btn.danger.fill{background:var(--danger);color:var(--on-danger)}
 .btn:hover{filter:brightness(1.08)}
 .btn[disabled]{opacity:.5;cursor:default}
 
@@ -173,15 +176,6 @@ svg.ybars .ax-r{fill:var(--c-ses);text-anchor:end}
 svg.ybars .lab{font-size:11px;fill:var(--muted);text-anchor:middle}
 svg.ybars .ses-line{fill:none;stroke:var(--c-ses);stroke-width:2}
 svg.ybars .ses-dot{fill:var(--c-ses);stroke:var(--paper);stroke-width:1.5}
-.pie-wrap{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin:8px 0}
-svg.pie{width:220px;max-width:100%;height:auto}
-svg.pie .slice{stroke:var(--paper);stroke-width:1}
-.pie-legend{flex:1;min-width:220px}
-.pie-legend ul{list-style:none;padding:0;margin:6px 0;display:grid;gap:4px}
-.pie-legend li{display:grid;grid-template-columns:14px 1fr auto 44px;gap:8px;align-items:center;font-size:.92rem}
-.pie-legend li i{width:14px;height:14px;border-radius:4px}
-.pie-legend li em{font-style:normal;color:var(--muted);text-align:right}
-.pl-tot{margin:0;font-weight:600}
 .calc-note{margin:8px 0}
 .calc-note summary{cursor:pointer;font-weight:600;color:var(--moss)}
 #docsExpW[hidden],#cKindW[hidden],#cSesW[hidden]{display:none}
@@ -195,6 +189,14 @@ svg.pie .slice{stroke:var(--paper);stroke-width:1}
 .hist-grid small{display:block;color:var(--muted);font-size:.74rem;margin-top:2px}
 .hist-grid .c-in b{color:var(--moss)}
 .single-row{flex-wrap:wrap}
+@media (max-width:560px){                                               /* telefono: data, prezzo e ✕ sulla prima riga, stato sotto */
+  .single-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;row-gap:6px}
+  .single-row > b{grid-column:1;grid-row:1}
+  .single-row > span:not(.miss-st){grid-column:2;grid-row:1}
+  .single-row > .x{grid-column:3;grid-row:1}
+  .single-row > .miss-st{grid-column:1;grid-row:2;justify-self:start;margin:0}
+  .single-row > .btn{grid-column:2 / 4;grid-row:2;justify-self:end;margin:0}
+}
 .single-row.paid{border-left-color:var(--moss)}
 .miss-st.ok{background:var(--moss-soft);color:var(--moss);border-color:var(--moss)}
 .hist-h{align-items:center}
@@ -528,6 +530,35 @@ header.top.has-logout .title-row{padding-right:82px}            /* spazio per �
 .yearnav{display:flex;align-items:center;gap:12px;margin:6px 0 4px}
 .yearnav b{font-size:1.1rem;min-width:3.5em;text-align:center}
 .chart-wrap{overflow-x:auto;margin-top:6px}
+.chart-swipe{display:none}
+.dk-list{display:grid;gap:10px;margin-top:8px}
+.dk-row{border:1px solid var(--line);border-left:4px solid var(--owed);border-radius:10px;padding:10px 12px;background:var(--paper)}
+.dk-row p{margin:0 0 4px}
+.dk-row .dk-d{font-size:1.05rem}
+.dk-row .dk-now{text-decoration:line-through;color:var(--muted)}
+.dk-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.dk-btns .btn{margin:0}
+/* campi data in gg/mm/aaaa anche con il dispositivo in inglese (vedi DATE_FIX) */
+.dwrap{position:relative;display:block}
+.dshow{position:absolute;left:0;top:0;bottom:0;display:flex;align-items:center;pointer-events:none;color:var(--pine);white-space:nowrap}
+.dshow.dshow-empty{color:var(--muted);font-weight:400 !important}
+html.dfix input[type="date"],html.dfix input[type="date"]::-webkit-datetime-edit,html.dfix input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+html.dfix input[type="date"]::-webkit-datetime-edit-text,html.dfix input[type="date"]::-webkit-datetime-edit-day-field,
+html.dfix input[type="date"]::-webkit-datetime-edit-month-field,html.dfix input[type="date"]::-webkit-datetime-edit-year-field{color:transparent;background:transparent}
+@media (max-width:700px){ .chart-swipe{display:block;margin:4px 0 0} }
+table.exp-pays td small.exp-note{display:block;color:var(--muted);font-size:.85rem}
+@media (max-width:560px){                       /* telefono: rate e pagamenti delle spese a righe, senza far scorrere la tabella */
+  table.pay-t thead,table.exp-pays thead{display:none}
+  table.pay-t,table.pay-t tbody,table.exp-pays,table.exp-pays tbody{display:block;width:100%}
+  table.pay-t tr,table.exp-pays tr{display:grid;grid-template-columns:auto 1fr auto;column-gap:12px;align-items:center;border-bottom:1px solid var(--line);padding:4px 0}
+  table.pay-t td,table.exp-pays td{border:none;padding:2px 0;min-width:0}
+  table.pay-t td.date,table.exp-pays td.date{grid-column:1;grid-row:1}
+  table.pay-t td.num,table.exp-pays td.num{grid-column:2;grid-row:1;text-align:left;font-weight:700}
+  table.pay-t td.act,table.exp-pays td.act{grid-column:3;grid-row:1 / span 2;position:static;box-shadow:none;background:none;width:auto}
+  table.pay-t td:nth-child(3),table.pay-t td:nth-child(4),table.exp-pays td:nth-child(2){grid-column:1 / 3;color:var(--muted);font-size:.9rem;overflow-wrap:anywhere}
+  table.exp-pays td:nth-child(2){color:var(--pine);font-size:.95rem}
+  table.pay-t td:empty{display:none}
+}
 svg.bars{width:100%;min-width:320px;height:auto;display:block}
 svg.bars .bar{fill:var(--moss);opacity:.85}
 svg.bars .bar.hi{fill:var(--owed);opacity:1}
@@ -645,6 +676,35 @@ details.pkg summary .pt::before{content:"▸ ";color:var(--moss)}
 details.pkg[open] summary .pt::before{content:"▾ "}
 details.pkg summary .ps{font-size:.88rem;color:var(--muted)}
 details.pkg .ok{color:var(--moss)} details.pkg .due{color:var(--owed)}
+.pkg-kv{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:2px 0 4px}
+.pkg-kv dt{color:var(--muted);font-size:.9rem}
+.pkg-kv dd{margin:0;overflow-wrap:anywhere}
+.ses-sub{margin:-4px 0 10px}
+.ses-list{border-top:1px solid var(--line)}
+.ses-row{display:grid;grid-template-columns:2.2em auto 1fr auto auto;align-items:center;gap:4px 10px;padding:6px 0;border-bottom:1px solid var(--line)}
+.ses-row .n{color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.ses-row .d{font-weight:700;white-space:nowrap}
+.ses-row .nt{min-width:0;overflow-wrap:anywhere}
+.ses-row .btn.small{margin:0;white-space:nowrap}
+@media (max-width:560px){
+  .ses-row{grid-template-columns:2.2em 1fr auto auto}
+  .ses-row .nt{grid-column:2 / -1;grid-row:2;color:var(--muted);font-size:.92rem}
+  .ses-row .nt:empty{display:none}
+}
+@media (max-width:370px){
+  .ses-row{grid-template-columns:1.8em minmax(0,1fr) auto}
+  .ses-row .btn.small{grid-column:2;grid-row:2;justify-self:start}
+  .ses-row .x{grid-column:3;grid-row:1}
+  .ses-row .nt{grid-column:2 / -1;grid-row:3}
+}
+.bp-actions{display:grid;grid-template-columns:auto 1fr 1fr;gap:8px;margin-top:18px}
+.bp-actions .btn{white-space:normal;line-height:1.25;min-height:48px;margin:0}
+@media (max-width:560px){
+  .bp-actions{grid-template-columns:auto 1fr}
+  .bp-actions #bpFile{grid-column:1 / -1;grid-row:1}
+}
+.sd-list{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center;margin-top:10px}
+.sd-list label{margin:0}
 .pkg-body{padding:0 14px 14px}
 .pkg-body .lbl{font-weight:700;margin:10px 0 4px;font-size:.9rem}
 .pkg-body .btn{margin-top:12px}
@@ -1012,6 +1072,9 @@ dialog p.hint.warn-hint{background:var(--owed-soft);color:var(--pine);border-rad
   <label class="check carry"><input type="checkbox" id="dataStats" checked><span>Includi le statistiche (un file leggibile con andamento, mesi e recap clienti)</span></label>
   <p class="hint" id="dataHint"></p>
   <div class="data-row"><button class="btn primary" value="export" id="dataExportBtn">Esporta dati</button></div>
+  <h4>Controllo date</h4>
+  <p class="hint">Cerca le date che potrebbero avere giorno e mese scambiati (es. 10 marzo al posto di 3 ottobre): decidi tu, una per una.</p>
+  <div class="data-row"><button class="btn" value="dates" id="dataDatesBtn" formnovalidate>📅 Controlla le date</button></div>
   <h4>Importa</h4>
   <p class="hint">Scegli un file creato con “Esporta dati” (ZIP o .json). Il gestionale riconosce da solo se contiene anche i clienti: in quel caso ti chiede se aggiungerli o sostituire quelli attuali.</p>
   <div class="data-row"><button type="button" class="btn" id="dataImportBtn">Importa dati</button></div>
@@ -1020,6 +1083,13 @@ dialog p.hint.warn-hint{background:var(--owed-soft);color:var(--pine);border-rad
     <p class="hint">I dati sono nel database e si sincronizzano su tutti i dispositivi dove hai fatto l'accesso.</p>
     <div class="data-row"><button type="button" class="btn ghost danger" id="dataLogout">Esci da questo dispositivo</button></div>
   </div>
+  <div class="dlg-actions"><button class="btn ghost" value="cancel" formnovalidate>Chiudi</button></div>
+</form></dialog>
+
+<dialog id="dlgDates"><form method="dialog">
+  <h3>📅 Controllo date</h3>
+  <p class="hint" id="dkText"></p>
+  <div id="dkList" class="dk-list"></div>
   <div class="dlg-actions"><button class="btn ghost" value="cancel" formnovalidate>Chiudi</button></div>
 </form></dialog>
 
@@ -1147,6 +1217,25 @@ dialog p.hint.warn-hint{background:var(--owed-soft);color:var(--pine);border-rad
   </div>
 </form></dialog>
 
+<dialog id="dlgBeforePkg"><form method="dialog">
+  <h3 id="bpTitle">Prima del nuovo pacchetto</h3>
+  <p id="bpText" style="white-space:pre-line"></p>
+  <div class="bp-actions">
+    <button class="btn ghost" value="cancel" id="bpCancel">Annulla</button>
+    <button class="btn" value="no" id="bpNo">No, crea subito il nuovo pacchetto</button>
+    <button class="btn primary" value="file" id="bpFile">Sì, crea prima il file (PDF o Word)</button>
+  </div>
+</form></dialog>
+<dialog id="dlgSesDates"><form method="dialog" id="fSesDates">
+  <h3 id="sdTitle">Date delle sedute già fatte</h3>
+  <p class="hint" id="sdText"></p>
+  <div id="sdList" class="sd-list"></div>
+  <p class="err" id="sdErr" role="alert"></p>
+  <div class="dlg-actions">
+    <button class="btn ghost" value="cancel" formnovalidate>Indietro</button>
+    <button class="btn primary" value="ok" id="sdOk">Salva le date</button>
+  </div>
+</form></dialog>
 <dialog id="dlgMsg"><form method="dialog">
   <h3 id="msgTitle"></h3>
   <p id="msgText"></p>
@@ -1231,14 +1320,24 @@ function normMisses(list){
     id: x.id || uid(), date: /^\d{4}-\d{2}-\d{2}$/.test(x.date||"") ? x.date : "", note: String(x.note || ""), status: "lost" }));
 }
 const missCount = (c, st) => (c.missLog || []).filter(x=>x.status === st).length;
+/* Di un pacchetto concluso restano inizio, fine, sedute fatte, costo e pagamenti. Le date delle singole sedute si tengono solo
+   per il pacchetto attivo: qui vengono tolte (se manca la data di fine, prima prendo quella dell'ultima seduta).
+   Le sedute singole invece tengono sempre la loro data. */
 function normPackage(p){
   const D = v => /^\d{4}-\d{2}-\d{2}$/.test(v||"") ? v : "";
-  return { id: p.id || uid(), start: D(p.start), end: D(p.end),
+  const single = !!p.single || Number(p.totalSessions) === 1;
+  const ses = Array.isArray(p.sessionLog) ? p.sessionLog : [], miss = normMisses(p.missLog);
+  let end = D(p.end);
+  if(!single){                                                             // la fine non può essere prima dell'ultima seduta
+    const last = l => l.map(x=>D(x && x.date)).filter(Boolean).sort().pop() || "", lastSes = last(ses);
+    if(!end) end = last([...ses, ...miss]); else if(lastSes > end) end = lastSes;
+  }
+  return { id: p.id || uid(), start: D(p.start), end,
     totalSessions: Number(p.totalSessions)||0, doneSessions: Number(p.doneSessions)||0,
     price: Number(p.price)||0, paid: Number(p.paid)||0,
     carriedIn: round2(Number(p.carriedIn)||0), carriedOut: round2(Number(p.carriedOut)||0),
-    sessionLog: Array.isArray(p.sessionLog) ? p.sessionLog : [], payLog: Array.isArray(p.payLog) ? p.payLog : [],
-    missLog: normMisses(p.missLog), single: !!p.single };
+    sessionLog: single ? ses : [], payLog: Array.isArray(p.payLog) ? p.payLog : [],
+    missLog: miss, single: !!p.single };
 }
 /* ===================== CHECK (consulenze) =====================
    check = { on, notes,
@@ -1339,7 +1438,8 @@ const PT_IDLE_MONTHS = 5;
 function ptLastDate(c){
   const ds = [], ok = d => /^\d{4}-\d{2}-\d{2}$/.test(d || "");
   const take = o => { (o.sessionLog || []).forEach(x=>ds.push(x.date)); (o.missLog || []).forEach(x=>ds.push(x.date)); ds.push(o.start); };
-  take(c); (c.packages || []).forEach(take); ds.push(c.closed, c.ptOnAt);
+  take(c); (c.packages || []).forEach(p=>{ take(p); ds.push(p.end); });   // dei pacchetti conclusi non ci sono più le date delle sedute: vale la data di fine
+  ds.push(c.closed, c.ptOnAt);
   return ds.filter(ok).sort().pop() || "";
 }
 function ptIdleSince(c){                                                   // "" = attivo; altrimenti il giorno da cui risulta non attivo
@@ -1467,7 +1567,7 @@ const SHARE_PT = [
   {k:"sedute",           label:"Sedute fatte, mancanti e totali del pacchetto", base:true},
   {k:"pagamenti",        label:"Costo del pacchetto, pagato e da saldare",      base:true},
   {k:"costoSeduta",      label:"Costo a seduta"},
-  {k:"storicoSedute",    label:"Storico sedute con le date"},
+  {k:"storicoSedute",    label:"Storico sedute del pacchetto attivo, con le date"},
   {k:"noteSedute",       label:"Note di ogni seduta (cosa avete fatto)", sub:"storicoSedute"},
   {k:"lezioniSaltate",   label:"Lezioni saltate"},
   {k:"storicoPagamenti", label:"Storico pagamenti (rate)"},
@@ -1499,8 +1599,9 @@ function shareAvail(c){
   return {ck, pt};
 }
 /* un servizio si può inviare se ha almeno una voce disponibile; il personal anche solo se è attivo (regola dei 5 mesi) */
+let shareForcePt = false;                                                   // aperta da “Nuovo pacchetto”: il personal si può sempre salvare
 function shareSvc(c){
-  const a = shareAvail(c), ckAny = Object.values(a.ck).some(Boolean), ptAny = Object.values(a.pt).some(Boolean), idle = ptIdleSince(c);
+  const a = shareAvail(c), ckAny = Object.values(a.ck).some(Boolean), ptAny = Object.values(a.pt).some(Boolean), idle = shareForcePt ? "" : ptIdleSince(c);
   return { ck: ckAny, pt: ptAny && !idle, idle,
     ckWhy: ckAny ? "" : "Questo cliente non ha ancora dati del Check.",
     ptWhy: !ptAny ? "Questo cliente non ha ancora dati del Personal 1 to 1."
@@ -1642,7 +1743,7 @@ function docxFullBody(c, what){
   b += dHeading("Dati cliente e allenamento");
   b += dKv([["Telefono", c.phone], ["Email", c.email], ["Volte a settimana", c.freq===""?"":String(c.freq)],
             ["Giorni di allenamento", c.days.join(", ")], ["Allenamento", c.training], ["Note", c.notes]]);
-  b += dHeading("Storico sedute") + dSessions(c, true);
+  b += dHeading("Storico sedute del pacchetto attivo") + dSessions(c, true);
   if((c.missLog || []).length) b += dHeading("Lezioni saltate") + dMisses(c);
   b += dHeading("Storico pagamenti") + dPayments(c);
   b += dPackages(c, {pay:true, sessions:true, notes:true, payments:true});
@@ -1681,7 +1782,7 @@ function sharePtSections(c, inc){
   if(tr.length) out.push({t:"h", title:"Il tuo allenamento"}, {t:"kv", rows:tr});
   if(on("storicoSedute")){
     const list = [...c.sessionLog].sort(byDateAsc), notes = on("noteSedute");
-    out.push({t:"h", title:"Storico sedute"}, {t:"table",
+    out.push({t:"h", title:"Storico sedute del pacchetto attivo"}, {t:"table",
       cols: notes ? [{t:"N°", f:.08, muted:true}, {t:"Data", f:.18}, {t:"Note seduta", f:.74}] : [{t:"N°", f:.08, muted:true}, {t:"Data", f:.92}],
       rows: list.map((x,i)=>notes ? [String(i+1), itDate(x.date), x.note || "—"] : [String(i+1), itDate(x.date)])});
   }
@@ -2056,7 +2157,7 @@ function buildPdf(c, jsPDF, what){
     K.heading("Dati cliente e allenamento");
     K.kv([["Telefono", c.phone], ["Email", c.email], ["Volte a settimana", c.freq===""?"":String(c.freq)],
           ["Giorni di allenamento", c.days.join(", ")], ["Allenamento", c.training], ["Note", c.notes]]);
-    K.heading("Storico sedute"); K.sessions(c, true);
+    K.heading("Storico sedute del pacchetto attivo"); K.sessions(c, true);
     if((c.missLog || []).length){ K.heading("Lezioni saltate"); K.misses(c); }
     K.heading("Storico pagamenti"); K.payments(c);
     K.packages(c, {pay:true, sessions:true, notes:true, payments:true});
@@ -2187,12 +2288,141 @@ const sleep = ms => new Promise(r=>setTimeout(r, ms));
 const fmtIn = n => String(Number(n)||0).replace(".", ",");
 const toInt = v => { const n = parseInt(String(v||"").replace(/\D/g,""), 10); return isNaN(n) ? 0 : n; };
 
+/* ======================= CAMPI DATA: SEMPRE IN ITALIANO, GIORNO MESE ANNO =======================
+   Il campo data del browser scrive la data nella lingua del dispositivo (con il telefono o il computer in inglese
+   verrebbe mm/dd/yyyy). La data del browser viene nascosta e al suo posto si vede sempre quella in italiano,
+   es. “8 ott 2026”; toccando il campo si apre il calendario. Il valore salvato non cambia (aaaa-mm-gg). */
+const DATE_FIX = window.__dateFix === undefined ? true : !!window.__dateFix;       // (spegnibile solo nelle prove)
+const MESI3 = ["gen","feb","mar","apr","mag","giu","lug","ago","set","ott","nov","dic"];
+const itDateLong = iso => { if(!/^\d{4}-\d{2}-\d{2}$/.test(iso || "")) return ""; const [y,m,d] = iso.split("-"); return `${Number(d)} ${MESI3[Number(m) - 1]} ${y}`; };
+function dshowSync(inp){
+  const sh = inp._dshow; if(!sh) return;
+  const v = inp.value, cs = getComputedStyle(inp);
+  sh.textContent = itDateLong(v) || "scegli la data";
+  sh.classList.toggle("dshow-empty", !itDateLong(v));
+  sh.style.fontFamily = cs.fontFamily; sh.style.fontSize = cs.fontSize; sh.style.fontWeight = cs.fontWeight; sh.style.letterSpacing = cs.letterSpacing;
+  sh.style.paddingLeft = (parseFloat(cs.paddingLeft) + parseFloat(cs.borderLeftWidth)) + "px";
+}
+function dshowAdd(inp){
+  if(inp._dshow || inp.type !== "date") return;
+  const w = document.createElement("span"); w.className = "dwrap";
+  inp.parentNode.insertBefore(w, inp); w.appendChild(inp);
+  const sh = document.createElement("span"); sh.className = "dshow"; sh.setAttribute("aria-hidden", "true"); w.appendChild(sh);
+  inp._dshow = sh; dshowSync(inp);
+}
+const dshowScan = root => { if(root && root.querySelectorAll) root.querySelectorAll('input[type="date"]').forEach(dshowAdd); };
+if(DATE_FIX){
+  document.documentElement.classList.add("dfix");
+  const VD = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
+  Object.defineProperty(HTMLInputElement.prototype, "value", {configurable:true, enumerable:VD.enumerable,
+    get(){ return VD.get.call(this); }, set(v){ VD.set.call(this, v); if(this._dshow) dshowSync(this); }});
+  ["input","change"].forEach(ev=>document.addEventListener(ev, e=>{ if(e.target && e.target._dshow) dshowSync(e.target); }, true));
+  /* niente digitazione nell'ordine mese/giorno: un tasto (o un tocco) apre il calendario; Canc/← cancellano la data */
+  document.addEventListener("keydown", e=>{
+    const t = e.target; if(!t || !t._dshow) return;
+    if(["Tab","Shift","Escape","Enter"].includes(e.key) || e.ctrlKey || e.metaKey || e.altKey) return;
+    e.preventDefault();
+    if(e.key === "Backspace" || e.key === "Delete"){ t.value = ""; t.dispatchEvent(new Event("input", {bubbles:true})); t.dispatchEvent(new Event("change", {bubbles:true})); return; }
+    try{ t.showPicker(); }catch(_){}
+  }, true);
+  document.addEventListener("click", e=>{ const t = e.target; if(t && t._dshow && matchMedia("(pointer: fine)").matches){ try{ t.showPicker(); }catch(_){} } }, true);
+  dshowScan(document);
+  new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(n=>{ if(n.nodeType !== 1) return; if(n.matches && n.matches('input[type="date"]')) dshowAdd(n); else dshowScan(n); })))
+    .observe(document.body, {childList:true, subtree:true});
+  window.addEventListener("resize", ()=>document.querySelectorAll('input[type="date"]').forEach(dshowSync));
+}
+
+/* ======================= CONTROLLO DATE =======================
+   Cerca le date che sembrano inserite al contrario (mese/giorno invece di giorno/mese): il giorno è al massimo 12
+   e scambiando giorno e mese la data diventa sensata (non nel futuro, non prima dell'inizio del pacchetto, ecc.).
+   Non cambia niente da solo: per ogni data scegli “Scambia giorno e mese” oppure “Va bene così” (non te la richiede più). */
+const swapDM = iso => `${iso.slice(0,4)}-${iso.slice(8,10)}-${iso.slice(5,7)}`;
+const canSwap = iso => /^\d{4}-\d{2}-\d{2}$/.test(iso || "") && Number(iso.slice(8,10)) <= 12 && iso.slice(5,7) !== iso.slice(8,10);
+function dateIssues(){
+  const out = [], T = today(), ok = new Set(Array.isArray(settings.dateOk) ? settings.dateOk : []);
+  const fut = x => x > T, D = itDate;
+  const add = (cid, who, what, paths, iso, bad) => {                    // bad(data) → motivo se la data è sospetta, altrimenti ""
+    if(!canSwap(iso)) return; const why = bad(iso); if(!why || bad(swapDM(iso))) return;
+    const key = `${cid}|${paths[0].join(".")}|${iso}`; if(ok.has(key)) return;
+    out.push({cid, who, what, paths, iso, to: swapDM(iso), why, key});
+  };
+  const nf = x => fut(x) ? "è nel futuro" : "";
+  const ff = (x, ref, txt) => fut(x) ? "è nel futuro" : (/^\d{4}-\d{2}-\d{2}$/.test(ref || "") && x < ref ? `${txt} (${D(ref)})` : "");
+  clients.forEach(c=>{
+    const who = c.name, sesD = c.sessionLog.map(x=>x.date).filter(isDate);
+    /* l'inizio del pacchetto è sospetto se è nel futuro o se la maggior parte delle sedute viene prima (una sola seduta sbagliata non basta) */
+    const most = (ds, x) => ds.length > 0 && ds.filter(d=>d < x).length * 2 > ds.length;
+    // personal: pacchetto attivo
+    if(c.start) add(c.id, who, "Inizio del pacchetto personal", [["start"]], c.start, x=>fut(x) ? "è nel futuro" : (most(sesD, x) ? "la maggior parte delle sedute viene prima di questa data" : ""));
+    c.sessionLog.forEach((x,i)=>add(c.id, who, "Seduta del pacchetto attivo", [["sessionLog",i,"date"]], x.date, y=>ff(y, c.start, "è prima dell'inizio del pacchetto")));
+    c.missLog.forEach((x,i)=>add(c.id, who, "Lezione saltata", [["missLog",i,"date"]], x.date, y=>ff(y, c.start, "è prima dell'inizio del pacchetto")));
+    c.payLog.forEach((x,i)=>add(c.id, who, "Rata del pacchetto personal", [["payLog",i,"date"]], x.date, nf));
+    // personal: pacchetti conclusi e sedute singole
+    c.packages.forEach((p,j)=>{
+      if(isSingle(p)){
+        const paths = [["packages",j,"start"]]; if(p.end === p.start) paths.push(["packages",j,"end"]);
+        (p.sessionLog || []).forEach((x,i)=>{ if(x.date === p.start) paths.push(["packages",j,"sessionLog",i,"date"]); });
+        (p.payLog || []).forEach((x,i)=>{ if(x.date === p.start) paths.push(["packages",j,"payLog",i,"date"]); });
+        add(c.id, who, "Seduta singola", paths, p.start, nf); return;
+      }
+      if(p.start) add(c.id, who, "Inizio di un pacchetto personal concluso", [["packages",j,"start"]], p.start, x=>fut(x) ? "è nel futuro" : (isDate(p.end) && x > p.end ? `è dopo la fine del pacchetto (${D(p.end)})` : ""));
+      if(p.end) add(c.id, who, "Fine di un pacchetto personal concluso", [["packages",j,"end"]], p.end, x=>ff(x, p.start, "è prima dell'inizio del pacchetto"));
+      (p.payLog || []).forEach((x,i)=>add(c.id, who, "Rata di un pacchetto personal concluso", [["packages",j,"payLog",i,"date"]], x.date, nf));
+    });
+    // check (consulenze)
+    const k = c.check; if(!k) return;
+    const pk = id => (k.pkg && k.pkg.id === id) ? k.pkg : (k.pkgs || []).find(q=>q.id === id);
+    if(k.pkg && k.pkg.start){ const cd = k.log.filter(e=>e.kind === "pkg" && e.pkgId === k.pkg.id).map(e=>e.date).filter(isDate);
+      add(c.id, who, "Inizio del pacchetto di consulenze", [["check","pkg","start"]], k.pkg.start, x=>fut(x) ? "è nel futuro" : (most(cd, x) ? "la maggior parte delle consulenze viene prima di questa data" : "")); }
+    if(k.pkg) (k.pkg.payLog || []).forEach((x,i)=>add(c.id, who, "Rata del pacchetto di consulenze", [["check","pkg","payLog",i,"date"]], x.date, nf));
+    (k.pkgs || []).forEach((p,j)=>{
+      if(p.start) add(c.id, who, "Inizio di un pacchetto di consulenze concluso", [["check","pkgs",j,"start"]], p.start, x=>fut(x) ? "è nel futuro" : (isDate(p.end) && x > p.end ? `è dopo la fine del pacchetto (${D(p.end)})` : ""));
+      if(p.end) add(c.id, who, "Fine di un pacchetto di consulenze concluso", [["check","pkgs",j,"end"]], p.end, x=>ff(x, p.start, "è prima dell'inizio del pacchetto"));
+      (p.payLog || []).forEach((x,i)=>add(c.id, who, "Rata di un pacchetto di consulenze concluso", [["check","pkgs",j,"payLog",i,"date"]], x.date, nf));
+    });
+    (k.log || []).forEach((e,i)=>{ const p = e.kind === "pkg" ? pk(e.pkgId) : null;
+      add(c.id, who, e.kind === "pkg" ? "Consulenza del pacchetto" : e.kind === "single" ? (e.extra ? "Consulenza extra" : "Consulenza singola") : "Nota / peso / programma (diario)",
+        [["check","log",i,"date"]], e.date, x=>p ? ff(x, p.start, "è prima dell'inizio del suo pacchetto") : nf(x)); });
+    (k.weights || []).forEach((w,i)=>add(c.id, who, "Peso", [["check","weights",i,"date"]], w.date, nf));
+  });
+  expData().pays.forEach((p,i)=>add("__exp", "Spese di gestione", "Pagamento di una spesa", [["expenses","pays",i,"date"]], p.date, nf));
+  return out;
+}
+function applyDateSwap(it){
+  const setAt = (obj, path) => { let o = obj; for(let i = 0; i < path.length - 1; i++){ o = o && o[path[i]]; } const f = path[path.length - 1];
+    if(o && o[f] === it.iso) o[f] = it.to; };
+  if(it.cid === "__exp"){ const st = clone(settings); it.paths.forEach(pt=>setAt(st, pt)); settings.expenses = st.expenses; saveSettings(); return true; }
+  const cur = getClient(it.cid); if(!cur) return false;
+  const n = clone(cur); it.paths.forEach(pt=>setAt(n, pt));
+  if(n.check) n.check = normCheck(n.check);
+  commit(n, true); return true;
+}
+let dkItems = [];
+function drawDateCheck(){
+  dkItems = dateIssues();
+  $("dkText").textContent = dkItems.length
+    ? `${dkItems.length === 1 ? "Ho trovato 1 data" : `Ho trovato ${dkItems.length} date`} che potrebbero avere giorno e mese scambiati. Per ognuna scegli tu: “Scambia giorno e mese” la corregge (e l'ordine delle date si sistema da solo), “Va bene così” la lascia com'è e non te la chiede più.`
+    : "Nessuna data sospetta: le date sembrano tutte giuste ✓";
+  $("dkList").innerHTML = dkItems.map((it,i)=>`<div class="dk-row"><p><b>${esc(it.who)}</b> · ${esc(it.what)}</p>
+    <p class="dk-d"><span class="dk-now">${itDateLong(it.iso)}</span> → <b>${itDateLong(it.to)}</b>?</p>
+    <p class="hint">Adesso è il ${itDate(it.iso)}: ${esc(it.why)}. Scambiando giorno e mese diventa il ${itDate(it.to)}.</p>
+    <div class="dk-btns"><button type="button" class="btn small primary" data-dk="swap" data-i="${i}">Scambia giorno e mese</button><button type="button" class="btn small" data-dk="ok" data-i="${i}">Va bene così</button></div></div>`).join("");
+}
+async function dateCheck(){ drawDateCheck(); await ask("dlgDates"); render(); }
+$("dkList").addEventListener("click", e=>{
+  const b = e.target.closest("button[data-dk]"); if(!b) return;
+  const it = dkItems[Number(b.dataset.i)]; if(!it) return;
+  if(b.dataset.dk === "swap"){ if(applyDateSwap(it)) toast(`Data corretta: ${itDateLong(it.to)}`); }
+  else { settings.dateOk = [...(Array.isArray(settings.dateOk) ? settings.dateOk : []), it.key]; saveSettings(); }
+  drawDateCheck();
+});
+
 /* ======================= SALVATAGGIO ======================= */
-/* Online (pagina privata): i dati stanno nel tuo account, in uno spazio privato.
-   File HTML: i dati stanno nel browser (localStorage). */
+/* Su Vercel: i dati stanno nel database (modalità "sync", con copia sul dispositivo per lavorare anche offline).
+   File HTML aperto dal computer (o sito senza server): i dati stanno nel browser (localStorage). */
 const store = {
-  mode: "local",   // "cloud" | "local"
-  col: null, downloads: null,
+  mode: "local",   // "sync" | "sync-login" | "sync-setup" | "local"
+  col: null,
   pending: new Map(),   // id -> {timer, writing, ver, savedVer}
   dirty: new Map(),     // id -> cliente non ancora confermato dal server
   deleting: new Set(),
@@ -2478,23 +2708,7 @@ async function syncLogout(){
 }
 
 async function initStore(){
-  let db = null, user = null, uidv = null;
-  if(window.claude && typeof window.claude.use === "function"){
-    try{
-      [db, user, store.downloads] = await Promise.all([
-        window.claude.use("db"), window.claude.use("user"), window.claude.use("downloads")
-      ]);
-      if(db && user) uidv = await user.id();
-    }catch(e){ console.warn(e); db = null; }
-  }
-  if(db && uidv){
-    store.mode = "cloud";
-    store.col = db.collection("data/users/" + uidv);
-    store.col.onSnapshot(applySnapshot, err=>{
-      console.error(err);
-      setStatus("error", "Connessione interrotta. Ricarica la pagina per vedere i dati aggiornati.");
-    });
-  } else if(!(await detectSync())) {
+  if(!(await detectSync())) {
     store.mode = "local";
     loadLocalSettings();
     clients = loadLocal(); loaded = true; render();
@@ -2591,7 +2805,7 @@ function statusText(){
     return "Dati sincronizzati su tutti i tuoi dispositivi";
   }
   if(store.status === "saving") return "Salvataggio in corso…";
-  return store.mode === "cloud" ? "Dati salvati nel tuo account" : "Dati salvati in questo browser";
+  return "Dati salvati in questo browser";
 }
 function setStatus(s, msg){
   store.status = s; if(msg) store.lastError = msg;
@@ -3402,19 +3616,14 @@ function detailHTML(c){
   const hasPast = c.packages.length > 0;
   h += historyHTML(c) + singlesHTML(c);
   h += missHTML(c, hasPast);
-  h += `<section class="block"><div class="bh"><h3>Storico sedute${hasPast ? " del pacchetto in corso" : ""}</h3><button class="btn small" data-a="addSes">+ Seduta</button></div>`;
-  if(!c.sessionLog.length) h += `<p class="none">Qui compaiono le sedute segnate con il pulsante “Segna seduta”, con data e note.</p>`;
-  else {
-    h += `<div class="scroll"><table><thead><tr><th>Data</th><th>Note</th><th><span hidden>Azioni</span></th></tr></thead><tbody>`;
-    [...c.sessionLog].sort(byDate).forEach(x=>{ h += `<tr><td class="date">${itDate(x.date)}</td><td>${esc(x.note)}</td><td class="act">${rowBtns("Ses", x, "", `seduta del ${itDate(x.date)}`)}</td></tr>`; });
-    h += `</tbody></table></div>`;
-  }
+  h += sesBlockHTML(c);
+
   h += `</section>`;
 
   h += `<section class="block hist-sec" id="histPay">${histHead("pay", "Storico rate del cliente", hasPast ? "pacchetto in corso" : "", `<button class="btn small" data-a="addPay">+ Rata</button>`)}<div class="hist-body"${histOpen.pay ? "" : " hidden"}>`;
   if(!c.payLog.length) h += `<p class="none">Qui compaiono le rate aggiunte con il pulsante “Aggiungi rata”.</p>`;
   else {
-    h += `<div class="scroll"><table><thead><tr><th>Data</th><th class="num">Importo</th><th>Metodo</th><th>Note</th><th><span hidden>Azioni</span></th></tr></thead><tbody>`;
+    h += `<div class="scroll"><table class="pay-t"><thead><tr><th>Data</th><th class="num">Importo</th><th>Metodo</th><th>Note</th><th><span hidden>Azioni</span></th></tr></thead><tbody>`;
     [...c.payLog].sort(byDate).forEach(x=>{ h += `<tr><td class="date">${itDate(x.date)}</td><td class="num">${eur(x.amount)}</td><td>${esc(x.method)}</td><td>${esc(x.note)}</td><td class="act">${rowBtns("Pay", x, "", `pagamento del ${itDate(x.date)}`)}</td></tr>`; });
     h += `</tbody></table></div>`;
   }
@@ -3500,19 +3709,62 @@ function packagesHTML(c){
     const pc = pkgClient(c, p), s = stats(pc);
     h += `<details class="pkg" data-pkg="${esc(p.id)}"${openPkgs.has(p.id) ? " open" : ""}><summary><span class="pt">${esc(pkgTitle(p))}</span>
       <span class="ps">${s.done} su ${s.total}${s.lost ? ` · ${s.lost} ${s.lost === 1 ? "saltata" : "saltate"}` : ""}${s.complete ? " · <b class=\"ok\">completato</b>" : ""} · pagato ${eur(s.paid)} su ${eur(s.price)}${s.total > 0 ? ` · ${eur(perSession(p.price - (p.carriedIn||0), s.total))}/seduta` : ""}${s.due > 0 ? ` · <b class="due">da saldare ${eur(s.due)}</b>` : ""}${s.carriedOut ? " · saldo spostato nel pacchetto dopo" : ""}</span></summary><div class="pkg-body">`;
-    if(pc.sessionLog.length){
-      h += `<p class="lbl">Sedute</p><div class="scroll"><table><tbody>`;
-      [...pc.sessionLog].sort(byDateAsc).forEach((x,i)=>{ h += `<tr><td class="num">${i+1}</td><td class="date">${itDate(x.date)}</td><td>${esc(x.note)}</td><td class="act">${rowBtns("Ses", x, p.id, `seduta del ${itDate(x.date)}`)}</td></tr>`; });
-      h += `</tbody></table></div>`;
-    } else h += `<p class="none">Nessuna seduta registrata con la data.</p>`;
+    const kv = [["Inizio", p.start ? itDate(p.start) : "—"], ["Fine", p.end ? itDate(p.end) : "—"], ["Sedute fatte", `${s.done} su ${s.total}`]];
+    if(s.lost) kv.push(["Lezioni saltate", String(s.lost)]);
+    if(s.total > 0) kv.push(["Pacchetto", s.complete ? `<b class="ok">completato</b>` : `non completato (${s.left === 1 ? "mancava 1 seduta" : `mancavano ${s.left} sedute`})`]);
+    kv.push(["Costo", eur(s.price)], ["Pagato", eur(s.paid)]);
+    if(s.carriedOut) kv.push(["Saldo spostato", `${s.carriedOut > 0 ? eur(s.carriedOut) : `credito di ${eur(-s.carriedOut)}`} nel pacchetto dopo`]);
+    if(s.due > 0.004) kv.push(["Da saldare", `<b class="due">${eur(s.due)}</b>`]);
+    else if(s.due < -0.004) kv.push(["Credito del cliente", eur(-s.due)]);
+    else if(s.price > 0) kv.push(["Da saldare", s.carriedOut > 0 ? eur(0) : `<b class="ok">${eur(0)} · saldato</b>`]);
+    h += `<dl class="pkg-kv">${kv.map(r=>`<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join("")}</dl>`;
     if(pc.payLog.length){
-      h += `<p class="lbl">Pagamenti</p><div class="scroll"><table><tbody>`;
+      h += `<p class="lbl">Pagamenti</p><div class="scroll"><table class="pay-t"><tbody>`;
       [...pc.payLog].sort(byDateAsc).forEach(x=>{ h += `<tr><td class="date">${itDate(x.date)}</td><td class="num">${eur(x.amount)}</td><td>${esc(x.method)}</td><td>${esc(x.note)}</td><td class="act">${rowBtns("Pay", x, p.id, `pagamento del ${itDate(x.date)}`)}</td></tr>`; });
       h += `</tbody></table></div>`;
     }
     h += `<div class="acts"><button class="btn small" data-a="editPkg" data-id="${esc(p.id)}">Modifica questo pacchetto</button><button class="btn small danger" data-a="delPkg" data-id="${esc(p.id)}">Elimina questo pacchetto</button></div></div></details>`;
   });
   return h + `</div></section>`;
+}
+/* Storico sedute del pacchetto attivo: le date si vedono solo per il pacchetto attivo, restano anche a pacchetto completato
+   e spariscono quando ne inizia uno nuovo. Ci finiscono le sedute di “Segna seduta”, del + di “Sedute fatte” e le “sedute già fatte”. */
+function sesBlockHTML(c){
+  const nSes = c.sessionLog.length, noDate = Math.max((Number(c.doneSessions) || 0) - nSes, 0);
+  let h = `<section class="block" id="sesBlock"><div class="bh"><h3>Storico sedute del pacchetto attivo</h3><button class="btn small" data-a="addSes">+ Seduta</button></div>`;
+  if(!nSes) h += `<p class="none">Qui compaiono, in ordine di data, le sedute del pacchetto attivo: quelle segnate con “Segna seduta”, con il + di “Sedute fatte” e le sedute già fatte scritte quando crei la cartella.${noDate ? ` ${noDate === 1 ? "1 seduta fatta è stata segnata" : `${noDate} sedute fatte sono state segnate`} senza data con una versione precedente.` : ""}</p>`;
+  else {
+    h += `<p class="sub ses-sub">${nSes} ${nSes === 1 ? "seduta registrata" : "sedute registrate"} con la data.${noDate ? ` ${noDate === 1 ? "1 seduta fatta non ha" : `${noDate} sedute fatte non hanno`} la data (segnate con una versione precedente).` : ""} Restano qui finché non inizi un nuovo pacchetto: a quel punto l'elenco riparte da zero.</p>`;
+    h += `<div class="ses-list">` + [...c.sessionLog].sort(byDateAsc).map((x,i)=>`<div class="ses-row"><span class="n">${i+1}</span><span class="d">${itDate(x.date) || "senza data"}</span><span class="nt">${esc(x.note)}</span>
+      <button class="btn small" data-a="editSes" data-id="${esc(x.id)}" aria-label="Modifica data della seduta del ${itDate(x.date)}">Modifica data</button><button class="x" data-a="delSes" data-id="${esc(x.id)}" aria-label="Elimina seduta del ${itDate(x.date)}">✕</button></div>`).reverse().join("") + `</div>`;
+  }
+  return h + `</section>`;
+}
+/* date delle sedute già fatte (modulo della cartella): una casella per seduta, tutte da compilare. null = “Indietro” */
+async function askSesDates(n, isNew){
+  $("sdText").textContent = `Hai scritto ${n} ${n === 1 ? "seduta già fatta" : "sedute già fatte"}${isNew ? "" : " in più"}: scrivi la data di ${n === 1 ? "questa seduta" : "ognuna"}. Compariranno nello storico sedute in ordine di data; potrai cambiarle con “Modifica data”.`;
+  $("sdList").innerHTML = Array.from({length:n}, (_,i)=>`<label for="sd${i}">Seduta ${i+1}</label><input id="sd${i}" type="date" data-sd="${i}">`).join("");
+  $("sdErr").textContent = ""; $("sdOk").textContent = n === 1 ? "Salva la data" : "Salva le date";
+  if(await ask("dlgSesDates") !== "ok") return null;
+  return [...$("sdList").querySelectorAll("input")].map(i=>i.value).sort();
+}
+$("fSesDates").addEventListener("submit", e=>{
+  if(!e.submitter || e.submitter.value !== "ok") return;
+  const empty = [...$("sdList").querySelectorAll("input")].find(i=>!isDate(i.value));
+  if(empty){ e.preventDefault(); $("sdErr").textContent = `Manca la data della seduta ${Number(empty.dataset.sd) + 1}.`; empty.focus(); }
+});
+$("sdList").addEventListener("input", ()=>{ $("sdErr").textContent = ""; });
+/* sedute fatte cambiate a mano (+ e −, numero scritto, modulo della cartella): lo storico segue il numero.
+   In più → nuove righe con la data indicata. In meno → tolgo le più recenti (a parità di data, l'ultima inserita). Restituisce le righe tolte. */
+function adjustSesLog(c, from, to, date){
+  const d = (Number(to) || 0) - (Number(from) || 0), gone = [];
+  if(!Array.isArray(c.sessionLog)) c.sessionLog = [];
+  for(let i = 0; i < d; i++) c.sessionLog.push({id:uid(), date: isDate(date) ? date : today(), note:""});
+  for(let i = 0; i < -d && c.sessionLog.length; i++){
+    let k = 0; c.sessionLog.forEach((x,j)=>{ if((x.date || "") >= (c.sessionLog[k].date || "")) k = j; });
+    gone.push(c.sessionLog.splice(k, 1)[0]);
+  }
+  return gone;
 }
 function refreshSummary(c){
   const s = stats(c);
@@ -3529,6 +3781,7 @@ function refreshSummary(c){
   const ha = $("headAlert"); if(ha) ha.innerHTML = headAlertHTML(c);
   const nb = $("newPkgBtn"); if(nb) nb.classList.toggle("primary", s.complete);
   const ab = $("addSesBtn"); if(ab) ab.classList.toggle("primary", !s.complete);
+  const sb = $("sesBlock"); if(sb) sb.outerHTML = sesBlockHTML(c);
 }
 
 /* ======================= AZIONI ======================= */
@@ -3613,7 +3866,18 @@ async function clientForm(existing, opts){
   document.querySelectorAll('input[name="fkScore"]').forEach(r=>r.checked = r.value === "0");
   syncSvcUI();
   if(opts && opts.focus === "ck") setTimeout(()=>{ const t = $("cCkW"); if(t && !t.hidden) t.scrollIntoView({block:"start"}); }, 60);   // si apre sul lato Check
-  if(await ask("dlgClient") !== "ok") return;
+  let sesDates = [];
+  for(;;){
+    if(await ask("dlgClient") !== "ok") return;
+    const one = isNew && (document.querySelector('input[name="cKind"]:checked') || {}).value === "single";
+    const add = toInt($("cDone").value) - (isNew ? 0 : (Number(v.doneSessions) || 0));
+    if(add > 0 && $("cSvcPt").checked && !one){                            // sedute già fatte: la data di ognuna, se no lo storico è sfalsato
+      const d = await askSesDates(add, isNew);
+      if(!d) continue;                                                      // “Indietro”: torno al modulo con i dati scritti
+      sesDates = d;
+    }
+    break;
+  }
   const single = isNew && (document.querySelector('input[name="cKind"]:checked') || {}).value === "single";
   const name = $("cName").value.trim(); if(!name) return;
   const freqRaw = $("cFreq").value.trim();
@@ -3669,24 +3933,20 @@ async function clientForm(existing, opts){
   } else if(isNew){
     const nc = normalize(data);
     if(nc.paid > 0) nc.payLog.push({id:uid(), date:today(), amount:nc.paid, method:"", note:"Acconto"});
+    nc.sessionLog = sesDates.slice(0, nc.doneSessions).map(date=>({id:uid(), date, note:""}));   // sedute già fatte, con le date scritte
     commit(nc, true); openId = nc.id; toast("Cartella creata");
   } else {
     const c = getClient(existing.id); if(!c) return;
-    commit(Object.assign(clone(c), data), true); toast("Dati salvati");
+    const n = Object.assign(clone(c), data);
+    if(n.doneSessions > c.doneSessions) sesDates.forEach(date=>n.sessionLog.push({id:uid(), date, note:""}));   // sedute in più: con le date scritte
+    else adjustSesLog(n, c.doneSessions, n.doneSessions, today());                // sedute in meno: tolgo le più recenti
+    commit(n, true); toast("Dati salvati");
   }
   render(); window.scrollTo({top:0});
 }
 
 const MIME = {pdf:"application/pdf", docx:"application/vnd.openxmlformats-officedocument.wordprocessingml.document", zip:"application/zip", json:"application/json"};
 async function saveFile(blob, filename, share){
-  if(store.downloads){
-    try{ await store.downloads.save({filename, data:blob}); return true; }
-    catch(e){
-      if(e && e.code === "declined") return false;
-      if(e && e.code === "rate_limited"){ toast("Attendi un momento e riprova."); return false; }
-      console.error(e);
-    }
-  }
   if(share && navigator.canShare && navigator.share){
     try{
       const ext = filename.split(".").pop();
@@ -3800,15 +4060,19 @@ $("fShare").addEventListener("submit", e=>{
   const p = shareSel.problem(); if(p){ e.preventDefault(); $("shareErr").textContent = p; }
 });
 
-async function shareClient(id){
-  const c = getClient(id); if(!c || exporting) return;
+async function shareClient(id, opts){
+  const c = getClient(id); if(!c || exporting) return false;
+  shareForcePt = !!(opts && opts.forcePt);
+  try{ return await shareRun(id, c, opts); } finally{ shareForcePt = false; }
+}
+async function shareRun(id, c, opts){
   const d = shareDefaults(c);
   $("shareTitle").textContent = `Invia dati a ${c.name}`;
   $("shareErr").textContent = "";
   $("shareTrainer").value = settings.trainerName || "";
   document.querySelectorAll('input[name="shareFmt"]').forEach(r=>r.checked = r.value===d.format);
-  shareSel.open(c, d, shareStartWhat(c, d.what));
-  if(await ask("dlgShare") !== "ok") return;
+  shareSel.open(c, d, opts && opts.what ? opts.what : shareStartWhat(c, d.what));
+  if(await ask("dlgShare") !== "ok") return false;
 
   const v = shareSel.value();
   const fmtEl = document.querySelector('input[name="shareFmt"]:checked');
@@ -3816,7 +4080,7 @@ async function shareClient(id){
   const trainer = $("shareTrainer").value.trim();
 
   if(trainer !== (settings.trainerName||"")){ settings.trainerName = trainer; saveSettings(); }
-  const cur = getClient(id); if(!cur) return;
+  const cur = getClient(id); if(!cur) return false;
   const newShare = normShare({what:v.what, ck:v.ck, pt:v.pt, format});
   if(JSON.stringify(cur.share) !== JSON.stringify(newShare)){ const n = clone(cur); n.share = newShare; commit(n, true); }
 
@@ -3835,9 +4099,11 @@ async function shareClient(id){
     }
     const ok = await saveFile(blob, `${safeName(fresh.name)} - ${doc.hasCk && doc.hasPt ? "riepilogo" : doc.hasCk ? "check" : "personal"}.${format}`, true);
     if(ok) toast("Riepilogo per il cliente pronto");
+    return !!ok;
   }catch(e){
     console.error(e);
     await messageBox("Invio non riuscito", e && e.message==="offline" ? OFFLINE_MSG : "Non sono riuscito a creare il riepilogo. Riprova.");
+    return false;
   }finally{ exporting = false; }
 }
 
@@ -3962,7 +4228,7 @@ async function handle(a, el){
     case "delPkg": {
       if(!c) return;
       const pid = el.dataset.id, p = c.packages.find(x=>x.id===pid); if(!p) return;
-      if(!(await messageBox("Eliminare questo pacchetto?", `${pkgTitle(p)}: verrà tolto dallo storico della cartella, con le sue sedute e i suoi pagamenti. Il pacchetto in corso non cambia.`, {ok:"Elimina", cancel:"Annulla", danger:true}))) return;
+      if(!(await messageBox("Eliminare questo pacchetto?", `${pkgTitle(p)}: verrà tolto dallo storico della cartella, con i suoi dati e i suoi pagamenti. Il pacchetto in corso non cambia.`, {ok:"Elimina", cancel:"Annulla", danger:true}))) return;
       const cur = getClient(id); if(!cur) return;
       const n = clone(cur); n.packages = n.packages.filter(x=>x.id!==pid);
       commit(n, true); render(); toast("Pacchetto eliminato");
@@ -4032,7 +4298,13 @@ document.addEventListener("click", e=>{
     const f = st.dataset.step, n = clone(cur);
     n[f] = Math.max((Number(n[f])||0) + Number(st.dataset.d), 0);
     const inp = document.querySelector(`input[data-f="${f}"]`); if(inp) inp.value = n[f];
-    commit(n); refreshSummary(n); return;
+    let msg = "";
+    if(f === "doneSessions" && n[f] !== (Number(cur.doneSessions) || 0)){       // la seduta in più (o in meno) si vede anche nello storico
+      const gone = adjustSesLog(n, cur.doneSessions, n[f], today());
+      msg = n[f] > cur.doneSessions ? `Seduta aggiunta con la data di oggi (${itDate(today())}). Se serve, usa “Modifica data”.`
+        : gone.length ? `Tolta dallo storico la seduta del ${itDate(gone[0].date)}.` : "";
+    }
+    commit(n); refreshSummary(n); if(msg) toast(msg); return;
   }
   const el = e.target.closest("[data-a]");
   if(el && !el.disabled) handle(el.dataset.a, el);
@@ -4049,12 +4321,29 @@ document.addEventListener("input", e=>{
     commit(n); refreshSummary(n); return;
   }
   const f = t.dataset && t.dataset.f;
+  if(f === "doneSessions") return;                                         // si salva quando esci dal campo (vedi sotto)
   if(f){
     const cur = getClient(openId); if(!cur) return;
     const n = clone(cur);
     n[f] = (f==="totalSessions" || f==="doneSessions") ? toInt(t.value) : round2(Math.max(parseNum(t.value),0));
     commit(n); refreshSummary(n);
   }
+});
+document.addEventListener("change", async e=>{
+  const t = e.target; if(!t.dataset || t.dataset.f !== "doneSessions") return;
+  const cur = getClient(openId); if(!cur) return;
+  const from = Number(cur.doneSessions) || 0, to = toInt(t.value);
+  if(to === from){ t.value = from; return; }
+  const out = Math.min(from - to, cur.sessionLog.length);
+  if(out > 1 && !(await messageBox("Togliere sedute dallo storico?", `Le sedute fatte passano da ${from} a ${to}: dallo storico verranno tolte le ${out} sedute più recenti.`, {ok:"Togli", cancel:"Annulla", danger:true}))){
+    t.value = from; return; }
+  const now = getClient(openId); if(!now) return;
+  const n = clone(now); n.doneSessions = to;
+  const gone = adjustSesLog(n, now.doneSessions, to, today());
+  commit(n); refreshSummary(n);
+  const inp = document.querySelector('input[data-f="doneSessions"]'); if(inp) inp.value = n.doneSessions;
+  toast(to > from ? (to - from === 1 ? `Seduta aggiunta con la data di oggi (${itDate(today())}). Se serve, usa “Modifica data”.` : `${to - from} sedute aggiunte con la data di oggi. Se serve, usa “Modifica data”.`)
+    : gone.length ? (gone.length === 1 ? `Tolta dallo storico la seduta del ${itDate(gone[0].date)}.` : `Tolte dallo storico le ${gone.length} sedute più recenti.`) : `Sedute fatte: ${to}`);
 });
 /* Quando esci da un campo, lo riscrivo in modo pulito (es. "250,5") */
 document.addEventListener("focusout", e=>{
@@ -4103,7 +4392,29 @@ $("fPkg").addEventListener("submit", e=>{
   if(toInt($("pTotal").value) < 1) return bad("Scrivi quante sedute ha il nuovo pacchetto, ad esempio 10.", $("pTotal"));
 });
 ["pStart","pTotal","pPrice"].forEach(i=>$(i).addEventListener("input", ()=>{ $("pkgErr").textContent = ""; }));
+/* Prima del nuovo pacchetto: Annulla (non succede niente) · No, crea subito il nuovo pacchetto · Sì, crea prima il file.
+   “Sì” apre la stessa finestra di “Invia dati al cliente” sul Personal: scegli tu le caselle e PDF o Word; poi si passa al nuovo pacchetto.
+   Se chiudi quella finestra senza creare il file, torni qui. */
+async function beforeNewPackage(id){
+  for(;;){
+    const c = getClient(id); if(!c) return false;
+    const s = stats(c), nDates = c.sessionLog.length;
+    const active = !!(c.doneSessions || c.paid || c.sessionLog.length || c.payLog.length || c.missLog.length);
+    const what = s.total > 0 ? `Il pacchetto attuale${s.start ? ` (iniziato il ${itDate(s.start)})` : ""}, ${s.done} su ${s.total}${s.complete ? ", completato" : ""},` : "Il pacchetto attuale";
+    $("bpText").textContent = (active
+      ? `${what} va nello storico pacchetti: restano inizio, fine, sedute fatte, costo e pagamenti.` + (nDates ? ` Le date delle singole sedute (${nDates}) verranno cancellate.` : "")
+      : "Il pacchetto attuale non ha ancora sedute né pagamenti: verrà sostituito da quello nuovo.")
+      + `
+
+Vuoi creare prima un file (PDF o Word) con i dati del pacchetto attuale, da salvare o da mandare al cliente?`;
+    const r = await ask("dlgBeforePkg");
+    if(r === "no") return true;
+    if(r !== "file") return false;                                         // Annulla: resta tutto com'era
+    if(await shareClient(id, {what:"pt", forcePt:true})) return true;       // file creato: si passa al nuovo pacchetto
+  }
+}
 async function newPackage(id, thenSession){
+  if(!(await beforeNewPackage(id))) return;
   const c = getClient(id); if(!c) return;
   const s = stats(c);
   const active = !!(c.doneSessions || c.paid || c.sessionLog.length || c.payLog.length || c.missLog.length);
@@ -4112,7 +4423,7 @@ async function newPackage(id, thenSession){
   const base = round2(c.price - c.carriedIn);
   $("pPrice").value = base > 0 ? fmtIn(base) : "";
   let note = active
-    ? `Il pacchetto attuale${s.start ? ` (iniziato il ${itDate(s.start)})` : ""}, ${s.done} su ${s.total}${s.complete ? ", completato" : ""}, va nello storico della cartella con le sue sedute e i suoi pagamenti. Il nuovo parte da 0 sedute fatte e 0 € pagati.`
+    ? `Il pacchetto attuale${s.start ? ` (iniziato il ${itDate(s.start)})` : ""}, ${s.done} su ${s.total}${s.complete ? ", completato" : ""}, viene chiuso e va nello storico pacchetti: restano inizio, fine, sedute fatte, costo e pagamenti.${c.sessionLog.length ? ` Le date delle singole sedute (${c.sessionLog.length}) vengono cancellate.` : ""} Il nuovo parte da 0 sedute fatte e 0 € pagati.`
     : "Il pacchetto attuale non ha ancora sedute né pagamenti: viene semplicemente sostituito da quello nuovo.";
   if(active && !s.complete && s.total > 0) note += `\n\nAttenzione: il pacchetto attuale non è completato (${s.left === 1 ? "manca 1 seduta" : `mancano ${s.left} sedute`}).`;
   $("pkgNote").textContent = note;
@@ -4231,9 +4542,9 @@ function syncMissUI(){
 $("sMiss").addEventListener("change", syncMissUI);
 function sesDialogMode(edit){
   $("sMissL").hidden = !!edit; $("sMiss").checked = false; $("sNoteW").hidden = false;
-  $("sesTitle").textContent = edit ? "Modifica seduta" : "Segna seduta";
+  $("sesTitle").textContent = edit ? "Modifica data della seduta" : "Segna seduta";
   $("sesOk").textContent = edit ? "Salva" : "Segna seduta";
-  $("sesHint").textContent = edit ? "Cambi data e note: il numero di sedute fatte non cambia." : "Le sedute fatte aumentano di 1.";
+  $("sesHint").textContent = edit ? "Cambi la data (e la nota): nello storico la seduta va al suo posto in ordine di data. Il numero di sedute fatte non cambia." : "Le sedute fatte aumentano di 1.";
 }
 function payDialogMode(edit){
   $("payTitle").textContent = edit ? "Modifica pagamento" : "Aggiungi rata";
@@ -4788,7 +5099,7 @@ async function exportDocs(){
     if(files.length === 1) ok = await saveFile(files[0].blob, files[0].name, touch);
     else {
       let shared = false;
-      if(touch && !store.downloads && navigator.canShare && navigator.share){
+      if(touch && navigator.canShare && navigator.share){
         const objs = files.map(f=>new File([f.blob], f.name, {type: MIME[kind]}));
         try{ if(navigator.canShare({files:objs})){ await navigator.share({files:objs, title:"Schede clienti"}); shared = ok = true; } }
         catch(e){ if(e && e.name === "AbortError") return; console.warn(e); }
@@ -4907,7 +5218,7 @@ function sessionMonths(c, undated){
   return out;
 }
 function lastActivity(c){
-  const d = [...sessionDates(c), ...payEvents(c).map(e=>e.date), ...allPackages(c).map(p=>p.start)].filter(isDate).sort();
+  const d = [...sessionDates(c), ...payEvents(c).map(e=>e.date), ...allPackages(c).map(p=>p.start), ...c.packages.map(p=>p.end)].filter(isDate).sort();
   return d.length ? d[d.length - 1] : "";
 }
 function clientStats(c){
@@ -5195,15 +5506,14 @@ function recapHTML(D, hide){
   h += `</div></div></section>`;
   return h;
 }
-/* ======= grafici dell'anno scelto: istogramma (mesi, più voci insieme) o torta (una voce, divisa per mese) ======= */
+/* ======= grafici dell'anno scelto: istogramma (mesi, più voci insieme) ======= */
+const fmtSeries = (f, v) => SERIES[f].money ? money(v) : `${v} ${v === 1 ? "seduta" : "sedute"}`;
 const SERIES = {
   income:   {label:"Guadagno", cls:"s-in",  money:true},
   expense:  {label:"Spese",    cls:"s-exp", money:true},
   net:      {label:"Guadagno netto", cls:"s-net", money:true},
   sessions: {label:"Sedute",   cls:"s-ses", money:false}
 };
-const PIE_HUE = {income:[150,45], expense:[5,65], net:[200,18], sessions:[215,65]};
-const fmtSeries = (f, v) => SERIES[f].money ? money(v) : `${v} ${v === 1 ? "seduta" : "sedute"}`;
 /* istogramma dell'anno: guadagno personal, guadagno check, spese (3 voci, 3 colori, accendibili dalla legenda) */
 const BAR3 = {ck:{label:"Guadagno check", cls:"s-ck"}, pt:{label:"Guadagno personal", cls:"s-pt"}, exp:{label:"Spese", cls:"s-exp"}};
 function chartsHTML(D, year, hide){
@@ -5219,7 +5529,7 @@ function chartsHTML(D, year, hide){
     const cur = on.filter(x=>x !== "exp").sort().join(",");
     h += `<div class="seg small chart-quick" role="group" aria-label="Cosa vedere">` + quick.map(([id,l,v])=>`<button type="button" class="btn small ${cur === v.slice().sort().join(",") ? "primary" : "ghost"}" data-a="chartQuick" data-v="${id}">${l}</button>`).join("") + `</div>`;
     h += `<div class="legend" role="group" aria-label="Voci del grafico">` + Object.entries(BAR3).map(([f,x])=>`<label class="lg ${x.cls}"><input type="checkbox" name="chartSeries" value="${f}"${on.includes(f) ? " checked" : ""}><i></i><span>${x.label}</span></label>`).join("") + `</div>`;
-    h += `<div class="chart-wrap">${bars3SVG(ks, val, on)}</div>`;
+    h += `<div class="chart-wrap">${bars3SVG(ks, val, on)}</div><p class="hint chart-swipe">↔ Scorri il grafico di lato per vedere tutti i mesi.</p>`;
     h += `<p class="hint">Tocca una voce della legenda per mostrarla o nasconderla: puoi vedere 1, 2 o tutte e 3 le voci. Le spese sono le spese di gestione.</p>`;
   }
   h += `<details class="calc-note"><summary>Come si calcolano</summary>
@@ -5275,26 +5585,6 @@ function yearBarsSVG(D, ks, on){
     s += `<text x="${W - 4}" y="${top + 4}" class="ax ax-r">${sMax}</text><text x="${W - 4}" y="${bot}" class="ax ax-r">0</text>`;
   }
   return s + `</svg>`;
-}
-function pieHTML(D, ks, f){
-  const items = ks.map((k,i)=>({k, i, v: D.month(k)[f] || 0}));
-  const pos = items.filter(x=>x.v > 0), neg = items.filter(x=>x.v < 0), total = pos.reduce((t,x)=>t + x.v, 0);
-  if(!total) return `<p class="none">Nessun dato di “${SERIES[f].label.toLowerCase()}” in questo anno.</p>`;
-  const [hue, sat] = PIE_HUE[f], order = pos.map(x=>x.i);
-  const col = i => { const j = order.indexOf(i), n = Math.max(order.length - 1, 1); return `hsl(${hue} ${sat}% ${order.length === 1 ? 45 : Math.round(24 + j * 50 / n)}%)`; };   // fette ben distinte
-  const R = 90, C = 100; let ang = -Math.PI / 2, s = `<svg class="pie" viewBox="0 0 200 200" role="img" aria-label="Grafico a torta: ${SERIES[f].label}">`;
-  pos.forEach(x=>{
-    const a2 = ang + 2 * Math.PI * x.v / total, large = a2 - ang > Math.PI ? 1 : 0;
-    const p1 = [C + R * Math.cos(ang), C + R * Math.sin(ang)], p2 = [C + R * Math.cos(a2), C + R * Math.sin(a2)];
-    const d = pos.length === 1 ? `M ${C - R} ${C} A ${R} ${R} 0 1 1 ${C + R} ${C} A ${R} ${R} 0 1 1 ${C - R} ${C} Z` : `M ${C} ${C} L ${p1[0].toFixed(2)} ${p1[1].toFixed(2)} A ${R} ${R} 0 ${large} 1 ${p2[0].toFixed(2)} ${p2[1].toFixed(2)} Z`;
-    s += `<path d="${d}" fill="${col(x.i)}" class="slice"><title>${esc(monthLabel(x.k))} · ${SERIES[f].label}: ${esc(fmtSeries(f, x.v))} (${Math.round(x.v / total * 100)}%)</title></path>`;
-    ang = a2;
-  });
-  s += `</svg>`;
-  let h = `<div class="pie-wrap">${s}<div class="pie-legend"><p class="pl-tot">${SERIES[f].label} del ${ks[0].slice(0,4)}: <b>${esc(fmtSeries(f, round2(total)))}</b></p><ul>`;
-  pos.forEach(x=>{ h += `<li><i style="background:${col(x.i)}"></i><span>${esc(MONTHS_LONG[x.i].charAt(0).toUpperCase() + MONTHS_LONG[x.i].slice(1))}</span><b>${esc(fmtSeries(f, round2(x.v)))}</b><em>${Math.round(x.v / total * 100)}%</em></li>`; });
-  h += `</ul>${neg.length ? `<p class="hint">Non nella torta (in perdita): ${neg.map(x=>`${MONTHS_LONG[x.i]} ${esc(fmtSeries(f, x.v))}`).join(", ")}.</p>` : ""}</div></div>`;
-  return h;
 }
 /* scelta dell'anno */
 async function pickStatsYear(){
@@ -5484,7 +5774,6 @@ function periodTableHTML(D, mode, year, hide){
 document.addEventListener("change", e=>{
   const t = e.target;
   if(t.name === "statsChart"){ settings.statsChart = t.value; saveSettings(); render(); }
-  else if(t.name === "pieMetric"){ settings.pieMetric = t.value; saveSettings(); render(); }
   else if(t.name === "chartSeries"){
     const on = [...document.querySelectorAll('input[name="chartSeries"]:checked')].map(x=>x.value);
     if(!on.length){ t.checked = true; return; }                        // almeno una voce resta visibile
@@ -5613,10 +5902,10 @@ function expHTML(){
   h += `<section class="block"><h3>Pagamenti delle spese</h3>`;
   if(!d.pays.length) h += `<p class="none">Ancora nessun pagamento: premi “Segna pagata” su una spesa.</p>`;
   else {
-    h += `<div class="scroll"><table><thead><tr><th>Data</th><th>Spesa</th><th>Importo</th><th>Note</th><th></th></tr></thead><tbody>`;
+    h += `<div class="scroll"><table class="exp-pays"><thead><tr><th>Data</th><th>Spesa</th><th class="num">Importo</th><th><span hidden>Azioni</span></th></tr></thead><tbody>`;
     [...d.pays].sort((a,b)=>(b.date||"").localeCompare(a.date||"")).forEach(p=>{
       const it = d.items.find(x=>x.id === p.itemId);
-      h += `<tr><td class="date">${itDate(p.date)}</td><td>${esc(it ? it.name : (p.name || "Spesa eliminata"))}</td><td class="num">${M(p.amount)}</td><td>${esc(p.note)}</td>
+      h += `<tr><td class="date">${itDate(p.date)}</td><td>${esc(it ? it.name : (p.name || "Spesa eliminata"))}${p.note ? `<small class="exp-note">${esc(p.note)}</small>` : ""}</td><td class="num">${M(p.amount)}</td>
         <td class="act"><button class="x ed" data-a="editExpPay" data-id="${esc(p.id)}" aria-label="Modifica pagamento del ${itDate(p.date)}">✎</button><button class="x" data-a="delExpPay" data-id="${esc(p.id)}" aria-label="Elimina pagamento del ${itDate(p.date)}">✕</button></td></tr>`;
     });
     h += `</tbody></table></div>`;
@@ -5795,7 +6084,9 @@ async function dataMenu(){
   $("dataLast").textContent = !bk ? "" : settings.lastBackup ? bk.text : "⚠ Non hai ancora fatto un backup completo con le cartelle dei clienti.";
   $("dataLast").hidden = !bk;
   syncDataDlg();
-  if(await ask("dlgData") !== "export") return;
+  const r = await ask("dlgData");
+  if(r === "dates") return dateCheck();
+  if(r !== "export") return;
   const withStats = $("dataStats").checked && clients.length > 0;
   if($("dataInclude").checked && clients.length) return exportAll(withStats);
   return exportProgram(withStats);
