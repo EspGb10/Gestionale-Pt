@@ -4057,6 +4057,11 @@ function historyHTML(c){
   if(!pk.length && !sg.length) return "";
   const earned = round2(all.reduce((t,p)=>t + (Number(p.paid)||0), 0));
   const done = all.reduce((t,p)=>t + (Number(p.doneSessions)||0), 0);
+  /* v81: media = prezzo dei pacchetti ÷ sedute comprate (come “200 € · 10 sedute → 20 €/seduta”),
+     non i soldi pagati ÷ sedute fatte (che a pacchetto appena iniziato e già pagato usciva gonfiata) */
+  const bought = all.filter(p=>Number(p.totalSessions) > 0);
+  const priceAll = round2(bought.reduce((t,p)=>t + Math.max((Number(p.price)||0) - (Number(p.current ? c.carriedIn : p.carriedIn)||0), 0), 0));
+  const sesAll = bought.reduce((t,p)=>t + (Number(p.totalSessions)||0), 0);
   const first = all.map(p=>p.start).filter(isDate).sort()[0];
   const sizes = pk.map(p=>p.totalSessions).filter(Boolean);
   return `<section class="block hist-block" id="histBlock"><h3>Il cliente con te</h3>
@@ -4064,7 +4069,7 @@ function historyHTML(c){
       <div><b id="histPkgs">${pk.length}</b><span>${pk.length === 1 ? "pacchetto" : "pacchetti"}</span>${sizes.length ? `<small>da ${sizes.join(", ")} ${sizes.length === 1 && Number(sizes[0]) === 1 ? "lezione" : "lezioni"}</small>` : ""}</div>
       <div><b id="histSingles">${sg.length}</b><span>${sg.length === 1 ? "seduta singola" : "sedute singole"}</span></div>
       <div><b id="histDone">${done}</b><span>${done === 1 ? "seduta fatta" : "sedute fatte"}</span>${first ? `<small>dal ${itDate(first)}</small>` : ""}</div>
-      <div class="c-in"><b id="histEarned">${hm(earned)}</b><span>guadagnato in totale</span>${done ? `<small>in media ${hm(perSession(earned, done))}/seduta</small>` : ""}</div>
+      <div class="c-in"><b id="histEarned">${hm(earned)}</b><span>guadagnato in totale</span>${sesAll ? `<small>in media ${hm(perSession(priceAll, sesAll))}/seduta</small>` : ""}</div>
     </div></section>`;
 }
 /* sedute singole del cliente */
