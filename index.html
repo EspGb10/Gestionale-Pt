@@ -4667,8 +4667,12 @@ function packagesHTML(c){
   const past = pastPackages(c).filter(p=>!isSingle(p)).sort((x,y)=>(x.start||x.end||"").localeCompare(y.start||y.end||""));   // dal più vecchio
   let rows = pkgHistory(c);
   if(pkgOrderNew()){ rows = [...rows].reverse(); past.reverse(); }                 // di base: il più recente in alto
-  let h = `<section class="block hist-sec" id="histPkg">${histHead("pkg", "Storico pacchetti fatti dal cliente", "", rows.length > 1 ? pkgOrderSel("pkgOrderPt") : "", rows.length ? pkgCountTxt(rows.length) : "")}<div class="hist-body"${histOpen.pkg ? "" : " hidden"}>`;
+  let h = `<section class="block hist-sec" id="histPkg">${histHead("pkg", "Storico pacchetti fatti dal cliente", "", past.length > 1 ? pkgOrderSel("pkgOrderPt") : "", rows.length ? pkgCountTxt(rows.length) : "")}<div class="hist-body"${histOpen.pkg ? "" : " hidden"}>`;
   if(!rows.length) return h + `<p class="none">Nessun pacchetto ancora.</p></div></section>`;
+  /* v97: in alto solo il pacchetto in corso; quelli conclusi stanno solo in “Dettagli dei pacchetti conclusi” (niente doppioni) */
+  rows = rows.filter(r=>r.current);
+  if(!rows.length) h += `<p class="none">Nessun pacchetto in corso.</p>`;
+  else {
   h += `<table class="pkg-hist"><thead><tr><th>Inizio</th><th>Fine</th><th class="num">Sedute</th><th class="num">Costo</th><th class="num">€/<wbr>seduta</th></tr></thead><tbody>`;
   const fineTxt = r => r.end ? itDate(r.end) : (r.current ? "in corso" : "—");
   rows.forEach(r=>{ h += `<tr class="${r.current ? "cur" : ""}" data-start="${itDate(r.start)}" data-fine="${fineTxt(r)}"><td class="date">${itDate(r.start)}</td><td class="date">${r.end ? itDate(r.end) : (r.current ? `<span class="in-corso">in corso</span>` : "—")}</td><td class="num">${r.total}</td><td class="num">${hm(r.price)}</td><td class="num">${r.total ? hm(perSession(r.price, r.total)) : "—"}</td></tr>`; });
@@ -4676,6 +4680,7 @@ function packagesHTML(c){
   /* sul telefono: elenco a righe (la tabella a 5 colonne non ci sta) */
   h += `<ul class="pkg-hist-list">` + rows.map(r=>`<li class="${r.current ? "cur" : ""}"><b>${itDate(r.start)} → ${r.end ? itDate(r.end) : (r.current ? `<span class="in-corso">in corso</span>` : "—")}</b>
       <span>${r.total} ${r.total === 1 ? "seduta" : "sedute"} · ${hm(r.price)}${r.total ? ` · <b class="pps">${hm(perSession(r.price, r.total))}/seduta</b>` : ""}</span></li>`).join("") + `</ul>`;
+  }
   if(!past.length) return h + `</div></section>`;
   h += `<p class="lbl">Dettagli dei pacchetti conclusi</p>`;
   past.forEach(p=>{
