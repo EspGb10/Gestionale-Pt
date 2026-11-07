@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Firma della seduta</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14213d;--moss:#2F6B4F;--muted:#5f6b66;--line:#d8ddd9;--bg:#f4f6f3;--paper:#fff;--err:#B42318}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;-webkit-text-size-adjust:100%}
+main{max-width:560px;margin:0 auto;padding:22px 16px 40px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:20px 18px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.top{height:6px;background:var(--moss);border-radius:16px 16px 0 0;margin:-20px -18px 16px}
+.who{color:var(--muted);font-size:.9rem;margin:0 0 6px}
+h1{font-size:1.6rem;line-height:1.15;margin:0 0 4px}
+.what{font-size:1.15rem;font-weight:700;margin:0}
+.sub{color:var(--muted);margin:2px 0 16px}
+.pad{position:relative;border:2px dashed #9fb3a8;border-radius:14px;background:#fff;height:clamp(300px,60vh,560px);margin:6px 0 12px}
+.turn{display:flex;align-items:center;gap:12px;background:#eef6f0;border:1.5px solid #9fb3a8;border-radius:12px;padding:12px 14px;margin:4px 0 12px;font-weight:700;color:var(--moss)}
+.turn .ic{font-size:1.8rem;line-height:1}
+.tools{display:flex;gap:8px;align-items:center;margin:0 0 4px}
+.tools .zb{min-width:52px;padding:8px 0;font-size:1.3rem;line-height:1}
+.tools .fsb{flex:1;padding:10px 12px;font-size:.95rem;background:#f4f6f3;border-color:#9fb3a8}
+.tools .zl{color:var(--muted);font-size:.85rem;min-width:3.2em;text-align:center}
+.tools .lnd{display:none}
+@media (orientation:landscape){
+  .turn,.who,.row.bottom{display:none}
+  main{max-width:none;padding:6px 28px 24px}
+  .card{padding:10px 14px}
+  .top{margin:-10px -14px 8px;height:5px}
+  .head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin-bottom:6px}
+  h1{font-size:1.1rem;margin:0}
+  .what{font-size:.95rem;margin:0}
+  .sub{margin:0;font-size:.9rem}
+  .tools{gap:6px}
+  .tools .zb{min-width:44px;min-height:40px;padding:4px 0;font-size:1.1rem}
+  .tools button{min-height:40px;padding:6px 12px}
+  .tools .fsb{flex:0 1 auto}
+  .tools .lnd{display:inline-block}
+  .tools .sp{flex:1}
+  .pad{margin:6px 0 8px}
+}
+.pad.full{position:fixed;inset:0;z-index:50;height:auto;margin:0;border:none;border-radius:0}
+.pad .padbar{display:none;position:absolute;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));gap:10px}
+.pad.full .padbar{display:flex}
+.pad.full .ph{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+.pad .padtop{display:none;position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:14px;right:14px;color:#5f6b66;font-size:.9rem}
+.pad.full .padtop{display:block}
+.big{width:100%;margin:0 0 10px;background:#f4f6f3;border-color:#9fb3a8}
+.pad canvas{position:absolute;inset:0;width:100%;height:100%;border-radius:12px;touch-action:none}
+.pad .ph{position:absolute;inset:auto 0 14px 0;text-align:center;color:#5f6b66;pointer-events:none;font-size:.95rem}
+.pad .ph b{display:block;border-top:1.5px solid #c9d3cd;margin:0 26px 8px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+button{font:inherit;font-weight:700;border-radius:12px;padding:13px 18px;min-height:48px;cursor:pointer;border:1.5px solid var(--ink);background:#fff;color:var(--ink)}
+button.primary{background:var(--moss);border-color:var(--moss);color:#fff;flex:1}
+button:disabled{opacity:.45;cursor:default}
+.err{color:var(--err);font-weight:600;min-height:1.2em;margin:10px 0 0}
+.done{text-align:center}
+.done h1{margin-top:4px}
+#cardImg{width:100%;height:auto;border:1px solid var(--line);border-radius:14px;margin:14px 0}
+.muted{color:var(--muted);font-size:.9rem}
+</style>
+</head>
+<body>
+<main>
+  <div class="card" id="box"><div class="top"></div><p id="msg">Caricamento…</p></div>
+</main>
+<script>
+/*SIGLIB-START*/
+/* ======= v99: FIRME DELLE SEDUTE — codice comune al gestionale e alla pagina del cliente (firma.html) =======
+   Una firma è salvata come “tratti” compressi (circa 1 KB), non come foto:
+   coordinate in una griglia 1000 × 400, 2 caratteri in base 36 per numero, i tratti separati da “.” */
+const SIG_W = 1000;
+function sigEncode(strokes){
+  const c2 = v => Math.max(0, Math.min(1295, Math.round(v))).toString(36).padStart(2, "0");
+  return strokes.filter(s=>s.length).map(s=>s.map(([x,y])=>c2(x) + c2(y)).join("")).join(".");
+}
+function sigDecode(str){
+  return String(str || "").split(".").filter(Boolean).map(s=>{ const pts = [];
+    for(let i = 0; i + 3 < s.length; i += 4) pts.push([parseInt(s.slice(i, i+2), 36), parseInt(s.slice(i+2, i+4), 36)]);
+    return pts; }).filter(p=>p.length && p.every(([x,y])=>Number.isFinite(x) && Number.isFinite(y)));
+}
+/* riquadro dove si firma con il dito (o il mouse).
+   La firma si salva come tratti (non come foto): stessa scala in orizzontale e in verticale, così non si deforma
+   e si può ridisegnare grande o piccola senza sgranare, anche se il riquadro cambia misura (es. a schermo intero). */
+const SIG_YMAX = 1295;
+function SigPad(canvas, onChange, opt){
+  const ctx = canvas.getContext("2d"), strokes = []; let cur = null;
+  const touches = new Map(); let pinch = null;                              // opt.pinch(scala, "start"|"move"|"end"): due dita = ingrandisci / rimpicciolisci
+  const unit = () => { const r = canvas.getBoundingClientRect(); return Math.min(SIG_W / Math.max(1, r.width), SIG_YMAX / Math.max(1, r.height)); };   // unità della firma per pixel
+  const fit = () => { const r = canvas.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+    canvas.width = Math.max(1, Math.round(r.width * d)); canvas.height = Math.max(1, Math.round(r.height * d)); draw(); };
+  const pos = e => { const r = canvas.getBoundingClientRect(), k = unit(); return [(e.clientX - r.left) * k, (e.clientY - r.top) * k]; };
+  function draw(){
+    const w = canvas.width, h = canvas.height, d = w / Math.max(1, canvas.getBoundingClientRect().width), k = unit();
+    ctx.clearRect(0, 0, w, h);
+    ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = "#14213d"; ctx.lineWidth = Math.max(2.5, 3 * d);
+    const P = v => v / k * d;
+    strokes.forEach(s=>{ ctx.beginPath(); s.forEach(([x,y], i)=>{ if(i) ctx.lineTo(P(x), P(y)); else ctx.moveTo(P(x), P(y)); });
+      if(s.length === 1){ const [x,y] = s[0]; ctx.lineTo(P(x) + 0.5, P(y)); } ctx.stroke(); });
+  }
+  const dist = () => { const [a, b] = [...touches.values()]; return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
+  canvas.addEventListener("pointerdown", e=>{ e.preventDefault(); try{ canvas.setPointerCapture(e.pointerId); }catch(_){}
+    touches.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if(opt && opt.pinch && touches.size === 2){                            // secondo dito: niente tratto, si fa lo zoom
+      if(cur){ const i = strokes.indexOf(cur); if(i >= 0) strokes.splice(i, 1); cur = null; draw(); }
+      pinch = {d0: dist()}; opt.pinch(1, "start"); if(onChange) onChange(); return; }
+    if(pinch || touches.size > 1) return;
+    cur = [pos(e)]; strokes.push(cur); draw(); if(onChange) onChange(); });
+  canvas.addEventListener("pointermove", e=>{
+    if(touches.has(e.pointerId)) touches.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if(pinch){ e.preventDefault(); if(touches.size === 2) opt.pinch(dist() / pinch.d0, "move"); return; }
+    if(!cur) return; e.preventDefault(); const p = pos(e), l = cur[cur.length - 1];
+    if(Math.hypot(p[0] - l[0], p[1] - l[1]) >= 3){ cur.push(p); draw(); } });
+  const end = e => { touches.delete(e.pointerId);
+    if(pinch){ if(!touches.size){ pinch = null; opt.pinch(1, "end"); } return; }
+    if(cur){ cur = null; if(onChange) onChange(); } };                       // a fine tratto: “Salva / Invia firma” si attiva
+  canvas.addEventListener("pointerup", end); canvas.addEventListener("pointercancel", end); canvas.addEventListener("pointerleave", e=>{ if(!pinch) end(e); });
+  canvas.style.touchAction = "none";
+  return { fit, clear(){ strokes.length = 0; draw(); if(onChange) onChange(); }, isEmpty: () => !strokes.some(s=>s.length > 1) && strokes.length < 2,
+    encode: () => sigEncode(strokes), points: () => strokes.reduce((t,s)=>t + s.length, 0) };
+}
+/* disegna la firma dentro un rettangolo (canvas): usato per tessera, immagini e documenti */
+function sigDraw(ctx, str, x, y, w, h, color){
+  const st = sigDecode(str); if(!st.length) return;
+  const xs = st.flat().map(p=>p[0]), ys = st.flat().map(p=>p[1]);
+  const bx = Math.min(...xs), by = Math.min(...ys), bw = Math.max(40, Math.max(...xs) - bx), bh = Math.max(30, Math.max(...ys) - by);
+  const k = Math.min(w / bw, h / bh), ox = x + (w - bw * k) / 2, oy = y + (h - bh * k) / 2;
+  ctx.save(); ctx.strokeStyle = color || "#14213d"; ctx.lineWidth = Math.max(1.2, Math.min(w, h) / 22); ctx.lineCap = "round"; ctx.lineJoin = "round";
+  st.forEach(s=>{ ctx.beginPath(); s.forEach(([px,py], i)=>{ const X = ox + (px - bx) * k, Y = oy + (py - by) * k; if(i) ctx.lineTo(X, Y); else ctx.moveTo(X, Y); }); if(s.length === 1) ctx.lineTo(ox + (s[0][0] - bx) * k + 1, oy + (s[0][1] - by) * k); ctx.stroke(); });
+  ctx.restore();
+}
+/* traguardi della tessera presenze */
+function sigWeekKey(iso){ const d = new Date(iso + "T12:00:00Z"), day = (d.getUTCDay() + 6) % 7; d.setUTCDate(d.getUTCDate() - day); return d.toISOString().slice(0,10); }
+/* STATUS del cliente in base alle sedute fatte con te: uno ogni 25 fino a 200, poi ogni 50 fino a 500 (VIP Platino) */
+const SIG_STATUS = [[25,"🥉","Bronzo","Bronze"],[50,"🥈","Argento","Silver"],[75,"🥇","Oro","Gold"],[100,"💚","Smeraldo","Emerald"],[125,"💙","Zaffiro","Sapphire"],
+  [150,"❤️","Rubino","Ruby"],[175,"💜","Ametista","Amethyst"],[200,"💎","Diamante","Diamond"],[250,"💠","Diamante Blu","Blue Diamond"],[300,"⚙️","Titanio","Titanium"],
+  [350,"🖤","Carbonio","Carbon"],[400,"⭐","Elite","Elite"],[450,"🏛️","Leggenda","Legend"],[500,"👑","VIP Platino","Platinum VIP"]];
+function sigStatus(all, en){ const r = SIG_STATUS.filter(x=>(Number(all) || 0) >= x[0]).pop(); return r ? {n:r[0], e:r[1], name: en ? r[3] : r[2]} : null; }
+function sigStatusNext(all, en){ const r = SIG_STATUS.find(x=>x[0] > (Number(all) || 0)); return r ? {n:r[0], e:r[1], name: en ? r[3] : r[2]} : null; }
+/* traguardi della tessera (con emoji): pacchetto, settimane di fila, status */
+function sigBadges(o){                                  // o: {total, used, dates:[date sedute FATTE], allTime, lang, single}
+  const out = [], dates = (o.dates || []).filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d || "")), used = Number(o.used) || dates.length, t = o.total || 0, L = o.lang === "en", all = Number(o.allTime) || 0;
+  if(!o.single){
+    if(t > 1 && used >= t) out.push(L ? "🏆 Package completed! 🎉" : "🏆 Pacchetto completato! 🎉");
+    else if(t > 1 && used >= Math.ceil(t / 2)) out.push(L ? "🎉 You're halfway through the package! 🎯" : "🎉 Sei a metà pacchetto! 🎯");
+    const run = sigWeekRun(dates);
+    if(run >= 2) out.push(L ? `🏅 ${run} weeks in a row 🗓️🔥💪` : `🏅 ${run} settimane di fila 🗓️🔥💪`);
+  }
+  const st = sigStatus(all, L);
+  if(st) out.push(L ? `${st.e} ${st.name} status: ${all} sessions together 🤝💯🌟` : `${st.e} Status ${st.name}: ${all} sedute insieme 🤝💯🌟`);
+  else if(all >= 10) out.push(L ? `🏅 ${all} sessions together 🤝💯🌟` : `🏅 ${all} sedute insieme 🤝💯🌟`);
+  return out;
+}
+/* settimane di fila (fino all'ultima data) */
+function sigWeekRun(dates){
+  const weeks = [...new Set((dates || []).filter(Boolean).map(sigWeekKey))].sort(); if(!weeks.length) return 0;
+  let run = 1; for(let i = weeks.length - 1; i > 0; i--){ const a = new Date(weeks[i] + "T12:00:00Z"), b = new Date(weeks[i-1] + "T12:00:00Z"); if(Math.round((a - b) / 864e5) === 7) run++; else break; }
+  return run;
+}
+/* tessera presenze (immagine): nome, pacchetto attivo, frase del giorno, firma della seduta, progressi,
+   fatte / saltate / mancano / nel pacchetto, date ancora da firmare (solo pacchetto attivo) e traguardi.
+   o = {name, trainer, start, total, done, lost, seq, today:{date, label, n, s, miss, signed}, unsigned:[{date, miss}], dates, allTime, msg:{e, t}, lang, now} */
+function sigCardCanvas(o){
+  const L = o.lang === "en", W = 1080, M = 64, CW = W - 2 * M;
+  const total = Math.max(0, Number(o.total) || 0), done = Math.max(0, Number(o.done) || 0), lost = Math.max(0, Number(o.lost) || 0);
+  const seq = Array.isArray(o.seq) && o.seq.length ? o.seq : [...Array(done).fill("done"), ...Array(lost).fill("miss")];
+  const used = done + lost, left = Math.max(0, total - used), td = o.today || {}, unsigned = (o.unsigned || []).filter(u=>u && u.date), all = Number(o.allTime) || 0;
+  const dIt = d => /^\d{4}-\d{2}-\d{2}$/.test(d || "") ? d.split("-").reverse().join("/") : "";
+  const C = {pine:"#14213d", moss:"#2F6B4F", mossD:"#24573F", soft:"#eef6f0", line:"#d5ddd8", muted:"#5f6b66", owed:"#B45309", owedSoft:"#fdf3e6", gold:"#C9971C", goldSoft:"#fbf3dc"};
+  const EM = `"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji"`;
+  const F = (w, s) => `${w} ${s}px "Barlow Condensed","Arial Narrow",Arial,${EM},sans-serif`, G = (w, s) => `${w} ${s}px Barlow,Arial,${EM},sans-serif`;
+  const badges = sigBadges({total, used, dates: o.dates || [], allTime: all, lang: o.lang, single: !!o.single});
+  const nx = sigStatusNext(all, L), nk = nx ? nx.n - all : 0, st = sigStatus(all, L);
+  const nextTxt = nx ? (L ? `⚪ Next status: ${nx.e} ${nx.name} at ${nx.n} sessions (${nk} to go) 🔒🚀` : `⚪ Prossimo status: ${nx.e} ${nx.name} a ${nx.n} sedute (${nk === 1 ? "ne manca 1" : `ne mancano ${nk}`}) 🔒🚀`)
+    : (L ? "👑 You've reached the highest status!" : "👑 Hai raggiunto lo status più alto!");
+  const meas = document.createElement("canvas").getContext("2d");
+  const wrap = (t, font, w) => { meas.font = font; const out = []; let line = ""; String(t).split(" ").forEach(wd=>{ const tt = line ? line + " " + wd : wd; if(meas.measureText(tt).width > w && line){ out.push(line); line = wd; } else line = tt; }); if(line) out.push(line); return out; };
+  const stTxt = unsigned.length
+    ? (L ? "All sessions are signed except: " : "Tutte le lezioni sono state firmate tranne: ") + unsigned.map(u=>dIt(u.date) + (u.miss ? (L ? " (missed)" : " (saltata)") : "")).join(", ")
+    : (L ? "All previous sessions have been signed." : "Tutte le lezioni precedenti sono state firmate.");
+  const stLines = wrap(stTxt, G("600", 30), CW - 120);
+  const msgLines = o.msg && o.msg.t ? wrap(o.msg.t, G("700", 34), CW - 150) : [];
+  const perRow = total > 12 ? Math.ceil(total / Math.ceil(total / 12)) : Math.max(total, 1), dotRows = Math.max(1, Math.ceil(Math.max(total, used) / perRow));
+  const dotD = Math.min(64, (CW - (perRow - 1) * 14) / perRow);
+  const msgH = msgLines.length ? Math.max(120, msgLines.length * 46 + 56) : 0;
+  const stH = Math.max(110, stLines.length * 42 + 60), bl = badges.length + 1;
+  const one = !!o.single;                                                   // seduta singola: niente progressi, conteggi e date da firmare
+  const H = 300 + (msgH ? 50 + msgH : 0) + 70 + 24 + 300 + 60 + (one ? 0 : 30 + dotRows * (dotD + 16) + 40 + 150 + 50 + stH + 80) + 20 + bl * 66 + 140;
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+  const x = cv.getContext("2d");
+  const rr = (X, Y, w, h, r) => { x.beginPath(); if(x.roundRect) x.roundRect(X, Y, w, h, r); else x.rect(X, Y, w, h); };
+  const label = (t, Y) => { x.fillStyle = C.moss; x.font = F("700", 30); x.fillText(t, M, Y); };
+  x.fillStyle = "#ffffff"; x.fillRect(0, 0, W, H);
+  /* testata verde */
+  const g = x.createLinearGradient(0, 0, W, 300); g.addColorStop(0, C.moss); g.addColorStop(1, C.mossD); x.fillStyle = g; x.fillRect(0, 0, W, 300);
+  x.fillStyle = "rgba(255,255,255,.85)"; x.font = F("700", 34); x.fillText(L ? "ATTENDANCE CARD" : "TESSERA PRESENZE", M, 92);
+  if(st){ const t = (L ? `${st.e} ${st.name} CLIENT` : `${st.e} CLIENTE ${st.name}`).toUpperCase(); x.font = F("700", 30); const w = x.measureText(t).width + 40;
+    rr(W - M - w, 58, w, 48, 24); x.fillStyle = C.gold; x.fill(); x.fillStyle = "#ffffff"; x.fillText(t, W - M - w + 20, 92); }
+  x.fillStyle = "#ffffff"; x.font = F("700", 78); x.fillText(o.name || "", M, 172);
+  x.fillStyle = "rgba(255,255,255,.9)"; x.font = G("500", 30);
+  x.fillText(one ? (L ? "Single session on " : "Seduta singola del ") + dIt(td.date)
+    : (L ? "Active package" : "Pacchetto attivo") + (o.start ? (L ? " from " : " dal ") + dIt(o.start) : "") + (total ? ` · ${total} ${L ? "sessions" : "sedute"}` : ""), M, 228);
+  if(o.trainer){ x.font = G("400", 26); x.fillText("Personal trainer: " + o.trainer, M, 270); }
+  let y = 300;
+  /* frase del giorno */
+  if(msgH){
+    y += 50; rr(M, y, CW, msgH, 22); x.fillStyle = C.goldSoft; x.fill(); x.lineWidth = 3; x.strokeStyle = "#ecd9a3"; x.stroke();
+    x.font = G("400", 54); x.textAlign = "center"; x.fillText(o.msg.e || "💬", M + 62, y + msgH / 2 + 19); x.textAlign = "left";
+    x.fillStyle = C.pine; x.font = G("700", 34); msgLines.forEach((l, i)=>x.fillText(l, M + 120, y + (msgH - msgLines.length * 46) / 2 + 36 + i * 46));
+    y += msgH;
+  }
+  y += 70;
+  /* firma della seduta */
+  const isToday = td.date && td.date === (o.now || "");
+  label(`${isToday ? (L ? "TODAY'S SIGNATURE" : "FIRMA DI OGGI") : (L ? "SESSION SIGNATURE" : "FIRMA DELLA SEDUTA")}${td.date ? " · " + dIt(td.date) : ""}`, y);
+  x.fillStyle = C.muted; x.font = G("600", 26); x.textAlign = "right"; x.fillText(td.label || "", W - M, y); x.textAlign = "left";
+  y += 24;
+  rr(M, y, CW, 300, 22); x.fillStyle = "#fbfcfb"; x.fill(); x.lineWidth = 3; x.strokeStyle = C.line; x.stroke();
+  x.strokeStyle = "#c9d3cd"; x.lineWidth = 2; x.beginPath(); x.moveTo(M + 50, y + 240); x.lineTo(W - M - 50, y + 240); x.stroke();
+  if(td.miss){ x.font = G("700", 24); const t = L ? "Missed lesson, not recoverable" : "Lezione saltata non recuperabile", w = x.measureText(t).width + 36;
+    rr(M + 24, y + 22, w, 44, 22); x.fillStyle = C.owedSoft; x.fill(); x.fillStyle = C.owed; x.fillText(t, M + 42, y + 52); }
+  if(td.s) sigDraw(x, td.s, M + 60, y + 40, CW - 120, 200, C.pine);
+  else { x.fillStyle = "#9aa5a0"; x.font = G("600", 34); x.textAlign = "center"; x.fillText(td.date ? (L ? "not signed" : "non firmata") : (L ? "No signature yet" : "Ancora nessuna firma"), W / 2, y + 165); x.textAlign = "left"; }
+  y += 300 + 60;
+  if(!one){
+  /* progressi */
+  label(L ? "YOUR PROGRESS 📈" : "I TUOI PROGRESSI 📈", y); y += 30;
+  for(let i = 0; i < Math.max(total, used); i++){
+    const cx = M + (i % perRow) * (dotD + 14) + dotD / 2, cy = y + Math.floor(i / perRow) * (dotD + 16) + dotD / 2, k = seq[i] || "todo";
+    if(td.n && i + 1 === td.n){ x.beginPath(); x.arc(cx, cy, dotD / 2 + 7, 0, Math.PI * 2); x.lineWidth = 4; x.strokeStyle = C.gold; x.stroke(); }
+    x.beginPath(); x.arc(cx, cy, dotD / 2, 0, Math.PI * 2);
+    x.fillStyle = k === "done" ? C.moss : k === "miss" ? C.owedSoft : "#ffffff"; x.fill();
+    x.lineWidth = 3; x.strokeStyle = k === "done" ? C.moss : k === "miss" ? C.owed : C.line; x.stroke();
+    x.fillStyle = k === "done" ? "#ffffff" : k === "miss" ? C.owed : "#9aa5a0"; x.font = F("700", Math.round(dotD * 0.46)); x.textAlign = "center"; x.fillText(String(i + 1), cx, cy + dotD * 0.16); x.textAlign = "left";
+  }
+  y += dotRows * (dotD + 16) + 40;
+  /* fatte / saltate / mancano / nel pacchetto */
+  const tiles = [[String(done), L ? "done" : "fatte", C.moss, C.soft], [String(left), L ? "to go" : "mancano", C.pine, "#f1f3f2"], [String(total || used), L ? "in the package" : "nel pacchetto", C.pine, "#f1f3f2"]];
+  if(lost) tiles.splice(1, 0, [String(lost), L ? "missed" : "saltate", C.owed, C.owedSoft]);
+  const tw = (CW - (tiles.length - 1) * 18) / tiles.length;
+  tiles.forEach(([v, t, col, bg], i)=>{ const X = M + i * (tw + 18); rr(X, y, tw, 150, 20); x.fillStyle = bg; x.fill();
+    x.fillStyle = col; x.font = F("700", 76); x.textAlign = "center"; x.fillText(v, X + tw / 2, y + 86); x.font = G("600", 26); x.fillText(t, X + tw / 2, y + 126); x.textAlign = "left"; });
+  y += 150 + 50;
+  /* firme del pacchetto attivo */
+  const okAll = !unsigned.length;
+  rr(M, y, CW, stH, 20); x.fillStyle = okAll ? C.soft : C.owedSoft; x.fill();
+  x.font = G("400", 46); x.textAlign = "center"; x.fillText(okAll ? "✅" : "⚠️", M + 54, y + stH / 2 + 16); x.textAlign = "left";
+  x.fillStyle = okAll ? C.moss : C.owed; x.font = G("600", 30);
+  stLines.forEach((l, i)=>x.fillText(l, M + 106, y + (stH - stLines.length * 42) / 2 + 32 + i * 42));
+  y += stH + 80;
+  }
+  /* traguardi */
+  label(L ? "YOUR MILESTONES 🏆✨" : "I TUOI TRAGUARDI 🏆✨", y); y += 20;
+  badges.forEach(b=>{ y += 66; x.fillStyle = C.pine; x.font = G("600", 34); x.fillText(b, M, y); });
+  y += 66; x.fillStyle = "#8a958f"; x.font = G("500", 30); x.fillText(nextTxt, M, y);
+  y += 100; x.fillStyle = C.moss; x.font = F("700", 46); x.textAlign = "center";
+  x.fillText(L ? "Keep it up! 🚀👏🔥" : "Continua così! 🚀👏🔥", W / 2, y); x.textAlign = "left";
+  return cv;
+}
+/* firma come immagine PNG (per Word e PDF) */
+function sigPng(str, w, h){
+  const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+  const x = cv.getContext("2d"); x.fillStyle = "#ffffff"; x.fillRect(0, 0, w, h);
+  sigDraw(x, str, 4, 4, w - 8, h - 8, "#14213d");
+  return cv.toDataURL("image/png");
+}
+/*SIGLIB-END*/
+(function(){
+  const $ = id => document.getElementById(id), box = $("box");
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const t = new URLSearchParams(location.search).get("t") || "";
+  let L = false;                                                                   // la lingua la decide il gestionale (info.lang)
+  const T = (it, en) => L ? en : it;
+  const dIt = iso => iso ? iso.split("-").reverse().join("/") : "";
+  function fail(code){
+    box.innerHTML = `<div class="top"></div><h1>${T("Link non valido", "Link not valid")}</h1><p class="sub">${code === "expired"
+      ? T("Il link è scaduto oppure la seduta è già stata firmata. Chiedi al tuo personal trainer un nuovo link.", "The link has expired or the session has already been signed. Ask your personal trainer for a new link.")
+      : code === "too_many" ? T("Troppi tentativi: riprova tra qualche minuto.", "Too many attempts: try again in a few minutes.")
+      : code === "offline" ? T("Non riesco a collegarmi. Controlla la connessione e ricarica la pagina.", "I can't connect. Check your connection and reload the page.")
+      : T("Il link non è corretto. Chiedi al tuo personal trainer un nuovo link.", "The link is not correct. Ask your personal trainer for a new link.")}</p>`;
+  }
+  async function start(){
+    if(!/^[A-Za-z0-9_-]{20,64}$/.test(t)) return fail("link");
+    let r, j;
+    try{ r = await fetch("api/firme?t=" + encodeURIComponent(t), {cache:"no-store"}); j = await r.json().catch(()=>({})); }catch(_){ return fail("offline"); }
+    if(!r.ok) return fail(r.status === 410 ? "expired" : r.status === 429 ? "too_many" : "link");
+    const info = j.info || {}; L = info.lang === "en";
+    document.documentElement.lang = L ? "en" : "it"; document.title = T("Firma della seduta", "Sign the session");
+    box.innerHTML = `<div class="top"></div>
+      ${info.trainer ? `<p class="who">${esc(T("Personal trainer", "Personal trainer"))}: <b>${esc(info.trainer)}</b></p>` : ""}
+      <div class="head"><h1>${esc(T("Ciao", "Hi"))} ${esc(info.first || "")}!</h1>
+      <p class="what">${esc(info.miss ? T("Conferma la lezione saltata del", "Confirm the missed lesson on") : T("Conferma la seduta del", "Confirm the session on"))} ${esc(dIt(info.date))}</p>
+      <p class="sub">${esc(info.label || "")}</p></div>
+      <div class="turn"><span class="ic" aria-hidden="true">📱↻</span><span>${esc(T("Gira il telefono in orizzontale per firmare", "Turn your phone sideways to sign"))}</span></div>
+      <div class="tools"><button type="button" class="zb" id="zout" aria-label="${esc(T("Rimpicciolisci il riquadro", "Make the box smaller"))}">➖</button><span class="zl" id="zl">100%</span><button type="button" class="zb" id="zin" aria-label="${esc(T("Ingrandisci il riquadro", "Make the box bigger"))}">➕</button>
+        <button type="button" class="fsb" id="fs">⤢ ${esc(T("Schermo intero", "Full screen"))}</button><span class="sp lnd"></span>
+        <button type="button" class="lnd" id="clr3">${esc(T("Cancella", "Clear"))}</button><button type="button" class="primary lnd" id="ok3" disabled>✔ ${esc(T("Invia firma", "Send signature"))}</button></div>
+      <div class="pad" id="pad"><div class="padtop">${esc(T("Gira il telefono in orizzontale e firma con il dito.", "Turn your phone sideways and sign with your finger."))}</div>
+        <canvas id="cv" aria-label="${esc(T("Riquadro per firmare", "Signature box"))}"></canvas><div class="ph" id="ph"><b></b>${esc(T("Firma qui con il dito", "Sign here with your finger"))}</div>
+        <div class="padbar"><button type="button" id="clr2">${esc(T("Cancella", "Clear"))}</button><button type="button" class="primary" id="done2">✔ ${esc(T("Fatto", "Done"))}</button></div></div>
+      <div class="row bottom"><button type="button" id="clr">${esc(T("Cancella", "Clear"))}</button><button type="button" class="primary" id="ok" disabled>✔ ${esc(T("Invia firma", "Send signature"))}</button></div>
+      <p class="err" id="err" role="alert"></p>`;
+    /* grandezza del riquadro: ➕ ➖ oppure due dita (la firma si ridisegna in proporzione, senza sgranare) */
+    let z = 1, z0 = 1;
+    const baseH = () => matchMedia("(orientation: landscape)").matches ? Math.max(200, innerHeight - 112) : Math.max(300, Math.min(innerHeight * 0.6, 560));
+    const size = () => { if($("pad").classList.contains("full")){ $("pad").style.height = ""; } else $("pad").style.height = Math.round(baseH() * z) + "px"; $("zl").textContent = Math.round(z * 100) + "%"; pad.fit(); };
+    const zoom = v => { z = Math.max(0.6, Math.min(2, Math.round(v * 100) / 100)); size(); };
+    const pad = SigPad($("cv"), ()=>{ $("ok").disabled = $("ok3").disabled = pad.points() < 3; $("ph").hidden = pad.points() > 0; $("err").textContent = ""; },
+      {pinch: (k, ph) => { if(ph === "start") z0 = z; else if(ph === "move") zoom(z0 * k); }});
+    $("zin").onclick = () => zoom(z + 0.2); $("zout").onclick = () => zoom(z - 0.2);
+    size(); window.addEventListener("resize", size); window.addEventListener("orientationchange", ()=>setTimeout(size, 250));
+    $("clr").onclick = $("clr2").onclick = $("clr3").onclick = () => pad.clear();
+    $("ok3").onclick = () => $("ok").click();
+    const full = on => { $("pad").classList.toggle("full", on); document.body.style.overflow = on ? "hidden" : ""; requestAnimationFrame(size); };
+    $("fs").onclick = () => full(true); $("done2").onclick = () => full(false);
+    $("ok").onclick = async () => {
+      const s = pad.encode(); if(s.length < 8) return;
+      $("ok").disabled = $("ok3").disabled = true; $("err").textContent = "";
+      let rr;
+      try{ rr = await fetch("api/firme", {method:"POST", cache:"no-store", headers:{"Content-Type":"application/json"}, body: JSON.stringify({t, s})}); }
+      catch(_){ $("ok").disabled = $("ok3").disabled = false; $("err").textContent = T("Non riesco a inviare: controlla la connessione e riprova.", "I can't send it: check your connection and try again."); return; }
+      if(rr.status === 410) return fail("expired");
+      if(!rr.ok){ $("ok").disabled = $("ok3").disabled = false; $("err").textContent = T("Qualcosa non va: riprova.", "Something went wrong: try again."); return; }
+      done(info, s);
+    };
+  }
+  async function done(info, s){
+    try{ if(document.fonts && document.fonts.load) await Promise.race([Promise.all([document.fonts.load('700 40px "Barlow Condensed"'), document.fonts.load("600 30px Barlow"), document.fonts.load("500 30px Barlow")]), new Promise(r=>setTimeout(r, 1500))]); }catch(_){}
+    let html = `<div class="top"></div><div class="done"><h1>✅ ${esc(T("Grazie!", "Thank you!"))}</h1><p class="sub">${esc(T("Firma ricevuta.", "Signature received."))}</p>`;
+    const c = info.card;
+    if(c && (c.total > 0 || c.single)){
+      const cv = sigCardCanvas(Object.assign({}, c, {today: Object.assign({}, c.today || {}, {s}), lang: info.lang}));
+      html += `<p>${esc(T("Ecco la tua tessera presenze con i traguardi:", "Here is your attendance card with your milestones:"))}</p><img id="cardImg" alt="${esc(T("Tessera presenze", "Attendance card"))}" src="${cv.toDataURL("image/png")}">
+        <div class="row"><button type="button" class="primary" id="save">⬇ ${esc(T("Salva immagine", "Save image"))}</button></div>
+        <p class="muted">${esc(T("Puoi chiudere questa pagina.", "You can close this page."))}</p>`;
+      box.innerHTML = html + "</div>";
+      $("save").onclick = async () => {
+        const name = T("Tessera presenze", "Attendance card") + ".png";
+        const blob = await new Promise(r=>cv.toBlob(r, "image/png"));
+        try{ const f = new File([blob], name, {type:"image/png"}); if(navigator.canShare && navigator.canShare({files:[f]})){ await navigator.share({files:[f]}); return; } }catch(e){ if(e && e.name === "AbortError") return; }
+        const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+      };
+    } else box.innerHTML = html + `<p class="muted">${esc(T("Puoi chiudere questa pagina.", "You can close this page."))}</p></div>`;
+  }
+  start();
+})();
+</script>
+</body>
+</html>

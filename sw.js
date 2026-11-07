@@ -1,12 +1,13 @@
 /* Gestionale PT: funziona anche senza internet.
    Quando pubblichi una versione nuova, cambia il numero qui sotto (v1 -> v2). */
-const CACHE = "gestionale-pt-v98";
+const CACHE = "gestionale-pt-v99b";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest",
   "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./favicon-32.png"];
 /* librerie per Word e PDF e caratteri: se possibile le salvo subito, così funzionano offline */
 const EXTRA = [
   "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js",
   "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js",
   "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Barlow:wght@400;500;600&display=swap"
 ];
 self.addEventListener("install", e=>{
@@ -28,6 +29,7 @@ self.addEventListener("fetch", e=>{
   if(req.method !== "GET") return;
   const url = new URL(req.url);
   if(url.origin === self.location.origin && url.pathname.includes("/api/")) return;   // il database: sempre dalla rete, mai dalla memoria
+  if(url.origin === self.location.origin && /\/firma\.html$/.test(url.pathname)) return;   // la pagina per far firmare il cliente: sempre dalla rete
   // la pagina: prima internet (così gli aggiornamenti arrivano subito), se manca la copia salvata
   if(req.mode === "navigate"){
     e.respondWith((async ()=>{
