@@ -79,7 +79,7 @@
 
   /* ---------- finestre ---------- */
   document.body.insertAdjacentHTML("beforeend", `<dialog id="dlgPV" class="sig-dlg"><form method="dialog" id="pvForm"></form></dialog>
-<dialog id="dlgPVPrev" class="sig-dlg"><form method="dialog"><iframe id="pvFrame" title="Anteprima della visuale cliente"></iframe><div class="dlg-actions"><button class="btn primary" value="cancel">Chiudi anteprima</button></div></form></dialog>`);
+<dialog id="dlgPVPrev" class="sig-dlg"><form method="dialog"><button type="submit" value="cancel" formnovalidate class="dlg-x" aria-label="Chiudi" title="Chiudi">✕</button><iframe id="pvFrame" title="Anteprima della visuale cliente"></iframe><div class="dlg-actions"><button class="btn primary" value="cancel">Chiudi anteprima</button></div></form></dialog>`);
 
   /* ---------- server ---------- */
   async function api(method, qs, body){
@@ -107,7 +107,7 @@
     const past = (c.packages || []).filter(p=>!(typeof isSingle === "function" && isSingle(p))).sort((a, b)=>(b.end || b.start || "").localeCompare(a.end || a.start || ""));
     const last = past[0];
     const o = {v: 1, upd: upd || "", trainer: settings.trainerName || "", first: first(c), msg: v.msg, sec: v.sec, active: ptActive(c), ended: "",
-      pkg: null, rows: [], pays: [], allTime: sigAllTime(c), days: [], old: null,
+      pkg: null, rows: [], pays: [], allTime: v.sec.goal ? sigAllTime(c) : 0, days: [], old: null,   // (v105: sedute totali e status solo con la sezione traguardi)
       /* appuntamenti dell'agenda (solo promemoria): il cliente vede tipo, giorno e ora — mai se è “singola” o del pacchetto */
       /* tutti quelli dell'ultimo mese (anche passati): la pagina mostra i prossimi e, a richiesta, i passati in grigio */
       book: v.sec.book && typeof normBook === "function" ? normBook(c.book).slice(-60).map(b=>({date: b.date, time: b.time, type: b.type})) : [],
@@ -195,7 +195,7 @@
 
   /* ---------- testi ---------- */
   const DEV_ICON = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="18.2" r="1.1" fill="currentColor"/><path d="M10 4.6h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
-  const devKind = k => k === "iPhone" || k === "iPad" ? `📱 ${k}` : k === "Android" ? "🤖 Android" : k === "computer" ? "💻 Computer" : "📱 Telefono";
+  const devKind = k => k === "iPhone" || k === "iPad" ? k : k === "Android" ? "Android" : k === "computer" ? "Computer" : "Telefono";   // v103: solo la scritta, senza icona
   function when(ms){
     if(!ms) return ""; const d = new Date(ms); if(isNaN(d)) return "";
     const iso = x => x.getFullYear() + "-" + String(x.getMonth() + 1).padStart(2, "0") + "-" + String(x.getDate()).padStart(2, "0");
@@ -208,7 +208,11 @@
     return v.seenAt ? `non ha ancora visto l'ultimo aggiornamento (ultimo accesso ${when(v.seenAt)})` : "non ha ancora aperto la pagina";
   }
   const ALERT_TXT = {try: "ha provato ad aprire la pagina con un link non più valido o da un dispositivo tolto", pinlock: "dispositivo bloccato: 5 PIN sbagliati", delreq: "chiede di cancellare i dati della pagina",
-    idle: "approvazione scaduta: non apriva la pagina da 30 giorni", logout: "ha scollegato il suo dispositivo"};
+    idle: "link spento: non apriva la pagina da 30 giorni (per riattivarla crea un link nuovo)", logout: "ha scollegato il suo dispositivo",
+    other: "un altro dispositivo ha provato ad aprire il link (già usato dal telefono del cliente)"};
+  /* v104: stato del link quando non c'è ancora un dispositivo */
+  const linkState = v => !v ? "" : v.lockWhy === "idle" ? "link spento: 30 giorni senza aprire la pagina" : v.lockWhy === "rejected" ? "richiesta rifiutata: serve un link nuovo"
+    : v.on && v.linkOld ? "link scaduto: non usato entro 1 ora" : v.on && !v.bound && v.expAt ? "link valido fino a " + when(v.expAt) : v.on ? "link attivo, in attesa del cliente" : "";
   const alertsOf = v => (v && v.alerts || []).filter(a=>a.k !== "sign" && ALERT_TXT[a.k]);
 
   /* ---------- riquadro del dispositivo nella cartella ---------- */
@@ -222,7 +226,7 @@
     else if(v && v.on && v.device) inner = `<div class="dev-card ok${v.device.blocked ? " warn" : ""}" data-a="pvOpen" data-id="${esc(c.id)}" role="button" tabindex="0" title="Gestisci la visuale cliente"><span class="dev-ic">${DEV_ICON}</span><span class="dev-tx"><small>Dispositivo · ${esc(c.name)}</small><b>${esc(v.device.name)}</b>
         <span class="dev-kind">${devKind(v.device.kind)}<i class="dev-dot" aria-hidden="true"></i>${v.device.blocked ? `<span class="dev-bad">🔒 bloccato (PIN)</span>` : v.device.seen ? "visto " + when(v.device.seen) : "approvato"}</span></span>
         <span class="dev-act"><button type="button" class="dev-x" data-a="pvDel" data-id="${esc(c.id)}" aria-label="Togli il dispositivo" title="Togli il dispositivo">✕</button></span></div>`;
-    else inner = `<button type="button" class="dev-card add" data-a="pvOpen" data-id="${esc(c.id)}"><span class="dev-ic">${DEV_ICON}</span><span class="dev-tx"><small>Dispositivo · ${esc(c.name)}</small><b>+ Aggiungi dispositivo</b>${v && v.on ? `<span class="dev-kind">link attivo, in attesa del cliente</span>` : ""}</span></button>`;
+    else inner = `<button type="button" class="dev-card add" data-a="pvOpen" data-id="${esc(c.id)}"><span class="dev-ic">${DEV_ICON}</span><span class="dev-tx"><small>Dispositivo · ${esc(c.name)}</small><b>+ Aggiungi dispositivo</b>${linkState(v) ? `<span class="dev-kind">${esc(linkState(v))}</span>` : ""}</span></button>`;
     return `<div class="dev-row" id="devRow">${inner}</div>`;
   }
   /* ---------- home: tasto e avvisi ---------- */
@@ -251,7 +255,7 @@
   function pageHTML(){
     let h = `<button class="back" data-a="pvClose">‹ Tutte le cartelle</button>
       <div class="stats-head"><h1>📱 Visuale cliente</h1></div>
-      <p class="sub">Ogni cliente può avere una pagina sul suo telefono, solo da guardare e sempre aggiornata: sedute, lezioni saltate, pagamenti, traguardi e firme. Il cliente apre il link, scrive il nome del dispositivo e chiede l'accesso: lo approvi tu (massimo 1 dispositivo per cliente), poi sceglie un PIN di 4 cifre. Per attivarla apri la cartella del cliente e premi <b>+ Aggiungi dispositivo</b>.</p>`;
+      <p class="sub">Ogni cliente può avere una pagina sul suo telefono, solo da guardare e sempre aggiornata: sedute, lezioni saltate, pagamenti, traguardi e firme. Il cliente apre il link, scrive il nome del dispositivo e chiede l'accesso: lo approvi tu (massimo 1 dispositivo per cliente), poi sceglie un PIN di 4 cifre. Il link nuovo vale 1 ora: quando il cliente chiede l'accesso resta legato al suo telefono e non scade più (si spegne solo se non apre la pagina per 30 giorni). Per attivarla apri la cartella del cliente e premi <b>+ Aggiungi dispositivo</b>.</p>`;
     if(!online()) return h + `<p class="locked-note">🔒 La visuale cliente funziona solo con il salvataggio online (sincronizzazione tra dispositivi).</p>`;
     if(off()) return h + `<section class="block pv-sec"><h2>Funzione disattivata</h2><p class="sub">Le pagine dei clienti sono spente e nelle cartelle non compare il riquadro del dispositivo.</p><button class="btn primary" data-a="pvOn">Riattiva la visuale cliente</button></section>`;
     const n = counts(), list = Object.entries(info).filter(([cid])=>getClient(cid)).sort((a, b)=>nameOf(a[0]).localeCompare(nameOf(b[0]), "it"));
@@ -260,7 +264,7 @@
     h += `<section class="block pv-sec"><h2>Pagine dei clienti (${list.filter(([, v])=>v.on).length})</h2>`;
     if(!list.length) h += `<p class="sub">Ancora nessuna pagina. Apri la cartella di un cliente e premi <b>+ Aggiungi dispositivo</b>.</p>`;
     else h += `<table class="pv-table"><thead><tr><th>Cliente</th><th>Dispositivo</th><th>Ultimo accesso</th><th></th></tr></thead><tbody>${list.map(([cid, v])=>`<tr class="${v.on ? "" : "pv-off"}">
-        <td><button class="pv-link" data-a="open" data-id="${esc(cid)}"><b>${esc(nameOf(cid))}</b></button>${v.locked ? `<br><span class="pv-muted">dispositivo tolto: link non più valido</span>` : v.ended ? `<br><span class="pv-muted">pacchetto chiuso il ${itDate(v.ended)}</span>` : ""}</td>
+        <td><button class="pv-link" data-a="open" data-id="${esc(cid)}"><b>${esc(nameOf(cid))}</b></button>${v.locked ? `<br><span class="pv-muted">${v.lockWhy === "idle" ? "link spento: 30 giorni senza aprire la pagina" : v.lockWhy === "rejected" ? "richiesta rifiutata: link non più valido" : "dispositivo tolto: link non più valido"}</span>` : v.on && !v.device && !v.pending && linkState(v) ? `<br><span class="pv-muted">${esc(linkState(v))}</span>` : v.ended ? `<br><span class="pv-muted">pacchetto chiuso il ${itDate(v.ended)}</span>` : ""}</td>
         <td>${v.device ? `${esc(v.device.name)}<br><span class="pv-muted">${devKind(v.device.kind)}${v.device.blocked ? ` · <span class="dev-bad">🔒 bloccato</span>` : ""}</span>` : v.pending ? `<span class="dev-bad">richiesta: ${esc(v.pending.name)}</span>` : `<span class="pv-muted">nessuno</span>`}</td>
         <td>${v.device && v.device.seen ? when(v.device.seen) : "—"}${v.device ? `<br><span class="pv-muted">${esc(seenText(v))}</span>` : ""}</td>
         <td><span class="pv-acts"><button type="button" class="btn small" data-a="pvOpen" data-id="${esc(cid)}">Gestisci</button>${v.on || v.locked ? `<button type="button" class="btn small ghost" data-a="pvBlock" data-id="${esc(cid)}">Blocca link</button>` : ""}</span></td></tr>`).join("")}</tbody></table>`;
@@ -276,22 +280,23 @@
     let c = getClient(cid); if(!c) return;
     if(!usable()) return messageBox("Visuale cliente", "Serve il salvataggio online (sincronizzazione) e la funzione attiva.");
     let v = info[cid];
-    if(!v || !v.on){
+    if(!v || !v.on || v.linkOld){                                  // (v104: link non usato entro 1 ora → il server ne crea uno nuovo)
       const r = await op({op: "link", client: cid, trainer: settings.trainerName || "", first: first(c)});
       if(!r) return; v = info[cid] = r.view; v.token = r.token;
       push(cid, true);
     } else if(!v.token){
-      const r = await op({op: "link", client: cid, trainer: settings.trainerName || "", first: first(c)}); if(!r) return; info[cid].token = r.token; v = info[cid];
+      const r = await op({op: "link", client: cid, trainer: settings.trainerName || "", first: first(c)}); if(!r) return; v = info[cid] = Object.assign(r.view || info[cid], {token: r.token});
     }
     const url = pageUrl(v.token), vw = normView(c.view), al = alertsOf(v);
-    $("pvForm").innerHTML = `<h3>📱 Visuale cliente · ${esc(c.name)}</h3>
-      <p class="hint">${v.pending ? `⏳ <b>${esc(v.pending.name)}</b> (${devKind(v.pending.kind)}) chiede l'accesso.` : v.device ? `Dispositivo approvato: <b>${esc(v.device.name)}</b> (${devKind(v.device.kind)})${v.device.blocked ? ` · <span class="dev-bad">🔒 bloccato per troppi PIN sbagliati</span>` : ""}<br>${esc(seenText(v))}` : "Nessun dispositivo: manda il link al cliente. Dovrà chiedere l'accesso e tu lo approvi."}</p>
+    $("pvForm").innerHTML = `<button type="submit" value="cancel" formnovalidate class="dlg-x" aria-label="Chiudi" title="Chiudi">✕</button><h3>📱 Visuale cliente · ${esc(c.name)}</h3>
+      <p class="hint">${v.pending ? `⏳ <b>${esc(v.pending.name)}</b> (${devKind(v.pending.kind)}) chiede l'accesso.` : v.device ? `Dispositivo approvato: <b>${esc(v.device.name)}</b> (${devKind(v.device.kind)})${v.device.blocked ? ` · <span class="dev-bad">🔒 bloccato per troppi PIN sbagliati</span>` : ""}<br>${esc(seenText(v))}` : `Nessun dispositivo: manda il link al cliente. Dovrà chiedere l'accesso e tu lo approvi.<br><b>Il link vale 1 ora${v.expAt ? ` (fino a ${esc(when(v.expAt))})` : ""}</b>: quando il cliente chiede l'accesso resta legato al suo telefono e non scade più.`}</p>
       ${v.pending ? `<div class="pv-row"><button type="button" class="btn primary" data-pv="ok">Approva</button><button type="button" class="btn ghost" data-pv="no">Rifiuta</button></div>` : ""}
       ${v.delreq ? `<div class="pv-note"><b>${esc(c.name)} chiede di cancellare i dati della pagina.</b><p class="pv-muted">Se accetti, la pagina viene spenta e i dati che vedeva il cliente vengono cancellati dal server. Sedute, pagamenti e firme restano nel tuo gestionale.</p><div class="pv-row"><button type="button" class="btn danger" data-pv="erase">Spegni e cancella</button><button type="button" class="btn ghost" data-pv="keep">Tieni la pagina</button></div></div>` : ""}
       ${al.length ? `<div class="pv-note">${al.map(a=>`<div class="pv-line"><span>${esc(ALERT_TXT[a.k])} <span class="pv-muted">(${when(a.at)})</span></span><button type="button" class="btn small ghost" data-pv="ack" data-al="${esc(a.id)}">Ok, visto</button></div>`).join("")}</div>` : ""}
       ${v.device || v.pending ? "" : `<div class="sl-qr" id="pvQr" aria-label="QR code della pagina del cliente"></div>`}
       <div class="sl-btns"><button type="button" class="btn primary" data-pv="send">📤 Invia link</button><button type="button" class="btn ghost" data-pv="copy">📋 Copia link</button></div>
       <input id="pvUrl" class="sl-url" readonly aria-label="Link della pagina del cliente" value="${esc(url)}">
+      ${v.bound ? "" : `<div class="pv-row"><button type="button" class="btn small ghost" data-pv="fresh">🔄 Link nuovo (vale 1 ora da adesso)</button></div>`}
       <h4>📢 Avviso per il cliente</h4>
       <p class="hint">Compare in alto nella sua pagina come “Avviso del tuo personal trainer”. Lascia vuoto per non mostrare niente. Il cliente non può rispondere: la pagina è solo da guardare (può solo firmare le sedute non firmate).</p>
       <textarea id="pvMsg" maxlength="300" placeholder="Es. Sabato la palestra è chiusa: la seduta si sposta a lunedì">${esc(vw.msg)}</textarea>
@@ -319,7 +324,7 @@
       const w = b.dataset.pv;
       if(w === "copy"){ try{ await navigator.clipboard.writeText(url); toast("Link copiato"); }catch(_){ const i = $("pvUrl"); i.focus(); i.select(); try{ document.execCommand("copy"); toast("Link copiato"); }catch(__){ toast("Tieni premuto il link per copiarlo"); } } return; }
       if(w === "send"){
-        const text = `Ciao ${first(getClient(cid)) || ""}! Ecco il link per vedere il tuo percorso (sedute, pagamenti, traguardi e firme): ${url}\nAprilo dal tuo telefono, scrivi il nome del dispositivo e chiedi l'accesso: lo approvo io.`;
+        const text = `Ciao ${first(getClient(cid)) || ""}! Ecco il link per vedere il tuo percorso (sedute, pagamenti, traguardi e firme): ${url}\nAprilo dal tuo telefono entro 1 ora, scrivi il nome del dispositivo e chiedi l'accesso: lo approvo io.`;
         const touch = matchMedia("(pointer:coarse)").matches;
         try{ if(touch && navigator.share){ await navigator.share({text}); return; } }catch(err){ if(err && err.name === "AbortError") return; }
         const ph = String((getClient(cid) || {}).phone || "").replace(/[^\d+]/g, "").replace(/^\+/, "").replace(/^00/, "");
@@ -334,8 +339,9 @@
     dlg.onclick = null;
     save();
     if(!next) return;
+    if(next === "fresh"){ const r = await op({op: "link", client: cid, fresh: true, trainer: settings.trainerName || "", first: first(getClient(cid) || c)}); if(r){ info[cid] = Object.assign(r.view || {}, {token: r.token}); toast("Link nuovo: vale 1 ora"); } return dialog(cid); }
     if(next === "ok") return approve(cid);
-    if(next === "no") return op({op: "reject", client: cid}, "Richiesta rifiutata");
+    if(next === "no") return op({op: "reject", client: cid}, "Richiesta rifiutata: il link non vale più");
     if(next === "del") return remove(cid);
     if(next === "block") return block(cid);
     if(next === "unblock") return op({op: "unblock", client: cid}, "Dispositivo sbloccato: il cliente può rimettere il suo PIN");
@@ -392,7 +398,7 @@
       case "pvClose": open = false; render(); window.scrollTo({top: 0}); return;
       case "pvOpen": return dialog(cid);
       case "pvOk": return approve(cid);
-      case "pvNo": return op({op: "reject", client: cid}, "Richiesta rifiutata");
+      case "pvNo": return op({op: "reject", client: cid}, "Richiesta rifiutata: il link non vale più");
       case "pvDel": return remove(cid);
       case "pvBlock": return block(cid);
       case "pvUnblock": return op({op: "unblock", client: cid}, "Dispositivo sbloccato");

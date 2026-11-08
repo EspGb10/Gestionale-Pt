@@ -1,6 +1,6 @@
 /* Pagina del cliente (visuale-cliente/): funziona anche senza internet.
    Vale SOLO per la cartella visuale-cliente (non tocca il gestionale). Le situazioni aggiornate arrivano sempre da internet (/api/). */
-const CACHE = "pt-cliente-v102";
+const CACHE = "pt-cliente-v105";
 const FILES = ["./", "./manifest.webmanifest", "../icon-192.png", "../icon-512.png", "../apple-touch-icon.png", "../favicon-32.png"];
 self.addEventListener("install", e=>{
   e.waitUntil((async ()=>{ const c = await caches.open(CACHE); await Promise.all(FILES.map(u=>c.add(u).catch(()=>{}))); await self.skipWaiting(); })());

@@ -135,9 +135,14 @@ input[type=text]{width:100%;font:inherit;padding:12px;border-radius:12px;border:
 .cal .d.bp{background:#e7e9e8;color:#7a857f;font-weight:700}
 .tag.bk{background:#dbe8fb;color:#1d4f91}
 .rows .r.past{opacity:.55;filter:grayscale(1)}
-.bkbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 6px}
-.bkbar input[type=date]{font:inherit;padding:8px 10px;border-radius:12px;border:1.5px solid var(--line);background:var(--paper);color:var(--pine);flex:1 1 150px;min-width:0}
-@media (prefers-color-scheme: dark){.cal .d.b,.tag.bk{background:#1d3352;color:#a9c8f5}}
+.cal button.d{font:inherit;color:inherit;background:transparent;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cal .d.on{outline:3px solid #1d4f91;outline-offset:1px}
+.calsel{background:var(--paper);border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;margin:0 0 12px}
+.calsel .cs-t{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.subh{font-size:.95rem;margin:16px 0 4px;color:var(--pine)}
+.bkdiv{border:0;border-top:2px solid #111;margin:14px 0 0}
+@media (prefers-color-scheme: dark){.bkdiv{border-top-color:#e8ece9}}
+@media (prefers-color-scheme: dark){.cal .d.b,.tag.bk{background:#1d3352;color:#a9c8f5}.cal .d.on{outline-color:#a9c8f5}.cal .d.s{color:#10241a}.cal .d.bp{background:#2a312d;color:#8d9a93}}
 .inst h4{margin:14px 0 6px;font-size:1.05rem}
 .inst ol{margin:0;padding-left:22px}
 .inst li{padding:4px 0;border:0}
@@ -438,6 +443,15 @@ function sigPng(str, w, h){
     },
     removed(){ cacheClear(); gate(`<div class="center"><div class="big-ic">🚫</div><h1>${T("Link scaduto", "Link expired")}</h1>
       <p>${T("Non hai più accesso a questo programma. Contatta il tuo personal trainer per maggiori informazioni.", "You no longer have access to this program. Contact your personal trainer for more information.")}</p></div>`); },
+    /* v104: link non usato entro 1 ora · link già legato a un altro dispositivo · 30 giorni senza aprire la pagina */
+    linkold(){ cacheClear(); gate(`<div class="center"><div class="big-ic">⌛</div><h1>${T("Link scaduto", "Link expired")}</h1>
+      <p>${T("Questo link valeva 1 ora e non è stato usato in tempo. Chiedi al tuo personal trainer di mandartene uno nuovo.", "This link was valid for 1 hour and wasn't used in time. Ask your personal trainer to send you a new one.")}</p></div>`); },
+    used(){ cacheClear(); gate(`<div class="center"><div class="big-ic">🔐</div><h1>${T("Link già usato", "Link already used")}</h1>
+      <p>${T("Questo link è già collegato a un altro dispositivo. Se hai cambiato telefono, chiedi al tuo personal trainer di togliere quello vecchio e di mandarti un link nuovo.", "This link is already linked to another device. If you changed phone, ask your personal trainer to remove the old one and send you a new link.")}</p></div>`); },
+    moved(){ cacheClear(); gate(`<div class="center"><div class="big-ic">📲</div><h1>${T("Apri dall'icona", "Open from the icon")}</h1>
+      <p>${T("La tua pagina ora si apre dall'icona sulla schermata Home del telefono. Puoi chiudere questa finestra.", "Your page now opens from the icon on your phone's Home screen. You can close this window.")}</p></div>`); },
+    idle(){ cacheClear(); gate(`<div class="center"><div class="big-ic">⌛</div><h1>${T("Link scaduto", "Link expired")}</h1>
+      <p>${T("Non apri la pagina da più di 30 giorni: per sicurezza il link si è spento. Chiedi al tuo personal trainer di mandartene uno nuovo.", "You haven't opened the page for more than 30 days: for safety the link was switched off. Ask your personal trainer to send you a new one.")}</p></div>`); },
     expired(){ cacheClear(); gate(`<div class="center"><div class="big-ic">📦</div><h1>${T("Pacchetto concluso", "Package ended")}</h1>
       <p>${T("Il tuo pacchetto è concluso da più di 7 giorni e non è stato rinnovato, quindi la pagina non è più disponibile. Contatta il tuo personal trainer per rinnovare.", "Your package ended more than 7 days ago and was not renewed, so this page is no longer available. Contact your personal trainer to renew.")}</p></div>`); },
     blocked(){ gate(`<div class="center"><div class="big-ic">🔒</div><h1>${T("Dispositivo bloccato", "Device locked")}</h1>
@@ -511,6 +525,10 @@ function sigPng(str, w, h){
       case "pin": setK(""); return pinScreen("pin");
       case "removed": return S.removed();
       case "expired": return S.expired();
+      case "linkold": return S.linkold();
+      case "used": return S.used();
+      case "idle": return S.idle();
+      case "moved": return S.moved();
       case "blocked": setK(""); return S.blocked();
       case "ok":
         if(j.k) setK(j.k);
@@ -542,7 +560,7 @@ function sigPng(str, w, h){
   const isClosed = k => k in folds ? !!folds[k] : !!CLOSED_DEF[k];
   const card = (k, title, body, cls) => `<section class="card fold${cls ? " " + cls : ""}${isClosed(k) ? " shut" : ""}" data-k="${k}"><button class="fh" aria-expanded="${!isClosed(k)}"><h2>${title}</h2><span class="fx">${isClosed(k) ? T("Mostra", "Show") + " ▾" : T("Nascondi", "Hide") + " ▴"}</span></button><div class="fb">${body}</div></section>`;
   function drawSig(cv){ const r = cv.getBoundingClientRect(); if(!r.width) return; const k = devicePixelRatio || 1; cv.width = r.width * k; cv.height = r.height * k; sigDraw(cv.getContext("2d"), cv.dataset.s, 8 * k, 6 * k, cv.width - 16 * k, cv.height - 12 * k, "#14213d"); }
-  let cur = null, curSigs = {}, curOpt = {}, news = [], openEye = "", calIdx = null, bkDate = "";
+  let cur = null, curSigs = {}, curOpt = {}, news = [], openEye = "", calYm = "", calSel = "", calMonths = [];
   const on = (d, k) => !d.sec || d.sec[k] !== false;
   /* “Novità dall'ultima visita”: solo quando c'è davvero qualcosa di nuovo rispetto all'ultima volta che hai aperto la pagina */
   function summary(d, sigs){
@@ -566,7 +584,7 @@ function sigPng(str, w, h){
     if(b.sg > (a.sg || 0)) out.push(`💪 ${b.sg - (a.sg || 0) === 1 ? T("+1 seduta singola", "+1 single session") : T(`+${b.sg - (a.sg || 0)} sedute singole`, `+${b.sg - (a.sg || 0)} single sessions`)}`);
     if(b.todo > a.todo) out.push(`✍️ ${b.todo === 1 ? T("1 seduta da firmare", "1 session to sign") : T(`${b.todo} sedute da firmare`, `${b.todo} sessions to sign`)}`);
     const s1 = sigStatus(a.all, L), s2 = sigStatus(b.all, L);
-    if(s2 && (!s1 || s2.n > s1.n)) out.push(`${s2.e} ${T("Nuovo status:", "New status:")} ${s2.name}!`);
+    if(on(d, "goal") && s2 && (!s1 || s2.n > s1.n)) out.push(`${s2.e} ${T("Nuovo status:", "New status:")} ${s2.name}!`);
     return out;
   }
   function showPage(d, sigs, opt){
@@ -587,7 +605,7 @@ function sigPng(str, w, h){
   function render(){
     const d = cur, sigs = curSigs, p = d.pkg, rows = d.rows || [];
     const keep = window.scrollY;
-    const st = sigStatus(d.allTime, L), nx = sigStatusNext(d.allTime, L);
+    const st = on(d, "goal") ? sigStatus(d.allTime, L) : null, nx = sigStatusNext(d.allTime, L);   // (v105: status solo se la sezione traguardi è visibile)
     const upd = curOpt.offline ? new Date(curOpt.at || 0) : null;
     let h = `${curOpt.preview ? `<div class="prev">👁 ${T("Anteprima: così vede la pagina il cliente", "Preview: this is what the client sees")}</div>` : ""}
       <header class="hero"><div class="top"><small>${T("Il mio percorso", "My journey")}${d.trainer ? " · " + esc(d.trainer) : ""}</small><span class="tools"><button class="ib" id="hHelp" title="${T("Guida", "Help")}" aria-label="${T("Guida", "Help")}">?</button>${curOpt.preview ? "" : `<button class="ib" id="hOut">${T("Esci", "Log out")}</button>`}</span></div>
@@ -596,68 +614,93 @@ function sigPng(str, w, h){
       ${st ? `<span class="chip">${st.e} ${L ? esc(st.name) + " client" : "Cliente " + esc(st.name)}</span>` : ""}
       <div class="upd">🔄 ${T("Aggiornato il", "Updated on")} ${dIt(d.upd)} ${T("alle", "at")} ${String(d.upd || "").slice(11,16)}</div>
       ${curOpt.offline ? `<div class="off" style="margin-top:10px">📶 ${T("Sei offline: questa è l'ultima situazione salvata sul telefono", "You're offline: this is the last situation saved on your phone")} (${dIt(upd.toISOString())})</div>` : ""}</header><div class="wrap">`;
+    /* 00. (v103) promemoria del saldo: in cima a tutto, prima dell'avviso. Sparisce quando è tutto pagato.
+       Niente pagato → “Restano X da saldare”; pagato in parte → “Saldato X su Y · restano Z” */
+    if(p && on(d, "pay") && Number(p.due) > 0.004){
+      const pd = Number(p.paid) || 0, tot = pd + Number(p.due);
+      h += `<section class="card due"><span class="i">💶</span><span>${pd > 0.004 ? T(`Saldato ${eur(pd)} su ${eur(tot)} · restano ${eur(p.due)}`, `Paid ${eur(pd)} of ${eur(tot)} · ${eur(p.due)} left`) : T(`Restano ${eur(p.due)} da saldare`, `${eur(p.due)} still to pay`)}</span></section>`;
+    }
     /* 0. avviso del personal trainer: sempre in alto (lo scrive solo il trainer) */
     if(d.msg) h += `<section class="card avviso" role="note"><h2>📢 ${T("Avviso del tuo personal trainer", "Notice from your personal trainer")}</h2><p>${esc(d.msg)}</p>${d.trainer ? `<small>— ${esc(d.trainer)}</small>` : ""}</section>`;
-    /* 0b. i prossimi appuntamenti (solo promemoria, li mette il trainer): tipo, giorno e ora.
-       Un appuntamento diventa “passato” 10 minuti dopo la sua ora; i passati (ultimo mese) si vedono in grigio con “Mostra gli appuntamenti passati” */
+    /* 0b. (v103) UN SOLO RIQUADRO: calendario del mese (colori in base allo stato) + sotto le prossime lezioni da fare.
+       Sopra il mese il giorno scelto (di base oggi) con cosa c'è quel giorno; il cliente tocca un giorno per vederlo, “Oggi” per tornare.
+       Un appuntamento sparisce dall'elenco 10 minuti dopo la sua ora; nel calendario i giorni prenotati già passati restano grigi (1 mese) */
     const cut = (()=>{ const x = new Date(Date.now() - 600000), p2 = n => String(n).padStart(2, "0"); return `${x.getFullYear()}-${p2(x.getMonth() + 1)}-${p2(x.getDate())} ${p2(x.getHours())}:${p2(x.getMinutes())}`; })();
     const bk = (d.book || []).filter(b=>b.date + " " + b.time > cut).sort((a, b)=>(a.date + a.time).localeCompare(b.date + b.time));
     const bkPast = (d.book || []).filter(b=>b.date + " " + b.time <= cut && b.date >= addDays(todayIso(), -31)).sort((a, b)=>(b.date + b.time).localeCompare(a.date + a.time));
     const bkType = b => b.type === "ck" ? `📋 ${T("Consulenza", "Consultation")}` : `🏋️ ${T("Personal", "Personal")}`;
     const bkRow = (b, past) => `<div class="r${past ? " past" : ""}"><span><b>${esc(dayLong(b.date))}</b><br><small>${bkType(b)}${past ? ` · ${T("passato", "past")}` : ""}</small></span><span class="tag bk">${T("ore", "at")} ${esc(b.time)}</span></div>`;
-    /* barra della data: di base OGGI e tutti i prossimi; il cliente può scegliere una data passata (fino a 1 mese: quel giorno, in grigio) o futura (da quel giorno in poi) */
-    const bkd0 = bkDate && bkDate !== todayIso() ? bkDate : "";
-    const bkShow = !bkd0 ? bk : bkd0 < todayIso() ? (d.book || []).filter(b=>b.date === bkd0 && b.date >= addDays(todayIso(), -31)).sort((a, b)=>a.time.localeCompare(b.time)) : bk.filter(b=>b.date >= bkd0);
-    const bkIsPast = b => b.date + " " + b.time <= cut;
-    if(on(d, "book") && (d.book || []).length) h += card("book", `📅 ${T("I tuoi appuntamenti", "Your appointments")}`,
-      `<div class="bkbar"><button class="btn sm" id="bkPrev" type="button" aria-label="${T("Giorno prima", "Previous day")}">‹</button>
-        <input type="date" id="bkDay" value="${bkd0 || todayIso()}" aria-label="${T("Scegli la data", "Choose the date")}">
-        <button class="btn sm" id="bkNext" type="button" aria-label="${T("Giorno dopo", "Next day")}">›</button>${bkd0 ? `<button class="btn sm primary" id="bkToday" type="button">${T("Oggi", "Today")}</button>` : ""}</div>
-      <p class="msum">${!bkd0 ? T("Prossimi appuntamenti, da oggi:", "Next appointments, from today:") : bkd0 < todayIso() ? T(`Appuntamenti del ${dIt(bkd0)} (passati):`, `Appointments on ${dIt(bkd0)} (past):`) : T(`Appuntamenti dal ${dIt(bkd0)}:`, `Appointments from ${dIt(bkd0)}:`)}</p>
-      ${bkShow.length ? `<div class="rows">${bkShow.map(b=>bkRow(b, bkIsPast(b))).join("")}</div>` : `<p class="msum">${T("Nessun appuntamento.", "No appointments.")}</p>`}
-      ${bkd0 && bkd0 < todayIso() ? `<p class="msum">${T("Ogni appuntamento passato resta visibile per 1 mese dalla sua data, poi sparisce.", "Each past appointment stays visible for 1 month from its date, then disappears.")}</p>` : ""}`);
+    const calOn = on(d, "cal"), bookOn = on(d, "book");
+    if(calOn || (bookOn && (d.book || []).length)){
+      let body = "";
+      if(calOn){
+        const days = (d.days || []).concat((d.singles || []).map(x=>[x, "s"])), byDay = {}; days.forEach(([dt, k])=>{ byDay[dt] = byDay[dt] === "s" ? "s" : k; });
+        const bkd = bookOn ? bk : [], bkp = bookOn ? bkPast : [], bkDay = {};
+        bkd.forEach(b=>{ (bkDay[b.date] = bkDay[b.date] || []).push(b.time); if(!byDay[b.date]) byDay[b.date] = "b"; });
+        bkp.forEach(b=>{ if(!byDay[b.date]) byDay[b.date] = "bp"; });   // giorni prenotati già passati: grigi
+        const tdy = todayIso(), sel = calSel || tdy;
+        calMonths = [...new Set(days.map(x=>x[0].slice(0, 7)).concat(bkd.map(b=>b.date.slice(0, 7)), bkp.map(b=>b.date.slice(0, 7)), [tdy.slice(0, 7)]))].sort();
+        if(!calYm || !calMonths.includes(calYm)) calYm = tdy.slice(0, 7);   // si apre sul mese di oggi
+        const ci = calMonths.indexOf(calYm), ym = calYm, [Y, M] = ym.split("-").map(Number), f1 = new Date(Y, M - 1, 1), nDays = new Date(Y, M, 0).getDate(), off = (f1.getDay() + 6) % 7;
+        const mk = n => `${ym}-${String(n).padStart(2, "0")}`;
+        body += `<div class="calsel"><div class="cs-t"><b>${esc(dayLong(sel))}</b>${calSel ? `<button class="btn sm primary" id="cToday" type="button">${T("Oggi", "Today")}</button>` : ""}</div></div>
+          <div class="cal-h"><button id="cPrev" aria-label="${T("Mese prima", "Previous month")}" ${ci <= 0 ? "disabled" : ""}>‹</button><b>${f1.toLocaleDateString(L ? "en-GB" : "it-IT", {month:"long", year:"numeric"})}</b><button id="cNext" aria-label="${T("Mese dopo", "Next month")}" ${ci >= calMonths.length - 1 ? "disabled" : ""}>›</button></div>
+          <div class="cal">${(L ? ["M","T","W","T","F","S","S"] : ["L","M","M","G","V","S","D"]).map(w=>`<span class="wd">${w}</span>`).join("")}${"<span></span>".repeat(off)}${Array.from({length: nDays}, (_, i)=>`<button type="button" class="d ${byDay[mk(i+1)] || ""}${mk(i+1) === tdy ? " t" : ""}${calSel && mk(i+1) === sel ? " on" : ""}" data-day="${mk(i+1)}"${bkDay[mk(i+1)] ? ` title="${T("ore", "at")} ${bkDay[mk(i+1)].join(", ")}"` : ""}>${i + 1}</button>`).join("")}</div>
+          <p class="msum">🟩 ${T("fatta", "done")} · 🟧 ${T("saltata", "missed")}${bkd.length || bkp.length ? ` · 🟦 ${T("prenotata", "booked")}` : ""}</p>`;
+      }
+      /* elenco sotto il calendario, in base al giorno scelto:
+         oggi → lezioni di oggi già fatte (grigie, “completata”) + linea nera + tutte quelle da fare;
+         giorno futuro → solo le lezioni da quel giorno in poi;
+         giorno passato → le lezioni di quel giorno (grigie) + linea nera + tutte quelle ancora da fare */
+      if(bookOn && (d.book || []).length){
+        const tdy = todayIso(), sel = calSel || tdy;
+        const dayK = {}; (d.days || []).concat((d.singles || []).map(x=>[x, "s"])).forEach(([dt, k])=>{ dayK[dt] = dayK[dt] === "s" ? "s" : k; });
+        const doneTag = (dt, type) => type !== "ck" && dayK[dt] === "m" ? T("saltata", "missed") : "✔ " + T("completata", "completed");
+        const pastRow = b => `<div class="r past"><span><b>${esc(dayLong(b.date))}</b><br><small>${bkType(b)} · ${doneTag(b.date, b.type)}</small></span><span class="tag bk">${T("ore", "at")} ${esc(b.time)}</span></div>`;
+        const pastOf = dt => { const l = bkPast.filter(b=>b.date === dt).sort((a, b)=>a.time.localeCompare(b.time)).map(pastRow);
+          if(!bkPast.some(b=>b.date === dt && b.type !== "ck") && dayK[dt]) l.unshift(`<div class="r past"><span><b>${esc(dayLong(dt))}</b><br><small>🏋️ ${T("Seduta", "Session")} · ${doneTag(dt, "pt")}</small></span></div>`);   // seduta segnata senza prenotazione
+          return l; };
+        const rowsOf = l => `<div class="rows">${l.join("")}</div>`;
+        const none = `<p class="msum">${T("Nessun appuntamento in programma.", "No upcoming appointments.")}</p>`;
+        const next = bk.map(b=>bkRow(b, false));
+        if(sel > tdy){
+          const fut = bk.filter(b=>b.date >= sel).map(b=>bkRow(b, false));
+          body += `<h3 class="subh">${T(`Appuntamenti dal ${dIt(sel)}`, `Appointments from ${dIt(sel)}`)}</h3>${fut.length ? rowsOf(fut) : none}`;
+        } else if(sel < tdy){
+          const old = pastOf(sel);
+          body += `<h3 class="subh">${T(`Lezioni del ${dIt(sel)}`, `Lessons on ${dIt(sel)}`)}</h3>${old.length ? rowsOf(old) : `<p class="msum">${T("Nessuna lezione in questo giorno.", "No lessons on this day.")}</p>`}
+            <hr class="bkdiv"><h3 class="subh">${T("Da fare", "To do")}</h3>${next.length ? rowsOf(next) : none}`;
+        } else {
+          const today = pastOf(tdy);
+          body += today.length ? `<h3 class="subh">${T("Lezioni di oggi", "Today's lessons")}</h3>${rowsOf(today)}<hr class="bkdiv"><h3 class="subh">${T("Da fare", "To do")}</h3>${next.length ? rowsOf(next) : none}`
+            : `<h3 class="subh">${T("Prossimi appuntamenti", "Next appointments")}</h3>${next.length ? rowsOf(next) : none}`;
+        }
+      }
+      h += card(calOn ? "cal" : "book", calOn ? `📅 ${T("Il tuo calendario", "Your calendar")}` : `📅 ${T("I tuoi appuntamenti", "Your appointments")}`, body);
+    }
     /* 1. i tuoi progressi */
     if(p && on(d, "prog")){
       const total = Number(p.total) || 0, done = Number(p.done) || 0, lost = Number(p.lost) || 0, used = done + lost, left = Math.max(0, total - used);
       const nd = Number(p.noDate) || 0, list = [...Array(nd).fill({}), ...rows];
-      h += card("prog", `${T("I tuoi progressi", "Your progress")} 📈`, `<div class="dots">${Array.from({length: Math.max(total, used)}, (_, i)=>{ const r = list[i]; return `<span class="dot ${r ? (r.miss ? "miss" : "done") : ""}" title="${r && r.date ? dIt(r.date) : ""}">${i + 1}</span>`; }).join("")}</div>
+      h += card("prog", `${T("I tuoi progressi in questo pacchetto", "Your progress in this package")} 📈`, `<div class="dots">${Array.from({length: Math.max(total, used)}, (_, i)=>{ const r = list[i]; return `<span class="dot ${r ? (r.miss ? "miss" : "done") : ""}" title="${r && r.date ? dIt(r.date) : ""}">${i + 1}</span>`; }).join("")}</div>
         <div class="tiles"><div class="tile ok"><b>${done}</b><span>${T("fatte", "done")}</span></div>${lost ? `<div class="tile ms"><b>${lost}</b><span>${T("saltate", "missed")}</span></div>` : ""}<div class="tile"><b>${left}</b><span>${T("mancano", "to go")}</span></div><div class="tile"><b>${total}</b><span>${T("nel pacchetto", "in package")}</span></div></div>
         ${total > 0 && used >= total ? `<p class="msum">🏆 ${T("Pacchetto completato! Parla con il tuo personal trainer per il prossimo.", "Package completed! Talk to your personal trainer about the next one.")}</p>` : ""}`);
     }
+    /* 1b. pagamenti: subito dopo i progressi (v103) */
+    if(p && on(d, "pay")) h += card("pay", `${T("Pagamenti", "Payments")} 💳`, `<div class="pay3"><div class="tile"><b style="font-size:1.25rem">${eur(p.price)}</b><span>${T("totale", "total")}</span></div><div class="tile ok"><b style="font-size:1.25rem">${eur(p.paid)}</b><span>${T("pagato", "paid")}</span></div><div class="tile${Number(p.due) > 0.004 ? " ms" : ""}"><b style="font-size:1.25rem">${eur(Math.max(0, p.due))}</b><span>${T("da saldare", "to pay")}</span></div></div>
+      <div class="rows">${(d.pays || []).length ? d.pays.map(x=>`<div class="r"><span>${dIt(x.date)} <small>· ${esc(payName(x.method))}</small></span><b>${eur(x.amount)}</b></div>`).join("") : `<p class="msum">${T("Nessuna rata registrata.", "No payments recorded.")}</p>`}</div>`);
     if(!p){
       const ex = d.ended ? addDays(d.ended, 7) : "";
       h += `<section class="card ended"><h2>📦 ${T("Pacchetto concluso", "Package ended")}</h2><p>${d.ended ? T(`Il tuo pacchetto si è concluso il ${dIt(d.ended)}.`, `Your package ended on ${dIt(d.ended)}.`) : ""} ${T("Per continuare contatta il tuo personal trainer.", "To continue, contact your personal trainer.")}</p>${ex ? `<p class="msum">${T("Questa pagina resta visibile fino al", "This page stays visible until")} ${dIt(ex)}.</p>` : ""}</section>`;
     }
     /* 2. novità (solo se ci sono) */
     if(news.length) h += card("news", `✨ ${T("Novità dall'ultima visita", "New since your last visit")}`, `<ul>${news.map(n=>`<li>${esc(n)}</li>`).join("")}</ul>`, "news");
-    if(p && on(d, "pay") && Number(p.due) > 0.004) h += `<section class="card due"><span class="i">💶</span><span>${T(`Restano ${eur(p.due)} da saldare`, `${eur(p.due)} still to pay`)}</span></section>`;
-    /* 3. calendario presenze con il riepilogo del mese */
-    if(on(d, "cal")){
-      const days = (d.days || []).concat((d.singles || []).map(x=>[x, "s"])), byDay = {}; days.forEach(([dt, k])=>{ byDay[dt] = byDay[dt] === "s" ? "s" : k; });
-      const bkd = on(d, "book") ? bk : [], bkDay = {}; bkd.forEach(b=>{ (bkDay[b.date] = bkDay[b.date] || []).push(b.time); if(!byDay[b.date]) byDay[b.date] = "b"; });
-      if(on(d, "book")) bkPast.forEach(b=>{ if(!byDay[b.date]) byDay[b.date] = "bp"; });   // giorni prenotati già passati: grigi
-      const months = [...new Set(days.map(x=>x[0].slice(0, 7)).concat(bkd.map(b=>b.date.slice(0, 7))).concat([todayIso().slice(0, 7)]))].sort();
-      if(calIdx === null || calIdx >= months.length) calIdx = Math.max(0, months.indexOf(todayIso().slice(0, 7)));   // si apre sul mese di oggi
-      const ym = months[calIdx], [Y, M] = ym.split("-").map(Number), f1 = new Date(Y, M - 1, 1), nDays = new Date(Y, M, 0).getDate(), off = (f1.getDay() + 6) % 7;
-      const mk = n => `${ym}-${String(n).padStart(2, "0")}`, tdy = todayIso();
-      const cnt = m => { let s = 0, x = 0; days.forEach(([dt, k])=>{ if(dt.startsWith(m)){ if(k === "s") s++; else x++; } }); return [s, x]; };
-      const mName = (y, m) => new Date(y, m - 1, 1).toLocaleDateString(L ? "en-GB" : "it-IT", {month:"long"});
-      const [s0, x0] = cnt(ym), pm = M === 1 ? `${Y - 1}-12` : `${Y}-${String(M - 1).padStart(2, "0")}`, [s1] = cnt(pm);
-      const txt = (s, x) => `${s} ${s === 1 ? T("seduta", "session") : T("sedute", "sessions")}${x ? `, ${x} ${x === 1 ? T("saltata", "missed") : T("saltate", "missed")}` : ""}`;
-      const sum = `${mName(Y, M).replace(/^./, c=>c.toUpperCase())}: ${txt(s0, x0)}${s1 || months.includes(pm) ? ` · ${mName(...pm.split("-").map(Number)).replace(/^./, c=>c.toUpperCase())}: ${txt(s1, 0)}` : ""}`;
-      h += card("cal", `${T("Calendario presenze", "Attendance calendar")} 🗓️`, `<div class="cal-h"><button id="cPrev" aria-label="${T("Mese prima", "Previous month")}" ${calIdx <= 0 ? "disabled" : ""}>‹</button><b>${f1.toLocaleDateString(L ? "en-GB" : "it-IT", {month:"long", year:"numeric"})}</b><button id="cNext" aria-label="${T("Mese dopo", "Next month")}" ${calIdx >= months.length - 1 ? "disabled" : ""}>›</button></div>
-        <div class="cal">${(L ? ["M","T","W","T","F","S","S"] : ["L","M","M","G","V","S","D"]).map(w=>`<span class="wd">${w}</span>`).join("")}${"<span></span>".repeat(off)}${Array.from({length: nDays}, (_, i)=>`<span class="d ${byDay[mk(i+1)] || ""}${mk(i+1) === tdy ? " t" : ""}"${bkDay[mk(i+1)] ? ` title="${T("ore", "at")} ${bkDay[mk(i+1)].join(", ")}"` : ""}>${i + 1}</span>`).join("")}</div>
-        <p class="msum">🟩 ${T("fatta", "done")} · 🟧 ${T("saltata", "missed")}${bkd.length ? ` · 🟦 ${T("prenotata", "booked")}` : ""}<br>${esc(sum)}${bkd.filter(b=>b.date.startsWith(ym)).length ? `<br>📅 ${T("Prenotate", "Booked")}: ${bkd.filter(b=>b.date.startsWith(ym)).map(b=>`${dIt(b.date).slice(0, 5)} ${T("ore", "at")} ${b.time}`).join(" · ")}` : ""}</p>`);
-    }
     /* 3b. sedute singole fatte (senza pacchetto attivo): valgono come sedute, non si scalano da un pacchetto */
     const sgl = d.singles || [];
     if(on(d, "single") && sgl.length) h += card("single", `${T("Sedute singole", "Single sessions")} 💪`, `<div class="rows">${sgl.slice(0, 8).map(x=>`<div class="r"><span>${dIt(x)}</span><span class="tag ok">✔ ${T("fatta", "done")}</span></div>`).join("")}</div><p class="msum">${T("Sedute fatte quando non avevi un pacchetto attivo: non si scalano da un pacchetto.", "Sessions done when you had no active package: they are not taken from a package.")}</p>`);
     /* 4. lezioni saltate */
     const miss = rows.filter(r=>r.miss);
     if(p && on(d, "miss") && miss.length) h += card("miss", T("Lezioni saltate", "Missed lessons"), `<div class="rows">${miss.map(r=>`<div class="r"><span>${dIt(r.date)}</span><span class="tag todo">${T("saltata non recuperabile", "missed, not recoverable")}</span></div>`).join("")}</div>`);
-    /* 5. pagamenti */
-    if(p && on(d, "pay")) h += card("pay", `${T("Pagamenti", "Payments")} 💳`, `<div class="pay3"><div class="tile"><b style="font-size:1.25rem">${eur(p.price)}</b><span>${T("totale", "total")}</span></div><div class="tile ok"><b style="font-size:1.25rem">${eur(p.paid)}</b><span>${T("pagato", "paid")}</span></div><div class="tile${Number(p.due) > 0.004 ? " ms" : ""}"><b style="font-size:1.25rem">${eur(Math.max(0, p.due))}</b><span>${T("da saldare", "to pay")}</span></div></div>
-      <div class="rows">${(d.pays || []).length ? d.pays.map(x=>`<div class="r"><span>${dIt(x.date)} <small>· ${esc(payName(x.method))}</small></span><b>${eur(x.amount)}</b></div>`).join("") : `<p class="msum">${T("Nessuna rata registrata.", "No payments recorded.")}</p>`}</div>`);
     /* 6. traguardi */
     if(on(d, "goal")){
       const done = p ? Number(p.done) || 0 : 0, used = p ? done + (Number(p.lost) || 0) : 0;
@@ -669,7 +712,7 @@ function sigPng(str, w, h){
     if(p && on(d, "firme") && rows.length){
       h += card("firme", `${T("Le tue firme", "Your signatures")} ✍️`, `<div class="rows">${rows.slice().reverse().map(r=>{ const g = sigs[r.id];
         return `<div class="r"><span>${dIt(r.date)}${r.miss ? ` <small>· ${T("saltata", "missed")}</small>` : ""}</span>${g ? `<span><span class="tag ok">✔ ${T("firmata", "signed")}</span> <button class="eye" data-eye="${esc(r.id)}" aria-label="${T("Vedi la firma", "View signature")}" aria-pressed="${openEye === r.id}">👁</button></span>` : `<button class="btn sm primary" data-sign="${esc(r.id)}"${curOpt.preview || curOpt.offline ? " disabled" : ""}>✍️ ${T("Firma", "Sign")}</button>`}</div>${g && openEye === r.id ? `<div class="sigbox"><canvas data-s="${esc(g.s)}" aria-label="${T("Firma", "Signature")}"></canvas><span class="wm">${T("SOLO VISIONE", "VIEW ONLY")}</span></div>` : ""}`; }).join("")}</div>
-        <p class="msum">${T("Puoi firmare le sedute non ancora firmate. Quelle già firmate non si possono cambiare.", "You can sign the sessions not signed yet. Signed ones can't be changed.")}</p>`);
+        <p class="msum">${T("Puoi firmare le sedute non ancora firmate.", "You can sign the sessions not signed yet.")}</p>`);
     }
     /* 8. pacchetto precedente (per 3 giorni) */
     const o = d.old;
@@ -690,10 +733,9 @@ function sigPng(str, w, h){
     const b = e.target.closest("button"); if(!b || !cur) return;
     if(b.dataset.eye !== undefined){ openEye = openEye === b.dataset.eye ? "" : b.dataset.eye; render(); return; }
     if(b.dataset.sign !== undefined){ if(!curOpt.preview && !curOpt.offline) signPad(b.dataset.sign); return; }
-    if(b.id === "bkPrev" || b.id === "bkNext"){ const nd = addDays(bkDate || todayIso(), b.id === "bkPrev" ? -1 : 1); bkDate = nd === todayIso() ? "" : nd; render(); return; }
-    if(b.id === "bkToday"){ bkDate = ""; render(); return; }
-    if(b.id === "cPrev"){ calIdx = Math.max(0, calIdx - 1); render(); return; }
-    if(b.id === "cNext"){ calIdx++; render(); return; }
+    if(b.dataset.day){ calSel = b.dataset.day === todayIso() ? "" : b.dataset.day; render(); return; }   // tocca un giorno del calendario
+    if(b.id === "cToday"){ calSel = ""; calYm = ""; render(); return; }
+    if(b.id === "cPrev" || b.id === "cNext"){ const i = calMonths.indexOf(calYm) + (b.id === "cPrev" ? -1 : 1); if(calMonths[i]) calYm = calMonths[i]; render(); return; }
     if(b.id === "hHelp") return guide();
     if(b.id === "gShare") return share();
     if(b.id === "hOut"){ if(curOpt.offline){ cur = null; return pinScreen("offline"); } try{ await api("POST", {op:"bye", k: K}); }catch(_){} setK(""); cur = null; stopWatch(); return boot(); }
@@ -708,7 +750,6 @@ function sigPng(str, w, h){
       catch(_){ toast(T("Non riesco a collegarmi: riprova.", "I can't connect: try again.")); }
     }
   });
-  app.addEventListener("change", e=>{ if(e.target.id !== "bkDay") return; const v = e.target.value; bkDate = !/^\d{4}-\d{2}-\d{2}$/.test(v) || v === todayIso() ? "" : v; render(); });
   app.addEventListener("contextmenu", e=>{ if(e.target.closest(".sigbox")) e.preventDefault(); });
   /* firma dalla pagina: riquadro a tutto schermo */
   function signPad(id){
@@ -841,6 +882,10 @@ function sigPng(str, w, h){
     const sg = {a:{s:fake()}, b:{s:fake()}, c:{s:fake()}, d:{s:fake()}, f:{s:fake()}};
     if(demo === "welcome") return S.welcome({first: "Mario"});
     if(demo === "wait") return S.waiting({name: "Telefono di Mario"});
+    if(demo === "linkold") return S.linkold();
+    if(demo === "used") return S.used();
+    if(demo === "idle") return S.idle();
+    if(demo === "moved") return S.moved();
     if(demo === "setpin") return pinScreen("set");
     if(demo === "install"){ showPage(D, sg, {}); return showInstall(true); }
     if(demo === "pin") return pinScreen("pin");
