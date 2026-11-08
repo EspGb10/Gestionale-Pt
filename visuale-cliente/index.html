@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#2F6B4F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Il mio percorso">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Il mio percorso</title>
+<style>
+:root{--ink:#14213d;--pine:#1C2B24;--moss:#2F6B4F;--mossD:#24573F;--soft:#eef6f0;--muted:#5f6b66;--line:#d8ddd9;--bg:#f2f4f1;--paper:#fff;--owed:#B45309;--owedSoft:#fdf3e6;--gold:#C9971C;--goldSoft:#fbf3dc;--err:#B42318}
+@media (prefers-color-scheme: dark){:root{--ink:#e6ece8;--pine:#e6ece8;--moss:#6FBF93;--mossD:#2F6B4F;--soft:#1f3328;--muted:#a3b0a9;--line:#33423a;--bg:#121815;--paper:#1b231f;--owed:#F0A35E;--owedSoft:#3a2a19;--gold:#E0B24A;--goldSoft:#33291a;--err:#ff8a80}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--pine);font:17px/1.45 Barlow,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;-webkit-text-size-adjust:100%}
+main{max-width:560px;margin:0 auto;padding:0 0 40px}
+.hero{background:linear-gradient(135deg,#2F6B4F,#24573F);color:#fff;padding:calc(18px + env(safe-area-inset-top,0px)) 20px 22px;border-radius:0 0 22px 22px}
+.hero .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.hero small{letter-spacing:.08em;text-transform:uppercase;font-weight:700;opacity:.85;font-size:.75rem}
+.hero h1{font:700 2.4rem/1.05 "Barlow Condensed",Arial,sans-serif;margin:8px 0 4px}
+.hero p{margin:0;opacity:.92}
+.hero .tools{display:flex;gap:8px}
+.ib{border:1px solid rgba(255,255,255,.45);background:rgba(255,255,255,.12);color:#fff;border-radius:999px;min-width:38px;height:38px;font:inherit;font-weight:700;cursor:pointer;padding:0 12px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--gold);color:#fff;border-radius:999px;padding:4px 12px;font-weight:700;font-size:.85rem;margin-top:10px}
+.upd{font-size:.8rem;opacity:.85;margin-top:8px}
+.wrap{padding:0 14px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:16px;margin:14px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.card h2{font:700 1.05rem/1.2 "Barlow Condensed",Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--moss);margin:0 0 10px}
+.news{background:var(--goldSoft);border-color:#ecd9a3}
+.news ul{margin:0;padding-left:18px}
+.msg{display:flex;gap:12px;align-items:flex-start}
+.msg .q{font-size:1.6rem;line-height:1}
+.msg p{margin:0;font-weight:600}
+.msg small{color:var(--muted)}
+.dots{display:flex;flex-wrap:wrap;gap:8px}
+.dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font:700 .95rem "Barlow Condensed",Arial,sans-serif;border:2px solid var(--line);color:var(--muted)}
+.dot.done{background:var(--moss);border-color:var(--moss);color:#fff}
+.dot.miss{background:var(--owedSoft);border-color:var(--owed);color:var(--owed)}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+.tile{background:#f1f3f2;border-radius:14px;padding:10px 4px;text-align:center}
+@media (prefers-color-scheme: dark){.tile{background:#232d28}}
+.tile b{display:block;font:700 1.8rem/1 "Barlow Condensed",Arial,sans-serif}
+.tile span{font-size:.75rem;color:var(--muted);font-weight:600}
+.tile.ok{background:var(--soft)} .tile.ok b{color:var(--moss)}
+.tile.ms{background:var(--owedSoft)} .tile.ms b{color:var(--owed)}
+.due{display:flex;gap:12px;align-items:center;background:var(--owedSoft);border:1px solid #f0d2b0;color:var(--owed);font-weight:700}
+.due .i{font-size:1.5rem}
+.cal-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.cal-h b{text-transform:capitalize}
+.cal-h button{border:1px solid var(--line);background:transparent;color:var(--pine);border-radius:10px;width:36px;height:32px;font-size:1.1rem}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:.85rem}
+.cal .wd{color:var(--muted);font-weight:700;font-size:.72rem}
+.cal .d{padding:7px 0;border-radius:10px}
+.cal .d.s{background:var(--moss);color:#fff;font-weight:700}
+.cal .d.m{background:var(--owedSoft);color:var(--owed);font-weight:700}
+.cal .d.t{outline:2px solid var(--gold)}
+.msum{font-size:.85rem;color:var(--muted);margin:8px 0 0}
+.rows .r{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.rows .r:last-child{border-bottom:0}
+.rows .r small{color:var(--muted)}
+.tag{font-size:.75rem;font-weight:700;border-radius:999px;padding:3px 9px;white-space:nowrap}
+.tag.ok{background:var(--soft);color:var(--moss)} .tag.todo{background:var(--owedSoft);color:var(--owed)}
+.pay3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.badges{list-style:none;padding:0;margin:0}
+.badges li{padding:7px 0;font-weight:600}
+.badges li.next{color:var(--muted);font-weight:500}
+.btn{font:inherit;font-weight:700;border-radius:12px;padding:11px 16px;min-height:44px;cursor:pointer;border:1.5px solid var(--moss);background:transparent;color:var(--moss)}
+.btn.primary{background:var(--moss);color:#fff}
+.btn.sm{min-height:34px;padding:5px 12px;font-size:.85rem}
+.eye{border:1px solid var(--line);background:transparent;color:var(--pine);border-radius:999px;min-width:38px;height:32px}
+.sigbox{position:relative;margin:6px 0 4px;border:1px dashed var(--line);border-radius:12px;background:#fff;height:90px}
+.sigbox canvas{width:100%;height:100%}
+.sigbox .wm{position:absolute;inset:0;display:grid;place-items:center;color:rgba(47,107,79,.22);font:700 1.4rem "Barlow Condensed",Arial;transform:rotate(-12deg);pointer-events:none;letter-spacing:.2em}
+.foot{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:20px 0 6px}
+.foot .btn{border-color:var(--line);color:var(--muted)}
+.center{text-align:center}
+.gate{padding:30px 18px}
+.gate .card{padding:22px 18px}
+.gate h1{font:700 1.9rem/1.1 "Barlow Condensed",Arial,sans-serif;margin:6px 0 10px}
+.inf{background:var(--soft);border-radius:12px;padding:12px 14px;font-size:.92rem}
+label.ck{display:flex;gap:10px;align-items:flex-start;margin:14px 0;font-weight:600}
+input[type=text]{width:100%;font:inherit;padding:12px;border-radius:12px;border:1.5px solid var(--line);background:var(--paper);color:var(--pine)}
+.pin{display:flex;gap:12px;justify-content:center;margin:18px 0}
+.pin span{width:52px;height:60px;border-radius:14px;border:2px solid var(--line);display:grid;place-items:center;font:700 1.8rem "Barlow Condensed",Arial}
+.pin span.f{border-color:var(--moss)}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:300px;margin:0 auto}
+.keys button{height:58px;border-radius:16px;border:1px solid var(--line);background:var(--paper);color:var(--pine);font:600 1.5rem Barlow,Arial}
+.big-ic{font-size:3rem;line-height:1}
+.veil{position:fixed;inset:0;background:rgba(18,24,21,.55);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);display:grid;place-items:center;color:#fff;z-index:30;text-align:center;font-weight:700}
+.old{border-style:dashed}
+.fold .fh{display:flex;width:100%;align-items:center;justify-content:space-between;gap:10px;background:none;border:0;padding:0;margin:0;color:inherit;font:inherit;cursor:pointer;text-align:left}
+.fold .fh h2{margin:0}
+.fold .fx{font-size:.8rem;font-weight:700;color:var(--muted);white-space:nowrap;border:1px solid var(--line);border-radius:999px;padding:4px 10px}
+.fold .fb{margin-top:12px}
+.fold.shut .fb{display:none}
+.err{color:var(--err);font-weight:700;min-height:1.3em;margin:8px 0 0}
+.tip{background:var(--goldSoft);border:1px solid #ecd9a3;border-radius:12px;padding:10px 12px;font-size:.88rem;margin:12px 0 0}
+.off{background:var(--owedSoft);color:var(--owed);border-radius:12px;padding:8px 12px;font-weight:700;font-size:.85rem;margin:12px 0 0}
+.prev{background:#1C2B24;color:#fff;text-align:center;font-weight:700;font-size:.85rem;padding:8px}
+.ended p{margin:0 0 8px}
+.keys button:active{background:var(--soft)}
+.keys button:disabled{opacity:.4}
+.sigbox{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.modal{position:fixed;inset:0;background:rgba(10,16,13,.55);z-index:40;display:grid;place-items:center;padding:16px}
+.modal .box{background:var(--paper);color:var(--pine);border-radius:18px;padding:18px;max-width:440px;width:100%;max-height:86vh;overflow:auto}
+.modal h3{font:700 1.4rem/1.1 "Barlow Condensed",Arial,sans-serif;margin:0 0 8px}
+.modal .acts{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px}
+.modal ul{padding-left:0;list-style:none;margin:0}
+.modal li{padding:6px 0;border-bottom:1px solid var(--line)}
+.modal li:last-child{border-bottom:0}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#1C2B24;color:#fff;border-radius:12px;padding:10px 16px;font-weight:600;z-index:60;max-width:90vw;text-align:center}
+.spad{position:fixed;inset:0;z-index:50;background:#fff;color:#14213d}
+.spad .stop{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:14px;right:14px;font-size:.95rem}
+.spad .stop b{font-size:1.05rem}
+.spad canvas{position:absolute;left:0;right:0;top:calc(64px + env(safe-area-inset-top,0px));bottom:calc(140px + env(safe-area-inset-bottom,0px));width:100%;height:auto;touch-action:none}
+.spad .ph{position:absolute;left:0;right:0;bottom:calc(76px + env(safe-area-inset-bottom,0px));height:64px;display:flex;align-items:center;justify-content:center;text-align:center;color:#5f6b66;font-size:.95rem;border-top:2px solid #c9d3cd;background:#f7f9f7;touch-action:pan-x pan-y pinch-zoom;user-select:none;-webkit-user-select:none}
+.spad .ph small{display:block;font-size:.78rem;color:#7a857f;margin-top:2px}
+.spad .bar{position:absolute;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;gap:10px}
+.spad .bar .btn{flex:1;background:#fff}
+.spad .bar .btn.primary{background:#2F6B4F;color:#fff}
+.spad .bar .btn:disabled{opacity:.45}
+.spad .serr{position:absolute;left:14px;right:14px;bottom:calc(150px + env(safe-area-inset-bottom,0px));color:#B42318;font-weight:700;text-align:center}
+@media (orientation:landscape) and (max-height:500px){.spad canvas{top:calc(44px + env(safe-area-inset-top,0px));bottom:calc(122px + env(safe-area-inset-bottom,0px))}.spad .ph{height:52px;bottom:calc(64px + env(safe-area-inset-bottom,0px))}.spad .stop{top:8px}}
+.avviso{background:#fff7e0;border:2px solid var(--gold)}
+.avviso h2{color:#8a6410}
+.avviso p{margin:0;font-weight:600;white-space:pre-line}
+.avviso small{color:var(--muted)}
+@media (prefers-color-scheme: dark){.avviso{background:var(--goldSoft)}.avviso h2{color:var(--gold)}}
+.cal .d.b{background:#dbe8fb;color:#1d4f91;font-weight:700}
+.tag.bk{background:#dbe8fb;color:#1d4f91}
+@media (prefers-color-scheme: dark){.cal .d.b,.tag.bk{background:#1d3352;color:#a9c8f5}}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+/* indirizzo senza la barra finale (…/visuale-cliente?t=…): la aggiungo, così icone, offline e server sono quelli giusti */
+if(/\/visuale-cliente$/.test(location.pathname)) location.replace(location.pathname + "/" + location.search + location.hash);
+</script>
+<script>
+/*SIGLIB-START*/
+/* ======= v99: FIRME DELLE SEDUTE — codice comune al gestionale e alla pagina del cliente (firma.html) =======
+   Una firma è salvata come “tratti” compressi (circa 1 KB), non come foto:
+   coordinate in una griglia 1000 × 400, 2 caratteri in base 36 per numero, i tratti separati da “.” */
+const SIG_W = 1000;
+function sigEncode(strokes){
+  const c2 = v => Math.max(0, Math.min(1295, Math.round(v))).toString(36).padStart(2, "0");
+  return strokes.filter(s=>s.length).map(s=>s.map(([x,y])=>c2(x) + c2(y)).join("")).join(".");
+}
+function sigDecode(str){
+  return String(str || "").split(".").filter(Boolean).map(s=>{ const pts = [];
+    for(let i = 0; i + 3 < s.length; i += 4) pts.push([parseInt(s.slice(i, i+2), 36), parseInt(s.slice(i+2, i+4), 36)]);
+    return pts; }).filter(p=>p.length && p.every(([x,y])=>Number.isFinite(x) && Number.isFinite(y)));
+}
+/* riquadro dove si firma con il dito (o il mouse).
+   La firma si salva come tratti (non come foto): stessa scala in orizzontale e in verticale, così non si deforma
+   e si può ridisegnare grande o piccola senza sgranare, anche se il riquadro cambia misura (es. a schermo intero). */
+const SIG_YMAX = 1295;
+function SigPad(canvas, onChange, opt){
+  const ctx = canvas.getContext("2d"), strokes = []; let cur = null;
+  const touches = new Map(); let pinch = null;                              // opt.pinch(scala, "start"|"move"|"end"): due dita = ingrandisci / rimpicciolisci
+  const unit = () => { const r = canvas.getBoundingClientRect(); return Math.min(SIG_W / Math.max(1, r.width), SIG_YMAX / Math.max(1, r.height)); };   // unità della firma per pixel
+  const fit = () => { const r = canvas.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+    canvas.width = Math.max(1, Math.round(r.width * d)); canvas.height = Math.max(1, Math.round(r.height * d)); draw(); };
+  const pos = e => { const r = canvas.getBoundingClientRect(), k = unit(); return [(e.clientX - r.left) * k, (e.clientY - r.top) * k]; };
+  function draw(){
+    const w = canvas.width, h = canvas.height, d = w / Math.max(1, canvas.getBoundingClientRect().width), k = unit();
+    ctx.clearRect(0, 0, w, h);
+    ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = "#14213d"; ctx.lineWidth = Math.max(2.5, 3 * d);
+    const P = v => v / k * d;
+    strokes.forEach(s=>{ ctx.beginPath(); s.forEach(([x,y], i)=>{ if(i) ctx.lineTo(P(x), P(y)); else ctx.moveTo(P(x), P(y)); });
+      if(s.length === 1){ const [x,y] = s[0]; ctx.lineTo(P(x) + 0.5, P(y)); } ctx.stroke(); });
+  }
+  const dist = () => { const [a, b] = [...touches.values()]; return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
+  canvas.addEventListener("pointerdown", e=>{ e.preventDefault(); try{ canvas.setPointerCapture(e.pointerId); }catch(_){}
+    touches.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if(opt && opt.pinch && touches.size === 2){                            // secondo dito: niente tratto, si fa lo zoom
+      if(cur){ const i = strokes.indexOf(cur); if(i >= 0) strokes.splice(i, 1); cur = null; draw(); }
+      pinch = {d0: dist()}; opt.pinch(1, "start"); if(onChange) onChange(); return; }
+    if(pinch || touches.size > 1) return;
+    cur = [pos(e)]; strokes.push(cur); draw(); if(onChange) onChange(); });
+  canvas.addEventListener("pointermove", e=>{
+    if(touches.has(e.pointerId)) touches.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if(pinch){ e.preventDefault(); if(touches.size === 2) opt.pinch(dist() / pinch.d0, "move"); return; }
+    if(!cur) return; e.preventDefault(); const p = pos(e), l = cur[cur.length - 1];
+    if(Math.hypot(p[0] - l[0], p[1] - l[1]) >= 3){ cur.push(p); draw(); } });
+  const end = e => { touches.delete(e.pointerId);
+    if(pinch){ if(!touches.size){ pinch = null; opt.pinch(1, "end"); } return; }
+    if(cur){ cur = null; if(onChange) onChange(); } };                       // a fine tratto: “Salva / Invia firma” si attiva
+  canvas.addEventListener("pointerup", end); canvas.addEventListener("pointercancel", end); canvas.addEventListener("pointerleave", e=>{ if(!pinch) end(e); });
+  canvas.style.touchAction = "none";
+  return { fit, clear(){ strokes.length = 0; draw(); if(onChange) onChange(); }, isEmpty: () => !strokes.some(s=>s.length > 1) && strokes.length < 2,
+    encode: () => sigEncode(strokes), points: () => strokes.reduce((t,s)=>t + s.length, 0) };
+}
+/* disegna la firma dentro un rettangolo (canvas): usato per tessera, immagini e documenti */
+function sigDraw(ctx, str, x, y, w, h, color){
+  const st = sigDecode(str); if(!st.length) return;
+  const xs = st.flat().map(p=>p[0]), ys = st.flat().map(p=>p[1]);
+  const bx = Math.min(...xs), by = Math.min(...ys), bw = Math.max(40, Math.max(...xs) - bx), bh = Math.max(30, Math.max(...ys) - by);
+  const k = Math.min(w / bw, h / bh), ox = x + (w - bw * k) / 2, oy = y + (h - bh * k) / 2;
+  ctx.save(); ctx.strokeStyle = color || "#14213d"; ctx.lineWidth = Math.max(1.2, Math.min(w, h) / 22); ctx.lineCap = "round"; ctx.lineJoin = "round";
+  st.forEach(s=>{ ctx.beginPath(); s.forEach(([px,py], i)=>{ const X = ox + (px - bx) * k, Y = oy + (py - by) * k; if(i) ctx.lineTo(X, Y); else ctx.moveTo(X, Y); }); if(s.length === 1) ctx.lineTo(ox + (s[0][0] - bx) * k + 1, oy + (s[0][1] - by) * k); ctx.stroke(); });
+  ctx.restore();
+}
+/* traguardi della tessera presenze */
+function sigWeekKey(iso){ const d = new Date(iso + "T12:00:00Z"), day = (d.getUTCDay() + 6) % 7; d.setUTCDate(d.getUTCDate() - day); return d.toISOString().slice(0,10); }
+/* STATUS del cliente in base alle sedute fatte con te: uno ogni 25 fino a 200, poi ogni 50 fino a 500 (VIP Platino) */
+const SIG_STATUS = [[25,"🥉","Bronzo","Bronze"],[50,"🥈","Argento","Silver"],[75,"🥇","Oro","Gold"],[100,"💚","Smeraldo","Emerald"],[125,"💙","Zaffiro","Sapphire"],
+  [150,"❤️","Rubino","Ruby"],[175,"💜","Ametista","Amethyst"],[200,"💎","Diamante","Diamond"],[250,"💠","Diamante Blu","Blue Diamond"],[300,"⚙️","Titanio","Titanium"],
+  [350,"🖤","Carbonio","Carbon"],[400,"⭐","Elite","Elite"],[450,"🏛️","Leggenda","Legend"],[500,"👑","VIP Platino","Platinum VIP"]];
+function sigStatus(all, en){ const r = SIG_STATUS.filter(x=>(Number(all) || 0) >= x[0]).pop(); return r ? {n:r[0], e:r[1], name: en ? r[3] : r[2]} : null; }
+function sigStatusNext(all, en){ const r = SIG_STATUS.find(x=>x[0] > (Number(all) || 0)); return r ? {n:r[0], e:r[1], name: en ? r[3] : r[2]} : null; }
+/* traguardi della tessera (con emoji): pacchetto, settimane di fila, status */
+function sigBadges(o){                                  // o: {total, used, dates:[date sedute FATTE], allTime, lang, single}
+  const out = [], dates = (o.dates || []).filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d || "")), used = Number(o.used) || dates.length, t = o.total || 0, L = o.lang === "en", all = Number(o.allTime) || 0;
+  if(!o.single){
+    if(t > 1 && used >= t) out.push(L ? "🏆 Package completed! 🎉" : "🏆 Pacchetto completato! 🎉");
+    else if(t > 1 && used >= Math.ceil(t / 2)) out.push(L ? "🎉 You're halfway through the package! 🎯" : "🎉 Sei a metà pacchetto! 🎯");
+    const run = sigWeekRun(dates);
+    if(run >= 2) out.push(L ? `🏅 ${run} weeks in a row 🗓️🔥💪` : `🏅 ${run} settimane di fila 🗓️🔥💪`);
+  }
+  const st = sigStatus(all, L);
+  if(st) out.push(L ? `${st.e} ${st.name} status: ${all} sessions together 🤝💯🌟` : `${st.e} Status ${st.name}: ${all} sedute insieme 🤝💯🌟`);
+  else if(all >= 10) out.push(L ? `🏅 ${all} sessions together 🤝💯🌟` : `🏅 ${all} sedute insieme 🤝💯🌟`);
+  return out;
+}
+/* settimane di fila (fino all'ultima data) */
+function sigWeekRun(dates){
+  const weeks = [...new Set((dates || []).filter(Boolean).map(sigWeekKey))].sort(); if(!weeks.length) return 0;
+  let run = 1; for(let i = weeks.length - 1; i > 0; i--){ const a = new Date(weeks[i] + "T12:00:00Z"), b = new Date(weeks[i-1] + "T12:00:00Z"); if(Math.round((a - b) / 864e5) === 7) run++; else break; }
+  return run;
+}
+/* tessera presenze (immagine): nome, pacchetto attivo, frase del giorno, firma della seduta, progressi,
+   fatte / saltate / mancano / nel pacchetto, date ancora da firmare (solo pacchetto attivo) e traguardi.
+   o = {name, trainer, start, total, done, lost, seq, today:{date, label, n, s, miss, signed}, unsigned:[{date, miss}], dates, allTime, msg:{e, t}, lang, now} */
+function sigCardCanvas(o){
+  const L = o.lang === "en", W = 1080, M = 64, CW = W - 2 * M;
+  const total = Math.max(0, Number(o.total) || 0), done = Math.max(0, Number(o.done) || 0), lost = Math.max(0, Number(o.lost) || 0);
+  const seq = Array.isArray(o.seq) && o.seq.length ? o.seq : [...Array(done).fill("done"), ...Array(lost).fill("miss")];
+  const used = done + lost, left = Math.max(0, total - used), td = o.today || {}, unsigned = (o.unsigned || []).filter(u=>u && u.date), all = Number(o.allTime) || 0;
+  const dIt = d => /^\d{4}-\d{2}-\d{2}$/.test(d || "") ? d.split("-").reverse().join("/") : "";
+  const C = {pine:"#14213d", moss:"#2F6B4F", mossD:"#24573F", soft:"#eef6f0", line:"#d5ddd8", muted:"#5f6b66", owed:"#B45309", owedSoft:"#fdf3e6", gold:"#C9971C", goldSoft:"#fbf3dc"};
+  const EM = `"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji"`;
+  const F = (w, s) => `${w} ${s}px "Barlow Condensed","Arial Narrow",Arial,${EM},sans-serif`, G = (w, s) => `${w} ${s}px Barlow,Arial,${EM},sans-serif`;
+  const badges = sigBadges({total, used, dates: o.dates || [], allTime: all, lang: o.lang, single: !!o.single});
+  const nx = sigStatusNext(all, L), nk = nx ? nx.n - all : 0, st = sigStatus(all, L);
+  const nextTxt = nx ? (L ? `⚪ Next status: ${nx.e} ${nx.name} at ${nx.n} sessions (${nk} to go) 🔒🚀` : `⚪ Prossimo status: ${nx.e} ${nx.name} a ${nx.n} sedute (${nk === 1 ? "ne manca 1" : `ne mancano ${nk}`}) 🔒🚀`)
+    : (L ? "👑 You've reached the highest status!" : "👑 Hai raggiunto lo status più alto!");
+  const meas = document.createElement("canvas").getContext("2d");
+  const wrap = (t, font, w) => { meas.font = font; const out = []; let line = ""; String(t).split(" ").forEach(wd=>{ const tt = line ? line + " " + wd : wd; if(meas.measureText(tt).width > w && line){ out.push(line); line = wd; } else line = tt; }); if(line) out.push(line); return out; };
+  const stTxt = unsigned.length
+    ? (L ? "All sessions are signed except: " : "Tutte le lezioni sono state firmate tranne: ") + unsigned.map(u=>dIt(u.date) + (u.miss ? (L ? " (missed)" : " (saltata)") : "")).join(", ")
+    : (L ? "All previous sessions have been signed." : "Tutte le lezioni precedenti sono state firmate.");
+  const stLines = wrap(stTxt, G("600", 30), CW - 120);
+  const msgLines = o.msg && o.msg.t ? wrap(o.msg.t, G("700", 34), CW - 150) : [];
+  const perRow = total > 12 ? Math.ceil(total / Math.ceil(total / 12)) : Math.max(total, 1), dotRows = Math.max(1, Math.ceil(Math.max(total, used) / perRow));
+  const dotD = Math.min(64, (CW - (perRow - 1) * 14) / perRow);
+  const msgH = msgLines.length ? Math.max(120, msgLines.length * 46 + 56) : 0;
+  const stH = Math.max(110, stLines.length * 42 + 60), bl = badges.length + 1;
+  const one = !!o.single;                                                   // seduta singola: niente progressi, conteggi e date da firmare
+  const H = 300 + (msgH ? 50 + msgH : 0) + 70 + 24 + 300 + 60 + (one ? 0 : 30 + dotRows * (dotD + 16) + 40 + 150 + 50 + stH + 80) + 20 + bl * 66 + 140;
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+  const x = cv.getContext("2d");
+  const rr = (X, Y, w, h, r) => { x.beginPath(); if(x.roundRect) x.roundRect(X, Y, w, h, r); else x.rect(X, Y, w, h); };
+  const label = (t, Y) => { x.fillStyle = C.moss; x.font = F("700", 30); x.fillText(t, M, Y); };
+  x.fillStyle = "#ffffff"; x.fillRect(0, 0, W, H);
+  /* testata verde */
+  const g = x.createLinearGradient(0, 0, W, 300); g.addColorStop(0, C.moss); g.addColorStop(1, C.mossD); x.fillStyle = g; x.fillRect(0, 0, W, 300);
+  x.fillStyle = "rgba(255,255,255,.85)"; x.font = F("700", 34); x.fillText(L ? "ATTENDANCE CARD" : "TESSERA PRESENZE", M, 92);
+  if(st){ const t = (L ? `${st.e} ${st.name} CLIENT` : `${st.e} CLIENTE ${st.name}`).toUpperCase(); x.font = F("700", 30); const w = x.measureText(t).width + 40;
+    rr(W - M - w, 58, w, 48, 24); x.fillStyle = C.gold; x.fill(); x.fillStyle = "#ffffff"; x.fillText(t, W - M - w + 20, 92); }
+  x.fillStyle = "#ffffff"; x.font = F("700", 78); x.fillText(o.name || "", M, 172);
+  x.fillStyle = "rgba(255,255,255,.9)"; x.font = G("500", 30);
+  x.fillText(one ? (L ? "Single session on " : "Seduta singola del ") + dIt(td.date)
+    : (L ? "Active package" : "Pacchetto attivo") + (o.start ? (L ? " from " : " dal ") + dIt(o.start) : "") + (total ? ` · ${total} ${L ? "sessions" : "sedute"}` : ""), M, 228);
+  if(o.trainer){ x.font = G("400", 26); x.fillText("Personal trainer: " + o.trainer, M, 270); }
+  let y = 300;
+  /* frase del giorno */
+  if(msgH){
+    y += 50; rr(M, y, CW, msgH, 22); x.fillStyle = C.goldSoft; x.fill(); x.lineWidth = 3; x.strokeStyle = "#ecd9a3"; x.stroke();
+    x.font = G("400", 54); x.textAlign = "center"; x.fillText(o.msg.e || "💬", M + 62, y + msgH / 2 + 19); x.textAlign = "left";
+    x.fillStyle = C.pine; x.font = G("700", 34); msgLines.forEach((l, i)=>x.fillText(l, M + 120, y + (msgH - msgLines.length * 46) / 2 + 36 + i * 46));
+    y += msgH;
+  }
+  y += 70;
+  /* firma della seduta */
+  const isToday = td.date && td.date === (o.now || "");
+  label(`${isToday ? (L ? "TODAY'S SIGNATURE" : "FIRMA DI OGGI") : (L ? "SESSION SIGNATURE" : "FIRMA DELLA SEDUTA")}${td.date ? " · " + dIt(td.date) : ""}`, y);
+  x.fillStyle = C.muted; x.font = G("600", 26); x.textAlign = "right"; x.fillText(td.label || "", W - M, y); x.textAlign = "left";
+  y += 24;
+  rr(M, y, CW, 300, 22); x.fillStyle = "#fbfcfb"; x.fill(); x.lineWidth = 3; x.strokeStyle = C.line; x.stroke();
+  x.strokeStyle = "#c9d3cd"; x.lineWidth = 2; x.beginPath(); x.moveTo(M + 50, y + 240); x.lineTo(W - M - 50, y + 240); x.stroke();
+  if(td.miss){ x.font = G("700", 24); const t = L ? "Missed lesson, not recoverable" : "Lezione saltata non recuperabile", w = x.measureText(t).width + 36;
+    rr(M + 24, y + 22, w, 44, 22); x.fillStyle = C.owedSoft; x.fill(); x.fillStyle = C.owed; x.fillText(t, M + 42, y + 52); }
+  if(td.s) sigDraw(x, td.s, M + 60, y + 40, CW - 120, 200, C.pine);
+  else { x.fillStyle = "#9aa5a0"; x.font = G("600", 34); x.textAlign = "center"; x.fillText(td.date ? (L ? "not signed" : "non firmata") : (L ? "No signature yet" : "Ancora nessuna firma"), W / 2, y + 165); x.textAlign = "left"; }
+  y += 300 + 60;
+  if(!one){
+  /* progressi */
+  label(L ? "YOUR PROGRESS 📈" : "I TUOI PROGRESSI 📈", y); y += 30;
+  for(let i = 0; i < Math.max(total, used); i++){
+    const cx = M + (i % perRow) * (dotD + 14) + dotD / 2, cy = y + Math.floor(i / perRow) * (dotD + 16) + dotD / 2, k = seq[i] || "todo";
+    if(td.n && i + 1 === td.n){ x.beginPath(); x.arc(cx, cy, dotD / 2 + 7, 0, Math.PI * 2); x.lineWidth = 4; x.strokeStyle = C.gold; x.stroke(); }
+    x.beginPath(); x.arc(cx, cy, dotD / 2, 0, Math.PI * 2);
+    x.fillStyle = k === "done" ? C.moss : k === "miss" ? C.owedSoft : "#ffffff"; x.fill();
+    x.lineWidth = 3; x.strokeStyle = k === "done" ? C.moss : k === "miss" ? C.owed : C.line; x.stroke();
+    x.fillStyle = k === "done" ? "#ffffff" : k === "miss" ? C.owed : "#9aa5a0"; x.font = F("700", Math.round(dotD * 0.46)); x.textAlign = "center"; x.fillText(String(i + 1), cx, cy + dotD * 0.16); x.textAlign = "left";
+  }
+  y += dotRows * (dotD + 16) + 40;
+  /* fatte / saltate / mancano / nel pacchetto */
+  const tiles = [[String(done), L ? "done" : "fatte", C.moss, C.soft], [String(left), L ? "to go" : "mancano", C.pine, "#f1f3f2"], [String(total || used), L ? "in the package" : "nel pacchetto", C.pine, "#f1f3f2"]];
+  if(lost) tiles.splice(1, 0, [String(lost), L ? "missed" : "saltate", C.owed, C.owedSoft]);
+  const tw = (CW - (tiles.length - 1) * 18) / tiles.length;
+  tiles.forEach(([v, t, col, bg], i)=>{ const X = M + i * (tw + 18); rr(X, y, tw, 150, 20); x.fillStyle = bg; x.fill();
+    x.fillStyle = col; x.font = F("700", 76); x.textAlign = "center"; x.fillText(v, X + tw / 2, y + 86); x.font = G("600", 26); x.fillText(t, X + tw / 2, y + 126); x.textAlign = "left"; });
+  y += 150 + 50;
+  /* firme del pacchetto attivo */
+  const okAll = !unsigned.length;
+  rr(M, y, CW, stH, 20); x.fillStyle = okAll ? C.soft : C.owedSoft; x.fill();
+  x.font = G("400", 46); x.textAlign = "center"; x.fillText(okAll ? "✅" : "⚠️", M + 54, y + stH / 2 + 16); x.textAlign = "left";
+  x.fillStyle = okAll ? C.moss : C.owed; x.font = G("600", 30);
+  stLines.forEach((l, i)=>x.fillText(l, M + 106, y + (stH - stLines.length * 42) / 2 + 32 + i * 42));
+  y += stH + 80;
+  }
+  /* traguardi */
+  label(L ? "YOUR MILESTONES 🏆✨" : "I TUOI TRAGUARDI 🏆✨", y); y += 20;
+  badges.forEach(b=>{ y += 66; x.fillStyle = C.pine; x.font = G("600", 34); x.fillText(b, M, y); });
+  y += 66; x.fillStyle = "#8a958f"; x.font = G("500", 30); x.fillText(nextTxt, M, y);
+  y += 100; x.fillStyle = C.moss; x.font = F("700", 46); x.textAlign = "center";
+  x.fillText(L ? "Keep it up! 🚀👏🔥" : "Continua così! 🚀👏🔥", W / 2, y); x.textAlign = "left";
+  return cv;
+}
+/* firma come immagine PNG (per Word e PDF) */
+function sigPng(str, w, h){
+  const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+  const x = cv.getContext("2d"); x.fillStyle = "#ffffff"; x.fillRect(0, 0, w, h);
+  sigDraw(x, str, 4, 4, w - 8, h - 8, "#14213d");
+  return cv.toDataURL("image/png");
+}
+/*SIGLIB-END*/
+(function(){
+  const $ = id => document.getElementById(id), app = $("app");
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const L = /^en/i.test(navigator.language || "") && !/^it/i.test(navigator.language || "");
+  const T = (it, en) => L ? en : it;
+  document.documentElement.lang = L ? "en" : "it";
+  if(L) document.title = "My journey";
+  const dIt = iso => /^\d{4}-\d{2}-\d{2}/.test(iso || "") ? iso.slice(0,10).split("-").reverse().join("/") : "";
+  const eur = n => (Number(n) || 0).toLocaleString(L ? "en-GB" : "it-IT", {style:"currency", currency:"EUR"});
+  const PAYM = {"Contanti":["💶", "Cash"], "Bonifico":["🏦", "Bank transfer"], "POS":["💳", "Card (POS)"]};
+  const payName = m => PAYM[m] ? PAYM[m][0] + " " + (L ? PAYM[m][1] : m) : (m || "");
+  const todayIso = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+  const dayLong = iso => { const d = new Date(iso + "T12:00:00"); const s = d.toLocaleDateString(L ? "en-GB" : "it-IT", {weekday:"long", day:"2-digit", month:"2-digit", year:"numeric"}); return (iso === todayIso() ? T("Oggi", "Today") + " · " : "") + s.charAt(0).toUpperCase() + s.slice(1); };
+  const addDays = (iso, n) => { const d = new Date(iso + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+  const lsGet = k => { try{ return JSON.parse(localStorage.getItem(k) || "null"); }catch(_){ return null; } };
+  const lsSet = (k, v) => { try{ localStorage.setItem(k, JSON.stringify(v)); }catch(_){} };
+  const lsDel = k => { try{ localStorage.removeItem(k); }catch(_){} };
+  const ssGet = k => { try{ return sessionStorage.getItem(k) || ""; }catch(_){ return ""; } };
+  const ssSet = (k, v) => { try{ if(v) sessionStorage.setItem(k, v); else sessionStorage.removeItem(k); }catch(_){} };
+  function toast(msg){ const el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); el.textContent = msg; document.body.appendChild(el); setTimeout(()=>el.remove(), 3200); }
+  /* finestra con domanda (Annulla / OK) */
+  function ask(title, text, ok, cancel){
+    return new Promise(res=>{
+      const m = document.createElement("div"); m.className = "modal";
+      m.innerHTML = `<div class="box" role="dialog" aria-modal="true"><h3>${esc(title)}</h3><p>${esc(text)}</p><div class="acts">${cancel === false ? "" : `<button class="btn" data-v="0">${esc(cancel || T("Annulla", "Cancel"))}</button>`}<button class="btn primary" data-v="1">${esc(ok || "OK")}</button></div></div>`;
+      m.addEventListener("click", e=>{ const b = e.target.closest("button[data-v]"); if(!b && e.target !== m) return; m.remove(); res(!!b && b.dataset.v === "1"); });
+      document.body.appendChild(m); m.querySelector(".btn.primary").focus();
+    });
+  }
+
+  /* ---------------- dati del link e del dispositivo ---------------- */
+  const q = new URLSearchParams(location.search), demo = q.get("demo"), preview = q.get("preview");
+  let tok = q.get("t") || "";
+  if(!demo && !preview){
+    if(/^[A-Za-z0-9_-]{20,64}$/.test(tok)) lsSet("pt_view_t", tok); else tok = lsGet("pt_view_t") || "";
+  }
+  const rnd = n => { const a = new Uint8Array(n); crypto.getRandomValues(a); return Array.from(a, b=>"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"[b & 63]).join(""); };
+  let dev = lsGet("pt_view_dev"); if(!/^[A-Za-z0-9_-]{16,64}$/.test(dev || "")){ dev = rnd(24); lsSet("pt_view_dev", dev); }
+  const CK = "pt_view_c_" + tok, LK = "pt_view_last_" + tok;
+  let K = ssGet("pt_view_k_" + tok);
+  const setK = k => { K = k || ""; ssSet("pt_view_k_" + tok, K); };
+  const ua = navigator.userAgent || "";
+  const isIPad = /iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  const kind = /iPhone|iPod/.test(ua) ? "iPhone" : isIPad ? "iPad" : /Android/.test(ua) ? "Android" : "computer";
+  const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  async function sha(s){ try{ const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)); return Array.from(new Uint8Array(b), x=>x.toString(16).padStart(2, "0")).join(""); }catch(_){ return ""; } }
+  async function api(method, body, extra){
+    const url = "../api/cliente" + (method === "GET" ? `?t=${encodeURIComponent(tok)}&d=${encodeURIComponent(dev)}${extra || ""}` : "");
+    const r = await fetch(url, {method, cache:"no-store", headers: body ? {"Content-Type":"application/json"} : {}, body: body ? JSON.stringify(Object.assign({t: tok, d: dev}, body)) : undefined});
+    let j = null; try{ j = await r.json(); }catch(_){}
+    return {status: r.status, j: j || {}};
+  }
+
+  /* ---------------- schermate di accesso ---------------- */
+  let who = {trainer:"", first:""}, timer = 0;
+  const stopTimer = () => { clearTimeout(timer); timer = 0; };
+  function gate(html){ stopTimer(); hideVeil(); app.innerHTML = `<div class="gate"><div class="card">${html}</div></div>`; window.scrollTo(0, 0); }
+  const trainerName = () => who.trainer || T("il tuo personal trainer", "your personal trainer");
+  const S = {
+    welcome(d){
+      const first = d.first || "", def = first ? (kind === "computer" ? T("Computer di ", "Computer of ") : kind === "iPad" ? T("Tablet di ", "Tablet of ") : T("Telefono di ", "Phone of ")) + first : "";
+      gate(`<div class="big-ic">👋</div><h1>${T("Il tuo percorso con", "Your journey with")} ${esc(trainerName())}</h1>
+      ${d.again ? `<p class="tip">${T("Non apri la pagina da più di 30 giorni: per sicurezza chiedi di nuovo l'accesso.", "You haven't opened this page for more than 30 days: for safety, request access again.")}</p>` : ""}
+      <p>${T("Qui vedi le tue sedute, i pagamenti, i traguardi e le firme. La pagina è solo da guardare.", "Here you can see your sessions, payments, milestones and signatures. This page is view-only.")}</p>
+      <div class="inf"><b>${T("Informativa", "Privacy notice")}</b><br>${T("I tuoi dati sono trattati dal tuo personal trainer solo a scopo lavorativo, per seguire il tuo percorso, e non verranno divulgati a terzi. Per vedere la pagina il tuo trainer deve approvare questo dispositivo. Non condividere il link con altri.", "Your data is processed by your personal trainer for work purposes only, to follow your journey, and will not be disclosed to third parties. To see this page your trainer must approve this device. Do not share the link with others.")}</div>
+      <label class="ck"><input type="checkbox" id="gCons"> ${T("Ho letto l'informativa", "I have read the notice")}</label>
+      <label for="gName">${T("Dai un nome a questo dispositivo", "Name this device")}</label><input type="text" id="gName" maxlength="40" autocomplete="off" value="${esc(def)}" placeholder="${T("es. Telefono di Mario", "e.g. Mario's phone")}">
+      <p class="err" id="gErr" role="alert"></p>
+      <p><button class="btn primary" id="gAsk" style="width:100%">${T("Chiedi accesso", "Request access")}</button></p>
+      ${kind === "iPhone" || kind === "iPad" ? (standalone ? "" : `<p class="tip">📲 ${T("Consiglio: prima aggiungi questa pagina alla schermata Home (tasto Condividi ⬆️ → «Aggiungi alla schermata Home»), aprila da lì e poi chiedi l'accesso. Così il dispositivo approvato resta sempre lo stesso.", "Tip: first add this page to your Home Screen (Share ⬆️ → “Add to Home Screen”), open it from there and then request access. This way the approved device always stays the same.")}</p>`) : ""}`);
+      $("gAsk").onclick = async () => {
+        const name = $("gName").value.trim(), err = $("gErr");
+        if(!$("gCons").checked){ err.textContent = T("Spunta «Ho letto l'informativa» per continuare.", "Tick “I have read the notice” to continue."); return; }
+        if(name.length < 2){ err.textContent = T("Scrivi un nome per questo dispositivo.", "Write a name for this device."); $("gName").focus(); return; }
+        $("gAsk").disabled = true; err.textContent = "";
+        try{ const r = await api("POST", {op:"ask", name, kind, consent:true}); handle(r); }
+        catch(_){ $("gAsk").disabled = false; err.textContent = T("Non riesco a collegarmi: controlla la connessione e riprova.", "I can't connect: check your connection and try again."); }
+      };
+    },
+    waiting(d){
+      gate(`<div class="center"><div class="big-ic">⏳</div><h1>${T("Richiesta inviata", "Request sent")}</h1>
+      <p>${T("Il tuo personal trainer deve approvare", "Your personal trainer must approve")} <b>${esc(d.name || "")}</b>.<br>${T("Questa pagina si aggiorna da sola.", "This page updates by itself.")}</p></div>`);
+      timer = setTimeout(boot, 8000);
+    },
+    removed(){ cacheClear(); gate(`<div class="center"><div class="big-ic">🚫</div><h1>${T("Link scaduto", "Link expired")}</h1>
+      <p>${T("Non hai più accesso a questo programma. Contatta il tuo personal trainer per maggiori informazioni.", "You no longer have access to this program. Contact your personal trainer for more information.")}</p></div>`); },
+    expired(){ cacheClear(); gate(`<div class="center"><div class="big-ic">📦</div><h1>${T("Pacchetto concluso", "Package ended")}</h1>
+      <p>${T("Il tuo pacchetto è concluso da più di 7 giorni e non è stato rinnovato, quindi la pagina non è più disponibile. Contatta il tuo personal trainer per rinnovare.", "Your package ended more than 7 days ago and was not renewed, so this page is no longer available. Contact your personal trainer to renew.")}</p></div>`); },
+    blocked(){ gate(`<div class="center"><div class="big-ic">🔒</div><h1>${T("Dispositivo bloccato", "Device locked")}</h1>
+      <p>${T("Sono stati inseriti troppi PIN sbagliati. Per sicurezza la pagina è bloccata: il tuo personal trainer può sbloccarla.", "Too many wrong PINs were entered. For safety the page is locked: your personal trainer can unlock it.")}</p><p><button class="btn" id="gRe">${T("Riprova", "Try again")}</button></p></div>`); $("gRe").onclick = boot; },
+    nolink(){ gate(`<div class="center"><div class="big-ic">🔗</div><h1>${T("Link non valido", "Invalid link")}</h1><p>${T("Apri il link che ti ha mandato il tuo personal trainer.", "Open the link your personal trainer sent you.")}</p></div>`); },
+    nonet(){ gate(`<div class="center"><div class="big-ic">📶</div><h1>${T("Nessuna connessione", "No connection")}</h1><p>${T("Collegati a internet e riprova.", "Connect to the internet and try again.")}</p><p><button class="btn primary" id="gRe">${T("Riprova", "Try again")}</button></p></div>`); $("gRe").onclick = boot; },
+    toomany(){ gate(`<div class="center"><div class="big-ic">⏱️</div><h1>${T("Troppi tentativi", "Too many attempts")}</h1><p>${T("Riprova tra 15 minuti.", "Try again in 15 minutes.")}</p></div>`); }
+  };
+  /* tastierino del PIN */
+  function pinScreen(mode, d){                       // mode: "set" (crea), "pin" (inserisci), "offline" (inserisci, senza internet)
+    let val = "", first = "", step = mode === "set" ? 1 : 0, busy = false;
+    const title = () => mode === "set" ? (step === 1 ? T("Crea il tuo PIN", "Create your PIN") : T("Ripeti il PIN", "Repeat your PIN")) : `${T("Ciao", "Hi")} ${esc(who.first || "")}!`;
+    const sub = () => mode === "set" ? (step === 1 ? T("4 cifre a tua scelta: ti servirà ogni volta che apri la pagina.", "4 digits of your choice: you'll need it every time you open the page.") : T("Scrivilo ancora una volta per conferma.", "Type it once more to confirm.")) : T("Inserisci il tuo PIN", "Enter your PIN");
+    gate(`<div class="center"><div class="big-ic">${mode === "set" ? "🔐" : "🔒"}</div><h1 id="pT">${title()}</h1><p id="pS">${sub()}</p>
+      <div class="pin" id="pDots" aria-live="polite">${"<span></span>".repeat(4)}</div><p class="err" id="pErr" role="alert">${d && d.msg ? esc(d.msg) : ""}</p>
+      <div class="keys">${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k=>`<button type="button" ${k === "" ? 'style="visibility:hidden" tabindex="-1"' : `data-k="${k}" aria-label="${k === "⌫" ? T("Cancella", "Delete") : k}"`}>${k}</button>`).join("")}</div>
+      ${mode === "offline" ? `<p class="off">📶 ${T("Sei offline: vedrai l'ultima situazione salvata.", "You're offline: you'll see the last saved situation.")}</p>` : ""}
+      ${mode !== "set" ? `<p class="msum">${T("PIN dimenticato? Chiedi al tuo personal trainer di azzerarlo.", "Forgot your PIN? Ask your personal trainer to reset it.")}</p>` : ""}</div>`);
+    const dots = () => $("pDots").querySelectorAll("span").forEach((s, i)=>{ s.className = i < val.length ? "f" : ""; s.textContent = i < val.length ? "•" : ""; });
+    const press = async k => {
+      if(busy) return;
+      if(k === "⌫"){ val = val.slice(0, -1); dots(); return; }
+      if(val.length >= 4) return;
+      val += k; dots(); $("pErr").textContent = "";
+      if(val.length < 4) return;
+      if(mode === "set" && step === 1){ first = val; val = ""; step = 2; setTimeout(()=>{ $("pT").textContent = title(); $("pS").textContent = sub(); dots(); }, 150); return; }
+      if(mode === "set" && val !== first){ val = ""; first = ""; step = 1; $("pT").textContent = title(); $("pS").textContent = sub(); dots(); $("pErr").textContent = T("I due PIN sono diversi: ricomincia.", "The two PINs are different: start again."); return; }
+      busy = true;
+      const pin = val;
+      if(mode === "offline"){
+        const c = lsGet(CK), h = c && c.salt ? await sha(c.salt + ":" + pin) : "";
+        busy = false;
+        if(c && h && h === c.ph){ document.removeEventListener("keydown", kb); showPage(c.data, c.sigs, {offline: true, at: c.at}); }
+        else { val = ""; dots(); $("pErr").textContent = T("PIN sbagliato.", "Wrong PIN."); }
+        return;
+      }
+      let r;
+      try{ r = await api("POST", {op: mode === "set" ? "setpin" : "pin", pin}); }
+      catch(_){ busy = false; val = ""; dots(); $("pErr").textContent = T("Non riesco a collegarmi: riprova.", "I can't connect: try again."); return; }
+      busy = false;
+      if(r.j.state === "ok"){ document.removeEventListener("keydown", kb); await remember(pin, r.j); return handle(r, true); }
+      if(r.j.state === "pin" && r.j.wrong){ val = ""; dots(); $("pErr").textContent = T("PIN sbagliato.", "Wrong PIN.") + " " + (r.j.left === 1 ? T("Ultimo tentativo prima del blocco.", "Last attempt before the lock.") : T(`Restano ${r.j.left} tentativi.`, `${r.j.left} attempts left.`)); return; }
+      document.removeEventListener("keydown", kb); handle(r);
+    };
+    const kb = e => { if(/^\d$/.test(e.key)) press(e.key); else if(e.key === "Backspace") press("⌫"); };
+    document.addEventListener("keydown", kb);
+    app.querySelector(".keys").addEventListener("click", e=>{ const b = e.target.closest("button[data-k]"); if(b) press(b.dataset.k); });
+    dots();
+  }
+  /* copia sul telefono (per vedere la pagina anche senza internet): dati + impronta del PIN */
+  async function remember(pin, j){
+    const salt = rnd(12), ph = await sha(salt + ":" + pin);
+    lsSet(CK, {data: j.data, sigs: j.sigs || {}, at: Date.now(), salt, ph});
+  }
+  function cacheSave(data, sigs){ const c = lsGet(CK); if(c){ c.data = data; c.sigs = sigs || {}; c.at = Date.now(); lsSet(CK, c); } }
+  function cacheClear(){ lsDel(CK); lsDel(LK); setK(""); }
+
+  /* risposta del server -> schermata giusta */
+  function handle(r, fresh){
+    const j = r.j || {};
+    if(j.trainer !== undefined) who = {trainer: j.trainer || "", first: j.first || ""};
+    if(r.status === 410) return S.removed();
+    if(r.status === 429) return S.toomany();
+    if(r.status === 404 && !j.error) return S.removed();          // la funzione non c'è più sul server: link scaduto (e cancello la copia sul telefono)
+    if(r.status === 404 || r.status === 400 && j.error === "device") return S.nolink();
+    if(r.status >= 500) return offlineOr(S.nonet);
+    switch(j.state){
+      case "new": setK(""); lsDel(CK); return S.welcome(j);
+      case "waiting": return S.waiting(j);
+      case "setpin": setK(""); lsDel(CK); return pinScreen("set");
+      case "pin": setK(""); return pinScreen("pin");
+      case "removed": return S.removed();
+      case "expired": return S.expired();
+      case "blocked": setK(""); return S.blocked();
+      case "ok":
+        if(j.k) setK(j.k);
+        if(!fresh) cacheSave(j.data, j.sigs);
+        return showPage(j.data, j.sigs || {}, {});
+    }
+    return S.nonet();
+  }
+  function offlineOr(f){ const c = lsGet(CK); if(c && c.data && c.ph) return pinScreen("offline"); return f(); }
+  async function boot(){
+    stopTimer();
+    if(!tok) return S.nolink();
+    let r;
+    try{ r = await api("GET", null, K ? "&k=" + encodeURIComponent(K) : ""); }
+    catch(_){ return offlineOr(S.nonet); }
+    handle(r);
+  }
+
+  /* ---------------- la pagina del cliente ---------------- */
+  /* ogni sezione si apre e si chiude (Mostra / Nascondi); di base le firme sono chiuse, il resto aperto. Il telefono ricorda la scelta */
+  const FOLD_KEY = "pt_view_fold", CLOSED_DEF = {firme:true};
+  let folds = lsGet(FOLD_KEY) || {};
+  const isClosed = k => k in folds ? !!folds[k] : !!CLOSED_DEF[k];
+  const card = (k, title, body, cls) => `<section class="card fold${cls ? " " + cls : ""}${isClosed(k) ? " shut" : ""}" data-k="${k}"><button class="fh" aria-expanded="${!isClosed(k)}"><h2>${title}</h2><span class="fx">${isClosed(k) ? T("Mostra", "Show") + " ▾" : T("Nascondi", "Hide") + " ▴"}</span></button><div class="fb">${body}</div></section>`;
+  function drawSig(cv){ const r = cv.getBoundingClientRect(); if(!r.width) return; const k = devicePixelRatio || 1; cv.width = r.width * k; cv.height = r.height * k; sigDraw(cv.getContext("2d"), cv.dataset.s, 8 * k, 6 * k, cv.width - 16 * k, cv.height - 12 * k, "#14213d"); }
+  let cur = null, curSigs = {}, curOpt = {}, news = [], openEye = "", calIdx = null;
+  const on = (d, k) => !d.sec || d.sec[k] !== false;
+  /* “Novità dall'ultima visita”: solo quando c'è davvero qualcosa di nuovo rispetto all'ultima volta che hai aperto la pagina */
+  function summary(d, sigs){
+    const rows = d.rows || [], p = d.pkg || {};
+    return {start: p.start || "", done: Number(p.done) || 0, lost: Number(p.lost) || 0, paid: Number(p.paid) || 0, msg: d.msg || "",
+      todo: on(d, "firme") ? rows.filter(r=>!sigs[r.id]).length : 0, all: Number(d.allTime) || 0, last: rows.filter(r=>!r.miss).map(r=>r.date).pop() || "",
+      bk: on(d, "book") ? (d.book || []).map(b=>b.date + " " + b.time) : [], sg: (d.singles || []).length};
+  }
+  function diff(a, b, d){
+    const out = [];
+    if(!a) return out;
+    if(b.start && b.start !== a.start){ out.push(`🆕 ${T("Nuovo pacchetto iniziato il", "New package started on")} ${dIt(b.start)}`); }
+    else {
+      if(b.done > a.done) out.push(`💪 ${b.done - a.done === 1 ? T("+1 seduta", "+1 session") : T(`+${b.done - a.done} sedute`, `+${b.done - a.done} sessions`)}${b.last ? ` (${T("l'ultima il", "the last on")} ${dIt(b.last)})` : ""}`);
+      if(b.lost > a.lost) out.push(`📅 ${b.lost - a.lost === 1 ? T("1 lezione saltata segnata", "1 missed lesson recorded") : T(`${b.lost - a.lost} lezioni saltate segnate`, `${b.lost - a.lost} missed lessons recorded`)}`);
+      if(on(d, "pay") && b.paid > a.paid + 0.004) out.push(`💶 ${T("Pagamento registrato:", "Payment recorded:")} ${eur(b.paid - a.paid)}`);
+    }
+    if(b.msg && b.msg !== a.msg) out.push(`📢 ${T("Nuovo avviso dal tuo personal trainer", "New notice from your personal trainer")}`);
+    const nb = (b.bk || []).filter(x=>!(a.bk || []).includes(x) && x.slice(0, 10) >= todayIso());
+    if(nb.length) out.push(`📅 ${nb.length === 1 ? T("Nuovo appuntamento:", "New appointment:") + " " + dIt(nb[0].slice(0, 10)) + " " + T("alle", "at") + " " + nb[0].slice(11) : T(`${nb.length} nuovi appuntamenti`, `${nb.length} new appointments`)}`);
+    if(b.sg > (a.sg || 0)) out.push(`💪 ${b.sg - (a.sg || 0) === 1 ? T("+1 seduta singola", "+1 single session") : T(`+${b.sg - (a.sg || 0)} sedute singole`, `+${b.sg - (a.sg || 0)} single sessions`)}`);
+    if(b.todo > a.todo) out.push(`✍️ ${b.todo === 1 ? T("1 seduta da firmare", "1 session to sign") : T(`${b.todo} sedute da firmare`, `${b.todo} sessions to sign`)}`);
+    const s1 = sigStatus(a.all, L), s2 = sigStatus(b.all, L);
+    if(s2 && (!s1 || s2.n > s1.n)) out.push(`${s2.e} ${T("Nuovo status:", "New status:")} ${s2.name}!`);
+    return out;
+  }
+  function showPage(d, sigs, opt){
+    if(!d){ return gate(`<div class="center"><div class="big-ic">⏳</div><h1>${T("Quasi pronto", "Almost ready")}</h1><p>${T("Il tuo personal trainer non ha ancora preparato la pagina. Riprova tra poco.", "Your personal trainer hasn't prepared the page yet. Try again soon.")}</p><p><button class="btn" id="gRe">${T("Riprova", "Try again")}</button></p></div>`), $("gRe").onclick = boot; }
+    if(d.trainer) who.trainer = d.trainer; if(d.first) who.first = d.first;
+    const first = !cur;
+    cur = d; curSigs = sigs || {}; curOpt = opt || {};
+    if(!curOpt.offline && !curOpt.preview && !demo){
+      const now = summary(d, curSigs), last = lsGet(LK);
+      const add = diff(last, now, d);
+      news = first ? add : news.concat(add.filter(x=>!news.includes(x)));
+      lsSet(LK, now);
+    }
+    render();
+    if(first && !curOpt.preview && !demo) startWatch();
+    poke();
+  }
+  function render(){
+    const d = cur, sigs = curSigs, p = d.pkg, rows = d.rows || [];
+    const keep = window.scrollY;
+    const st = sigStatus(d.allTime, L), nx = sigStatusNext(d.allTime, L);
+    const upd = curOpt.offline ? new Date(curOpt.at || 0) : null;
+    let h = `${curOpt.preview ? `<div class="prev">👁 ${T("Anteprima: così vede la pagina il cliente", "Preview: this is what the client sees")}</div>` : ""}
+      <header class="hero"><div class="top"><small>${T("Il mio percorso", "My journey")}${d.trainer ? " · " + esc(d.trainer) : ""}</small><span class="tools"><button class="ib" id="hHelp" title="${T("Guida", "Help")}" aria-label="${T("Guida", "Help")}">?</button>${curOpt.preview ? "" : `<button class="ib" id="hOut">${T("Esci", "Log out")}</button>`}</span></div>
+      <h1>${T("Ciao", "Hi")} ${esc(d.first || "")}!</h1>
+      <p>${p ? `${p.start ? T("Pacchetto attivo dal", "Active package from") + " " + dIt(p.start) + " · " : ""}${p.total} ${p.total === 1 ? T("seduta", "session") : T("sedute", "sessions")}` : T("Nessun pacchetto in corso", "No package in progress")}</p>
+      ${st ? `<span class="chip">${st.e} ${L ? esc(st.name) + " client" : "Cliente " + esc(st.name)}</span>` : ""}
+      <div class="upd">🔄 ${T("Aggiornato il", "Updated on")} ${dIt(d.upd)} ${T("alle", "at")} ${String(d.upd || "").slice(11,16)}</div>
+      ${curOpt.offline ? `<div class="off" style="margin-top:10px">📶 ${T("Sei offline: questa è l'ultima situazione salvata sul telefono", "You're offline: this is the last situation saved on your phone")} (${dIt(upd.toISOString())})</div>` : ""}</header><div class="wrap">`;
+    /* 0. avviso del personal trainer: sempre in alto (lo scrive solo il trainer) */
+    if(d.msg) h += `<section class="card avviso" role="note"><h2>📢 ${T("Avviso del tuo personal trainer", "Notice from your personal trainer")}</h2><p>${esc(d.msg)}</p>${d.trainer ? `<small>— ${esc(d.trainer)}</small>` : ""}</section>`;
+    /* 0b. i prossimi appuntamenti (solo promemoria, li mette il trainer): tipo, giorno e ora */
+    const bk = (d.book || []).filter(b=>b.date >= todayIso());
+    const bkType = b => b.type === "ck" ? `📋 ${T("Consulenza", "Consultation")}` : `🏋️ ${T("Personal", "Personal")}`;
+    if(on(d, "book") && bk.length) h += card("book", `📅 ${T("I tuoi prossimi appuntamenti", "Your next appointments")}`, `<div class="rows">${bk.slice(0, 6).map(b=>`<div class="r"><span><b>${esc(dayLong(b.date))}</b><br><small>${bkType(b)}</small></span><span class="tag bk">${T("ore", "at")} ${esc(b.time)}</span></div>`).join("")}</div>${bk.length > 6 ? `<p class="msum">${T(`e altri ${bk.length - 6} nel calendario`, `and ${bk.length - 6} more in the calendar`)}</p>` : ""}`);
+    /* 1. i tuoi progressi */
+    if(p && on(d, "prog")){
+      const total = Number(p.total) || 0, done = Number(p.done) || 0, lost = Number(p.lost) || 0, used = done + lost, left = Math.max(0, total - used);
+      const nd = Number(p.noDate) || 0, list = [...Array(nd).fill({}), ...rows];
+      h += card("prog", `${T("I tuoi progressi", "Your progress")} 📈`, `<div class="dots">${Array.from({length: Math.max(total, used)}, (_, i)=>{ const r = list[i]; return `<span class="dot ${r ? (r.miss ? "miss" : "done") : ""}" title="${r && r.date ? dIt(r.date) : ""}">${i + 1}</span>`; }).join("")}</div>
+        <div class="tiles"><div class="tile ok"><b>${done}</b><span>${T("fatte", "done")}</span></div>${lost ? `<div class="tile ms"><b>${lost}</b><span>${T("saltate", "missed")}</span></div>` : ""}<div class="tile"><b>${left}</b><span>${T("mancano", "to go")}</span></div><div class="tile"><b>${total}</b><span>${T("nel pacchetto", "in package")}</span></div></div>
+        ${total > 0 && used >= total ? `<p class="msum">🏆 ${T("Pacchetto completato! Parla con il tuo personal trainer per il prossimo.", "Package completed! Talk to your personal trainer about the next one.")}</p>` : ""}`);
+    }
+    if(!p){
+      const ex = d.ended ? addDays(d.ended, 7) : "";
+      h += `<section class="card ended"><h2>📦 ${T("Pacchetto concluso", "Package ended")}</h2><p>${d.ended ? T(`Il tuo pacchetto si è concluso il ${dIt(d.ended)}.`, `Your package ended on ${dIt(d.ended)}.`) : ""} ${T("Per continuare contatta il tuo personal trainer.", "To continue, contact your personal trainer.")}</p>${ex ? `<p class="msum">${T("Questa pagina resta visibile fino al", "This page stays visible until")} ${dIt(ex)}.</p>` : ""}</section>`;
+    }
+    /* 2. novità (solo se ci sono) */
+    if(news.length) h += card("news", `✨ ${T("Novità dall'ultima visita", "New since your last visit")}`, `<ul>${news.map(n=>`<li>${esc(n)}</li>`).join("")}</ul>`, "news");
+    if(p && on(d, "pay") && Number(p.due) > 0.004) h += `<section class="card due"><span class="i">💶</span><span>${T(`Restano ${eur(p.due)} da saldare`, `${eur(p.due)} still to pay`)}</span></section>`;
+    /* 3. calendario presenze con il riepilogo del mese */
+    if(on(d, "cal")){
+      const days = (d.days || []).concat((d.singles || []).map(x=>[x, "s"])), byDay = {}; days.forEach(([dt, k])=>{ byDay[dt] = byDay[dt] === "s" ? "s" : k; });
+      const bkd = on(d, "book") ? bk : [], bkDay = {}; bkd.forEach(b=>{ (bkDay[b.date] = bkDay[b.date] || []).push(b.time); if(!byDay[b.date]) byDay[b.date] = "b"; });
+      const months = [...new Set(days.map(x=>x[0].slice(0, 7)).concat(bkd.map(b=>b.date.slice(0, 7))).concat([todayIso().slice(0, 7)]))].sort();
+      if(calIdx === null || calIdx >= months.length) calIdx = Math.max(0, months.indexOf(todayIso().slice(0, 7)));   // si apre sul mese di oggi
+      const ym = months[calIdx], [Y, M] = ym.split("-").map(Number), f1 = new Date(Y, M - 1, 1), nDays = new Date(Y, M, 0).getDate(), off = (f1.getDay() + 6) % 7;
+      const mk = n => `${ym}-${String(n).padStart(2, "0")}`, tdy = todayIso();
+      const cnt = m => { let s = 0, x = 0; days.forEach(([dt, k])=>{ if(dt.startsWith(m)){ if(k === "s") s++; else x++; } }); return [s, x]; };
+      const mName = (y, m) => new Date(y, m - 1, 1).toLocaleDateString(L ? "en-GB" : "it-IT", {month:"long"});
+      const [s0, x0] = cnt(ym), pm = M === 1 ? `${Y - 1}-12` : `${Y}-${String(M - 1).padStart(2, "0")}`, [s1] = cnt(pm);
+      const txt = (s, x) => `${s} ${s === 1 ? T("seduta", "session") : T("sedute", "sessions")}${x ? `, ${x} ${x === 1 ? T("saltata", "missed") : T("saltate", "missed")}` : ""}`;
+      const sum = `${mName(Y, M).replace(/^./, c=>c.toUpperCase())}: ${txt(s0, x0)}${s1 || months.includes(pm) ? ` · ${mName(...pm.split("-").map(Number)).replace(/^./, c=>c.toUpperCase())}: ${txt(s1, 0)}` : ""}`;
+      h += card("cal", `${T("Calendario presenze", "Attendance calendar")} 🗓️`, `<div class="cal-h"><button id="cPrev" aria-label="${T("Mese prima", "Previous month")}" ${calIdx <= 0 ? "disabled" : ""}>‹</button><b>${f1.toLocaleDateString(L ? "en-GB" : "it-IT", {month:"long", year:"numeric"})}</b><button id="cNext" aria-label="${T("Mese dopo", "Next month")}" ${calIdx >= months.length - 1 ? "disabled" : ""}>›</button></div>
+        <div class="cal">${(L ? ["M","T","W","T","F","S","S"] : ["L","M","M","G","V","S","D"]).map(w=>`<span class="wd">${w}</span>`).join("")}${"<span></span>".repeat(off)}${Array.from({length: nDays}, (_, i)=>`<span class="d ${byDay[mk(i+1)] || ""}${mk(i+1) === tdy ? " t" : ""}"${bkDay[mk(i+1)] ? ` title="${T("ore", "at")} ${bkDay[mk(i+1)].join(", ")}"` : ""}>${i + 1}</span>`).join("")}</div>
+        <p class="msum">🟩 ${T("fatta", "done")} · 🟧 ${T("saltata", "missed")}${bkd.length ? ` · 🟦 ${T("prenotata", "booked")}` : ""}<br>${esc(sum)}${bkd.filter(b=>b.date.startsWith(ym)).length ? `<br>📅 ${T("Prenotate", "Booked")}: ${bkd.filter(b=>b.date.startsWith(ym)).map(b=>`${dIt(b.date).slice(0, 5)} ${T("ore", "at")} ${b.time}`).join(" · ")}` : ""}</p>`);
+    }
+    /* 3b. sedute singole fatte (senza pacchetto attivo): valgono come sedute, non si scalano da un pacchetto */
+    const sgl = d.singles || [];
+    if(on(d, "single") && sgl.length) h += card("single", `${T("Sedute singole", "Single sessions")} 💪`, `<div class="rows">${sgl.slice(0, 8).map(x=>`<div class="r"><span>${dIt(x)}</span><span class="tag ok">✔ ${T("fatta", "done")}</span></div>`).join("")}</div><p class="msum">${T("Sedute fatte quando non avevi un pacchetto attivo: non si scalano da un pacchetto.", "Sessions done when you had no active package: they are not taken from a package.")}</p>`);
+    /* 4. lezioni saltate */
+    const miss = rows.filter(r=>r.miss);
+    if(p && on(d, "miss") && miss.length) h += card("miss", T("Lezioni saltate", "Missed lessons"), `<div class="rows">${miss.map(r=>`<div class="r"><span>${dIt(r.date)}</span><span class="tag todo">${T("saltata non recuperabile", "missed, not recoverable")}</span></div>`).join("")}</div>`);
+    /* 5. pagamenti */
+    if(p && on(d, "pay")) h += card("pay", `${T("Pagamenti", "Payments")} 💳`, `<div class="pay3"><div class="tile"><b style="font-size:1.25rem">${eur(p.price)}</b><span>${T("totale", "total")}</span></div><div class="tile ok"><b style="font-size:1.25rem">${eur(p.paid)}</b><span>${T("pagato", "paid")}</span></div><div class="tile${Number(p.due) > 0.004 ? " ms" : ""}"><b style="font-size:1.25rem">${eur(Math.max(0, p.due))}</b><span>${T("da saldare", "to pay")}</span></div></div>
+      <div class="rows">${(d.pays || []).length ? d.pays.map(x=>`<div class="r"><span>${dIt(x.date)} <small>· ${esc(payName(x.method))}</small></span><b>${eur(x.amount)}</b></div>`).join("") : `<p class="msum">${T("Nessuna rata registrata.", "No payments recorded.")}</p>`}</div>`);
+    /* 6. traguardi */
+    if(on(d, "goal")){
+      const done = p ? Number(p.done) || 0 : 0, used = p ? done + (Number(p.lost) || 0) : 0;
+      const badges = sigBadges({total: p ? p.total : 0, used, dates: rows.filter(r=>!r.miss).map(r=>r.date), allTime: d.allTime, lang: L ? "en" : "it", single: !p});
+      h += card("goal", `${T("I tuoi traguardi", "Your milestones")} 🏆✨`, `<ul class="badges">${badges.map(b=>`<li>${esc(b)}</li>`).join("")}${st ? "" : `<li>💪 ${d.allTime} ${d.allTime === 1 ? T("seduta fatta in tutto", "session done in total") : T("sedute fatte in tutto", "sessions done in total")}</li>`}${nx ? `<li class="next">⚪ ${T("Prossimo status", "Next status")}: ${nx.e} ${esc(nx.name)} ${T("a", "at")} ${nx.n} ${T("sedute", "sessions")} (${T(`ne mancano ${nx.n - d.allTime}`, `${nx.n - d.allTime} to go`)}) 🔒🚀</li>` : ""}</ul>
+        ${curOpt.preview ? "" : `<p><button class="btn sm" id="gShare">📤 ${T("Condividi traguardo", "Share milestone")}</button></p>`}`);
+    }
+    /* 7. firme: firmata (👁 per vederla, solo visione) oppure da firmare */
+    if(p && on(d, "firme") && rows.length){
+      h += card("firme", `${T("Le tue firme", "Your signatures")} ✍️`, `<div class="rows">${rows.slice().reverse().map(r=>{ const g = sigs[r.id];
+        return `<div class="r"><span>${dIt(r.date)}${r.miss ? ` <small>· ${T("saltata", "missed")}</small>` : ""}</span>${g ? `<span><span class="tag ok">✔ ${T("firmata", "signed")}</span> <button class="eye" data-eye="${esc(r.id)}" aria-label="${T("Vedi la firma", "View signature")}" aria-pressed="${openEye === r.id}">👁</button></span>` : `<button class="btn sm primary" data-sign="${esc(r.id)}"${curOpt.preview || curOpt.offline ? " disabled" : ""}>✍️ ${T("Firma", "Sign")}</button>`}</div>${g && openEye === r.id ? `<div class="sigbox"><canvas data-s="${esc(g.s)}" aria-label="${T("Firma", "Signature")}"></canvas><span class="wm">${T("SOLO VISIONE", "VIEW ONLY")}</span></div>` : ""}`; }).join("")}</div>
+        <p class="msum">${T("Puoi firmare le sedute non ancora firmate. Quelle già firmate non si possono cambiare.", "You can sign the sessions not signed yet. Signed ones can't be changed.")}</p>`);
+    }
+    /* 8. pacchetto precedente (per 3 giorni) */
+    const o = d.old;
+    if(o && (!o.until || o.until >= todayIso())) h += card("old", T("Pacchetto precedente", "Previous package"), `<p style="margin:0">${o.start ? dIt(o.start) + " → " : ""}${dIt(o.end)} · ${o.done} ${T("su", "of")} ${o.total} ${T("sedute", "sessions")}${o.lost ? ` · ${o.lost} ${o.lost === 1 ? T("saltata", "missed") : T("saltate", "missed")}` : ""}</p>${o.until && p ? `<p class="msum">${T("Visibile fino al", "Visible until")} ${dIt(o.until)}</p>` : ""}`, "old");
+    if(!curOpt.preview) h += `<div class="foot"><button class="btn sm" id="fOut">🚪 ${T("Esci da questo dispositivo", "Log out of this device")}</button><button class="btn sm" id="fDel">🗑 ${T("Chiedi di cancellare i miei dati", "Ask to delete my data")}</button></div>`;
+    h += `</div>`;
+    app.innerHTML = h;
+    document.querySelectorAll("canvas[data-s]").forEach(drawSig);
+    window.scrollTo(0, keep);
+  }
+  /* tocchi nella pagina */
+  app.addEventListener("click", async e=>{
+    const fh = e.target.closest(".fh");
+    if(fh){ const sec = fh.closest(".fold"), k = sec.dataset.k, shut = !sec.classList.contains("shut");
+      sec.classList.toggle("shut", shut); fh.setAttribute("aria-expanded", String(!shut)); fh.querySelector(".fx").textContent = shut ? T("Mostra", "Show") + " ▾" : T("Nascondi", "Hide") + " ▴";
+      folds[k] = shut; lsSet(FOLD_KEY, folds);
+      if(!shut) sec.querySelectorAll("canvas[data-s]").forEach(drawSig); return; }
+    const b = e.target.closest("button"); if(!b || !cur) return;
+    if(b.dataset.eye !== undefined){ openEye = openEye === b.dataset.eye ? "" : b.dataset.eye; render(); return; }
+    if(b.dataset.sign !== undefined){ if(!curOpt.preview && !curOpt.offline) signPad(b.dataset.sign); return; }
+    if(b.id === "cPrev"){ calIdx = Math.max(0, calIdx - 1); render(); return; }
+    if(b.id === "cNext"){ calIdx++; render(); return; }
+    if(b.id === "hHelp") return guide();
+    if(b.id === "gShare") return share();
+    if(b.id === "hOut"){ if(curOpt.offline){ cur = null; return pinScreen("offline"); } try{ await api("POST", {op:"bye", k: K}); }catch(_){} setK(""); cur = null; stopWatch(); return boot(); }
+    if(b.id === "fOut"){
+      if(!(await ask(T("Scollegare questo dispositivo?", "Disconnect this device?"), T("Per rivedere la pagina dovrai chiedere di nuovo l'accesso e il tuo personal trainer dovrà approvarlo.", "To see the page again you'll have to request access again and your personal trainer will have to approve it."), T("Scollega", "Disconnect")))) return;
+      try{ const r = await api("POST", {op:"logout", k: K}); if(r.status >= 400 && r.status !== 403) throw 0; }catch(_){ return toast(T("Non riesco a collegarmi: riprova.", "I can't connect: try again.")); }
+      cacheClear(); cur = null; stopWatch(); return boot();
+    }
+    if(b.id === "fDel"){
+      if(!(await ask(T("Chiedere di cancellare i tuoi dati?", "Ask to delete your data?"), T("Il tuo personal trainer riceverà la richiesta di cancellare i dati di questa pagina e deciderà lui.", "Your personal trainer will receive the request to delete the data on this page and will decide."), T("Invia richiesta", "Send request")))) return;
+      try{ const r = await api("POST", {op:"delreq", k: K}); if(!r.j.ok) throw 0; toast(T("Richiesta inviata al tuo personal trainer.", "Request sent to your personal trainer.")); }
+      catch(_){ toast(T("Non riesco a collegarmi: riprova.", "I can't connect: try again.")); }
+    }
+  });
+  app.addEventListener("contextmenu", e=>{ if(e.target.closest(".sigbox")) e.preventDefault(); });
+  /* firma dalla pagina: riquadro a tutto schermo */
+  function signPad(id){
+    const r = (cur.rows || []).find(x=>x.id === id); if(!r) return;
+    const box = document.createElement("div"); box.className = "spad"; box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true");
+    box.innerHTML = `<div class="stop"><b>${r.miss ? T("Lezione saltata del", "Missed lesson on") : T("Seduta del", "Session on")} ${dIt(r.date)}</b><br>${T("Firma con il dito sopra la linea. Se vuoi, gira il telefono in orizzontale.", "Sign with your finger above the line. You can turn your phone sideways.")}</div>
+      <canvas id="sCv" aria-label="${T("Riquadro per firmare", "Signature box")}"></canvas><div class="ph"><span>${T("↑ Firma con il dito sopra la linea", "↑ Sign with your finger above the line")}<small>${T("qui sotto puoi scorrere e ingrandire", "down here you can scroll and zoom")}</small></span></div>
+      <p class="serr" id="sErr" role="alert"></p>
+      <div class="bar"><button class="btn" id="sNo">${T("Annulla", "Cancel")}</button><button class="btn" id="sClr">${T("Cancella", "Clear")}</button><button class="btn primary" id="sOk" disabled>✔ ${T("Invia firma", "Send signature")}</button></div>`;
+    document.body.appendChild(box); document.body.style.overflow = "hidden"; hideVeil(); pauseVeil = true;
+    const pad = SigPad($("sCv"), ()=>{ $("sOk").disabled = pad.points() < 3; $("sErr").textContent = ""; });
+    const fit = () => pad.fit(); requestAnimationFrame(fit); window.addEventListener("resize", fit);
+    const close = () => { window.removeEventListener("resize", fit); box.remove(); document.body.style.overflow = ""; pauseVeil = false; poke(); };
+    $("sNo").onclick = close; $("sClr").onclick = () => pad.clear();
+    $("sOk").onclick = async () => {
+      const s = pad.encode(); if(s.length < 8) return;
+      $("sOk").disabled = true;
+      let rr;
+      try{ rr = await api("POST", {op:"sign", k: K, id, s}); }catch(_){ $("sOk").disabled = false; $("sErr").textContent = T("Non riesco a inviare: controlla la connessione e riprova.", "I can't send it: check your connection and try again."); return; }
+      if(rr.j.ok){ curSigs[id] = {s, via:"client"}; close(); render(); toast(`✅ ${T("Firma inviata. Grazie!", "Signature sent. Thank you!")}`); refresh(); return; }
+      if(rr.status === 409){ close(); toast(T("Questa seduta è già firmata.", "This session is already signed.")); refresh(); return; }
+      if(rr.j.state === "pin"){ close(); return handle(rr); }
+      $("sOk").disabled = false; $("sErr").textContent = T("Qualcosa non va: riprova.", "Something went wrong: try again.");
+    };
+  }
+  /* guida rapida */
+  function guide(){
+    const m = document.createElement("div"); m.className = "modal";
+    const it = [["📈", T("<b>Progressi</b>: i pallini verdi sono le sedute fatte, gli arancioni le lezioni saltate.", "<b>Progress</b>: green dots are sessions done, orange ones are missed lessons.")],
+      ["✍️", T("<b>Firme</b>: puoi firmare le sedute non ancora firmate. Quelle firmate si vedono con 👁 e non si possono cambiare.", "<b>Signatures</b>: you can sign sessions not signed yet. Signed ones open with 👁 and can't be changed.")],
+      ["▾", T("<b>Mostra / Nascondi</b>: tocca il titolo di una sezione per aprirla o chiuderla.", "<b>Show / Hide</b>: tap a section title to open or close it.")],
+      ["🔄", T("La pagina si aggiorna da sola ogni volta che il tuo personal trainer cambia qualcosa.", "The page updates by itself every time your personal trainer changes something.")],
+      ["🙈", T("Per la tua privacy la pagina si copre dopo 2 minuti senza tocchi o quando cambi app: tocca per rivederla.", "For your privacy the page is covered after 2 minutes without touches or when you switch app: tap to see it again.")],
+      ["🔒", T("<b>Esci</b> chiude la pagina: per riaprirla serve il PIN. Hai dimenticato il PIN? Chiedi al tuo personal trainer di azzerarlo.", "<b>Log out</b> closes the page: you need your PIN to reopen it. Forgot it? Ask your personal trainer to reset it.")],
+      ["📲", kind === "Android" ? T("Icona sul telefono: menu ⋮ del browser → «Aggiungi a schermata Home».", "Icon on your phone: browser menu ⋮ → “Add to Home screen”.") : T("Icona sul telefono: tasto Condividi ⬆️ → «Aggiungi alla schermata Home».", "Icon on your phone: Share ⬆️ → “Add to Home Screen”.")],
+      ["📶", T("Funziona anche senza internet: vedi l'ultima situazione salvata.", "It also works offline: you see the last saved situation.")]];
+    m.innerHTML = `<div class="box" role="dialog" aria-modal="true"><h3>${T("Guida rapida", "Quick guide")}</h3><ul>${it.map(([e, t])=>`<li>${e} ${t}</li>`).join("")}</ul><div class="acts"><button class="btn primary">OK</button></div></div>`;
+    m.addEventListener("click", e=>{ if(e.target === m || e.target.closest("button")) m.remove(); });
+    document.body.appendChild(m);
+  }
+  /* condividi traguardo: immagine con lo status (senza firme né soldi) */
+  async function share(){
+    const d = cur, st = sigStatus(d.allTime, L), p = d.pkg, c = document.createElement("canvas"); c.width = c.height = 1080;
+    const x = c.getContext("2d"), g = x.createLinearGradient(0, 0, 1080, 1080); g.addColorStop(0, "#2F6B4F"); g.addColorStop(1, "#1C3D2D");
+    x.fillStyle = g; x.fillRect(0, 0, 1080, 1080); x.textAlign = "center"; x.fillStyle = "#fff";
+    try{ if(document.fonts && document.fonts.load) await Promise.race([Promise.all([document.fonts.load('700 90px "Barlow Condensed"'), document.fonts.load("600 40px Barlow")]), new Promise(r=>setTimeout(r, 1500))]); }catch(_){}
+    const done = p && p.total > 0 && (Number(p.done) || 0) + (Number(p.lost) || 0) >= p.total;
+    x.font = "260px system-ui, 'Apple Color Emoji', 'Noto Color Emoji', sans-serif"; x.fillText(st ? st.e : (done ? "🏆" : "💪"), 540, 420);
+    x.font = '700 104px "Barlow Condensed", Arial, sans-serif';
+    x.fillText(st ? (L ? `${st.name} client` : `Cliente ${st.name}`) : (done ? T("Pacchetto completato!", "Package completed!") : T("Avanti così!", "Keep going!")), 540, 590);
+    x.font = '600 52px Barlow, Arial, sans-serif'; x.fillStyle = "#e9f3ec";
+    x.fillText(`${d.allTime} ${d.allTime === 1 ? T("seduta completata", "session completed") : T("sedute completate", "sessions completed")} 💪`, 540, 690);
+    if(st && done) x.fillText(T("e pacchetto completato! 🏆", "and package completed! 🏆"), 540, 770);
+    x.font = '500 40px Barlow, Arial, sans-serif'; x.fillStyle = "#cfe3d6";
+    x.fillText(`${T("Il mio percorso", "My journey")}${d.trainer ? (L ? " with " : " con ") + d.trainer : ""} · ${dIt(todayIso())}`, 540, 960);
+    const blob = await new Promise(r=>c.toBlob(r, "image/png")), name = T("Il mio traguardo", "My milestone") + ".png";
+    try{ const f = new File([blob], name, {type:"image/png"}); if(navigator.canShare && navigator.canShare({files:[f]})){ await navigator.share({files:[f], title: T("Il mio traguardo", "My milestone")}); return; } }catch(e){ if(e && e.name === "AbortError") return; }
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+    toast(T("Immagine salvata: ora puoi condividerla.", "Image saved: now you can share it."));
+  }
+  /* aggiornamento automatico (ogni minuto, quando la pagina è aperta) */
+  let watch = 0;
+  async function refresh(){
+    if(!cur || curOpt.offline || !K) return;
+    let r; try{ r = await api("GET", null, "&k=" + encodeURIComponent(K)); }catch(_){ return; }
+    if(r.j.state === "ok"){ cacheSave(r.j.data, r.j.sigs); if(JSON.stringify([r.j.data, r.j.sigs]) !== JSON.stringify([cur, curSigs])) showPage(r.j.data, r.j.sigs || {}, {}); return; }
+    if(document.querySelector(".spad")) return;
+    stopWatch(); cur = null; handle(r);
+  }
+  function startWatch(){ stopWatch(); watch = setInterval(()=>{ if(document.visibilityState === "visible") refresh(); }, 60000); }
+  function stopWatch(){ clearInterval(watch); watch = 0; }
+  /* velo per la privacy: dopo 2 minuti senza tocchi o quando cambi app */
+  let idle = 0, pauseVeil = false;
+  const veilOn = () => !!cur && !curOpt.preview && !demo && !pauseVeil;
+  function showVeil(){ if(!veilOn() || $("veil")) return; document.body.insertAdjacentHTML("beforeend", `<div class="veil" id="veil" role="button" tabindex="0"><div><div class="big-ic">🙈</div>${T("Pagina nascosta", "Page hidden")}<br><small style="font-weight:500">${T("Tocca per vederla", "Tap to show it")}</small></div></div>`); }
+  function hideVeil(){ const v = $("veil"); if(v) v.remove(); }
+  function poke(){ clearTimeout(idle); if(veilOn()) idle = setTimeout(showVeil, 120000); }
+  document.addEventListener("click", e=>{ if(e.target.closest("#veil")){ hideVeil(); refresh(); } poke(); }, true);
+  ["touchstart", "keydown", "scroll", "pointermove"].forEach(ev=>document.addEventListener(ev, poke, {passive:true, capture:true}));
+  document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState === "hidden") showVeil(); else if(cur && !curOpt.offline) refresh(); });
+  window.addEventListener("pagehide", showVeil);
+  window.addEventListener("resize", ()=>{ if(cur) document.querySelectorAll("canvas[data-s]").forEach(drawSig); });
+
+  /* ---------------- anteprima dal gestionale e pagina di esempio ---------------- */
+  window.__preview = (data, sigs) => { showPage(data, sigs || {}, {preview: true}); };
+  if(preview){ gate(`<div class="center"><p>${T("Anteprima…", "Preview…")}</p></div>`); try{ if(window.parent && window.parent !== window) window.parent.postMessage({ptPreviewReady: true}, location.origin); }catch(_){} return; }
+  if(demo){
+    const fake = () => { const st = []; let s = []; for(let t = 0; t <= 1; t += 0.02){ s.push([60 + t * 560, 230 - 60 * Math.sin(t * 18) * Math.exp(-t * 0.6) - 40 * Math.cos(t * 7)]); } st.push(s); st.push([[120,300],[880,280]]); return sigEncode(st); };
+    who = {trainer: "Giovanni Esposito", first: "Mario"};
+    const rows = [{id:"a", date:"2026-11-02"}, {id:"b", date:"2026-11-03"}, {id:"c", date:"2026-11-04", miss:true}, {id:"d", date:"2026-11-05"}, {id:"e", date:"2026-11-06"}, {id:"f", date:"2026-11-07"}];
+    const D = {v:1, upd:"2026-11-08T10:40", trainer:"Giovanni Esposito", first:"Mario", msg:"Bravo Mario! Questa settimana lavoriamo sulla postura: ricordati lo stretching a casa 💪",
+      sec:{prog:true, cal:true, miss:true, pay:true, goal:true, firme:true}, active:true, ended:"",
+      pkg:{start:"2026-11-02", total:12, done:5, lost:1, price:450, paid:300, due:150, noDate:0}, rows,
+      pays:[{date:"2026-11-02", amount:150, method:"Contanti"}, {date:"2026-11-07", amount:150, method:"Bonifico"}], allTime:52,
+      days: rows.map(r=>[r.date, r.miss ? "m" : "s"]).concat([["2026-10-06","s"],["2026-10-09","s"],["2026-10-13","s"],["2026-10-16","s"],["2026-10-20","s"],["2026-10-23","s"],["2026-10-27","s"],["2026-10-30","s"]]),
+      old:{start:"2026-09-01", end:"2026-10-30", done:10, total:10, lost:0, until:"2099-11-02"}, book:[{date:"2099-11-10", time:"18:00", type:"pt"}, {date:"2099-11-12", time:"09:30", type:"ck"}], singles:["2026-10-31", "2026-10-28"]};
+    const sg = {a:{s:fake()}, b:{s:fake()}, c:{s:fake()}, d:{s:fake()}, f:{s:fake()}};
+    if(demo === "welcome") return S.welcome({first: "Mario"});
+    if(demo === "wait") return S.waiting({name: "Telefono di Mario"});
+    if(demo === "setpin") return pinScreen("set");
+    if(demo === "pin") return pinScreen("pin");
+    if(S[demo]) return S[demo]();
+    if(demo === "veil"){ showPage(D, sg, {}); document.body.insertAdjacentHTML("beforeend", `<div class="veil"><div><div class="big-ic">🙈</div>${T("Pagina nascosta", "Page hidden")}<br><small style="font-weight:500">${T("Tocca per vederla", "Tap to show it")}</small></div></div>`); return; }
+    news = [T("💪 +1 seduta (l'ultima il 07/11/2026)", "💪 +1 session (the last on 07/11/2026)"), T("💶 Pagamento registrato: 150,00 €", "💶 Payment recorded: €150.00"), T("✍️ 1 seduta da firmare", "✍️ 1 session to sign")];
+    return showPage(D, sg, {});
+  }
+  /* pagina vera: funziona anche offline (service worker solo per questa pagina) */
+  if("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")){
+    navigator.serviceWorker.register("sw.js", {scope: "./"}).catch(()=>{});
+  }
+  boot();
+})();
+</script>
+</body>
+</html>
