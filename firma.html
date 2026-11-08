@@ -339,9 +339,11 @@ function sigPng(str, w, h){
     if(c && (c.total > 0 || c.single)){
       const cv = sigCardCanvas(Object.assign({}, c, {today: Object.assign({}, c.today || {}, {s}), lang: info.lang}));
       html += `<p>${esc(T("Ecco la tua tessera presenze con i traguardi:", "Here is your attendance card with your milestones:"))}</p><img id="cardImg" alt="${esc(T("Tessera presenze", "Attendance card"))}" src="${cv.toDataURL("image/png")}">
-        <div class="row"><button type="button" class="primary" id="save">⬇ ${esc(T("Salva immagine", "Save image"))}</button></div>
+        <div class="row" id="cardActs"><button type="button" id="skip">⏭ ${esc(T("Salta", "Skip"))}</button><button type="button" class="primary" id="save">⬇ ${esc(T("Salva immagine", "Save image"))}</button></div>
         <p class="muted">${esc(T("Puoi chiudere questa pagina.", "You can close this page."))}</p>`;
       box.innerHTML = html + "</div>";
+      /* v105: “Salta” toglie la tessera e lascia solo “Grazie! Firma ricevuta” */
+      $("skip").onclick = () => { ["cardImg", "cardActs"].forEach(id=>{ const e = $(id); if(e) e.remove(); }); const pp = box.querySelector(".done > p:not(.sub):not(.muted)"); if(pp) pp.remove(); };
       $("save").onclick = async () => {
         const name = T("Tessera presenze", "Attendance card") + ".png";
         const blob = await new Promise(r=>cv.toBlob(r, "image/png"));
