@@ -46,13 +46,17 @@ h1{font-size:1.6rem;line-height:1.15;margin:0 0 4px}
 .pad.full{position:fixed;inset:0;z-index:50;height:auto;margin:0;border:none;border-radius:0}
 .pad .padbar{display:none;position:absolute;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));gap:10px}
 .pad.full .padbar{display:flex}
-.pad.full .ph{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
-.pad .padtop{display:none;position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:14px;right:14px;color:#5f6b66;font-size:.9rem}
+.pad.full canvas{bottom:calc(140px + env(safe-area-inset-bottom,0px));height:auto}
+.pad.full .ph{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+.pad .padtop{display:none;pointer-events:none;position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:14px;right:14px;color:#5f6b66;font-size:.9rem}
 .pad.full .padtop{display:block}
 .big{width:100%;margin:0 0 10px;background:#f4f6f3;border-color:#9fb3a8}
-.pad canvas{position:absolute;inset:0;width:100%;height:100%;border-radius:12px;touch-action:none}
-.pad .ph{position:absolute;inset:auto 0 14px 0;text-align:center;color:#5f6b66;pointer-events:none;font-size:.95rem}
-.pad .ph b{display:block;border-top:1.5px solid #c9d3cd;margin:0 26px 8px}
+/* sopra la linea si firma; sotto la linea (fascia con la scritta) si scorre e si ingrandisce la pagina, come nel resto della pagina */
+.pad canvas{position:absolute;left:0;top:0;right:0;bottom:64px;width:100%;height:calc(100% - 64px);border-radius:12px 12px 0 0;touch-action:none}
+.pad .ph{position:absolute;left:0;right:0;bottom:0;height:64px;display:flex;align-items:center;justify-content:center;text-align:center;color:#5f6b66;font-size:.95rem;
+  border-top:2px solid #c9d3cd;background:#f7f9f7;border-radius:0 0 12px 12px;touch-action:pan-x pan-y pinch-zoom;user-select:none;-webkit-user-select:none}
+.pad .ph b{display:none}
+.pad .ph small{display:block;font-size:.78rem;color:#7a857f;margin-top:2px}
 .row{display:flex;gap:10px;flex-wrap:wrap}
 button{font:inherit;font-weight:700;border-radius:12px;padding:13px 18px;min-height:48px;cursor:pointer;border:1.5px solid var(--ink);background:#fff;color:var(--ink)}
 button.primary{background:var(--moss);border-color:var(--moss);color:#fff;flex:1}
@@ -300,7 +304,7 @@ function sigPng(str, w, h){
         <button type="button" class="fsb" id="fs">⤢ ${esc(T("Schermo intero", "Full screen"))}</button><span class="sp lnd"></span>
         <button type="button" class="lnd" id="clr3">${esc(T("Cancella", "Clear"))}</button><button type="button" class="primary lnd" id="ok3" disabled>✔ ${esc(T("Invia firma", "Send signature"))}</button></div>
       <div class="pad" id="pad"><div class="padtop">${esc(T("Gira il telefono in orizzontale e firma con il dito.", "Turn your phone sideways and sign with your finger."))}</div>
-        <canvas id="cv" aria-label="${esc(T("Riquadro per firmare", "Signature box"))}"></canvas><div class="ph" id="ph"><b></b>${esc(T("Firma qui con il dito", "Sign here with your finger"))}</div>
+        <canvas id="cv" aria-label="${esc(T("Riquadro per firmare", "Signature box"))}"></canvas><div class="ph" id="ph"><span>${esc(T("↑ Firma con il dito sopra la linea", "↑ Sign with your finger above the line"))}<small>${esc(T("qui sotto puoi scorrere e ingrandire", "down here you can scroll and zoom"))}</small></span></div>
         <div class="padbar"><button type="button" id="clr2">${esc(T("Cancella", "Clear"))}</button><button type="button" class="primary" id="done2">✔ ${esc(T("Fatto", "Done"))}</button></div></div>
       <div class="row bottom"><button type="button" id="clr">${esc(T("Cancella", "Clear"))}</button><button type="button" class="primary" id="ok" disabled>✔ ${esc(T("Invia firma", "Send signature"))}</button></div>
       <p class="err" id="err" role="alert"></p>`;
@@ -309,7 +313,7 @@ function sigPng(str, w, h){
     const baseH = () => matchMedia("(orientation: landscape)").matches ? Math.max(200, innerHeight - 112) : Math.max(300, Math.min(innerHeight * 0.6, 560));
     const size = () => { if($("pad").classList.contains("full")){ $("pad").style.height = ""; } else $("pad").style.height = Math.round(baseH() * z) + "px"; $("zl").textContent = Math.round(z * 100) + "%"; pad.fit(); };
     const zoom = v => { z = Math.max(0.6, Math.min(2, Math.round(v * 100) / 100)); size(); };
-    const pad = SigPad($("cv"), ()=>{ $("ok").disabled = $("ok3").disabled = pad.points() < 3; $("ph").hidden = pad.points() > 0; $("err").textContent = ""; },
+    const pad = SigPad($("cv"), ()=>{ $("ok").disabled = $("ok3").disabled = pad.points() < 3;  $("err").textContent = ""; },
       {pinch: (k, ph) => { if(ph === "start") z0 = z; else if(ph === "move") zoom(z0 * k); }});
     $("zin").onclick = () => zoom(z + 0.2); $("zout").onclick = () => zoom(z - 0.2);
     size(); window.addEventListener("resize", size); window.addEventListener("orientationchange", ()=>setTimeout(size, 250));
