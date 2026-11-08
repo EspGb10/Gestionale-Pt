@@ -1,6 +1,9 @@
 /* Pagina del cliente (v101). File NUOVO: non cambia data.js, login.js, recover.js, kvlib.js, firme.js.
    Il cliente apre un link (cliente.html?t=CODICE) e vede SOLO la situazione del suo pacchetto, sempre aggiornata.
    Ogni dispositivo deve essere approvato dal trainer (massimo 1 per cliente), poi il cliente sceglie un PIN di 4 cifre.
+   v104: il link nuovo vale 1 ORA. Quando il cliente invia la richiesta (entro l'ora; se l'ha aperto entro l'ora ha tempo fino a 24 ore)
+   il link si lega a quel dispositivo e non scade più. Un altro dispositivo vede “link già usato” (avviso al trainer, max 1 all'ora).
+   30 giorni senza aprire la pagina → il link si spegne (serve un link nuovo). Richiesta rifiutata → link spento.
    Chiavi nel database:
      gpt:view            hash: <cliente> -> scheda della pagina (link, dispositivo, richiesta, avvisi, consensi…)
      gpt:viewtok:<cod>   -> <cliente>
@@ -17,7 +20,7 @@
      POST {t, d, op:"claim", x}        l'icona (su iPhone è un “dispositivo” nuovo) prende il posto del dispositivo approvato; poi serve il PIN
    Con la password del gestionale:
      GET  ?list=1  -> {views:{cliente:{…}}}
-     POST {op:"link", client, trainer, first}   -> {token}  (lo stesso finché il dispositivo non viene tolto o il link bloccato)
+     POST {op:"link", client, trainer, first[, fresh]}   -> {token}  (lo stesso finché è valido; nuovo se spento, non usato entro 1 ora, o fresh senza dispositivo)
      POST {op:"snap", client, snap} · approve · reject · remove · block · pinreset · unblock · ack(ids) · keep · blockall */
 const crypto = require("crypto");
 const {kv, missing, authorized, readJson, send, ipOf, P} = require("./kvlib");
@@ -31,7 +34,7 @@ const STROKES = v => typeof v === "string" && v.length >= 8 && v.length <= 24000
 const hash = v => crypto.createHash("sha256").update(String(v)).digest("base64url").slice(0, 32);
 const clean = (v, n) => String(v || "").replace(/[\u0000-\u001f<>]/g, "").trim().slice(0, n);
 const KINDS = ["iPhone", "iPad", "Android", "computer", "altro"];
-const DAY = 86400000, IDLE_DAYS = 30, RENEW_DAYS = 7, SESS = 43200, MAX_FAILS = 5;
+const DAY = 86400000, IDLE_DAYS = 30, RENEW_DAYS = 7, SESS = 43200, MAX_FAILS = 5, HOUR = 3600000;
 const romeDay = (ms = Date.now()) => new Date(ms).toLocaleDateString("sv-SE", {timeZone: "Europe/Rome"});
 const romeHM = (ms = Date.now()) => new Date(ms).toLocaleTimeString("it-IT", {timeZone: "Europe/Rome", hour: "2-digit", minute: "2-digit", hour12: false});
 const addDays = (iso, n) => { const d = new Date(iso + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
@@ -43,6 +46,13 @@ function alert(rec, k, extra){
   rec.alerts = (Array.isArray(rec.alerts) ? rec.alerts : []).slice(-29);
   rec.alerts.push(Object.assign({id: crypto.randomBytes(6).toString("base64url"), k, at: Date.now()}, extra || {}));
 }
+/* v104: a quale dispositivo è legato il link (anche per i link creati prima della v104) */
+const boundH = rec => rec.bh || (rec.device && rec.device.h) || (rec.pending && rec.pending.h) || "";
+const linkOld = rec => !boundH(rec) && Date.now() - (Number(rec.created) || 0) > HOUR;          // non usato entro 1 ora
+const openedInTime = (rec, hd) => (rec.opened || []).includes(hd) && Date.now() - (Number(rec.created) || 0) <= DAY;
+const idleDev = rec => !!(rec.device && Date.now() - (rec.device.seen || rec.device.appr || Date.now()) > IDLE_DAYS * DAY);
+/* 30 giorni senza aprire la pagina: il link si spegne (comandi da mandare al database) */
+function lockIdle(rec){ rec.device = null; rec.pending = null; rec.locked = true; rec.lockWhy = "idle"; alert(rec, "idle"); const sd = sessDel(rec); rec.sess = []; return sd; }
 /* quello che vede il gestionale (mai PIN, impronte o codici dei dispositivi) */
 const devPub = d => d ? {name: d.name, kind: d.kind, at: d.at, seen: d.seen || 0, blocked: !!d.blocked, pin: !!d.pin} : null;
 const sessDel = rec => (Array.isArray(rec && rec.sess) ? rec.sess : []).filter(TOK).map(k=>["DEL", P + "viewsess:" + k])
@@ -50,7 +60,8 @@ const sessDel = rec => (Array.isArray(rec && rec.sess) ? rec.sess : []).filter(T
 const pub = rec => rec ? {on: !!rec.token && !rec.locked, locked: !!rec.locked, device: devPub(rec.device),
   pending: rec.pending ? {name: rec.pending.name, kind: rec.pending.kind, at: rec.pending.at} : null,
   alerts: rec.alerts || [], consents: rec.consents || [], delreq: rec.delreq || 0, seenAt: rec.seenAt || 0, updAt: rec.updAt || 0,
-  ended: rec.ended || "", created: rec.created || 0} : null;
+  ended: rec.ended || "", created: rec.created || 0,
+  bound: !!boundH(rec), linkOld: !rec.locked && linkOld(rec), expAt: boundH(rec) ? 0 : (Number(rec.created) || 0) + HOUR, lockWhy: rec.locked ? rec.lockWhy || "removed" : ""} : null;
 /* il pacchetto è chiuso da più di 7 giorni e non è stato rinnovato */
 const expired = rec => DATE(rec.ended) && romeDay() > addDays(rec.ended, RENEW_DAYS);
 async function tooMany(req){ const [n] = await kv([["GET", P + "viewfail:" + ipOf(req)]]); return Number(n) >= 30; }
@@ -98,18 +109,35 @@ module.exports = async (req, res) => {
       if(!DEV(d)) return send(res, 400, {error:"device"});
       const hd = hash(d), who = {trainer: rec.trainer || "", first: rec.first || ""};
       const mine = !!(rec.device && rec.device.h === hd);
-      /* dispositivo tolto dal trainer: nessuno può più chiedere l'accesso con questo link */
+      /* 30 giorni senza aprire la pagina: il link si spegne, serve un link nuovo (v104) */
+      if(idleDev(rec)){ const sd = lockIdle(rec); await kv([...sd, ["HSET", P + "view", client, JSON.stringify(rec)]]); return send(res, 200, Object.assign({state:"idle"}, who)); }
+      /* dispositivo tolto, richiesta rifiutata o 30 giorni: nessuno può più chiedere l'accesso con questo link */
       if(rec.locked){
         if(!rec.lastTry || Date.now() - rec.lastTry > 3600000){ rec.lastTry = Date.now(); alert(rec, "try", {name: ""}); await putRec(client, rec); }
-        return send(res, 200, Object.assign({state:"removed"}, who));
+        return send(res, 200, Object.assign({state: rec.lockWhy === "idle" ? "idle" : "removed"}, who));
       }
       if(expired(rec)) return send(res, 200, Object.assign({state:"expired", ended: rec.ended}, who));
-      /* 30 giorni senza aprire la pagina: l'approvazione scade, va chiesta di nuovo */
-      if(mine && Date.now() - (rec.device.seen || rec.device.appr || Date.now()) > IDLE_DAYS * DAY){
-        rec.device = null; alert(rec, "idle"); await putRec(client, rec);
-        return send(res, 200, Object.assign({state:"new", again: true}, who));
-      }
       const op = req.method === "POST" ? body.op : "get";
+      /* icona sulla schermata Home: prende l'approvazione del dispositivo che ha creato il codice (stesso telefono) */
+      if(op === "claim"){
+        if(!TOK(body.x)) return send(res, 400, {error:"x"});
+        const [raw] = await kv([["GET", P + "viewxfer:" + body.x]]);
+        let xr = null; try{ xr = raw ? JSON.parse(raw) : null; }catch(_){}
+        if(!xr || xr.c !== client || !rec.device || rec.device.h !== xr.h || rec.device.blocked) return send(res, 200, Object.assign({state: mine ? "pin" : boundH(rec) && boundH(rec) !== hd ? "used" : "new", claimed: false}, who));
+        rec.moved = rec.device.h; rec.device.h = hd; rec.bh = hd; rec.device.seen = Date.now();      // (moved: il browser di prima, sullo stesso telefono)
+        await kv([["DEL", P + "viewxfer:" + body.x], ["HSET", P + "view", client, JSON.stringify(rec)]]);
+        return send(res, 200, Object.assign({state: rec.device.pin ? "pin" : "setpin", claimed: true}, who));
+      }
+      /* v104: link legato a un altro dispositivo → “link già usato” (avviso al trainer al massimo una volta all'ora) */
+      const bh = boundH(rec);
+      if(bh && bh !== hd && !mine && rec.moved === hd) return send(res, 200, Object.assign({state:"moved"}, who));   // stesso telefono: ora si apre dall'icona
+      if(bh && bh !== hd && !mine){
+        if(!rec.lastOther || Date.now() - rec.lastOther > HOUR){ rec.lastOther = Date.now(); alert(rec, "other"); await putRec(client, rec); }
+        return send(res, 200, Object.assign({state:"used"}, who));
+      }
+      /* v104: link non usato entro 1 ora (chi l'ha aperto in tempo può ancora inviare la richiesta, fino a 24 ore) */
+      if(!bh && linkOld(rec) && !openedInTime(rec, hd)) return send(res, 200, Object.assign({state:"linkold"}, who));
+      if(!bh && req.method === "GET" && !(rec.opened || []).includes(hd)){ rec.opened = (rec.opened || []).slice(-4).concat(hd); await putRec(client, rec); }
       if(req.method === "GET"){
         if(mine){
           if(rec.device.blocked) return send(res, 200, Object.assign({state:"blocked"}, who));
@@ -125,16 +153,6 @@ module.exports = async (req, res) => {
         return send(res, 200, Object.assign({state:"new"}, who));
       }
       if(req.method !== "POST") return send(res, 405, {error:"method"});
-      /* icona sulla schermata Home: prende l'approvazione del dispositivo che ha creato il codice (stesso telefono) */
-      if(op === "claim"){
-        if(!TOK(body.x)) return send(res, 400, {error:"x"});
-        const [raw] = await kv([["GET", P + "viewxfer:" + body.x]]);
-        let xr = null; try{ xr = raw ? JSON.parse(raw) : null; }catch(_){}
-        if(!xr || xr.c !== client || !rec.device || rec.device.h !== xr.h || rec.device.blocked) return send(res, 200, Object.assign({state: mine ? "pin" : "new", claimed: false}, who));
-        rec.device.h = hd; rec.device.seen = Date.now();
-        await kv([["DEL", P + "viewxfer:" + body.x], ["HSET", P + "view", client, JSON.stringify(rec)]]);
-        return send(res, 200, Object.assign({state: rec.device.pin ? "pin" : "setpin", claimed: true}, who));
-      }
       if(op === "ask"){
         if(mine) return send(res, 200, {state: rec.device.pin ? "pin" : "setpin"});
         if(body.consent !== true) return send(res, 400, {error:"consent"});
@@ -143,6 +161,7 @@ module.exports = async (req, res) => {
         const kind = KINDS.includes(body.kind) ? body.kind : "altro", at = Date.now();
         if((rec.rejected || []).includes(hd)) alert(rec, "try", {name});     // dispositivo già rifiutato o tolto che riprova
         rec.pending = {h: hd, name, kind, at};
+        if(!rec.bh){ rec.bh = hd; rec.bound = at; rec.opened = []; }        // v104: da qui il link è di questo dispositivo, senza scadenza
         rec.consents = (rec.consents || []).slice(-19); rec.consents.push({at, name, kind});
         await putRec(client, rec);
         return send(res, 200, Object.assign({state:"waiting", name}, who));
@@ -209,8 +228,11 @@ module.exports = async (req, res) => {
     if(req.method === "GET"){
       if(q.get("list") === null) return send(res, 400, {error:"what"});
       const [flat] = await kv([["HGETALL", P + "view"]]);
-      const views = {};
-      for(let i = 0; flat && i < flat.length; i += 2){ try{ views[flat[i]] = pub(JSON.parse(flat[i+1])); }catch(_){} }
+      const views = {}, cmds = [];
+      for(let i = 0; flat && i < flat.length; i += 2){ try{ const r = JSON.parse(flat[i+1]);
+        if(r && !r.locked && idleDev(r)){ cmds.push(...lockIdle(r), ["HSET", P + "view", flat[i], JSON.stringify(r)]); }   // v104: 30 giorni → link spento
+        views[flat[i]] = pub(r); }catch(_){} }
+      if(cmds.length) await kv(cmds);
       return send(res, 200, {views, now: Date.now()});
     }
     if(req.method !== "POST") return send(res, 405, {error:"method"});
@@ -229,11 +251,11 @@ module.exports = async (req, res) => {
     let rec = await getRec(client);
     const op = body.op;
     if(op === "link"){
-      /* link nuovo se non c'era o se il dispositivo era stato tolto (il vecchio link non vale più) */
-      if(!rec || !rec.token || rec.locked){
+      /* link nuovo se non c'era, se il link era spento, se non è stato usato entro 1 ora o se chiedi “Link nuovo” (solo se non è ancora legato a un dispositivo) */
+      if(!rec || !rec.token || rec.locked || linkOld(rec) || (body.fresh === true && !boundH(rec))){
         const cmds = [];
         if(rec && TOK(rec.token)) cmds.push(["DEL", P + "viewtok:" + rec.token]);
-        rec = Object.assign(rec || {}, {token: crypto.randomBytes(24).toString("base64url"), device: null, pending: null, locked: false, created: Date.now()});
+        rec = Object.assign(rec || {}, {token: crypto.randomBytes(24).toString("base64url"), device: null, pending: null, locked: false, created: Date.now(), bh: "", bound: 0, opened: [], lockWhy: "", lastOther: 0, moved: ""});
         cmds.push(["SET", P + "viewtok:" + rec.token, client]);
         await kv(cmds);
       }
@@ -262,10 +284,13 @@ module.exports = async (req, res) => {
       }
       return send(res, 200, {ok: true, view: pub(rec)});
     }
-    if(op === "reject"){ if(rec.pending) rej(rec.pending.h); rec.pending = null; await putRec(client, rec); return send(res, 200, {ok: true, view: pub(rec)}); }
+    if(op === "reject"){                                       // v104: richiesta rifiutata → il link non vale più (per riprovare serve un link nuovo)
+      if(rec.pending){ rej(rec.pending.h); rec.pending = null; if(!rec.device){ rec.locked = true; rec.lockWhy = "rejected"; } }
+      await putRec(client, rec); return send(res, 200, {ok: true, view: pub(rec)});
+    }
     if(op === "remove"){                                       // dispositivo tolto: il link non vale più per nessuno
       if(rec.device) rej(rec.device.h); if(rec.pending) rej(rec.pending.h);
-      rec.device = null; rec.pending = null; rec.locked = true;
+      rec.device = null; rec.pending = null; rec.locked = true; rec.lockWhy = "removed";
       const sd = sessDel(rec); rec.sess = [];
       await kv([...sd, ["HSET", P + "view", client, JSON.stringify(rec)]]);
       return send(res, 200, {ok: true, view: pub(rec)});
