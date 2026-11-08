@@ -13,6 +13,8 @@
      POST {t, d, op:"setpin", pin} · {op:"pin", pin}   -> {state:"ok", k, data, sigs}
      POST {t, d, k, op:"sign", id, s}   firma una seduta non firmata · {op:"logout"} scollega il dispositivo · {op:"bye"} chiude l'accesso
      POST {t, d, k, op:"delreq"}      chiede di cancellare i dati della pagina (decide il trainer)
+     POST {t, d, k, op:"xfer"} -> {x}  codice (30 minuti, una volta sola) per passare l'approvazione all'icona sulla schermata Home
+     POST {t, d, op:"claim", x}        l'icona (su iPhone è un “dispositivo” nuovo) prende il posto del dispositivo approvato; poi serve il PIN
    Con la password del gestionale:
      GET  ?list=1  -> {views:{cliente:{…}}}
      POST {op:"link", client, trainer, first}   -> {token}  (lo stesso finché il dispositivo non viene tolto o il link bloccato)
@@ -43,7 +45,8 @@ function alert(rec, k, extra){
 }
 /* quello che vede il gestionale (mai PIN, impronte o codici dei dispositivi) */
 const devPub = d => d ? {name: d.name, kind: d.kind, at: d.at, seen: d.seen || 0, blocked: !!d.blocked, pin: !!d.pin} : null;
-const sessDel = rec => (Array.isArray(rec && rec.sess) ? rec.sess : []).filter(TOK).map(k=>["DEL", P + "viewsess:" + k]);
+const sessDel = rec => (Array.isArray(rec && rec.sess) ? rec.sess : []).filter(TOK).map(k=>["DEL", P + "viewsess:" + k])
+  .concat((Array.isArray(rec && rec.xf) ? rec.xf : []).filter(TOK).map(k=>["DEL", P + "viewxfer:" + k]));   // (anche i codici per l'icona)
 const pub = rec => rec ? {on: !!rec.token && !rec.locked, locked: !!rec.locked, device: devPub(rec.device),
   pending: rec.pending ? {name: rec.pending.name, kind: rec.pending.kind, at: rec.pending.at} : null,
   alerts: rec.alerts || [], consents: rec.consents || [], delreq: rec.delreq || 0, seenAt: rec.seenAt || 0, updAt: rec.updAt || 0,
@@ -122,6 +125,16 @@ module.exports = async (req, res) => {
         return send(res, 200, Object.assign({state:"new"}, who));
       }
       if(req.method !== "POST") return send(res, 405, {error:"method"});
+      /* icona sulla schermata Home: prende l'approvazione del dispositivo che ha creato il codice (stesso telefono) */
+      if(op === "claim"){
+        if(!TOK(body.x)) return send(res, 400, {error:"x"});
+        const [raw] = await kv([["GET", P + "viewxfer:" + body.x]]);
+        let xr = null; try{ xr = raw ? JSON.parse(raw) : null; }catch(_){}
+        if(!xr || xr.c !== client || !rec.device || rec.device.h !== xr.h || rec.device.blocked) return send(res, 200, Object.assign({state: mine ? "pin" : "new", claimed: false}, who));
+        rec.device.h = hd; rec.device.seen = Date.now();
+        await kv([["DEL", P + "viewxfer:" + body.x], ["HSET", P + "view", client, JSON.stringify(rec)]]);
+        return send(res, 200, Object.assign({state: rec.device.pin ? "pin" : "setpin", claimed: true}, who));
+      }
       if(op === "ask"){
         if(mine) return send(res, 200, {state: rec.device.pin ? "pin" : "setpin"});
         if(body.consent !== true) return send(res, 400, {error:"consent"});
@@ -171,6 +184,12 @@ module.exports = async (req, res) => {
         alert(rec, "sign", {date: row.date, miss: !!row.miss, sid: body.id});
         await kv([["HSET", P + "sig:" + client, sig.id, JSON.stringify(sig)], ["HSET", P + "view", client, JSON.stringify(rec)]]);
         return send(res, 200, {ok: true});
+      }
+      if(op === "xfer"){
+        const x = crypto.randomBytes(18).toString("base64url");
+        rec.xf = (Array.isArray(rec.xf) ? rec.xf : []).slice(-2).concat(x);
+        await kv([["SET", P + "viewxfer:" + x, JSON.stringify({c: client, h: hd}), "EX", 1800], ["HSET", P + "view", client, JSON.stringify(rec)]]);
+        return send(res, 200, {x});
       }
       if(op === "bye"){ await kv([["DEL", P + "viewsess:" + body.k]]); return send(res, 200, {ok: true}); }
       if(op === "logout"){                                       // il cliente scollega il suo dispositivo
