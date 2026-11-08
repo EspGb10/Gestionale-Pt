@@ -1,6 +1,6 @@
 /* Gestionale PT: funziona anche senza internet.
    Quando pubblichi una versione nuova, cambia il numero qui sotto (v1 -> v2). */
-const CACHE = "gestionale-pt-v100";
+const CACHE = "gestionale-pt-v101";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest",
   "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./favicon-32.png"];
 /* librerie per Word e PDF e caratteri: se possibile le salvo subito, così funzionano offline */
@@ -30,6 +30,7 @@ self.addEventListener("fetch", e=>{
   const url = new URL(req.url);
   if(url.origin === self.location.origin && url.pathname.includes("/api/")) return;   // il database: sempre dalla rete, mai dalla memoria
   if(url.origin === self.location.origin && /\/firma\.html$/.test(url.pathname)) return;   // la pagina per far firmare il cliente: sempre dalla rete
+  if(url.origin === self.location.origin && url.pathname.includes("/visuale-cliente/")) return;   // v101: la visuale cliente ha il suo service worker (e se elimini la cartella non resta niente)
   // la pagina: prima internet (così gli aggiornamenti arrivano subito), se manca la copia salvata
   if(req.mode === "navigate"){
     e.respondWith((async ()=>{
