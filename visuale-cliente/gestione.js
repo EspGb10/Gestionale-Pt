@@ -109,7 +109,8 @@
     const o = {v: 1, upd: upd || "", trainer: settings.trainerName || "", first: first(c), msg: v.msg, sec: v.sec, active: ptActive(c), ended: "",
       pkg: null, rows: [], pays: [], allTime: sigAllTime(c), days: [], old: null,
       /* appuntamenti dell'agenda (solo promemoria): il cliente vede tipo, giorno e ora — mai se è “singola” o del pacchetto */
-      book: v.sec.book && typeof bookOf === "function" ? bookOf(c).slice(0, 40).map(b=>({date: b.date, time: b.time, type: b.type})) : [],
+      /* tutti quelli dell'ultimo mese (anche passati): la pagina mostra i prossimi e, a richiesta, i passati in grigio */
+      book: v.sec.book && typeof normBook === "function" ? normBook(c.book).slice(-60).map(b=>({date: b.date, time: b.time, type: b.type})) : [],
       /* sedute singole fatte (quando non c'era un pacchetto attivo), le più recenti */
       singles: v.sec.single ? (c.packages || []).filter(p=>typeof isSingle === "function" && isSingle(p) && (p.start || p.end)).map(p=>p.start || p.end).sort().reverse().slice(0, 30) : []};
     if(has){

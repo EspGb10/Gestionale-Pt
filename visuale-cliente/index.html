@@ -132,8 +132,18 @@ input[type=text]{width:100%;font:inherit;padding:12px;border-radius:12px;border:
 .avviso small{color:var(--muted)}
 @media (prefers-color-scheme: dark){.avviso{background:var(--goldSoft)}.avviso h2{color:var(--gold)}}
 .cal .d.b{background:#dbe8fb;color:#1d4f91;font-weight:700}
+.cal .d.bp{background:#e7e9e8;color:#7a857f;font-weight:700}
 .tag.bk{background:#dbe8fb;color:#1d4f91}
+.rows .r.past{opacity:.55;filter:grayscale(1)}
+.bkbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 6px}
+.bkbar input[type=date]{font:inherit;padding:8px 10px;border-radius:12px;border:1.5px solid var(--line);background:var(--paper);color:var(--pine);flex:1 1 150px;min-width:0}
 @media (prefers-color-scheme: dark){.cal .d.b,.tag.bk{background:#1d3352;color:#a9c8f5}}
+.inst h4{margin:14px 0 6px;font-size:1.05rem}
+.inst ol{margin:0;padding-left:22px}
+.inst li{padding:4px 0;border:0}
+#instModal .acts{position:sticky;bottom:-18px;background:var(--paper);padding:12px 0 14px;margin:8px 0 -18px;border-top:1px solid var(--line)}
+#instModal .acts .btn{width:100%}
+.inst-later{background:var(--soft);border-radius:12px;padding:10px 12px;margin-top:12px;font-size:.92rem}
 </style>
 </head>
 <body>
@@ -411,8 +421,7 @@ function sigPng(str, w, h){
       <label class="ck"><input type="checkbox" id="gCons"> ${T("Ho letto l'informativa", "I have read the notice")}</label>
       <label for="gName">${T("Dai un nome a questo dispositivo", "Name this device")}</label><input type="text" id="gName" maxlength="40" autocomplete="off" value="${esc(def)}" placeholder="${T("es. Telefono di Mario", "e.g. Mario's phone")}">
       <p class="err" id="gErr" role="alert"></p>
-      <p><button class="btn primary" id="gAsk" style="width:100%">${T("Chiedi accesso", "Request access")}</button></p>
-      ${kind === "iPhone" || kind === "iPad" ? (standalone ? "" : `<p class="tip">📲 ${T("Consiglio: prima aggiungi questa pagina alla schermata Home (tasto Condividi ⬆️ → «Aggiungi alla schermata Home»), aprila da lì e poi chiedi l'accesso. Così il dispositivo approvato resta sempre lo stesso.", "Tip: first add this page to your Home Screen (Share ⬆️ → “Add to Home Screen”), open it from there and then request access. This way the approved device always stays the same.")}</p>`) : ""}`);
+      <p><button class="btn primary" id="gAsk" style="width:100%">${T("Chiedi accesso", "Request access")}</button></p>`);
       $("gAsk").onclick = async () => {
         const name = $("gName").value.trim(), err = $("gErr");
         if(!$("gCons").checked){ err.textContent = T("Spunta «Ho letto l'informativa» per continuare.", "Tick “I have read the notice” to continue."); return; }
@@ -469,7 +478,7 @@ function sigPng(str, w, h){
       try{ r = await api("POST", {op: mode === "set" ? "setpin" : "pin", pin}); }
       catch(_){ busy = false; val = ""; dots(); $("pErr").textContent = T("Non riesco a collegarmi: riprova.", "I can't connect: try again."); return; }
       busy = false;
-      if(r.j.state === "ok"){ document.removeEventListener("keydown", kb); await remember(pin, r.j); return handle(r, true); }
+      if(r.j.state === "ok"){ document.removeEventListener("keydown", kb); await remember(pin, r.j); handle(r, true); if(mode === "set" && !standalone) showInstall(true); return; }
       if(r.j.state === "pin" && r.j.wrong){ val = ""; dots(); $("pErr").textContent = T("PIN sbagliato.", "Wrong PIN.") + " " + (r.j.left === 1 ? T("Ultimo tentativo prima del blocco.", "Last attempt before the lock.") : T(`Restano ${r.j.left} tentativi.`, `${r.j.left} attempts left.`)); return; }
       document.removeEventListener("keydown", kb); handle(r);
     };
@@ -515,6 +524,12 @@ function sigPng(str, w, h){
     stopTimer();
     if(!tok) return S.nolink();
     let r;
+    /* aperta dall'icona sulla schermata Home (su iPhone è un “dispositivo” nuovo): prende l'approvazione del telefono con il codice del link */
+    const xc = q.get("x");
+    if(xc && standalone && !lsGet("pt_view_x_" + xc)){
+      lsSet("pt_view_x_" + xc, 1);
+      try{ const c = await api("POST", {op: "claim", x: xc}); if(c.j && c.j.claimed){ setK(""); } }catch(_){}
+    }
     try{ r = await api("GET", null, K ? "&k=" + encodeURIComponent(K) : ""); }
     catch(_){ return offlineOr(S.nonet); }
     handle(r);
@@ -527,7 +542,7 @@ function sigPng(str, w, h){
   const isClosed = k => k in folds ? !!folds[k] : !!CLOSED_DEF[k];
   const card = (k, title, body, cls) => `<section class="card fold${cls ? " " + cls : ""}${isClosed(k) ? " shut" : ""}" data-k="${k}"><button class="fh" aria-expanded="${!isClosed(k)}"><h2>${title}</h2><span class="fx">${isClosed(k) ? T("Mostra", "Show") + " ▾" : T("Nascondi", "Hide") + " ▴"}</span></button><div class="fb">${body}</div></section>`;
   function drawSig(cv){ const r = cv.getBoundingClientRect(); if(!r.width) return; const k = devicePixelRatio || 1; cv.width = r.width * k; cv.height = r.height * k; sigDraw(cv.getContext("2d"), cv.dataset.s, 8 * k, 6 * k, cv.width - 16 * k, cv.height - 12 * k, "#14213d"); }
-  let cur = null, curSigs = {}, curOpt = {}, news = [], openEye = "", calIdx = null;
+  let cur = null, curSigs = {}, curOpt = {}, news = [], openEye = "", calIdx = null, bkDate = "";
   const on = (d, k) => !d.sec || d.sec[k] !== false;
   /* “Novità dall'ultima visita”: solo quando c'è davvero qualcosa di nuovo rispetto all'ultima volta che hai aperto la pagina */
   function summary(d, sigs){
@@ -583,10 +598,24 @@ function sigPng(str, w, h){
       ${curOpt.offline ? `<div class="off" style="margin-top:10px">📶 ${T("Sei offline: questa è l'ultima situazione salvata sul telefono", "You're offline: this is the last situation saved on your phone")} (${dIt(upd.toISOString())})</div>` : ""}</header><div class="wrap">`;
     /* 0. avviso del personal trainer: sempre in alto (lo scrive solo il trainer) */
     if(d.msg) h += `<section class="card avviso" role="note"><h2>📢 ${T("Avviso del tuo personal trainer", "Notice from your personal trainer")}</h2><p>${esc(d.msg)}</p>${d.trainer ? `<small>— ${esc(d.trainer)}</small>` : ""}</section>`;
-    /* 0b. i prossimi appuntamenti (solo promemoria, li mette il trainer): tipo, giorno e ora */
-    const bk = (d.book || []).filter(b=>b.date >= todayIso());
+    /* 0b. i prossimi appuntamenti (solo promemoria, li mette il trainer): tipo, giorno e ora.
+       Un appuntamento diventa “passato” 10 minuti dopo la sua ora; i passati (ultimo mese) si vedono in grigio con “Mostra gli appuntamenti passati” */
+    const cut = (()=>{ const x = new Date(Date.now() - 600000), p2 = n => String(n).padStart(2, "0"); return `${x.getFullYear()}-${p2(x.getMonth() + 1)}-${p2(x.getDate())} ${p2(x.getHours())}:${p2(x.getMinutes())}`; })();
+    const bk = (d.book || []).filter(b=>b.date + " " + b.time > cut).sort((a, b)=>(a.date + a.time).localeCompare(b.date + b.time));
+    const bkPast = (d.book || []).filter(b=>b.date + " " + b.time <= cut && b.date >= addDays(todayIso(), -31)).sort((a, b)=>(b.date + b.time).localeCompare(a.date + a.time));
     const bkType = b => b.type === "ck" ? `📋 ${T("Consulenza", "Consultation")}` : `🏋️ ${T("Personal", "Personal")}`;
-    if(on(d, "book") && bk.length) h += card("book", `📅 ${T("I tuoi prossimi appuntamenti", "Your next appointments")}`, `<div class="rows">${bk.slice(0, 6).map(b=>`<div class="r"><span><b>${esc(dayLong(b.date))}</b><br><small>${bkType(b)}</small></span><span class="tag bk">${T("ore", "at")} ${esc(b.time)}</span></div>`).join("")}</div>${bk.length > 6 ? `<p class="msum">${T(`e altri ${bk.length - 6} nel calendario`, `and ${bk.length - 6} more in the calendar`)}</p>` : ""}`);
+    const bkRow = (b, past) => `<div class="r${past ? " past" : ""}"><span><b>${esc(dayLong(b.date))}</b><br><small>${bkType(b)}${past ? ` · ${T("passato", "past")}` : ""}</small></span><span class="tag bk">${T("ore", "at")} ${esc(b.time)}</span></div>`;
+    /* barra della data: di base OGGI e tutti i prossimi; il cliente può scegliere una data passata (fino a 1 mese: quel giorno, in grigio) o futura (da quel giorno in poi) */
+    const bkd0 = bkDate && bkDate !== todayIso() ? bkDate : "";
+    const bkShow = !bkd0 ? bk : bkd0 < todayIso() ? (d.book || []).filter(b=>b.date === bkd0 && b.date >= addDays(todayIso(), -31)).sort((a, b)=>a.time.localeCompare(b.time)) : bk.filter(b=>b.date >= bkd0);
+    const bkIsPast = b => b.date + " " + b.time <= cut;
+    if(on(d, "book") && (d.book || []).length) h += card("book", `📅 ${T("I tuoi appuntamenti", "Your appointments")}`,
+      `<div class="bkbar"><button class="btn sm" id="bkPrev" type="button" aria-label="${T("Giorno prima", "Previous day")}">‹</button>
+        <input type="date" id="bkDay" value="${bkd0 || todayIso()}" aria-label="${T("Scegli la data", "Choose the date")}">
+        <button class="btn sm" id="bkNext" type="button" aria-label="${T("Giorno dopo", "Next day")}">›</button>${bkd0 ? `<button class="btn sm primary" id="bkToday" type="button">${T("Oggi", "Today")}</button>` : ""}</div>
+      <p class="msum">${!bkd0 ? T("Prossimi appuntamenti, da oggi:", "Next appointments, from today:") : bkd0 < todayIso() ? T(`Appuntamenti del ${dIt(bkd0)} (passati):`, `Appointments on ${dIt(bkd0)} (past):`) : T(`Appuntamenti dal ${dIt(bkd0)}:`, `Appointments from ${dIt(bkd0)}:`)}</p>
+      ${bkShow.length ? `<div class="rows">${bkShow.map(b=>bkRow(b, bkIsPast(b))).join("")}</div>` : `<p class="msum">${T("Nessun appuntamento.", "No appointments.")}</p>`}
+      ${bkd0 && bkd0 < todayIso() ? `<p class="msum">${T("Ogni appuntamento passato resta visibile per 1 mese dalla sua data, poi sparisce.", "Each past appointment stays visible for 1 month from its date, then disappears.")}</p>` : ""}`);
     /* 1. i tuoi progressi */
     if(p && on(d, "prog")){
       const total = Number(p.total) || 0, done = Number(p.done) || 0, lost = Number(p.lost) || 0, used = done + lost, left = Math.max(0, total - used);
@@ -606,6 +635,7 @@ function sigPng(str, w, h){
     if(on(d, "cal")){
       const days = (d.days || []).concat((d.singles || []).map(x=>[x, "s"])), byDay = {}; days.forEach(([dt, k])=>{ byDay[dt] = byDay[dt] === "s" ? "s" : k; });
       const bkd = on(d, "book") ? bk : [], bkDay = {}; bkd.forEach(b=>{ (bkDay[b.date] = bkDay[b.date] || []).push(b.time); if(!byDay[b.date]) byDay[b.date] = "b"; });
+      if(on(d, "book")) bkPast.forEach(b=>{ if(!byDay[b.date]) byDay[b.date] = "bp"; });   // giorni prenotati già passati: grigi
       const months = [...new Set(days.map(x=>x[0].slice(0, 7)).concat(bkd.map(b=>b.date.slice(0, 7))).concat([todayIso().slice(0, 7)]))].sort();
       if(calIdx === null || calIdx >= months.length) calIdx = Math.max(0, months.indexOf(todayIso().slice(0, 7)));   // si apre sul mese di oggi
       const ym = months[calIdx], [Y, M] = ym.split("-").map(Number), f1 = new Date(Y, M - 1, 1), nDays = new Date(Y, M, 0).getDate(), off = (f1.getDay() + 6) % 7;
@@ -660,6 +690,8 @@ function sigPng(str, w, h){
     const b = e.target.closest("button"); if(!b || !cur) return;
     if(b.dataset.eye !== undefined){ openEye = openEye === b.dataset.eye ? "" : b.dataset.eye; render(); return; }
     if(b.dataset.sign !== undefined){ if(!curOpt.preview && !curOpt.offline) signPad(b.dataset.sign); return; }
+    if(b.id === "bkPrev" || b.id === "bkNext"){ const nd = addDays(bkDate || todayIso(), b.id === "bkPrev" ? -1 : 1); bkDate = nd === todayIso() ? "" : nd; render(); return; }
+    if(b.id === "bkToday"){ bkDate = ""; render(); return; }
     if(b.id === "cPrev"){ calIdx = Math.max(0, calIdx - 1); render(); return; }
     if(b.id === "cNext"){ calIdx++; render(); return; }
     if(b.id === "hHelp") return guide();
@@ -676,6 +708,7 @@ function sigPng(str, w, h){
       catch(_){ toast(T("Non riesco a collegarmi: riprova.", "I can't connect: try again.")); }
     }
   });
+  app.addEventListener("change", e=>{ if(e.target.id !== "bkDay") return; const v = e.target.value; bkDate = !/^\d{4}-\d{2}-\d{2}$/.test(v) || v === todayIso() ? "" : v; render(); });
   app.addEventListener("contextmenu", e=>{ if(e.target.closest(".sigbox")) e.preventDefault(); });
   /* firma dalla pagina: riquadro a tutto schermo */
   function signPad(id){
@@ -710,11 +743,43 @@ function sigPng(str, w, h){
       ["🔄", T("La pagina si aggiorna da sola ogni volta che il tuo personal trainer cambia qualcosa.", "The page updates by itself every time your personal trainer changes something.")],
       ["🙈", T("Per la tua privacy la pagina si copre dopo 2 minuti senza tocchi o quando cambi app: tocca per rivederla.", "For your privacy the page is covered after 2 minutes without touches or when you switch app: tap to see it again.")],
       ["🔒", T("<b>Esci</b> chiude la pagina: per riaprirla serve il PIN. Hai dimenticato il PIN? Chiedi al tuo personal trainer di azzerarlo.", "<b>Log out</b> closes the page: you need your PIN to reopen it. Forgot it? Ask your personal trainer to reset it.")],
-      ["📲", kind === "Android" ? T("Icona sul telefono: menu ⋮ del browser → «Aggiungi a schermata Home».", "Icon on your phone: browser menu ⋮ → “Add to Home screen”.") : T("Icona sul telefono: tasto Condividi ⬆️ → «Aggiungi alla schermata Home».", "Icon on your phone: Share ⬆️ → “Add to Home Screen”.")],
+      ["📲", `${T("<b>Metti la pagina sulla schermata Home</b>: così la apri con un tocco, come un'app.", "<b>Put the page on your Home Screen</b>: open it with one tap, like an app.")} <button class="btn sm" id="gInst" type="button">${T("Mostra le istruzioni", "Show the instructions")}</button>`],
       ["📶", T("Funziona anche senza internet: vedi l'ultima situazione salvata.", "It also works offline: you see the last saved situation.")]];
     m.innerHTML = `<div class="box" role="dialog" aria-modal="true"><h3>${T("Guida rapida", "Quick guide")}</h3><ul>${it.map(([e, t])=>`<li>${e} ${t}</li>`).join("")}</ul><div class="acts"><button class="btn primary">OK</button></div></div>`;
-    m.addEventListener("click", e=>{ if(e.target === m || e.target.closest("button")) m.remove(); });
+    m.addEventListener("click", e=>{ if(e.target.closest("#gInst")){ m.remove(); return showInstall(false); } if(e.target === m || e.target.closest("button")) m.remove(); });
     document.body.appendChild(m);
+  }
+  /* istruzioni per mettere la pagina sulla schermata Home (dopo il PIN: va premuto “Fatto”; poi sempre nella guida “?”) */
+  function installHTML(){
+    const ios = `<h4>${T("Se hai un iPhone", "If you have an iPhone")}</h4><ol>
+      <li>${T("Questa pagina deve essere aperta con <b>Safari</b>, l'app con la bussola blu. Se l'hai aperta da un'altra app, cerca la scritta <b>“Apri in Safari”</b> e toccala.", "This page must be open in <b>Safari</b>, the app with the blue compass. If you opened it from another app, look for <b>“Open in Safari”</b> and tap it.")}</li>
+      <li>${T("In basso al centro dello schermo c'è il tasto <b>Condividi</b>: è un quadrato con una freccia che punta verso l'alto. Toccalo. Se non vedi la barra in basso, tocca una volta la parte bassa dello schermo e la barra compare.", "At the bottom centre of the screen there is the <b>Share</b> button: a square with an arrow pointing up. Tap it. If you don't see the bar at the bottom, tap the bottom of the screen once and it appears.")}</li>
+      <li>${T("Si apre un elenco. Scorri verso il basso con il dito finché trovi <b>“Aggiungi alla schermata Home”</b>, quella con il simbolo +. Toccala.", "A list opens. Scroll down with your finger until you find <b>“Add to Home Screen”</b>, the one with the + symbol. Tap it.")}</li>
+      <li>${T("In alto a destra tocca <b>“Aggiungi”</b>. Non cambiare il nome.", "At the top right tap <b>“Add”</b>. Don't change the name.")}</li>
+      <li>${T("Esci da Safari. Sulla schermata Home del telefono, tra le tue app, trovi la nuova icona <b>“Il mio percorso”</b>.", "Leave Safari. On your phone's Home Screen, among your apps, you'll find the new <b>“Il mio percorso”</b> icon.")}</li>
+      <li>${T("Da ora in poi apri la pagina sempre toccando quell'icona e scrivi il tuo <b>PIN</b>.", "From now on always open the page by tapping that icon and enter your <b>PIN</b>.")}</li></ol>`;
+    const and = `<h4>${T("Se hai un telefono Android", "If you have an Android phone")}</h4><ol>
+      <li>${T("Questa pagina deve essere aperta con <b>Chrome</b>, l'app rotonda rossa, gialla e verde. Se l'hai aperta da un'altra app, tocca i tre puntini in alto a destra e scegli <b>“Apri in Chrome”</b>.", "This page must be open in <b>Chrome</b>, the round red, yellow and green app. If you opened it from another app, tap the three dots at the top right and choose <b>“Open in Chrome”</b>.")}</li>
+      <li>${T("In alto a destra dello schermo ci sono <b>tre puntini uno sopra l'altro (⋮)</b>. Toccali.", "At the top right of the screen there are <b>three dots one above the other (⋮)</b>. Tap them.")}</li>
+      <li>${T("Si apre un menu. Tocca <b>“Aggiungi a schermata Home”</b> oppure <b>“Installa app”</b>: il nome cambia da telefono a telefono.", "A menu opens. Tap <b>“Add to Home screen”</b> or <b>“Install app”</b>: the name changes from phone to phone.")}</li>
+      <li>${T("Tocca <b>“Aggiungi”</b> oppure <b>“Installa”</b> per confermare. Se te lo chiede ancora, tocca di nuovo <b>“Aggiungi”</b>.", "Tap <b>“Add”</b> or <b>“Install”</b> to confirm. If it asks again, tap <b>“Add”</b> again.")}</li>
+      <li>${T("Sulla schermata Home del telefono trovi la nuova icona <b>“Il mio percorso”</b>.", "On your phone's Home Screen you'll find the new <b>“Il mio percorso”</b> icon.")}</li>
+      <li>${T("Da ora in poi apri la pagina sempre toccando quell'icona e scrivi il tuo <b>PIN</b>.", "From now on always open the page by tapping that icon and enter your <b>PIN</b>.")}</li></ol>
+      <p class="msum">${T("Se usi Samsung Internet: tocca le tre lineette ≡ in basso a destra, poi “Aggiungi pagina a”, poi “Schermata Home”.", "If you use Samsung Internet: tap the three lines ≡ at the bottom right, then “Add page to”, then “Home screen”.")}</p>`;
+    return `<h3>${T("Metti “Il mio percorso” sulla schermata Home", "Put “Il mio percorso” on your Home Screen")}</h3>
+      <p>${T("Così la apri con un tocco, come un'app, senza cercare il link ogni volta.", "This way you open it with one tap, like an app, without looking for the link every time.")}</p>
+      <div class="inst">${kind === "Android" ? and + ios : ios + and}</div>
+      <p class="inst-later"><b>${T("Se vuoi farlo più tardi, trovi queste istruzioni nella guida “?” in alto nella pagina.", "If you want to do it later, you'll find these instructions in the “?” guide at the top of the page.")}</b></p>`;
+  }
+  async function showInstall(must){
+    /* il link dell'icona porta con sé un codice (30 minuti, una volta sola) che passa l'approvazione all'icona: niente nuova richiesta */
+    if(!standalone && K && !curOpt.preview && !demo){
+      try{ const r = await api("POST", {op: "xfer", k: K}); if(r.j && r.j.x){ const u = new URL(location.href); u.searchParams.set("t", tok); u.searchParams.set("x", r.j.x); history.replaceState(null, "", u.pathname + u.search); } }catch(_){}
+    }
+    const m = document.createElement("div"); m.className = "modal"; m.id = "instModal";
+    m.innerHTML = `<div class="box" role="dialog" aria-modal="true">${installHTML()}<div class="acts"><button class="btn primary" id="instOk" type="button">✔ ${T("Fatto", "Done")}</button></div></div>`;
+    m.addEventListener("click", e=>{ if(e.target.closest("#instOk") || (!must && e.target === m)) m.remove(); });
+    hideVeil(); document.body.appendChild(m);
   }
   /* condividi traguardo: immagine con lo status (senza firme né soldi) */
   async function share(){
@@ -760,6 +825,7 @@ function sigPng(str, w, h){
   window.addEventListener("resize", ()=>{ if(cur) document.querySelectorAll("canvas[data-s]").forEach(drawSig); });
 
   /* ---------------- anteprima dal gestionale e pagina di esempio ---------------- */
+  window.__showInstall = showInstall;
   window.__preview = (data, sigs) => { showPage(data, sigs || {}, {preview: true}); };
   if(preview){ gate(`<div class="center"><p>${T("Anteprima…", "Preview…")}</p></div>`); try{ if(window.parent && window.parent !== window) window.parent.postMessage({ptPreviewReady: true}, location.origin); }catch(_){} return; }
   if(demo){
@@ -776,6 +842,7 @@ function sigPng(str, w, h){
     if(demo === "welcome") return S.welcome({first: "Mario"});
     if(demo === "wait") return S.waiting({name: "Telefono di Mario"});
     if(demo === "setpin") return pinScreen("set");
+    if(demo === "install"){ showPage(D, sg, {}); return showInstall(true); }
     if(demo === "pin") return pinScreen("pin");
     if(S[demo]) return S[demo]();
     if(demo === "veil"){ showPage(D, sg, {}); document.body.insertAdjacentHTML("beforeend", `<div class="veil"><div><div class="big-ic">🙈</div>${T("Pagina nascosta", "Page hidden")}<br><small style="font-weight:500">${T("Tocca per vederla", "Tap to show it")}</small></div></div>`); return; }
