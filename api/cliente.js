@@ -13,7 +13,8 @@
    Senza password (il cliente, dal link):
      GET  ?t=COD&d=DISP[&k=ACCESSO]  -> {state: new|waiting|setpin|pin|ok|removed|expired|blocked}  (410 = link spento)
      POST {t, d, op:"ask", name, kind, consent}   chiede l'accesso (con la spunta dell'informativa)
-     POST {t, d, op:"setpin", pin} · {op:"pin", pin}   -> {state:"ok", k, data, sigs}
+     POST {t, d, op:"setpin", pin} · {op:"pin", pin}   -> {state:"ok", k, data, sigs, privacy}   (privacy: documento privacy da firmare)
+     POST {t, d, k, op:"privacy", s, lang}       -> v105: firma del documento privacy mandato dal trainer
      POST {t, d, k, op:"sign", id, s}   firma una seduta non firmata · {op:"logout"} scollega il dispositivo · {op:"bye"} chiude l'accesso
      POST {t, d, k, op:"delreq"}      chiede di cancellare i dati della pagina (decide il trainer)
      POST {t, d, k, op:"xfer"} -> {x}  codice (30 minuti, una volta sola) per passare l'approvazione all'icona sulla schermata Home
@@ -67,13 +68,14 @@ const expired = rec => DATE(rec.ended) && romeDay() > addDays(rec.ended, RENEW_D
 async function tooMany(req){ const [n] = await kv([["GET", P + "viewfail:" + ipOf(req)]]); return Number(n) >= 30; }
 async function fail(req, res, code, error){ const k = P + "viewfail:" + ipOf(req); try{ await kv([["INCR", k], ["EXPIRE", k, 900]]); }catch(_){} return send(res, code, {error}); }
 async function payload(client, rec){
-  const [snapRaw, flat] = await kv([["GET", P + "viewsnap:" + client], ["HGETALL", P + "sig:" + client]]);
+  const [snapRaw, flat, privRaw] = await kv([["GET", P + "viewsnap:" + client], ["HGETALL", P + "sig:" + client], ["HGET", P + "privacy", client]]);
   let data = null; try{ data = snapRaw ? JSON.parse(snapRaw) : null; }catch(_){}
   const ids = new Set(((data && data.rows) || []).map(r=>r.id)), sigs = {};
   if(!data || !data.sec || data.sec.firme !== false){
     for(let i = 0; flat && i < flat.length; i += 2){ if(!ids.has(flat[i])) continue; try{ const s = JSON.parse(flat[i+1]); if(s && s.s) sigs[flat[i]] = {s: s.s, via: s.via, time: s.time}; }catch(_){} }
   }
-  return {data, sigs, device: rec.device ? rec.device.name : ""};
+  let pv = null; try{ pv = privRaw ? JSON.parse(privRaw) : null; }catch(_){}
+  return {data, sigs, device: rec.device ? rec.device.name : "", privacy: !!(pv && pv.st === "sent")};   // v105 (privacy): il trainer gli ha mandato il documento da firmare
 }
 async function openSession(client, rec, hd){
   const k = crypto.randomBytes(24).toString("base64url");
@@ -214,6 +216,16 @@ module.exports = async (req, res) => {
       if(op === "logout"){                                       // il cliente scollega il suo dispositivo
         rec.device = null; alert(rec, "logout");
         await kv([["DEL", P + "viewsess:" + body.k], ["HSET", P + "view", client, JSON.stringify(rec)]]);
+        return send(res, 200, {ok: true});
+      }
+      /* v105 (privacy): firma del documento privacy mandato dal trainer (api/privacy.js tiene i documenti) */
+      if(op === "privacy"){
+        if(!STROKES(body.s)) return send(res, 400, {error:"strokes"});
+        const [pr] = await kv([["HGET", P + "privacy", client]]);
+        let pv = null; try{ pv = pr ? JSON.parse(pr) : null; }catch(_){}
+        if(!pv || pv.st !== "sent") return send(res, 409, {error:"not_sent"});
+        const doc = {st: "signed", sent: Number(pv.sent) || 0, at: Date.now(), via: "visuale", lang: body.lang === "en" ? "en" : "it", v: 1, s: body.s};
+        await kv([["HSET", P + "privacy", client, JSON.stringify(doc)]]);
         return send(res, 200, {ok: true});
       }
       if(op === "delreq"){
