@@ -945,6 +945,8 @@ dialog p.hint.warn-hint{background:var(--owed-soft);color:var(--pine);border-rad
 #agHome .ag-day{padding:8px 0 9px}
 #agHome .ag-day b{font-size:1.35rem}
 #agHome .ag-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+/* v105 (10/11): sul telefono riquadri piccoli, 2 per riga (2 righe = 4 per pagina) */
+@media (max-width:700px){#agHome #agGrid.ag-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}#agHome #agGrid .ag-card{padding:8px 9px}#agHome #agGrid .ag-card .ag-when{font-size:.74rem}#agHome #agGrid .ag-card .ag-when b{font-size:.95rem}#agHome #agGrid .ag-card .ag-n{font-size:.92rem;line-height:1.2}#agHome #agGrid .ag-card .ag-n small{font-size:.74rem}}
 #agHome .ag-card{flex-direction:column;align-items:flex-start;gap:2px}
 #agHome .ag-card[hidden]{display:none}
 #agHome .ag-card.ag-past{background:var(--chalk);opacity:.6;filter:grayscale(1)}
@@ -6474,11 +6476,11 @@ function agendaHomeHTML(){
     <div class="ag-foot"><span>${week[0] === t ? "Prossimi 7 giorni" : `Dal ${itDate(week[0]).slice(0, 5)} al ${itDate(week[6]).slice(0, 5)}`}: ${nWeek} ${nWeek === 1 ? "appuntamento" : "appuntamenti"}</span>
       <span class="ag-pager" id="agPager" role="navigation" aria-label="Pagine degli appuntamenti"></span></div></section></div>`;
 }
-/* pagine dell'elenco: tanti riquadri quanti ne entrano in larghezza, massimo 3 righe; poi ‹ 1 2 3 › in basso a destra */
+/* pagine dell'elenco: tanti riquadri quanti ne entrano in larghezza, 1 riga (sul telefono 2 righe); poi ‹ 1 2 3 › in basso a destra */
 function agPaginate(){
   const g = $("agGrid"), pg = $("agPager"); if(!g || !pg) return;
   const items = [...g.children]; items.forEach(x=>{ x.hidden = false; });
-  const cols = Math.max(1, getComputedStyle(g).gridTemplateColumns.split(" ").filter(Boolean).length), per = cols * 3, pages = Math.ceil(items.length / per);
+  const cols = Math.max(1, getComputedStyle(g).gridTemplateColumns.split(" ").filter(Boolean).length), per = cols * (matchMedia("(max-width: 700px)").matches ? 2 : 1), pages = Math.ceil(items.length / per);
   agPage = Math.min(Math.max(0, agPage), Math.max(0, pages - 1));
   items.forEach((x, i)=>{ x.hidden = Math.floor(i / per) !== agPage; });
   if(pages <= 1){ pg.innerHTML = ""; return; }
@@ -9521,7 +9523,7 @@ i18nStart();
 initStore().catch(e=>{ console.error(e); store.mode="local"; loadLocalSettings(); clients = loadLocal(); loaded = true; render(); });
 </script>
 <!-- v101: visuale cliente (facoltativa): se elimini la cartella visuale-cliente, il gestionale funziona uguale -->
-<script src="visuale-cliente/gestione.js?v=105c"></script>
+<script src="visuale-cliente/gestione.js?v=105d"></script>
 <script>
 /* app web: funziona anche offline e si installa sulla schermata Home */
 if("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")){
