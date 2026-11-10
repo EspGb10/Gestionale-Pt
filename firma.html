@@ -66,6 +66,41 @@ button:disabled{opacity:.45;cursor:default}
 .done h1{margin-top:4px}
 #cardImg{width:100%;height:auto;border:1px solid var(--line);border-radius:14px;margin:14px 0}
 .muted{color:var(--muted);font-size:.9rem}
+/* v105 (privacy): documento privacy del cliente */
+.pv-ovl{position:fixed;inset:0;background:rgba(10,20,15,.55);display:flex;align-items:flex-end;justify-content:center;z-index:2147483000;padding:12px}
+.pv-box{background:#fff;color:#1d2a22;border-radius:22px;max-width:460px;width:100%;max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;text-align:left;font-family:inherit}
+.pv-box.pv-done{height:calc(100vh - 24px);height:calc(100dvh - 24px)}
+.pv-scroll{overflow-y:auto;padding:22px 20px 8px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;flex:1 1 auto;min-height:0}
+.pv-head{padding:18px 20px 6px}
+.pv-ic{font-size:2rem;line-height:1}
+.pv-h{margin:8px 0 2px;font-size:1.35rem;line-height:1.2;color:#1d2a22}
+.pv-okh{color:#2f6b3f;margin-top:0}
+.pv-sub{margin:0 0 14px;color:#6a786f;font-size:.85rem}
+.pv-p{margin:0 0 10px;font-size:1rem;line-height:1.45;color:#1d2a22}
+.pv-small{font-size:.88rem;color:#4a5a50}
+.pv-ul{margin:0 0 10px 18px;padding:0;line-height:1.5;color:#1d2a22}
+.pv-doc{display:flex;align-items:center;gap:12px;margin:14px 0 10px;padding:12px 14px;border:1.5px solid #2F6B4F;border-radius:14px;background:#f1f7f3;color:#1d2a22;text-decoration:none}
+.pv-dic{font-size:1.7rem;line-height:1}.pv-doc b{display:block}.pv-doc small{display:block;color:#5f6b66;font-size:.82rem}.pv-go{margin-left:auto;font-size:1.6rem;color:#2F6B4F}
+.pv-foot{padding:12px 20px 16px;border-top:1px solid #e3e8e4;background:#fff;flex:0 0 auto}
+.pv-row{display:flex;gap:10px}
+.pv-ok{width:100%;padding:14px;border:0;border-radius:14px;background:#2F6B4F;color:#fff;font:inherit;font-weight:800;font-size:1.05rem;cursor:pointer}
+.pv-btn{flex:0 0 auto;padding:14px 16px;border:1.5px solid #c9d2cc;border-radius:14px;background:#fff;color:#1d2a22;font:inherit;font-weight:800;font-size:1rem;cursor:pointer}
+.pv-ok:disabled{opacity:.5;cursor:default}
+.pv-pad{position:relative;border:2px dashed #9fb3a8;border-radius:14px;background:#fff;height:clamp(200px,38vh,320px);margin:12px 0 4px}
+.pv-pad canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.pv-ph{position:absolute;left:0;right:0;bottom:12px;text-align:center;color:#9aa6a0;font-size:.85rem;pointer-events:none}
+.pv-err{margin:8px 0 0;text-align:center;color:#B42318;font-size:.85rem;font-weight:700}
+/* il modulo (vista nella pagina) */
+.pd-doc{font-family:Helvetica,Arial,sans-serif;color:#000;font-size:.86rem;line-height:1.45}
+.pd-bar{height:1.5px;background:#000;margin:0 0 10px}
+.pd-big{font-size:1.25rem;font-weight:800;letter-spacing:.06em;margin:0 0 2px;color:#000}
+.pd-h{font-size:1.02rem;line-height:1.25;margin:0 0 3px;color:#000}
+.pd-sub{color:#6b6b6b;font-size:.74rem;margin:0 0 10px}
+.pd-p{margin:0 0 7px}.pd-cons{font-weight:700;margin:10px 0 0}
+.pd-sig{margin-top:14px;border-top:1px solid #9a9a9a;padding-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;align-items:end}
+.pd-f small{display:block;color:#000;font-size:.9rem;font-weight:800;text-transform:uppercase;letter-spacing:.02em}.pd-f b{display:block;min-height:1.4em;border-bottom:1px solid #000;padding:2px 0;font-size:.86rem}
+.pd-sg{grid-column:2;grid-row:1 / span 2;padding:16px 0 0 14px}.pd-sg small{font-size:1rem}.pd-img{height:88px;border-bottom:1.5px solid #000}.pd-img canvas{width:100%;height:100%;display:block}
+.pd-g{color:#6b6b6b}.pd-foot{margin:12px 0 0;color:#6b6b6b;font-size:.7rem}
 </style>
 </head>
 <body>
@@ -273,6 +308,131 @@ function sigPng(str, w, h){
   return cv.toDataURL("image/png");
 }
 /*SIGLIB-END*/
+/* ---------- v105 (privacy): DOCUMENTO PRIVACY — stesso codice in firma.html, nella visuale cliente e nel gestionale ----------
+   Il cliente lo vede SOLO se il trainer gliel'ha mandato. Legge il messaggio, può aprire il modulo completo (PDF),
+   preme “Ho letto e accetto”, firma il modulo e vede una volta il modulo firmato. Senza firma non va avanti. */
+const PRIV_V = 1;
+const PRIV_TRAINER = "Esposito Giovanbattista";
+const PRIV_TX = {
+  it: {big: "DOCUMENTO PRIVACY", title: "Informativa e consenso al trattamento dei dati personali",
+    sub: "ai sensi degli artt. 7 e 13 del Regolamento UE 2016/679 (GDPR) e del D.Lgs. 196/2003, come modificato dal D.Lgs. 101/2018",
+    pts: [["1. Chi tratta i dati", PRIV_TRAINER + ", personal trainer."],
+      ["2. Dati trattati", "Nome, cognome e numero di telefono; date delle sedute e firme di presenza; pagamenti dei pacchetti."],
+      ["3. Finalità", "I dati sono usati dal personal trainer solo per gestire il servizio di personal training: allenamenti, presenze, pacchetti e pagamenti. Le firme servono esclusivamente ad attestare la presenza alle sedute e non sono usate per altri scopi."],
+      ["4. Base giuridica", "Esecuzione del servizio richiesto e consenso del cliente (art. 6, par. 1, lett. a e b GDPR)."],
+      ["5. Modalità e sicurezza", "I dati sono trattati in modo riservato, con strumenti elettronici protetti da password (artt. 5 e 32 GDPR). Non sono diffusi né ceduti a terzi, salvo obblighi di legge."],
+      ["6. Conservazione", "Per la durata del servizio e, dopo, solo per il tempo previsto dalla legge (art. 5, par. 1, lett. e GDPR)."],
+      ["7. Diritti del cliente", "In qualsiasi momento il cliente può chiedere l'accesso, la rettifica, la cancellazione o la limitazione dei propri dati, opporsi al trattamento e revocare il consenso (artt. 7 e 15–21 GDPR), e può presentare reclamo al Garante per la protezione dei dati personali (art. 77 GDPR)."]],
+    cons: "Il cliente dichiara di aver letto la presente informativa e acconsente al trattamento dei propri dati personali per le sole finalità indicate.",
+    name: "Nome e cognome del cliente", when: "Data e ora", sig: "Firma del cliente",
+    foot: "Firma elettronica apposta dal cliente sul proprio dispositivo; data e ora registrate al momento della firma.",
+    sTitle: "Informativa sulla privacy", sSub: "Trattamento dei dati personali ai sensi del Regolamento UE 2016/679 (GDPR)",
+    sWho: "Chi tratta i tuoi dati", sWhich: "Quali dati", sList: ["nome, cognome e numero di telefono", "le sedute fatte e le tue firme sulle sedute", "i pagamenti dei pacchetti"],
+    sPur: "Finalità del trattamento", sPurT: "I dati sono trattati esclusivamente per lo svolgimento del servizio di personal training: gestione degli allenamenti, delle presenze, dei pacchetti e dei relativi pagamenti. Il loro conferimento fa parte della gestione del servizio, che il personal trainer e il cliente possono consultare e verificare in ogni momento.",
+    sLaw: "Nel rispetto della normativa", sLawT: "I dati sono gestiti secondo la normativa sulla privacy, solo ai fini dell'allenamento, e sono gli stessi che tu hai fornito per il servizio.",
+    doc: "Documento privacy (PDF)", docSub: "Il modulo completo: tocca per aprirlo",
+    note: "Premendo “Ho letto e accetto” dai il consenso a usare i tuoi dati solo ai fini del servizio, e poi firmi il modulo.",
+    ok: "Ho letto e accetto", signT: "Firma il modulo privacy", signHint: "Firma con il dito nel riquadro", clear: "Cancella", confirm: "Conferma firma",
+    err: "Non riesco a salvare: controlla la connessione e riprova.", doneT: "Modulo privacy firmato",
+    doneSub: "Ecco il modulo con la tua firma. Lo vedi solo ora: se ti serve una copia, chiedila al tuo personal trainer.", cont: "Continua", at: "alle"},
+  en: {big: "PRIVACY DOCUMENT", title: "Privacy notice and consent to the processing of personal data",
+    sub: "under arts. 7 and 13 of EU Regulation 2016/679 (GDPR) and Italian Legislative Decree 196/2003, as amended by Legislative Decree 101/2018",
+    pts: [["1. Who processes the data", PRIV_TRAINER + ", personal trainer."],
+      ["2. Data processed", "First name, last name and phone number; session dates and attendance signatures; package payments."],
+      ["3. Purpose", "The data are used by the personal trainer only to manage the personal training service: workouts, attendance, packages and payments. Signatures are used exclusively to certify attendance at the sessions and for no other purpose."],
+      ["4. Legal basis", "Performance of the requested service and the client's consent (art. 6(1)(a) and (b) GDPR)."],
+      ["5. Methods and security", "The data are processed confidentially, with password-protected electronic tools (arts. 5 and 32 GDPR). They are not disclosed or transferred to third parties, except where required by law."],
+      ["6. Retention", "For the duration of the service and, afterwards, only for the time required by law (art. 5(1)(e) GDPR)."],
+      ["7. Client's rights", "At any time the client may request access to, rectification, erasure or restriction of their data, object to the processing and withdraw consent (arts. 7 and 15–21 GDPR), and may lodge a complaint with the Italian Data Protection Authority (art. 77 GDPR)."]],
+    cons: "The client declares to have read this notice and consents to the processing of their personal data for the stated purposes only.",
+    name: "Client's full name", when: "Date and time", sig: "Client's signature",
+    foot: "Electronic signature applied by the client on their own device; date and time recorded at the moment of signing.",
+    sTitle: "Privacy notice", sSub: "Processing of personal data under EU Regulation 2016/679 (GDPR)",
+    sWho: "Who processes your data", sWhich: "Which data", sList: ["first name, last name and phone number", "the sessions done and your signatures on the sessions", "the package payments"],
+    sPur: "Purpose of processing", sPurT: "The data are processed exclusively to provide the personal training service: management of workouts, attendance, packages and the related payments. Providing them is part of the management of the service, which the personal trainer and the client can consult and check at any time.",
+    sLaw: "In compliance with the law", sLawT: "The data are handled in accordance with privacy legislation, only for training purposes, and they are the same data you provided for the service.",
+    doc: "Privacy document (PDF)", docSub: "The full form: tap to open it",
+    note: "By tapping “I have read and I accept” you consent to the use of your data for the service only, and then you sign the form.",
+    ok: "I have read and I accept", signT: "Sign the privacy form", signHint: "Sign with your finger in the box", clear: "Clear", confirm: "Confirm signature",
+    err: "I can't save: check your connection and try again.", doneT: "Privacy form signed",
+    doneSub: "Here is the form with your signature. You only see it now: if you need a copy, ask your personal trainer.", cont: "Continue", at: "at"}
+};
+const privEsc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const privWhen = (ms, en) => { const d = new Date(ms), p = n => String(n).padStart(2, "0"); return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()} ${PRIV_TX[en ? "en" : "it"].at} ${p(d.getHours())}:${p(d.getMinutes())}`; };
+/* il modulo completo (con nome, data e ora e il posto della firma) */
+const PRIV_REFS = /\((?:artt?|arts?)\. .*?GDPR\)/g;                  // i riferimenti agli articoli: in grigio
+/* il modulo: solo nero e grigio su bianco */
+function privDocHTML(en, o){
+  const t = PRIV_TX[en ? "en" : "it"]; o = o || {};
+  return `<div class="pd-doc"><div class="pd-bar"></div><p class="pd-big">${t.big}</p><h3 class="pd-h">${t.title}</h3><p class="pd-sub">${t.sub}</p>
+    ${t.pts.map(([a, b])=>`<p class="pd-p"><b>${a}</b><br>${privEsc(b).replace(PRIV_REFS, m=>`<span class="pd-g">${m}</span>`)}</p>`).join("")}<p class="pd-cons">${t.cons}</p>
+    <div class="pd-sig"><div class="pd-f"><small>${t.name}</small><b>${privEsc(o.name || "")}</b></div>
+    <div class="pd-f pd-sg"><small>${t.sig}</small><div class="pd-img"><canvas class="pd-cv"></canvas></div></div>
+    <div class="pd-f"><small>${t.when}</small><b>${privEsc(o.when || "")}</b></div></div>
+    ${o.s ? `<p class="pd-foot">${t.foot}</p>` : ""}</div>`;
+}
+function privDrawSig(root, s){
+  const cv = root.querySelector(".pd-cv"); if(!cv || !s || typeof sigDraw !== "function") return;
+  const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+  cv.width = Math.max(1, Math.round(r.width * d)); cv.height = Math.max(1, Math.round(r.height * d));
+  sigDraw(cv.getContext("2d"), s, 4, 4, cv.width - 8, cv.height - 8, "#000");
+}
+/* il messaggio breve con il rettangolino del PDF */
+function privSummaryHTML(en, pdfUrl){
+  const t = PRIV_TX[en ? "en" : "it"];
+  return `<div class="pv-ic">🔒</div><h2 class="pv-h">${t.sTitle}</h2><p class="pv-sub">${t.sSub}</p>
+    <p class="pv-p"><b>${t.sWho}</b><br>${PRIV_TRAINER}, personal trainer.</p>
+    <p class="pv-p"><b>${t.sWhich}</b></p><ul class="pv-ul">${t.sList.map(x=>`<li>${x}</li>`).join("")}</ul>
+    <p class="pv-p"><b>${t.sPur}</b><br>${t.sPurT}</p>
+    <p class="pv-p"><b>${t.sLaw}</b><br>${t.sLawT}</p>
+    <a class="pv-doc" id="privPdf" href="${privEsc(pdfUrl)}" target="_blank" rel="noopener"><span class="pv-dic">📄</span><span><b>${t.doc}</b><small>${t.docSub}</small></span><span class="pv-go">›</span></a>
+    <p class="pv-p pv-small">${t.note}</p>`;
+}
+/* tutto il percorso: messaggio → “Ho letto e accetto” → firma → modulo firmato → Continua.
+   o = {en, pdfUrl, name, save: async s => true|false}. Restituisce una Promise che finisce con “Continua”. */
+function privacyFlow(o){
+  const t = PRIV_TX[o.en ? "en" : "it"];
+  return new Promise(resolve=>{
+    const w = document.createElement("div"); w.className = "pv-ovl"; w.id = "privacyModal";
+    w.setAttribute("role", "dialog"); w.setAttribute("aria-modal", "true"); w.setAttribute("aria-label", t.sTitle);
+    document.body.appendChild(w);
+    const prevOverflow = document.body.style.overflow; document.body.style.overflow = "hidden";
+    const step1 = () => {
+      w.innerHTML = `<div class="pv-box"><div class="pv-scroll">${privSummaryHTML(o.en, o.pdfUrl)}</div><div class="pv-foot">
+        <button type="button" class="pv-ok" id="privacyOk">✔ ${t.ok}</button></div></div>`;
+      w.querySelector("#privacyOk").onclick = step2;
+    };
+    const step2 = () => {
+      w.innerHTML = `<div class="pv-box pv-sign"><div class="pv-scroll"><div class="pv-ic">✍️</div><h2 class="pv-h">${t.signT}</h2>
+        <p class="pv-sub">${privEsc(o.name || "")}${o.name ? " · " : ""}${privWhen(Date.now(), o.en)}</p>
+        <div class="pv-pad"><canvas id="privCv" aria-label="${t.signHint}"></canvas><span class="pv-ph">${t.signHint}</span></div>
+        <p class="pv-err" id="privacyErr" role="alert" hidden></p></div>
+        <div class="pv-foot pv-row"><button type="button" class="pv-btn" id="privClr">${t.clear}</button><button type="button" class="pv-ok" id="privSign" disabled>✔ ${t.confirm}</button></div></div>`;
+      const ok = w.querySelector("#privSign"), err = w.querySelector("#privacyErr"), ph = w.querySelector(".pv-ph");
+      const pad = SigPad(w.querySelector("#privCv"), ()=>{ const n = pad.points(); ok.disabled = n < 3; ph.hidden = n > 0; err.hidden = true; });
+      const fit = () => pad.fit(); requestAnimationFrame(fit); window.addEventListener("resize", fit);
+      w.querySelector("#privClr").onclick = () => pad.clear();
+      ok.onclick = async () => {
+        const s = pad.encode(); if(s.length < 8) return;
+        ok.disabled = true; let saved = false;
+        try{ saved = await o.save(s); }catch(_){ saved = false; }
+        if(!saved){ ok.disabled = false; err.hidden = false; err.textContent = t.err; return; }
+        window.removeEventListener("resize", fit);
+        step3(s, Date.now());
+      };
+    };
+    const step3 = (s, at) => {
+      w.innerHTML = `<div class="pv-box pv-done"><div class="pv-head"><h2 class="pv-h pv-okh">✔ ${t.doneT}</h2><p class="pv-sub">${t.doneSub}</p></div>
+        <div class="pv-scroll pv-docwrap">${privDocHTML(o.en, {name: o.name, when: privWhen(at, o.en), s})}</div>
+        <div class="pv-foot"><button type="button" class="pv-ok" id="privCont">${t.cont}</button></div></div>`;
+      const wrap = w.querySelector(".pv-docwrap");
+      requestAnimationFrame(()=>{ privDrawSig(wrap, s); wrap.scrollTop = wrap.scrollHeight; });
+      w.querySelector("#privCont").onclick = () => { w.remove(); document.body.style.overflow = prevOverflow; resolve(true); };   // non resta salvato da nessuna parte
+    };
+    step1();
+  });
+}
+
 (function(){
   const $ = id => document.getElementById(id), box = $("box");
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -294,6 +454,11 @@ function sigPng(str, w, h){
     if(!r.ok) return fail(r.status === 410 ? "expired" : r.status === 429 ? "too_many" : "link");
     const info = j.info || {}; L = info.lang === "en";
     document.documentElement.lang = L ? "en" : "it"; document.title = T("Firma della seduta", "Sign the session");
+    /* v105 (privacy): se il trainer gli ha mandato il documento privacy, prima lo firma (obbligatorio), poi firma la seduta */
+    let pneed = false;
+    try{ const pr = await fetch("api/privacy?t=" + encodeURIComponent(t), {cache:"no-store"}); if(pr.ok){ const pj = await pr.json().catch(()=>({})); pneed = pj.need === true; } }catch(_){}
+    if(pneed) await privacyFlow({en: L, pdfUrl: L ? "modulo-privacy-en.pdf" : "modulo-privacy.pdf", name: info.first || "",
+      save: async s => { const r = await fetch("api/privacy", {method:"POST", cache:"no-store", headers:{"Content-Type":"application/json"}, body: JSON.stringify({t, op:"sign", s, lang: L ? "en" : "it"})}); return r.ok; }});
     box.innerHTML = `<div class="top"></div>
       ${info.trainer ? `<p class="who">${esc(T("Personal trainer", "Personal trainer"))}: <b>${esc(info.trainer)}</b></p>` : ""}
       <div class="head"><h1>${esc(T("Ciao", "Hi"))} ${esc(info.first || "")}!</h1>
