@@ -5016,7 +5016,6 @@ function checkDetailHTML(c){
   let h = `<button class="back" data-a="back">${statsOpen ? "‹ Statistiche andamento" : "‹ Tutte le cartelle"}</button>
   <div class="detail-head">
     <div class="dh-top"><h2>${esc(c.name)}</h2>${sideSwitchHTML(c, "ck")}</div>
-    ${(()=>{ const pv = privChipHTML(c); return pv ? `<div class="priv-row">${pv}</div>` : ""; })()}
     ${agendaFoldHTML(c, "ck")}
     ${contact ? `<p class="contact">${contact}</p>` : `<div style="height:10px"></div>`}
     ${(()=>{ const idle = ckIdleSince(c); return idle ? `<p class="alert-box idle-box" id="ckIdleBox">💤 <b>Consulenza non attiva dal ${itDate(idle)}</b>: nessuna consulenza da più di ${CK_IDLE_MONTHS} mesi. Torna attiva da sola con la prossima consulenza.</p>` : ""; })()}
@@ -5115,7 +5114,6 @@ function checkDetailHTML(c){
   h += weightBlockHTML(k);
   h += `<section class="block" id="ckNotesBlock"><div class="bh"><h3>Note sul cliente e sulle consulenze</h3><button class="btn small" data-a="editCheck">Modifica</button></div>
     ${k.notes ? `<p class="ck-notes">${esc(k.notes)}</p>` : `<p class="none">Nessuna nota. Aggiungile da “Modifica”.</p>`}</section>`;
-  h += privSecHTML(c);                                                          // v105 (privacy)
   return h;
 }
 function weightBlockHTML(k){
@@ -9523,7 +9521,7 @@ i18nStart();
 initStore().catch(e=>{ console.error(e); store.mode="local"; loadLocalSettings(); clients = loadLocal(); loaded = true; render(); });
 </script>
 <!-- v101: visuale cliente (facoltativa): se elimini la cartella visuale-cliente, il gestionale funziona uguale -->
-<script src="visuale-cliente/gestione.js?v=105b"></script>
+<script src="visuale-cliente/gestione.js?v=105c"></script>
 <script>
 /* app web: funziona anche offline e si installa sulla schermata Home */
 if("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")){
