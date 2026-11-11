@@ -1,6 +1,6 @@
 /* Gestionale PT: funziona anche senza internet.
    Quando pubblichi una versione nuova, cambia il numero qui sotto (v1 -> v2). */
-const CACHE = "gestionale-pt-v105d";
+const CACHE = "gestionale-pt-v105g";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest",
   "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./favicon-32.png"];
 /* librerie per Word e PDF e caratteri: se possibile le salvo subito, così funzionano offline */
@@ -66,4 +66,21 @@ self.addEventListener("fetch", e=>{
       return hit || (await net) || Response.error();
     })());
   }
+});
+
+/* v105 (11/11): notifiche sul telefono del trainer (richieste di accesso e avvisi di sicurezza) */
+self.addEventListener("push", e=>{
+  let d = {}; try{ d = e.data ? e.data.json() : {}; }catch(_){ d = {body: e.data ? e.data.text() : ""}; }
+  e.waitUntil(self.registration.showNotification(d.title || "Gestionale PT", {body: d.body || "", tag: d.tag || undefined,
+    icon: "./icon-192.png", badge: "./icon-192.png", data: {url: d.url || "./"}}));
+});
+self.addEventListener("notificationclick", e=>{
+  e.notification.close();
+  const url = new URL((e.notification.data && e.notification.data.url) || "./", self.registration.scope).href;
+  e.waitUntil((async ()=>{
+    const list = await self.clients.matchAll({type: "window", includeUncontrolled: true});
+    const w = list.find(c=>c.url.startsWith(self.registration.scope) && !c.url.includes("/visuale-cliente/") && !c.url.includes("firma.html"));
+    if(w){ await w.focus(); w.postMessage({open: "visuale"}); return; }
+    await self.clients.openWindow(url);
+  })());
 });
