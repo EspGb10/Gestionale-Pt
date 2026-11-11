@@ -209,7 +209,9 @@
   }
   const ALERT_TXT = {try: "ha provato ad aprire la pagina con un link non più valido o da un dispositivo tolto", pinlock: "dispositivo bloccato: 5 PIN sbagliati", delreq: "chiede di cancellare i dati della pagina",
     idle: "link spento: non apriva la pagina da 30 giorni (per riattivarla crea un link nuovo)", logout: "ha scollegato il suo dispositivo",
-    other: "un altro dispositivo ha provato ad aprire il link (già usato dal telefono del cliente)"};
+    other: "un altro dispositivo ha provato ad aprire il link (già usato dal telefono del cliente)",
+    app: "ha aggiunto la sua pagina alla schermata Home: l'app è attiva con il suo PIN",
+    moved: "è rientrato con il suo PIN da un altro browser: quello di prima non funziona più"};   // v105 (11/11)
   /* v104: stato del link quando non c'è ancora un dispositivo */
   const linkState = v => !v ? "" : v.lockWhy === "idle" ? "link spento: 30 giorni senza aprire la pagina" : v.lockWhy === "rejected" ? "richiesta rifiutata: serve un link nuovo"
     : v.on && v.linkOld ? "link scaduto: non usato entro 1 ora" : v.on && !v.bound && v.expAt ? "link valido fino a " + when(v.expAt) : v.on ? "link attivo, in attesa del cliente" : "";
@@ -224,7 +226,7 @@
         <span class="dev-kind">${devKind(v.pending.kind)} · ${when(v.pending.at)}</span></span>
         <span class="dev-act"><button type="button" class="btn small primary" data-a="pvOk" data-id="${esc(c.id)}">Approva</button><button type="button" class="btn small ghost" data-a="pvNo" data-id="${esc(c.id)}">Rifiuta</button></span></div>`;
     else if(v && v.on && v.device) inner = `<div class="dev-card ok${v.device.blocked ? " warn" : ""}" data-a="pvOpen" data-id="${esc(c.id)}" role="button" tabindex="0" title="Gestisci la visuale cliente"><span class="dev-ic">${DEV_ICON}</span><span class="dev-tx"><small>Dispositivo · ${esc(c.name)}</small><b>${esc(v.device.name)}</b>
-        <span class="dev-kind">${devKind(v.device.kind)}<i class="dev-dot" aria-hidden="true"></i>${v.device.blocked ? `<span class="dev-bad">🔒 bloccato (PIN)</span>` : v.device.seen ? "visto " + when(v.device.seen) : "approvato"}</span></span>
+        <span class="dev-kind">${devKind(v.device.kind)}${v.app ? `<span class="dev-app"> + app</span>` : ""}<i class="dev-dot" aria-hidden="true"></i>${v.device.blocked ? `<span class="dev-bad">🔒 bloccato (PIN)</span>` : v.device.seen ? "visto " + when(v.device.seen) : "approvato"}</span></span>
         <span class="dev-act"><button type="button" class="dev-x" data-a="pvDel" data-id="${esc(c.id)}" aria-label="Togli il dispositivo" title="Togli il dispositivo">✕</button></span></div>`;
     else inner = `<button type="button" class="dev-card add" data-a="pvOpen" data-id="${esc(c.id)}"><span class="dev-ic">${DEV_ICON}</span><span class="dev-tx"><small>Dispositivo · ${esc(c.name)}</small><b>+ Aggiungi dispositivo</b>${linkState(v) ? `<span class="dev-kind">${esc(linkState(v))}</span>` : ""}</span></button>`;
     return `<div class="dev-row" id="devRow">${inner}</div>`;
@@ -268,7 +270,7 @@
         <td>${v.device ? `${esc(v.device.name)}<br><span class="pv-muted">${devKind(v.device.kind)}${v.device.blocked ? ` · <span class="dev-bad">🔒 bloccato</span>` : ""}</span>` : v.pending ? `<span class="dev-bad">richiesta: ${esc(v.pending.name)}</span>` : `<span class="pv-muted">nessuno</span>`}</td>
         <td>${v.device && v.device.seen ? when(v.device.seen) : "—"}${v.device ? `<br><span class="pv-muted">${esc(seenText(v))}</span>` : ""}</td>
         <td><span class="pv-acts"><button type="button" class="btn small" data-a="pvOpen" data-id="${esc(cid)}">Gestisci</button>${v.on || v.locked ? `<button type="button" class="btn small ghost" data-a="pvBlock" data-id="${esc(cid)}">Blocca link</button>` : ""}</span></td></tr>`).join("")}</tbody></table>`;
-    h += `</section><section class="block pv-sec"><h2>Emergenza e impostazioni</h2>
+    h += `</section>${window.PTPush ? window.PTPush.html() : ""}<section class="block pv-sec"><h2>Emergenza e impostazioni</h2>
       <p class="sub"><b>Blocca tutto</b> spegne subito tutti i link: nessun cliente vede più la sua pagina. Per riattivarla a un cliente premi di nuovo <b>+ Aggiungi dispositivo</b> nella sua cartella (link nuovo).</p>
       <div class="pv-row" style="display:flex;flex-wrap:wrap;gap:8px"><button type="button" class="btn danger" data-a="pvBlockAll">⛔ Blocca tutto</button><button type="button" class="btn ghost" data-a="pvOff">Disattiva la visuale cliente</button></div>
       <p class="pv-muted">${n.req ? `${n.req} ${n.req === 1 ? "richiesta" : "richieste"} in attesa · ` : ""}Si controlla da sola ogni minuto.</p></section>`;
@@ -281,11 +283,11 @@
     if(!usable()) return messageBox("Visuale cliente", "Serve il salvataggio online (sincronizzazione) e la funzione attiva.");
     let v = info[cid];
     if(!v || !v.on || v.linkOld){                                  // (v104: link non usato entro 1 ora → il server ne crea uno nuovo)
-      const r = await op({op: "link", client: cid, trainer: settings.trainerName || "", first: first(c)});
+      const r = await op({op: "link", client: cid, trainer: settings.trainerName || "", first: first(c), name: c.name});
       if(!r) return; v = info[cid] = r.view; v.token = r.token;
       push(cid, true);
     } else if(!v.token){
-      const r = await op({op: "link", client: cid, trainer: settings.trainerName || "", first: first(c)}); if(!r) return; v = info[cid] = Object.assign(r.view || info[cid], {token: r.token});
+      const r = await op({op: "link", client: cid, trainer: settings.trainerName || "", first: first(c), name: c.name}); if(!r) return; v = info[cid] = Object.assign(r.view || info[cid], {token: r.token});
     }
     const url = pageUrl(v.token), vw = normView(c.view), al = alertsOf(v);
     $("pvForm").innerHTML = `<button type="submit" value="cancel" formnovalidate class="dlg-x" aria-label="Chiudi" title="Chiudi">✕</button><h3>📱 Visuale cliente · ${esc(c.name)}</h3>
@@ -339,7 +341,7 @@
     dlg.onclick = null;
     save();
     if(!next) return;
-    if(next === "fresh"){ const r = await op({op: "link", client: cid, fresh: true, trainer: settings.trainerName || "", first: first(getClient(cid) || c)}); if(r){ info[cid] = Object.assign(r.view || {}, {token: r.token}); toast("Link nuovo: vale 1 ora"); } return dialog(cid); }
+    if(next === "fresh"){ const r = await op({op: "link", client: cid, fresh: true, trainer: settings.trainerName || "", first: first(getClient(cid) || c), name: (getClient(cid) || c).name}); if(r){ info[cid] = Object.assign(r.view || {}, {token: r.token}); toast("Link nuovo: vale 1 ora"); } return dialog(cid); }
     if(next === "ok") return approve(cid);
     if(next === "no") return op({op: "reject", client: cid}, "Richiesta rifiutata: il link non vale più");
     if(next === "del") return remove(cid);

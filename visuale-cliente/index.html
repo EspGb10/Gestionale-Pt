@@ -565,12 +565,32 @@ function privacyFlow(o){
   const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
   async function sha(s){ try{ const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)); return Array.from(new Uint8Array(b), x=>x.toString(16).padStart(2, "0")).join(""); }catch(_){ return ""; } }
   async function api(method, body, extra){
-    const url = "../api/cliente" + (method === "GET" ? `?t=${encodeURIComponent(tok)}&d=${encodeURIComponent(dev)}${extra || ""}` : "");
+    const url = "../api/cliente" + (method === "GET" ? `?t=${encodeURIComponent(tok)}&d=${encodeURIComponent(dev)}${standalone ? "&a=1" : ""}${extra || ""}` : "");
     const r = await fetch(url, {method, cache:"no-store", headers: body ? {"Content-Type":"application/json"} : {}, body: body ? JSON.stringify(Object.assign({t: tok, d: dev}, body)) : undefined});
     let j = null; try{ j = await r.json(); }catch(_){}
+    if(j && typeof j.dev === "string" && /^[A-Za-z0-9_-]{16,64}$/.test(j.dev) && j.dev !== dev){ dev = j.dev; lsSet("pt_view_dev", dev); }   // v105: memoria cancellata da Safari
     return {status: r.status, j: j || {}};
   }
 
+  /* v105 (11/11): browser “sbagliato” per chiedere l'accesso (la sua memoria è separata e si perde):
+     iPhone → solo Safari (non Chrome, Firefox, Edge, né il browser interno di Instagram, Facebook, Google…); Android → non dentro Instagram/Facebook */
+  const UA = navigator.userAgent, IOSDEV = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const INAPP = /FBAN|FBAV|FB_IAB|FBIOS|Instagram|Line\/|Twitter|TikTok|musical_ly|BytedanceWebview|Snapchat|Pinterest|LinkedInApp|GSA\//.test(UA);
+  const BADBR = !standalone && (INAPP || (IOSDEV && /CriOS|FxiOS|EdgiOS|OPiOS|OPT\/|YaBrowser|DuckDuckGo|Brave/.test(UA)));
+  function openOut(){
+    const url = location.href.split("#")[0], ios = IOSDEV, tgt = ios ? "Safari" : "Chrome";
+    const iosVer = Number((/OS (\d+)_/.exec(UA) || [])[1] || 0);
+    const direct = ios ? (iosVer >= 17 ? "x-safari-" + url : "") : `intent://${location.host}${location.pathname}${location.search}#Intent;scheme=https;package=com.android.chrome;end`;
+    gate(`<div class="center"><div class="big-ic">🧭</div><h1>${T(`Apri in ${tgt}`, `Open in ${tgt}`)}</h1>
+      <p>${ios ? T("Su iPhone la tua pagina funziona in <b>Safari</b>: così il telefono la riconosce sempre e non devi chiedere un link nuovo.", "On iPhone your page works in <b>Safari</b>: this way the phone always recognises it and you don't need a new link.")
+               : T("Questa app apre i link in una finestra sua, che poi si dimentica di te. Apri il link in <b>Chrome</b>.", "This app opens links in its own window, which then forgets you. Open the link in <b>Chrome</b>.")}</p>
+      ${direct ? `<p><a class="btn primary" style="width:100%;display:block;text-align:center;text-decoration:none;color:#fff" href="${esc(direct)}">${T(`Apri in ${tgt}`, `Open in ${tgt}`)}</a></p>` : ""}
+      <p><button class="btn" id="oCopy" type="button" style="width:100%">📋 ${T("Copia il link", "Copy the link")}</button></p>
+      <ol class="msum" style="text-align:left">${ios ? `<li>${T("Tocca <b>“Copia il link”</b>.", "Tap <b>“Copy the link”</b>.")}</li><li>${T("Apri <b>Safari</b> (la bussola blu).", "Open <b>Safari</b> (the blue compass).")}</li><li>${T("Tocca la barra in alto, <b>incolla</b> e vai.", "Tap the bar at the top, <b>paste</b> and go.")}</li>`
+        : `<li>${T("Tocca i <b>tre puntini</b> in alto a destra.", "Tap the <b>three dots</b> at the top right.")}</li><li>${T("Scegli <b>“Apri in Chrome”</b> o <b>“Apri nel browser”</b>.", "Choose <b>“Open in Chrome”</b> or <b>“Open in browser”</b>.")}</li>`}</ol>
+      <p class="err" id="oMsg" role="status"></p></div>`);
+    $("oCopy").onclick = async () => { try{ await navigator.clipboard.writeText(url); $("oMsg").textContent = T("Link copiato ✔", "Link copied ✔"); }catch(_){ prompt(T("Copia questo link:", "Copy this link:"), url); } };
+  }
   /* ---------------- schermate di accesso ---------------- */
   let who = {trainer:"", first:""}, timer = 0;
   const stopTimer = () => { clearTimeout(timer); timer = 0; };
@@ -601,13 +621,13 @@ function privacyFlow(o){
       <p>${T("Il tuo personal trainer deve approvare", "Your personal trainer must approve")} <b>${esc(d.name || "")}</b>.<br>${T("Questa pagina si aggiorna da sola.", "This page updates by itself.")}</p></div>`);
       timer = setTimeout(boot, 8000);
     },
-    removed(){ cacheClear(); gate(`<div class="center"><div class="big-ic">🚫</div><h1>${T("Link scaduto", "Link expired")}</h1>
-      <p>${T("Non hai più accesso a questo programma. Contatta il tuo personal trainer per maggiori informazioni.", "You no longer have access to this program. Contact your personal trainer for more information.")}</p></div>`); },
+    removed(){ cacheClear(); gate(`<div class="center"><div class="big-ic">🔗</div><h1>${T("Link non più valido", "Link no longer valid")}</h1>
+      <p>${T("Questo link non funziona più. Se il tuo personal trainer ti ha mandato un <b>link nuovo</b>, apri quello.<br><br>Se usavi l'<b>icona sulla schermata Home</b>, cancellala e rifalla dal link nuovo.<br><br>Se non hai ricevuto un link nuovo, contatta il tuo personal trainer.", "This link no longer works. If your personal trainer sent you a <b>new link</b>, open that one.<br><br>If you used the <b>icon on the Home Screen</b>, delete it and add it again from the new link.<br><br>If you didn't receive a new link, contact your personal trainer.")}</p></div>`); },
     /* v104: link non usato entro 1 ora · link già legato a un altro dispositivo · 30 giorni senza aprire la pagina */
     linkold(){ cacheClear(); gate(`<div class="center"><div class="big-ic">⌛</div><h1>${T("Link scaduto", "Link expired")}</h1>
       <p>${T("Questo link valeva 1 ora e non è stato usato in tempo. Chiedi al tuo personal trainer di mandartene uno nuovo.", "This link was valid for 1 hour and wasn't used in time. Ask your personal trainer to send you a new one.")}</p></div>`); },
-    used(){ cacheClear(); gate(`<div class="center"><div class="big-ic">🔐</div><h1>${T("Link già usato", "Link already used")}</h1>
-      <p>${T("Questo link è già collegato a un altro dispositivo. Se hai cambiato telefono, chiedi al tuo personal trainer di togliere quello vecchio e di mandarti un link nuovo.", "This link is already linked to another device. If you changed phone, ask your personal trainer to remove the old one and send you a new link.")}</p></div>`); },
+    used(d){ cacheClear(); gate(`<div class="center"><div class="big-ic">🔐</div><h1>${T("Link già usato", "Link already used")}</h1>
+      <p>${T("Questo link è già collegato a un altro dispositivo. Se hai cambiato telefono, chiedi al tuo personal trainer di togliere quello vecchio e di mandarti un link nuovo.", "This link is already linked to another device. If you changed phone, ask your personal trainer to remove the old one and send you a new link.")}</p>${d && d.canPin ? `<div class="mv"><p><b>${T("È il tuo telefono?", "Is this your phone?")}</b> ${T("Se hai cancellato i dati di Safari, usi una finestra privata o un altro browser, scrivi il tuo PIN: la pagina si sposta qui e il tuo personal trainer riceve un avviso.", "If you cleared Safari's data, use a private window or another browser, enter your PIN: the page moves here and your personal trainer gets a notice.")}</p><p><button class="btn primary" id="gMove" type="button" style="width:100%">🔑 ${T("Inserisci il tuo PIN", "Enter your PIN")}</button></p></div>` : ""}</div>`); if($("gMove")) $("gMove").onclick = () => pinScreen("move"); },
     moved(){ cacheClear(); gate(`<div class="center"><div class="big-ic">📲</div><h1>${T("Apri dall'icona", "Open from the icon")}</h1>
       <p>${T("La tua pagina ora si apre dall'icona sulla schermata Home del telefono. Puoi chiudere questa finestra.", "Your page now opens from the icon on your phone's Home screen. You can close this window.")}</p></div>`); },
     idle(){ cacheClear(); gate(`<div class="center"><div class="big-ic">⌛</div><h1>${T("Link scaduto", "Link expired")}</h1>
@@ -623,9 +643,9 @@ function privacyFlow(o){
   /* tastierino del PIN */
   function pinScreen(mode, d){                       // mode: "set" (crea), "pin" (inserisci), "offline" (inserisci, senza internet)
     let val = "", first = "", step = mode === "set" ? 1 : 0, busy = false;
-    const title = () => mode === "set" ? (step === 1 ? T("Crea il tuo PIN", "Create your PIN") : T("Ripeti il PIN", "Repeat your PIN")) : `${T("Ciao", "Hi")} ${esc(who.first || "")}!`;
-    const sub = () => mode === "set" ? (step === 1 ? T("4 cifre a tua scelta: ti servirà ogni volta che apri la pagina.", "4 digits of your choice: you'll need it every time you open the page.") : T("Scrivilo ancora una volta per conferma.", "Type it once more to confirm.")) : T("Inserisci il tuo PIN", "Enter your PIN");
-    gate(`<div class="center"><div class="big-ic">${mode === "set" ? "🔐" : "🔒"}</div><h1 id="pT">${title()}</h1><p id="pS">${sub()}</p>
+    const title = () => mode === "move" ? T("Rientra con il tuo PIN", "Sign back in with your PIN") : mode === "app" ? T("Attiva l'app", "Activate the app") : mode === "set" ? (step === 1 ? T("Crea il tuo PIN", "Create your PIN") : T("Ripeti il PIN", "Repeat your PIN")) : `${T("Ciao", "Hi")} ${esc(who.first || "")}!`;
+    const sub = () => mode === "move" ? T("Scrivi il tuo PIN: la pagina si sposta su questo browser e quello di prima non funzionerà più.", "Enter your PIN: the page moves to this browser and the previous one will no longer work.") : mode === "app" ? T("Hai messo “Il mio percorso” sulla schermata Home. Scrivi il tuo PIN, lo stesso che usi in Safari, per usarla come app.", "You put “Il mio percorso” on your Home Screen. Enter your PIN, the same one you use in Safari, to use it as an app.") : mode === "set" ? (step === 1 ? T("4 cifre a tua scelta: ti servirà ogni volta che apri la pagina.", "4 digits of your choice: you'll need it every time you open the page.") : T("Scrivilo ancora una volta per conferma.", "Type it once more to confirm.")) : T("Inserisci il tuo PIN", "Enter your PIN");
+    gate(`<div class="center"><div class="big-ic">${mode === "set" ? "🔐" : mode === "app" ? "📲" : mode === "move" ? "🔑" : "🔒"}</div><h1 id="pT">${title()}</h1><p id="pS">${sub()}</p>
       <div class="pin" id="pDots" aria-live="polite">${"<span></span>".repeat(4)}</div><p class="err" id="pErr" role="alert">${d && d.msg ? esc(d.msg) : ""}</p>
       <div class="keys">${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k=>`<button type="button" ${k === "" ? 'style="visibility:hidden" tabindex="-1"' : `data-k="${k}" aria-label="${k === "⌫" ? T("Cancella", "Delete") : k}"`}>${k}</button>`).join("")}</div>
       ${mode === "offline" ? `<p class="off">📶 ${T("Sei offline: vedrai l'ultima situazione salvata.", "You're offline: you'll see the last saved situation.")}</p>` : ""}
@@ -649,11 +669,11 @@ function privacyFlow(o){
         return;
       }
       let r;
-      try{ r = await api("POST", {op: mode === "set" ? "setpin" : "pin", pin}); }
+      try{ r = await api("POST", {op: mode === "set" ? "setpin" : mode === "app" ? "app" : mode === "move" ? "move" : "pin", pin}); }
       catch(_){ busy = false; val = ""; dots(); $("pErr").textContent = T("Non riesco a collegarmi: riprova.", "I can't connect: try again."); return; }
       busy = false;
       if(r.j.state === "ok"){ document.removeEventListener("keydown", kb); await remember(pin, r.j); handle(r, true); if(mode === "set" && !standalone) showInstall(true); return; }
-      if(r.j.state === "pin" && r.j.wrong){ val = ""; dots(); $("pErr").textContent = T("PIN sbagliato.", "Wrong PIN.") + " " + (r.j.left === 1 ? T("Ultimo tentativo prima del blocco.", "Last attempt before the lock.") : T(`Restano ${r.j.left} tentativi.`, `${r.j.left} attempts left.`)); return; }
+      if((r.j.state === "pin" || r.j.state === "apppin" || r.j.state === "movepin") && r.j.wrong){ val = ""; dots(); $("pErr").textContent = T("PIN sbagliato.", "Wrong PIN.") + " " + (r.j.left === 1 ? T("Ultimo tentativo prima del blocco.", "Last attempt before the lock.") : T(`Restano ${r.j.left} tentativi.`, `${r.j.left} attempts left.`)); return; }
       document.removeEventListener("keydown", kb); handle(r);
     };
     const kb = e => { if(/^\d$/.test(e.key)) press(e.key); else if(e.key === "Backspace") press("⌫"); };
@@ -689,14 +709,16 @@ function privacyFlow(o){
     if(r.status === 404 || r.status === 400 && j.error === "device") return S.nolink();
     if(r.status >= 500) return offlineOr(S.nonet);
     switch(j.state){
-      case "new": setK(""); lsDel(CK); return S.welcome(j);
+      case "new": setK(""); lsDel(CK); if(BADBR) return openOut(); return S.welcome(j);   // v105: prima apri nel browser giusto
       case "waiting": return S.waiting(j);
       case "setpin": setK(""); lsDel(CK); return pinScreen("set");
       case "pin": setK(""); return pinScreen("pin");
       case "removed": return S.removed();
       case "expired": return S.expired();
       case "linkold": return S.linkold();
-      case "used": return S.used();
+      case "apppin": setK(""); return pinScreen("app");                 // v105: aperta dall'icona sulla schermata Home → il suo PIN
+      case "movepin": return pinScreen("move");
+      case "used": if(BADBR) return openOut(); return S.used(j);
       case "idle": return S.idle();
       case "moved": return S.moved();
       case "blocked": setK(""); return S.blocked();
