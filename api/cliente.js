@@ -18,13 +18,26 @@
      POST {t, d, k, op:"sign", id, s}   firma una seduta non firmata · {op:"logout"} scollega il dispositivo · {op:"bye"} chiude l'accesso
      POST {t, d, k, op:"delreq"}      chiede di cancellare i dati della pagina (decide il trainer)
      POST {t, d, k, op:"xfer"} -> {x}  codice (30 minuti, una volta sola) per passare l'approvazione all'icona sulla schermata Home
-     POST {t, d, op:"claim", x}        l'icona (su iPhone è un “dispositivo” nuovo) prende il posto del dispositivo approvato; poi serve il PIN
+     POST {t, d, op:"claim", x}        l'icona (su iPhone è un “dispositivo” nuovo) diventa la sua app (Safari continua a funzionare); poi serve il PIN
+     v105 (11/11): GET …&a=1 dall'icona sulla schermata Home → {state:"apppin"} se il link è già del suo telefono:
+     POST {t, d, op:"app", pin}        con il PIN del cliente l'icona diventa la sua app (una sola alla volta; Safari resta) e il trainer riceve l'avviso
+     POST {t, d, op:"move", pin}       “link già usato” ma è il suo telefono: con il PIN la pagina si sposta su questo browser (avviso + notifica)
+     Cookie pt_dev (HttpOnly): il server ricorda il telefono anche se Safari cancella la memoria del sito (risposta con {dev} da salvare)
    Con la password del gestionale:
      GET  ?list=1  -> {views:{cliente:{…}}}
      POST {op:"link", client, trainer, first[, fresh]}   -> {token}  (lo stesso finché è valido; nuovo se spento, non usato entro 1 ora, o fresh senza dispositivo)
      POST {op:"snap", client, snap} · approve · reject · remove · block · pinreset · unblock · ack(ids) · keep · blockall */
 const crypto = require("crypto");
-const {kv, missing, authorized, readJson, send, ipOf, P} = require("./kvlib");
+const {kv, missing, authorized, readJson, send: sendRaw, ipOf, P} = require("./kvlib");
+/* v105 (11/11): il telefono del cliente lo ricorda anche il server, con un cookie che Safari non cancella dopo 7 giorni
+   (Safari cancella la memoria del sito se il cliente non apre la pagina per 7 giorni: senza cookie vedrebbe “link già usato”) */
+const DEV_COOKIE = "pt_dev";
+const cookieDev = req => { const m = /(?:^|;\s*)pt_dev=([A-Za-z0-9_-]{16,64})(?:;|$)/.exec(String(req.headers.cookie || "")); return m ? m[1] : ""; };
+const send = (res, code, obj) => {
+  if(res.__ptCookie) res.setHeader("Set-Cookie", `${DEV_COOKIE}=${res.__ptCookie}; Path=/; Max-Age=34560000; HttpOnly; Secure; SameSite=Lax`);
+  if(res.__ptDev && obj && typeof obj === "object") obj = Object.assign({dev: res.__ptDev}, obj);   // la pagina riprende il suo codice del telefono
+  return sendRaw(res, code, obj);
+};
 
 const ID = v => typeof v === "string" && v.length > 0 && v.length <= 120 && !/[\s:]/.test(v);
 const TOK = v => typeof v === "string" && /^[A-Za-z0-9_-]{20,64}$/.test(v);
@@ -41,6 +54,27 @@ const romeHM = (ms = Date.now()) => new Date(ms).toLocaleTimeString("it-IT", {ti
 const addDays = (iso, n) => { const d = new Date(iso + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 const pinHash = (dev, pin) => hash("pin:" + dev.salt + ":" + pin);
 
+/* v105 (11/11): notifiche sul telefono del trainer (api/_pushlib.js): richieste di accesso e avvisi di sicurezza */
+const PUSH_NOTE = {
+  ask: (n, x)=>({it: {title: "📱 Richiesta di accesso", body: `${n} chiede di vedere la sua pagina da “${x}”. Apri il gestionale per approvare.`},
+                 en: {title: "📱 Access request", body: `${n} is asking to see their page from “${x}”. Open the app to approve.`}}),
+  other: n=>({it: {title: "⚠️ Link già usato", body: `Un altro telefono ha provato ad aprire il link di ${n}.`},
+              en: {title: "⚠️ Link already used", body: `Another phone tried to open ${n}'s link.`}}),
+  pinlock: n=>({it: {title: "🔒 PIN bloccato", body: `${n}: 5 PIN sbagliati, la pagina è bloccata. Puoi sbloccarla dal gestionale.`},
+                en: {title: "🔒 PIN locked", body: `${n}: 5 wrong PINs, the page is locked. You can unlock it from the app.`}}),
+  delreq: n=>({it: {title: "🗑 Richiesta di cancellazione", body: `${n} chiede di cancellare i dati della sua pagina.`},
+               en: {title: "🗑 Deletion request", body: `${n} is asking to delete their page's data.`}}),
+  try: n=>({it: {title: "⚠️ Tentativo di accesso", body: `Qualcuno ha provato ad aprire la pagina di ${n} con un link non più valido o da un dispositivo tolto.`},
+            en: {title: "⚠️ Access attempt", body: `Someone tried to open ${n}'s page with a link that's no longer valid or from a removed device.`}})
+};
+async function notify(rec, k, x){
+  try{
+    if(k === "moved") PUSH_NOTE.moved = n=>({it: {title: "🔁 Pagina spostata", body: `${n} è rientrato con il suo PIN da un altro browser: quello di prima non funziona più.`},
+                                             en: {title: "🔁 Page moved", body: `${n} signed back in with their PIN from another browser: the previous one no longer works.`}});
+    const f = PUSH_NOTE[k]; if(!f) return;
+    await require("./_pushlib").sendAll(Object.assign(f(rec.name || rec.first || "Un cliente", clean(x, 40)), {tag: k + "-" + Date.now(), url: "./#visuale"}));
+  }catch(_){}                                                     // le notifiche non devono mai bloccare la pagina del cliente
+}
 async function getRec(client){ const [raw] = await kv([["HGET", P + "view", client]]); try{ return raw ? JSON.parse(raw) : null; }catch(_){ return null; } }
 const putRec = (client, rec) => kv([["HSET", P + "view", client, JSON.stringify(rec)]]);
 function alert(rec, k, extra){
@@ -53,12 +87,12 @@ const linkOld = rec => !boundH(rec) && Date.now() - (Number(rec.created) || 0) >
 const openedInTime = (rec, hd) => (rec.opened || []).includes(hd) && Date.now() - (Number(rec.created) || 0) <= DAY;
 const idleDev = rec => !!(rec.device && Date.now() - (rec.device.seen || rec.device.appr || Date.now()) > IDLE_DAYS * DAY);
 /* 30 giorni senza aprire la pagina: il link si spegne (comandi da mandare al database) */
-function lockIdle(rec){ rec.device = null; rec.pending = null; rec.locked = true; rec.lockWhy = "idle"; alert(rec, "idle"); const sd = sessDel(rec); rec.sess = []; return sd; }
+function lockIdle(rec){ rec.device = null; rec.pending = null; rec.app = null; rec.locked = true; rec.lockWhy = "idle"; alert(rec, "idle"); const sd = sessDel(rec); rec.sess = []; return sd; }
 /* quello che vede il gestionale (mai PIN, impronte o codici dei dispositivi) */
 const devPub = d => d ? {name: d.name, kind: d.kind, at: d.at, seen: d.seen || 0, blocked: !!d.blocked, pin: !!d.pin} : null;
 const sessDel = rec => (Array.isArray(rec && rec.sess) ? rec.sess : []).filter(TOK).map(k=>["DEL", P + "viewsess:" + k])
   .concat((Array.isArray(rec && rec.xf) ? rec.xf : []).filter(TOK).map(k=>["DEL", P + "viewxfer:" + k]));   // (anche i codici per l'icona)
-const pub = rec => rec ? {on: !!rec.token && !rec.locked, locked: !!rec.locked, device: devPub(rec.device),
+const pub = rec => rec ? {on: !!rec.token && !rec.locked, locked: !!rec.locked, device: devPub(rec.device), app: rec.device && rec.app ? {at: rec.app.at} : null,
   pending: rec.pending ? {name: rec.pending.name, kind: rec.pending.kind, at: rec.pending.at} : null,
   alerts: rec.alerts || [], consents: rec.consents || [], delreq: rec.delreq || 0, seenAt: rec.seenAt || 0, updAt: rec.updAt || 0,
   ended: rec.ended || "", created: rec.created || 0,
@@ -107,15 +141,19 @@ module.exports = async (req, res) => {
       if(!client) return fail(req, res, 410, "off");
       const rec = await getRec(client);
       if(!rec || rec.token !== t) return fail(req, res, 410, "off");
-      const d = req.method === "GET" ? q.get("d") : body.d;
+      let d = req.method === "GET" ? q.get("d") : body.d;
       if(!DEV(d)) return send(res, 400, {error:"device"});
+      { const ck = cookieDev(req), isMine = h => !!(rec.device && (rec.device.h === h || (rec.app && rec.app.h === h))) || !!(rec.pending && rec.pending.h === h) || (!rec.device && rec.bh === h);
+        if(ck && ck !== d && !isMine(hash(d)) && isMine(hash(ck))){ d = ck; res.__ptDev = ck; }   // memoria di Safari cancellata: è lo stesso telefono
+        res.__ptCookie = d; }
       const hd = hash(d), who = {trainer: rec.trainer || "", first: rec.first || ""};
-      const mine = !!(rec.device && rec.device.h === hd);
+      const mine = !!(rec.device && (rec.device.h === hd || (rec.app && rec.app.h === hd)));   // v105: anche la sua app sulla schermata Home
+      const isApp = req.method === "GET" ? q.get("a") === "1" : body.a === true;                  // aperta dall'icona sulla schermata Home
       /* 30 giorni senza aprire la pagina: il link si spegne, serve un link nuovo (v104) */
       if(idleDev(rec)){ const sd = lockIdle(rec); await kv([...sd, ["HSET", P + "view", client, JSON.stringify(rec)]]); return send(res, 200, Object.assign({state:"idle"}, who)); }
       /* dispositivo tolto, richiesta rifiutata o 30 giorni: nessuno può più chiedere l'accesso con questo link */
       if(rec.locked){
-        if(!rec.lastTry || Date.now() - rec.lastTry > 3600000){ rec.lastTry = Date.now(); alert(rec, "try", {name: ""}); await putRec(client, rec); }
+        if(!rec.lastTry || Date.now() - rec.lastTry > 3600000){ rec.lastTry = Date.now(); alert(rec, "try", {name: ""}); await putRec(client, rec); await notify(rec, "try"); }
         return send(res, 200, Object.assign({state: rec.lockWhy === "idle" ? "idle" : "removed"}, who));
       }
       if(expired(rec)) return send(res, 200, Object.assign({state:"expired", ended: rec.ended}, who));
@@ -126,16 +164,52 @@ module.exports = async (req, res) => {
         const [raw] = await kv([["GET", P + "viewxfer:" + body.x]]);
         let xr = null; try{ xr = raw ? JSON.parse(raw) : null; }catch(_){}
         if(!xr || xr.c !== client || !rec.device || rec.device.h !== xr.h || rec.device.blocked) return send(res, 200, Object.assign({state: mine ? "pin" : boundH(rec) && boundH(rec) !== hd ? "used" : "new", claimed: false}, who));
-        rec.moved = rec.device.h; rec.device.h = hd; rec.bh = hd; rec.device.seen = Date.now();      // (moved: il browser di prima, sullo stesso telefono)
+        rec.app = {h: hd, at: Date.now()}; rec.device.seen = Date.now(); alert(rec, "app", {name: rec.device.name});   // v105: l'icona diventa la sua app, Safari continua a funzionare
         await kv([["DEL", P + "viewxfer:" + body.x], ["HSET", P + "view", client, JSON.stringify(rec)]]);
         return send(res, 200, Object.assign({state: rec.device.pin ? "pin" : "setpin", claimed: true}, who));
+      }
+      /* v105 (11/11): l'icona sulla schermata Home (su iPhone ha una memoria sua) usa il link una seconda volta, solo con il PIN del cliente */
+      if(op === "app" && !mine){
+        if(!rec.device || !rec.device.pin) return send(res, 200, Object.assign({state:"used"}, who));
+        if(rec.device.blocked) return send(res, 200, Object.assign({state:"blocked"}, who));
+        if(!PIN(body.pin) || pinHash(rec.device, body.pin) !== rec.device.pin){
+          rec.device.fails = (Number(rec.device.fails) || 0) + 1;
+          if(rec.device.fails >= MAX_FAILS){ rec.device.blocked = true; alert(rec, "pinlock", {name: rec.device.name}); }
+          await putRec(client, rec);
+          if(rec.device.blocked) await notify(rec, "pinlock");
+          return send(res, 200, Object.assign({state: rec.device.blocked ? "blocked" : "apppin", wrong: true, left: Math.max(0, MAX_FAILS - rec.device.fails)}, who));
+        }
+        rec.device.fails = 0; rec.app = {h: hd, at: Date.now()}; alert(rec, "app", {name: rec.device.name});   // una sola app: quella vecchia non vale più
+        const k = await openSession(client, rec, hd);
+        return send(res, 200, Object.assign({state:"ok", k}, who, await payload(client, rec)));
+      }
+      /* v105 (11/11): “link già usato” ma è il suo telefono (memoria cancellata, finestra privata, altro browser): con il suo PIN la pagina si sposta qui */
+      if(op === "move" && !mine){
+        if(!rec.device || !rec.device.pin) return send(res, 200, Object.assign({state:"used"}, who));
+        if(rec.device.blocked) return send(res, 200, Object.assign({state:"blocked"}, who));
+        if(!PIN(body.pin) || pinHash(rec.device, body.pin) !== rec.device.pin){
+          rec.device.fails = (Number(rec.device.fails) || 0) + 1;
+          if(rec.device.fails >= MAX_FAILS){ rec.device.blocked = true; alert(rec, "pinlock", {name: rec.device.name}); }
+          await putRec(client, rec);
+          if(rec.device.blocked) await notify(rec, "pinlock");
+          return send(res, 200, Object.assign({state: rec.device.blocked ? "blocked" : "movepin", wrong: true, left: Math.max(0, MAX_FAILS - rec.device.fails)}, who));
+        }
+        const old = rec.device.h; rec.device.fails = 0; rec.device.h = hd; rec.bh = hd; rec.moved = "";
+        rec.rejected = (rec.rejected || []).filter(x=>x !== hd);
+        alert(rec, "moved", {name: rec.device.name});
+        const sd = sessDel(rec).filter(c=>c[1].includes("viewsess:")); rec.sess = [];      // il browser di prima esce
+        await kv(sd.length ? sd : [["GET", P + "x"]]);
+        const k = await openSession(client, rec, hd);
+        await notify(rec, "moved");
+        return send(res, 200, Object.assign({state:"ok", k}, who, await payload(client, rec)));
       }
       /* v104: link legato a un altro dispositivo → “link già usato” (avviso al trainer al massimo una volta all'ora) */
       const bh = boundH(rec);
       if(bh && bh !== hd && !mine && rec.moved === hd) return send(res, 200, Object.assign({state:"moved"}, who));   // stesso telefono: ora si apre dall'icona
       if(bh && bh !== hd && !mine){
-        if(!rec.lastOther || Date.now() - rec.lastOther > HOUR){ rec.lastOther = Date.now(); alert(rec, "other"); await putRec(client, rec); }
-        return send(res, 200, Object.assign({state:"used"}, who));
+        if(isApp && rec.device && rec.device.pin && !rec.device.blocked) return send(res, 200, Object.assign({state:"apppin"}, who));   // v105: è la sua icona? chiede il PIN
+        if(!rec.lastOther || Date.now() - rec.lastOther > HOUR){ rec.lastOther = Date.now(); alert(rec, "other"); await putRec(client, rec); await notify(rec, "other"); }
+        return send(res, 200, Object.assign({state:"used", canPin: !!(rec.device && rec.device.pin && !rec.device.blocked)}, who));
       }
       /* v104: link non usato entro 1 ora (chi l'ha aperto in tempo può ancora inviare la richiesta, fino a 24 ore) */
       if(!bh && linkOld(rec) && !openedInTime(rec, hd)) return send(res, 200, Object.assign({state:"linkold"}, who));
@@ -166,6 +240,7 @@ module.exports = async (req, res) => {
         if(!rec.bh){ rec.bh = hd; rec.bound = at; rec.opened = []; }        // v104: da qui il link è di questo dispositivo, senza scadenza
         rec.consents = (rec.consents || []).slice(-19); rec.consents.push({at, name, kind});
         await putRec(client, rec);
+        await notify(rec, "ask", name);
         return send(res, 200, Object.assign({state:"waiting", name}, who));
       }
       if(!mine) return send(res, 403, {error:"device"});
@@ -183,6 +258,7 @@ module.exports = async (req, res) => {
           rec.device.fails = (Number(rec.device.fails) || 0) + 1;
           if(rec.device.fails >= MAX_FAILS){ rec.device.blocked = true; alert(rec, "pinlock", {name: rec.device.name}); }
           await putRec(client, rec);
+          if(rec.device.blocked) await notify(rec, "pinlock");
           return send(res, 200, Object.assign({state: rec.device.blocked ? "blocked" : "pin", wrong: true, left: Math.max(0, MAX_FAILS - rec.device.fails)}, who));
         }
         rec.device.fails = 0;
@@ -214,7 +290,8 @@ module.exports = async (req, res) => {
       }
       if(op === "bye"){ await kv([["DEL", P + "viewsess:" + body.k]]); return send(res, 200, {ok: true}); }
       if(op === "logout"){                                       // il cliente scollega il suo dispositivo
-        rec.device = null; alert(rec, "logout");
+        if(rec.app && rec.app.h === hd && rec.device.h !== hd) rec.app = null; else { rec.device = null; rec.app = null; }   // v105: dall'app scollega solo l'app
+        alert(rec, "logout");
         await kv([["DEL", P + "viewsess:" + body.k], ["HSET", P + "view", client, JSON.stringify(rec)]]);
         return send(res, 200, {ok: true});
       }
@@ -231,6 +308,7 @@ module.exports = async (req, res) => {
       if(op === "delreq"){
         rec.delreq = Date.now(); alert(rec, "delreq");
         await putRec(client, rec);
+        await notify(rec, "delreq");
         return send(res, 200, {ok: true});
       }
       return send(res, 400, {error:"op"});
@@ -267,11 +345,12 @@ module.exports = async (req, res) => {
       if(!rec || !rec.token || rec.locked || linkOld(rec) || (body.fresh === true && !boundH(rec))){
         const cmds = [];
         if(rec && TOK(rec.token)) cmds.push(["DEL", P + "viewtok:" + rec.token]);
-        rec = Object.assign(rec || {}, {token: crypto.randomBytes(24).toString("base64url"), device: null, pending: null, locked: false, created: Date.now(), bh: "", bound: 0, opened: [], lockWhy: "", lastOther: 0, moved: ""});
+        rec = Object.assign(rec || {}, {token: crypto.randomBytes(24).toString("base64url"), device: null, app: null, pending: null, locked: false, created: Date.now(), bh: "", bound: 0, opened: [], lockWhy: "", lastOther: 0, moved: ""});
         cmds.push(["SET", P + "viewtok:" + rec.token, client]);
         await kv(cmds);
       }
       rec.trainer = clean(body.trainer, 60); rec.first = clean(body.first, 40); rec.t = Date.now();
+      if(body.name) rec.name = clean(body.name, 60);                     // v105: nome completo (per le notifiche al trainer)
       await putRec(client, rec);
       return send(res, 200, {token: rec.token, view: pub(rec)});
     }
@@ -290,7 +369,7 @@ module.exports = async (req, res) => {
     if(op === "approve"){
       if(rec.pending){
         if(rec.device) rej(rec.device.h);                      // massimo 1 dispositivo: il vecchio viene sostituito
-        rec.device = Object.assign({}, rec.pending, {appr: Date.now()}); rec.pending = null;
+        rec.device = Object.assign({}, rec.pending, {appr: Date.now()}); rec.pending = null; rec.app = null;
         rec.rejected = (rec.rejected || []).filter(x=>x !== rec.device.h);
         await putRec(client, rec);
       }
@@ -302,7 +381,7 @@ module.exports = async (req, res) => {
     }
     if(op === "remove"){                                       // dispositivo tolto: il link non vale più per nessuno
       if(rec.device) rej(rec.device.h); if(rec.pending) rej(rec.pending.h);
-      rec.device = null; rec.pending = null; rec.locked = true; rec.lockWhy = "removed";
+      rec.device = null; rec.pending = null; rec.app = null; rec.locked = true; rec.lockWhy = "removed";
       const sd = sessDel(rec); rec.sess = [];
       await kv([...sd, ["HSET", P + "view", client, JSON.stringify(rec)]]);
       return send(res, 200, {ok: true, view: pub(rec)});
