@@ -910,7 +910,7 @@ function privacyFlow(o){
     /* 8. pacchetto precedente (per 3 giorni) */
     const o = d.old;
     if(o && (!o.until || o.until >= todayIso())) h += card("old", T("Pacchetto precedente", "Previous package"), `<p style="margin:0">${o.start ? dIt(o.start) + " → " : ""}${dIt(o.end)} · ${o.done} ${T("su", "of")} ${o.total} ${T("sedute", "sessions")}${o.lost ? ` · ${o.lost} ${o.lost === 1 ? T("saltata", "missed") : T("saltate", "missed")}` : ""}</p>${o.until && p ? `<p class="msum">${T("Visibile fino al", "Visible until")} ${dIt(o.until)}</p>` : ""}`, "old");
-    if(!curOpt.preview) h += `<div class="foot"><button class="btn sm" id="fOut">🚪 ${T("Esci da questo dispositivo", "Log out of this device")}</button><button class="btn sm" id="fDel">🗑 ${T("Chiedi di cancellare i miei dati", "Ask to delete my data")}</button></div>`;
+    if(!curOpt.preview) h += `<div class="foot"><button class="btn sm" id="fOut">🚪 ${T("Esci da questo dispositivo", "Log out of this device")}</button></div>`;
     h += `</div>`;
     app.innerHTML = h;
     document.querySelectorAll("canvas[data-s]").forEach(drawSig);
@@ -937,11 +937,7 @@ function privacyFlow(o){
       try{ const r = await api("POST", {op:"logout", k: K}); if(r.status >= 400 && r.status !== 403) throw 0; }catch(_){ return toast(T("Non riesco a collegarmi: riprova.", "I can't connect: try again.")); }
       cacheClear(); cur = null; stopWatch(); return boot();
     }
-    if(b.id === "fDel"){
-      if(!(await ask(T("Chiedere di cancellare i tuoi dati?", "Ask to delete your data?"), T("Il tuo personal trainer riceverà la richiesta di cancellare i dati di questa pagina e deciderà lui.", "Your personal trainer will receive the request to delete the data on this page and will decide."), T("Invia richiesta", "Send request")))) return;
-      try{ const r = await api("POST", {op:"delreq", k: K}); if(!r.j.ok) throw 0; toast(T("Richiesta inviata al tuo personal trainer.", "Request sent to your personal trainer.")); }
-      catch(_){ toast(T("Non riesco a collegarmi: riprova.", "I can't connect: try again.")); }
-    }
+    /* v106: tolto “Chiedi di cancellare i miei dati” (decide solo il trainer) */
   });
   app.addEventListener("contextmenu", e=>{ if(e.target.closest(".sigbox")) e.preventDefault(); });
   /* firma dalla pagina: riquadro a tutto schermo */
