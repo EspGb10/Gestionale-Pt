@@ -305,12 +305,7 @@ module.exports = async (req, res) => {
         await kv([["HSET", P + "privacy", client, JSON.stringify(doc)]]);
         return send(res, 200, {ok: true});
       }
-      if(op === "delreq"){
-        rec.delreq = Date.now(); alert(rec, "delreq");
-        await putRec(client, rec);
-        await notify(rec, "delreq");
-        return send(res, 200, {ok: true});
-      }
+      if(op === "delreq") return send(res, 403, {error:"off"});         // v106: dalla pagina del cliente non si chiede più di cancellare i dati (decide il trainer)
       return send(res, 400, {error:"op"});
     }
     /* ---------- il trainer (con la password) ---------- */
