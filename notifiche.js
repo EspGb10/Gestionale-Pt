@@ -28,7 +28,7 @@
   const later = () => { if(busy) return; clearTimeout(rq); rq = setTimeout(refresh, 150); };   // ricontrollo ogni volta che la sezione compare
   function html(inner){
     if(!inner) later();                                     // (dal gestionale: ricontrollo; da paint: no, altrimenti non finirebbe mai)
-    const sub = `<p class="sub">Ti arriva una notifica, anche con l'app chiusa, quando un cliente <b>chiede l'accesso</b> alla sua pagina e per gli <b>avvisi di sicurezza</b>: link aperto da un altro telefono, PIN bloccato, richiesta di cancellare i dati, dispositivo tolto che riprova.</p>`;
+    const sub = `<p class="sub">Ti arriva una notifica, anche con l'app chiusa, quando un cliente <b>chiede l'accesso</b> alla sua pagina e per gli <b>avvisi di sicurezza</b>: link aperto da un altro telefono, PIN bloccato, dispositivo tolto che riprova.</p>`;
     let body;
     if(state === "on") body = `<p class="push-ok">✅ Notifiche attive su questo telefono.</p><div class="pv-row push-row"><button type="button" class="btn" data-push="test"${busy ? " disabled" : ""}>📨 Manda una prova</button><button type="button" class="btn ghost" data-push="off"${busy ? " disabled" : ""}>Disattiva</button></div>`;
     else if(state === "off") body = `<div class="pv-row push-row"><button type="button" class="btn primary" data-push="on"${busy ? " disabled" : ""}>🔔 Attiva notifiche su questo telefono</button></div><p class="pv-muted">Il telefono ti chiederà il permesso: premi <b>“Consenti”</b>.</p>`;
