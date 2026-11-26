@@ -49,6 +49,10 @@
 .dev-bad{color:var(--owed);font-weight:700}
 @media (max-width:480px){ .dev-row{margin:0 0 14px} .dev-card{width:100%;max-width:none} .dev-card.pending{flex-wrap:wrap} .dev-card.pending .dev-act{margin-left:52px} }
 .pv-note{border:1px solid #f0d2b0;background:#fdf3e6;border-radius:14px;padding:12px 14px;margin:0 0 14px}
+/* v113: tema scuro: lo sfondo crema con il testo chiaro non si leggeva → sfondo ambra scuro */
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .pv-note{background:#3a2a17;border-color:#8a5f2e} :root:not([data-theme="light"]) .pv-line{border-top-color:rgba(255,255,255,.1)} }
+:root[data-theme="dark"] .pv-note{background:#3a2a17;border-color:#8a5f2e}
+:root[data-theme="dark"] .pv-line{border-top-color:rgba(255,255,255,.1)}
 .pv-note h3{margin:0 0 6px;font-size:1.05rem}
 .pv-line{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 10px;padding:8px 0;border-top:1px solid rgba(0,0,0,.06)}
 .pv-line:first-of-type{border-top:0}
@@ -248,7 +252,7 @@
     Object.entries(info).forEach(([cid, v])=>{
       const c = getClient(cid); if(!c) return;
       if(v.pending) lines.push(`<div class="pv-line"><span><b>${esc(c.name)}</b> chiede di vedere la sua pagina da “${esc(v.pending.name)}” (${devKind(v.pending.kind)})</span><span class="pv-acts"><button type="button" class="btn small primary" data-a="pvOk" data-id="${esc(cid)}">Approva</button><button type="button" class="btn small ghost" data-a="pvNo" data-id="${esc(cid)}">Rifiuta</button></span></div>`);
-      alertsOf(v).forEach(a=>lines.push(`<div class="pv-line"><span><b>${esc(c.name)}</b>: ${esc(ALERT_TXT[a.k])} <span class="pv-muted">(${when(a.at)})</span></span><span class="pv-acts">${a.k === "pinlock" ? `<button type="button" class="btn small primary" data-a="pvUnblock" data-id="${esc(cid)}">Sblocca</button>` : a.k === "delreq" ? `<button type="button" class="btn small" data-a="pvOpen" data-id="${esc(cid)}">Decidi</button>` : ""}<button type="button" class="btn small ghost" data-a="pvAck" data-id="${esc(cid)}" data-al="${esc(a.id)}">Ok, visto</button></span></div>`));
+      alertsOf(v).forEach(a=>lines.push(`<div class="pv-line"><span><b>${esc(c.name)}</b>: ${esc(ALERT_TXT[a.k])} <span class="pv-muted">(${when(a.at)})</span></span><span class="pv-acts">${a.k === "pinlock" ? `<button type="button" class="btn small primary" data-a="pvUnblock" data-id="${esc(cid)}">Sblocca</button>` : a.k === "delreq" ? `<button type="button" class="btn small" data-a="pvOpen" data-id="${esc(cid)}">Decidi</button>` : a.k === "try" && v.locked ? `<button type="button" class="btn small primary" data-a="pvRenew" data-id="${esc(cid)}" data-al="${esc(a.id)}">🔄 Link nuovo</button>` : ""}<button type="button" class="btn small ghost" data-a="pvAck" data-id="${esc(cid)}" data-al="${esc(a.id)}">Ok, visto</button></span></div>`));
     });
     if(!lines.length) return "";
     return `<section class="pv-note" id="pvHome"><h3>📱 Visuale cliente</h3>${lines.join("")}</section>`;
@@ -405,6 +409,7 @@
       case "pvBlock": return block(cid);
       case "pvUnblock": return op({op: "unblock", client: cid}, "Dispositivo sbloccato");
       case "pvAck": return op({op: "ack", client: cid, ids: [el.dataset.al]});
+      case "pvRenew": await op({op: "ack", client: cid, ids: [el.dataset.al]}); return dialog(cid);   // v114: link nuovo (quello vecchio non vale più)
       case "pvBlockAll": return blockAll(true);
       case "pvOff":
         if(!(await messageBox("Disattivare la visuale cliente?", "Tutte le pagine dei clienti si spengono e nelle cartelle non compare più il riquadro del dispositivo. Puoi riattivarla quando vuoi da qui.", {ok: "Disattiva", cancel: "Annulla", danger: true}))) return;
@@ -420,7 +425,7 @@
     box, homeBtn, homeNotice, pageHTML, act,
     pageOpen: () => open,
     changed: c => { if(c && c.id) schedule(c.id); },
-    dropped: id => { if(info[id] && usable()){ post({op: "block", client: id}).catch(()=>{}); delete info[id]; } },
+    dropped: id => { if(usable()){ post({op: "block", client: id}).catch(()=>{}); delete info[id]; } },   // v114: sempre (anche se gli avvisi non sono ancora caricati): link, dispositivo e avvisi spariscono
     wiped: () => { if(Object.keys(info).length && usable()) post({op: "blockall"}).catch(()=>{}); info = {}; },
     _poll: poll, _info: () => info, _snap: snap
   };
