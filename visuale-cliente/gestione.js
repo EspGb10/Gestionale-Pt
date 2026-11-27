@@ -14,6 +14,7 @@
   const SECS = [["book", "Prossimi appuntamenti (personal e consulenze)"], ["single", "Sedute singole fatte"], ["prog", "I tuoi progressi (pallini e sedute)"], ["cal", "Calendario presenze"], ["miss", "Lezioni saltate"], ["pay", "Pagamenti e promemoria saldo"], ["goal", "Tessera, status e traguardi"], ["firme", "Firme (vedere e firmare)"]];
   const LAST_KEY = "gpt_pv_last", POLL_MS = 60000, PUSH_MS = 2500;
   let info = {}, infoOk = false, open = false, pollT = 0, lastPoll = 0, polling = false;
+  let pvQ = "", histOpen = false, histQ = "";   // v115: ricerca nella Visuale cliente e nella Cronologia dispositivi tolti
   const pushT = {}, toasted = new Set(), knownPend = new Set();
   const off = () => !!settings.viewOff;
   const online = () => (store.mode === "sync" || !!window.__viewTest) && !!sigToken;
@@ -74,6 +75,24 @@
 #dlgPV .pv-secs{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px}
 @media (max-width:520px){ #dlgPV .pv-secs{grid-template-columns:1fr} }
 #dlgPV .pv-row{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+.pvh-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+.pvh-badge{display:inline-block;min-width:1.5em;padding:1px 7px;margin-left:6px;border-radius:99px;background:var(--danger);color:#fff;font-size:.78rem;font-weight:800;text-align:center}
+.pv-dl{display:flex;flex-direction:column;gap:6px}.pv-dl .d{display:flex;gap:6px;align-items:baseline}.pv-dl .n{font-weight:800;min-width:1.4em}
+.hist{display:flex;flex-direction:column;gap:10px}
+.hist-it{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 14px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--paper)}
+.hist-it.blk{border-color:var(--danger);box-shadow:inset 4px 0 0 var(--danger)}
+.hist-tx{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1 1 220px}.hist-tx b{font-size:1.02rem;overflow-wrap:anywhere}
+.hist-st{display:inline-block;align-self:flex-start;max-width:100%;padding:2px 10px;border-radius:12px;font-size:.8rem;font-weight:800;background:rgba(0,0,0,.06);white-space:normal}
+.hist-st.blk{background:var(--danger);color:#fff}
+.hist-acts{display:flex;flex-wrap:wrap;gap:8px}
+.btn.unblock{background:#2e7d4f;border-color:#2e7d4f;color:#fff}
+:root[data-theme="dark"] .hist-st:not(.blk){background:rgba(255,255,255,.1)}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .hist-st:not(.blk){background:rgba(255,255,255,.1)} }
+#dlgPV .pv-dev{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:8px 0;border-top:1px solid var(--line,rgba(0,0,0,.08))}
+#dlgPV .pv-dev .pv-dn{font-weight:800;min-width:1.6em}
+#dlgPV .pv-dev input{flex:1 1 180px;min-width:0;font:inherit;padding:8px 10px;border-radius:10px;border:1.5px solid var(--line,#ccc);background:var(--paper,#fff);color:inherit}
+#dlgPV .pv-dev .pv-dm{flex-basis:100%;margin-left:2.2em}
+#dlgPV .pv-dev .pv-derr{flex-basis:100%;margin-left:2.2em;color:var(--danger,#b3261e);font-weight:700}
 #dlgPV details{margin:10px 0}
 #dlgPV summary{cursor:pointer;font-weight:700}
 #dlgPVPrev{width:min(430px,96vw);max-width:none;padding:10px}
@@ -214,11 +233,13 @@
   const ALERT_TXT = {try: "ha provato ad aprire la pagina con un link non più valido o da un dispositivo tolto", pinlock: "dispositivo bloccato: 5 PIN sbagliati", delreq: "chiede di cancellare i dati della pagina",
     idle: "link spento: non apriva la pagina da 30 giorni (per riattivarla crea un link nuovo)", logout: "ha scollegato il suo dispositivo",
     other: "un altro dispositivo ha provato ad aprire il link (già usato dal telefono del cliente)",
+    banned: "un dispositivo bloccato permanentemente ha provato ad aprire il link",
     app: "ha aggiunto la sua pagina alla schermata Home: l'app è attiva con il suo PIN",
     moved: "è rientrato con il suo PIN da un altro browser: quello di prima non funziona più"};   // v105 (11/11)
   /* v104: stato del link quando non c'è ancora un dispositivo */
   const linkState = v => !v ? "" : v.lockWhy === "idle" ? "link spento: 30 giorni senza aprire la pagina" : v.lockWhy === "rejected" ? "richiesta rifiutata: serve un link nuovo"
     : v.on && v.linkOld ? "link scaduto: non usato entro 1 ora" : v.on && !v.bound && v.expAt ? "link valido fino a " + when(v.expAt) : v.on ? "link attivo, in attesa del cliente" : "";
+  const altTxt = a => a.k === "other" && a.n === 3 ? "un terzo dispositivo ha provato ad aprire il link (ne ha già 2 registrati)" : ALERT_TXT[a.k];   // v115
   const alertsOf = v => (v && v.alerts || []).filter(a=>a.k !== "sign" && ALERT_TXT[a.k]);
 
   /* ---------- riquadro del dispositivo nella cartella ---------- */
@@ -229,7 +250,7 @@
     if(v && v.pending) inner = `<div class="dev-card pending"><span class="dev-ic">${DEV_ICON}</span><span class="dev-tx"><small>Richiesta di accesso</small><b>${esc(v.pending.name)}</b>
         <span class="dev-kind">${devKind(v.pending.kind)} · ${when(v.pending.at)}</span></span>
         <span class="dev-act"><button type="button" class="btn small primary" data-a="pvOk" data-id="${esc(c.id)}">Approva</button><button type="button" class="btn small ghost" data-a="pvNo" data-id="${esc(c.id)}">Rifiuta</button></span></div>`;
-    else if(v && v.on && v.device) inner = `<div class="dev-card ok${v.device.blocked ? " warn" : ""}" data-a="pvOpen" data-id="${esc(c.id)}" role="button" tabindex="0" title="Gestisci la visuale cliente"><span class="dev-ic">${DEV_ICON}</span><span class="dev-tx"><small>Dispositivo · ${esc(c.name)}</small><b>${esc(v.device.name)}</b>
+    else if(v && v.on && v.device) inner = `<div class="dev-card ok${v.device.blocked ? " warn" : ""}" data-a="pvOpen" data-id="${esc(c.id)}" role="button" tabindex="0" title="Gestisci la visuale cliente"><span class="dev-ic">${DEV_ICON}</span><span class="dev-tx"><small>${v.dev2 ? "2 dispositivi" : "Dispositivo"} · ${esc(c.name)}</small><b>${esc(v.device.name)}${v.dev2 ? ` · ${esc(v.dev2.name)}` : ""}</b>
         <span class="dev-kind">${devKind(v.device.kind)}${v.app ? `<span class="dev-app"> + app</span>` : ""}<i class="dev-dot" aria-hidden="true"></i>${v.device.blocked ? `<span class="dev-bad">🔒 bloccato (PIN)</span>` : v.device.seen ? "visto " + when(v.device.seen) : "approvato"}</span></span>
         <span class="dev-act"><button type="button" class="dev-x" data-a="pvDel" data-id="${esc(c.id)}" aria-label="Togli il dispositivo" title="Togli il dispositivo">✕</button></span></div>`;
     else inner = `<button type="button" class="dev-card add" data-a="pvOpen" data-id="${esc(c.id)}"><span class="dev-ic">${DEV_ICON}</span><span class="dev-tx"><small>Dispositivo · ${esc(c.name)}</small><b>+ Aggiungi dispositivo</b>${linkState(v) ? `<span class="dev-kind">${esc(linkState(v))}</span>` : ""}</span></button>`;
@@ -252,28 +273,62 @@
     Object.entries(info).forEach(([cid, v])=>{
       const c = getClient(cid); if(!c) return;
       if(v.pending) lines.push(`<div class="pv-line"><span><b>${esc(c.name)}</b> chiede di vedere la sua pagina da “${esc(v.pending.name)}” (${devKind(v.pending.kind)})</span><span class="pv-acts"><button type="button" class="btn small primary" data-a="pvOk" data-id="${esc(cid)}">Approva</button><button type="button" class="btn small ghost" data-a="pvNo" data-id="${esc(cid)}">Rifiuta</button></span></div>`);
-      alertsOf(v).forEach(a=>lines.push(`<div class="pv-line"><span><b>${esc(c.name)}</b>: ${esc(ALERT_TXT[a.k])} <span class="pv-muted">(${when(a.at)})</span></span><span class="pv-acts">${a.k === "pinlock" ? `<button type="button" class="btn small primary" data-a="pvUnblock" data-id="${esc(cid)}">Sblocca</button>` : a.k === "delreq" ? `<button type="button" class="btn small" data-a="pvOpen" data-id="${esc(cid)}">Decidi</button>` : a.k === "try" && v.locked ? `<button type="button" class="btn small primary" data-a="pvRenew" data-id="${esc(cid)}" data-al="${esc(a.id)}">🔄 Link nuovo</button>` : ""}<button type="button" class="btn small ghost" data-a="pvAck" data-id="${esc(cid)}" data-al="${esc(a.id)}">Ok, visto</button></span></div>`));
+      alertsOf(v).forEach(a=>lines.push(`<div class="pv-line"><span><b>${esc(c.name)}</b>: ${esc(altTxt(a))} <span class="pv-muted">(${when(a.at)})</span></span><span class="pv-acts">${a.k === "pinlock" ? `<button type="button" class="btn small primary" data-a="pvUnblock" data-id="${esc(cid)}">Sblocca</button>` : a.k === "delreq" ? `<button type="button" class="btn small" data-a="pvOpen" data-id="${esc(cid)}">Decidi</button>` : a.k === "try" && v.locked ? `<button type="button" class="btn small primary" data-a="pvRenew" data-id="${esc(cid)}" data-al="${esc(a.id)}">🔄 Link nuovo</button>` : ""}<button type="button" class="btn small ghost" data-a="pvAck" data-id="${esc(cid)}" data-al="${esc(a.id)}">Ok, visto</button></span></div>`));
     });
     if(!lines.length) return "";
     return `<section class="pv-note" id="pvHome"><h3>📱 Visuale cliente</h3>${lines.join("")}</section>`;
   }
   /* ---------- sezione “Visuale cliente” ---------- */
+  /* v115: cronologia di tutti i clienti che hai ancora (cartelle eliminate: spariscono da qui) */
+  const histAll = () => Object.entries(info).filter(([cid])=>getClient(cid)).flatMap(([cid, v])=>(v.hist || []).map(e=>Object.assign({cid}, e))).sort((a, b)=>(b.at || 0) - (a.at || 0));
+  const searchBar = (id, q, clear) => `<div class="searchbar" role="search"><input class="search" id="${id}" type="search" enterkeyhint="search" placeholder="${id === "pvHistQ" ? "Cerca un dispositivo o un cliente…" : "Cerca un cliente…"}" value="${esc(q)}" aria-label="Cerca" autocomplete="off">${q ? `<button type="button" class="s-btn s-clear" data-a="${clear}" aria-label="Cancella la ricerca" title="Cancella">✕</button>` : ""}<span class="s-btn s-go" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.4"/><line x1="15.4" y1="15.4" x2="21" y2="21" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></span></div>`;
+  const devLine = (d, n) => `<div class="d"><span class="n">${n}.</span><span><b>${esc(d.name)}</b> <span class="pv-muted">· <span>${devKind(d.kind)}</span>${d.seen ? ` · <span>visto ${when(d.seen)}</span>` : ""}</span></span></div>`;
+  function pvRows(list){
+    return list.map(([cid, v])=>`<tr class="${v.on ? "" : "pv-off"}">
+        <td><button class="pv-link" data-a="open" data-id="${esc(cid)}"><b>${esc(nameOf(cid))}</b></button>${v.locked ? `<br><span class="pv-muted">${v.lockWhy === "idle" ? "link spento: 30 giorni senza aprire la pagina" : v.lockWhy === "rejected" ? "richiesta rifiutata: link non più valido" : "dispositivo tolto: link non più valido"}</span>` : v.on && !v.device && !v.pending && linkState(v) ? `<br><span class="pv-muted">${esc(linkState(v))}</span>` : v.ended ? `<br><span class="pv-muted">pacchetto chiuso il ${itDate(v.ended)}</span>` : ""}</td>
+        <td>${v.device ? `<div class="pv-dl">${devLine(v.device, 1)}${v.dev2 ? devLine(v.dev2, 2) : ""}</div>${v.device.blocked ? `<span class="dev-bad">🔒 bloccato (PIN)</span>` : ""}` : v.pending ? `<span class="dev-bad">richiesta: ${esc(v.pending.name)}</span>` : `<span class="pv-muted">nessuno</span>`}</td>
+        <td>${v.device && v.device.seen ? when(v.device.seen) : "—"}${v.device ? `<br><span class="pv-muted">${esc(seenText(v))}</span>` : ""}</td>
+        <td><span class="pv-acts"><button type="button" class="btn small" data-a="pvOpen" data-id="${esc(cid)}">Gestisci</button>${v.on || v.locked ? `<button type="button" class="btn small ghost" data-a="pvBlock" data-id="${esc(cid)}">Blocca link</button>` : ""}</span></td></tr>`).join("");
+  }
+  const pvList = () => Object.entries(info).filter(([cid])=>getClient(cid)).sort((a, b)=>nameOf(a[0]).localeCompare(nameOf(b[0]), "it"));
+  function pvTable(){
+    const all = pvList(), q = plain(pvQ.trim()), list = q ? all.filter(([cid])=>plain(nameOf(cid)).includes(q)) : all;
+    if(!all.length) return `<p class="sub">Ancora nessuna pagina. Apri la cartella di un cliente e premi <b>+ Aggiungi dispositivo</b>.</p>`;
+    return (q ? `<p class="found">${list.length} ${list.length === 1 ? "cliente trovato" : "clienti trovati"} per “${esc(pvQ.trim())}”</p>` : "")
+      + (list.length ? `<table class="pv-table"><thead><tr><th>Cliente</th><th>Dispositivi</th><th>Ultimo accesso</th><th></th></tr></thead><tbody>${pvRows(list)}</tbody></table>` : `<p class="pv-muted">Nessun cliente con questo nome.</p>`);
+  }
+  /* v115: Cronologia dispositivi tolti (cerca per nome del dispositivo o della cartella) */
+  const quando = ms => { const w = when(ms); return !w ? "" : /^\d/.test(w) ? "il " + w : w; };   // “oggi alle 11:40” · “il 20/11/2026 alle 17:05”
+  function histList(){
+    const all = histAll(), q = plain(histQ.trim());
+    const list = q ? all.filter(e=>plain(e.name).includes(q) || plain(nameOf(e.cid)).includes(q)) : all;
+    if(!all.length) return `<p class="pv-muted">Nessun dispositivo tolto o rifiutato.</p>`;
+    const st = e => e.ban ? `<span class="hist-st blk">🔒 Bloccato permanentemente dal ${itDate(new Date(e.banAt).toISOString().slice(0, 10))}</span>`
+      : e.why === "rejected" ? `<span class="hist-st">Rifiutato ${e.n} ${e.n === 1 ? "volta" : "volte"} su 3${e.n >= 3 ? " · non può più chiedere l'accesso" : " · può richiederlo ancora"}</span>`
+      : `<span class="hist-st">Tolto · può rientrare con il PIN</span>`;
+    return (q ? `<p class="found">${list.length} ${list.length === 1 ? "dispositivo trovato" : "dispositivi trovati"} per “${esc(histQ.trim())}”</p>` : "")
+      + (list.length ? `<div class="hist">${list.map(e=>`<div class="hist-it${e.ban ? " blk" : ""}"><div class="hist-tx"><b>${esc(e.name || "Dispositivo")}</b>
+        <span class="pv-muted">${esc(nameOf(e.cid))} · ${devKind(e.kind)} · ${e.why === "rejected" ? "richiesta rifiutata" : "tolto"} ${quando(e.at)}</span>${st(e)}</div>
+        <div class="hist-acts">${e.ban ? `<button type="button" class="btn unblock" data-a="pvUnban" data-id="${esc(e.cid)}" data-h="${esc(e.id)}">🔓 Sblocca dispositivo</button>` : `<button type="button" class="btn danger" data-a="pvBan" data-id="${esc(e.cid)}" data-h="${esc(e.id)}">🔒 Blocca permanentemente</button>`}<button type="button" class="btn ghost" data-a="pvHistDel" data-id="${esc(e.cid)}" data-h="${esc(e.id)}">🗑 Elimina dalla cronologia</button></div></div>`).join("")}</div>` : `<p class="pv-muted">Nessun dispositivo trovato.</p>`);
+  }
+  function histHTML(){
+    return `<button class="back" data-a="pvHistClose">‹ Visuale cliente</button>
+      <div class="stats-head"><h1>🗂 Cronologia dispositivi tolti</h1></div>
+      <p class="sub">Qui trovi i dispositivi che hai <b>tolto</b> o a cui hai <b>rifiutato</b> l'accesso. Un dispositivo tolto può ancora rientrare con il link del cliente e il suo PIN: se lo fa, sparisce da qui e torna al suo posto. Una richiesta rifiutata si può rimandare al massimo 3 volte in tutto. Per non farlo entrare mai più premi <b>Blocca permanentemente</b>: non potrà aprire nessun link, di nessun cliente. Cerca per nome del dispositivo o del cliente.</p>
+      ${searchBar("pvHistQ", histQ, "pvHistClear")}
+      <section class="block pv-sec"><h2>Dispositivi (${histAll().length})</h2><div id="pvHistList">${histList()}</div></section>`;
+  }
   function pageHTML(){
+    if(histOpen && online() && !off()) return histHTML();
     let h = `<button class="back" data-a="pvClose">‹ Tutte le cartelle</button>
-      <div class="stats-head"><h1>📱 Visuale cliente</h1></div>
-      <p class="sub">Ogni cliente può avere una pagina sul suo telefono, solo da guardare e sempre aggiornata: sedute, lezioni saltate, pagamenti, traguardi e firme. Il cliente apre il link, scrive il nome del dispositivo e chiede l'accesso: lo approvi tu (massimo 1 dispositivo per cliente), poi sceglie un PIN di 4 cifre. Il link nuovo vale 1 ora: quando il cliente chiede l'accesso resta legato al suo telefono e non scade più (si spegne solo se non apre la pagina per 30 giorni). Per attivarla apri la cartella del cliente e premi <b>+ Aggiungi dispositivo</b>.</p>`;
+      <div class="stats-head pvh-top"><h1>📱 Visuale cliente</h1>${online() && !off() ? `<button type="button" class="btn" data-a="pvHist">🗂 Cronologia dispositivi tolti${histAll().length ? `<span class="pvh-badge">${histAll().length}</span>` : ""}</button>` : ""}</div>
+      <p class="sub">Ogni cliente può avere una pagina sul suo telefono, solo da guardare e sempre aggiornata: sedute, lezioni saltate, pagamenti, traguardi e firme. Il cliente apre il link, scrive il nome del dispositivo e chiede l'accesso: lo approvi tu, poi sceglie un PIN di 4 cifre. Può usarla su <b>massimo 2 dispositivi</b> (il secondo si aggiunge con il PIN): le altre app dello stesso telefono contano come lo stesso dispositivo. Il link nuovo vale 1 ora: quando il cliente chiede l'accesso resta legato al suo telefono e non scade più (si spegne solo se non apre la pagina per 30 giorni). Per attivarla apri la cartella del cliente e premi <b>+ Aggiungi dispositivo</b>.</p>`;
     if(!online()) return h + `<p class="locked-note">🔒 La visuale cliente funziona solo con il salvataggio online (sincronizzazione tra dispositivi).</p>`;
     if(off()) return h + `<section class="block pv-sec"><h2>Funzione disattivata</h2><p class="sub">Le pagine dei clienti sono spente e nelle cartelle non compare il riquadro del dispositivo.</p><button class="btn primary" data-a="pvOn">Riattiva la visuale cliente</button></section>`;
     const n = counts(), list = Object.entries(info).filter(([cid])=>getClient(cid)).sort((a, b)=>nameOf(a[0]).localeCompare(nameOf(b[0]), "it"));
     const notice = homeNotice();
     h += notice ? notice.replace('id="pvHome"', 'id="pvPageNote"') : `<p class="pv-muted">${infoOk ? "Nessuna richiesta o avviso da vedere." : "Controllo richieste e avvisi…"}</p>`;
-    h += `<section class="block pv-sec"><h2>Pagine dei clienti (${list.filter(([, v])=>v.on).length})</h2>`;
-    if(!list.length) h += `<p class="sub">Ancora nessuna pagina. Apri la cartella di un cliente e premi <b>+ Aggiungi dispositivo</b>.</p>`;
-    else h += `<table class="pv-table"><thead><tr><th>Cliente</th><th>Dispositivo</th><th>Ultimo accesso</th><th></th></tr></thead><tbody>${list.map(([cid, v])=>`<tr class="${v.on ? "" : "pv-off"}">
-        <td><button class="pv-link" data-a="open" data-id="${esc(cid)}"><b>${esc(nameOf(cid))}</b></button>${v.locked ? `<br><span class="pv-muted">${v.lockWhy === "idle" ? "link spento: 30 giorni senza aprire la pagina" : v.lockWhy === "rejected" ? "richiesta rifiutata: link non più valido" : "dispositivo tolto: link non più valido"}</span>` : v.on && !v.device && !v.pending && linkState(v) ? `<br><span class="pv-muted">${esc(linkState(v))}</span>` : v.ended ? `<br><span class="pv-muted">pacchetto chiuso il ${itDate(v.ended)}</span>` : ""}</td>
-        <td>${v.device ? `${esc(v.device.name)}<br><span class="pv-muted">${devKind(v.device.kind)}${v.device.blocked ? ` · <span class="dev-bad">🔒 bloccato</span>` : ""}</span>` : v.pending ? `<span class="dev-bad">richiesta: ${esc(v.pending.name)}</span>` : `<span class="pv-muted">nessuno</span>`}</td>
-        <td>${v.device && v.device.seen ? when(v.device.seen) : "—"}${v.device ? `<br><span class="pv-muted">${esc(seenText(v))}</span>` : ""}</td>
-        <td><span class="pv-acts"><button type="button" class="btn small" data-a="pvOpen" data-id="${esc(cid)}">Gestisci</button>${v.on || v.locked ? `<button type="button" class="btn small ghost" data-a="pvBlock" data-id="${esc(cid)}">Blocca link</button>` : ""}</span></td></tr>`).join("")}</tbody></table>`;
+    h += (list.length ? searchBar("pvQ", pvQ, "pvQClear") : "") + `<section class="block pv-sec"><h2>Pagine dei clienti (${list.filter(([, v])=>v.on).length})</h2><div id="pvTable">${pvTable()}</div>`;
     h += `</section>${window.PTPush ? window.PTPush.html() : ""}<section class="block pv-sec"><h2>Emergenza e impostazioni</h2>
       <p class="sub"><b>Blocca tutto</b> spegne subito tutti i link: nessun cliente vede più la sua pagina. Per riattivarla a un cliente premi di nuovo <b>+ Aggiungi dispositivo</b> nella sua cartella (link nuovo).</p>
       <div class="pv-row" style="display:flex;flex-wrap:wrap;gap:8px"><button type="button" class="btn danger" data-a="pvBlockAll">⛔ Blocca tutto</button><button type="button" class="btn ghost" data-a="pvOff">Disattiva la visuale cliente</button></div>
@@ -295,10 +350,10 @@
     }
     const url = pageUrl(v.token), vw = normView(c.view), al = alertsOf(v);
     $("pvForm").innerHTML = `<button type="submit" value="cancel" formnovalidate class="dlg-x" aria-label="Chiudi" title="Chiudi">✕</button><h3>📱 Visuale cliente · ${esc(c.name)}</h3>
-      <p class="hint">${v.pending ? `⏳ <b>${esc(v.pending.name)}</b> (${devKind(v.pending.kind)}) chiede l'accesso.` : v.device ? `Dispositivo approvato: <b>${esc(v.device.name)}</b> (${devKind(v.device.kind)})${v.device.blocked ? ` · <span class="dev-bad">🔒 bloccato per troppi PIN sbagliati</span>` : ""}<br>${esc(seenText(v))}` : `Nessun dispositivo: manda il link al cliente. Dovrà chiedere l'accesso e tu lo approvi.<br><b>Il link vale 1 ora${v.expAt ? ` (fino a ${esc(when(v.expAt))})` : ""}</b>: quando il cliente chiede l'accesso resta legato al suo telefono e non scade più.`}</p>
+      <p class="hint">${v.pending ? `⏳ <b>${esc(v.pending.name)}</b> (${devKind(v.pending.kind)}) chiede l'accesso.` : v.device ? `${v.dev2 ? `Dispositivi: <b>${esc(v.device.name)}</b> <span>(${devKind(v.device.kind)})</span> · <b>${esc(v.dev2.name)}</b> <span>(${devKind(v.dev2.kind)})</span>` : `Dispositivo approvato: <b>${esc(v.device.name)}</b> (${devKind(v.device.kind)})`}${v.device.blocked ? ` · <span class="dev-bad">🔒 bloccato per troppi PIN sbagliati</span>` : ""}<br>${esc(seenText(v))}` : `Nessun dispositivo: manda il link al cliente. Dovrà chiedere l'accesso e tu lo approvi.<br><b>Il link vale 1 ora${v.expAt ? ` (fino a ${esc(when(v.expAt))})` : ""}</b>: quando il cliente chiede l'accesso resta legato al suo telefono e non scade più.`}</p>
       ${v.pending ? `<div class="pv-row"><button type="button" class="btn primary" data-pv="ok">Approva</button><button type="button" class="btn ghost" data-pv="no">Rifiuta</button></div>` : ""}
       ${v.delreq ? `<div class="pv-note"><b>${esc(c.name)} chiede di cancellare i dati della pagina.</b><p class="pv-muted">Se accetti, la pagina viene spenta e i dati che vedeva il cliente vengono cancellati dal server. Sedute, pagamenti e firme restano nel tuo gestionale.</p><div class="pv-row"><button type="button" class="btn danger" data-pv="erase">Spegni e cancella</button><button type="button" class="btn ghost" data-pv="keep">Tieni la pagina</button></div></div>` : ""}
-      ${al.length ? `<div class="pv-note">${al.map(a=>`<div class="pv-line"><span>${esc(ALERT_TXT[a.k])} <span class="pv-muted">(${when(a.at)})</span></span><button type="button" class="btn small ghost" data-pv="ack" data-al="${esc(a.id)}">Ok, visto</button></div>`).join("")}</div>` : ""}
+      ${al.length ? `<div class="pv-note">${al.map(a=>`<div class="pv-line"><span>${esc(altTxt(a))} <span class="pv-muted">(${when(a.at)})</span></span><button type="button" class="btn small ghost" data-pv="ack" data-al="${esc(a.id)}">Ok, visto</button></div>`).join("")}</div>` : ""}
       ${v.device || v.pending ? "" : `<div class="sl-qr" id="pvQr" aria-label="QR code della pagina del cliente"></div>`}
       <div class="sl-btns"><button type="button" class="btn primary" data-pv="send">📤 Invia link</button><button type="button" class="btn ghost" data-pv="copy">📋 Copia link</button></div>
       <input id="pvUrl" class="sl-url" readonly aria-label="Link della pagina del cliente" value="${esc(url)}">
@@ -309,13 +364,14 @@
       <h4>Cosa vede il cliente</h4>
       <div class="pv-secs">${SECS.map(([k, l])=>`<label class="check carry"><input type="checkbox" data-sec="${k}"${vw.sec[k] ? " checked" : ""}><span>${esc(l)}</span></label>`).join("")}</div>
       <div class="pv-row"><button type="button" class="btn" data-pv="preview">👁 Vedi come la vede il cliente</button></div>
-      ${v.device ? `<h4>Dispositivo e PIN</h4><div class="pv-row">${v.device.blocked ? `<button type="button" class="btn primary" data-pv="unblock">🔓 Sblocca</button>` : ""}<button type="button" class="btn" data-pv="pin">Azzera il PIN</button><button type="button" class="btn ghost" data-pv="del">✕ Togli il dispositivo</button></div>` : ""}
+      ${v.device ? `<h4>Dispositivi e PIN <span class="pv-muted">(massimo 2)</span></h4>${devRow(v.device, "main", 1, !!v.dev2)}${v.dev2 ? devRow(v.dev2, "dev2", 2, true) : `<p class="pv-muted">Un solo dispositivo. Se il cliente apre il link da un altro telefono o da un computer, può aggiungerlo con il suo PIN e un nome diverso. Le altre app dello stesso telefono (WhatsApp, Safari, Instagram, icona sulla schermata Home…) valgono sempre come lo stesso dispositivo.</p>`}
+        <div class="pv-row">${v.device.blocked ? `<button type="button" class="btn primary" data-pv="unblock">🔓 Sblocca</button>` : ""}<button type="button" class="btn" data-pv="pin">Azzera il PIN</button>${v.dev2 ? `<button type="button" class="btn ghost" data-pv="del">✕ Togli tutti e due</button>` : ""}</div>` : ""}
       <details><summary>Registro dei consensi (${(v.consents || []).length})</summary>${(v.consents || []).length ? `<ul>${v.consents.slice().reverse().map(x=>`<li>${when(x.at)} · “${esc(x.name)}” (${devKind(x.kind)}): ha letto l'informativa e chiesto l'accesso</li>`).join("")}</ul>` : `<p class="pv-muted">Nessuno per ora.</p>`}</details>
       <div class="dlg-actions"><button type="button" class="btn danger" data-pv="block">⛔ Blocca link</button><button class="btn primary" value="cancel">Fatto</button></div>`;
     if($("pvQr")) lib("qrcode").then(q=>{ const qr = q(0, "M"); qr.addData(url); qr.make(); if($("pvQr")) $("pvQr").innerHTML = qr.createSvgTag({cellSize: 5, margin: 3, scalable: true}); })
       .catch(()=>{ if($("pvQr")) $("pvQr").innerHTML = `<p class="none">QR code non disponibile senza internet: usa “Invia link”.</p>`; });
     const dlg = $("dlgPV");
-    let next = null;
+    let next = null, nextW = "";
     const save = () => {
       const cc = getClient(cid); if(!cc) return;
       const nv = {msg: $("pvMsg").value.trim().slice(0, 300), sec: {}};
@@ -339,6 +395,8 @@
         return;
       }
       if(w === "preview"){ save(); return preview(cid); }
+      if(w === "ren"){ const k = b.dataset.w, inp = dlg.querySelector(`[data-dn="${k}"]`), er = dlg.querySelector(`[data-derr="${k}"]`); b.disabled = true; await rename(cid, k, inp ? inp.value : "", er); b.disabled = false; return; }
+      if(w === "del1"){ nextW = b.dataset.w; }
       next = w; dlg.close("cancel");
     };
     await ask("dlgPV");
@@ -347,8 +405,9 @@
     if(!next) return;
     if(next === "fresh"){ const r = await op({op: "link", client: cid, fresh: true, trainer: settings.trainerName || "", first: first(getClient(cid) || c), name: (getClient(cid) || c).name}); if(r){ info[cid] = Object.assign(r.view || {}, {token: r.token}); toast("Link nuovo: vale 1 ora"); } return dialog(cid); }
     if(next === "ok") return approve(cid);
-    if(next === "no") return op({op: "reject", client: cid}, "Richiesta rifiutata: il link non vale più");
+    if(next === "no") return op({op: "reject", client: cid}, "Richiesta rifiutata: è nella Cronologia dispositivi tolti (può riprovare al massimo 3 volte)");
     if(next === "del") return remove(cid);
+    if(next === "del1") return removeOne(cid, nextW);
     if(next === "block") return block(cid);
     if(next === "unblock") return op({op: "unblock", client: cid}, "Dispositivo sbloccato: il cliente può rimettere il suo PIN");
     if(next === "pin"){ if(await messageBox("Azzerare il PIN?", `${c.name} sceglierà un PIN nuovo la prossima volta che apre la pagina.`, {ok: "Azzera il PIN", cancel: "Annulla"})) await op({op: "pinreset", client: cid}, "PIN azzerato"); return dialog(cid); }
@@ -360,14 +419,50 @@
       if(r){ const cc = getClient(cid); if(cc && cc.view){ const n = Object.assign({}, cc); delete n.view; commit(n, true); } render(); }
     }
   }
+  /* v115: riga di un dispositivo: nome modificabile (diverso dall'altro), visto, tasto Togli */
+  function devRow(d, w, n, two){
+    return `<div class="pv-dev"><span class="pv-dn">${n}.</span><input type="text" maxlength="40" data-dn="${w}" value="${esc(d.name)}" aria-label="Nome del dispositivo ${n}">
+      <button type="button" class="btn small" data-pv="ren" data-w="${w}">✏️ Salva nome</button><button type="button" class="btn small ghost" data-pv="${two ? "del1" : "del"}" data-w="${w}">✕ Togli</button>
+      <span class="pv-dm pv-muted">${devKind(d.kind)}${d.seen ? " · visto " + when(d.seen) : ""}</span><span class="pv-derr" data-derr="${w}" role="alert"></span></div>`;
+  }
+  async function rename(cid, w, name, errEl){
+    const v = info[cid]; if(!v) return false;
+    const nm = String(name || "").trim().replace(/\s+/g, " "), other = w === "dev2" ? v.device : v.dev2;
+    const say = t => { if(errEl) errEl.textContent = t; };
+    if(nm.length < 2){ say("Scrivi un nome (almeno 2 lettere)."); return false; }
+    if(other && other.name.trim().replace(/\s+/g, " ") === nm){ say(`Il nome deve essere diverso da “${other.name}” (basta cambiare un carattere).`); return false; }
+    try{ const r = await post({op: "rename", client: cid, which: w, name: nm}); if(r && r.view) info[cid] = r.view; say(""); refresh(); toast("Nome salvato"); return true; }
+    catch(e){ say(e && e.status === 409 ? `Il nome deve essere diverso da “${other ? other.name : ""}” (basta cambiare un carattere).` : e && e.code === "login" ? "Accedi di nuovo e riprova." : "Serve internet: controlla la connessione e riprova."); return false; }
+  }
+  async function removeOne(cid, w){
+    const v = info[cid], c = getClient(cid); if(!v || !c || !v.device) return;
+    const d = w === "dev2" ? v.dev2 : v.device, keep = w === "dev2" ? v.device : v.dev2; if(!d) return;
+    if(!(await messageBox(`Togliere “${d.name}”?`, `${c.name} non vedrà più la pagina su “${d.name}”.${keep ? ` “${keep.name}” continua a funzionare e il link resta attivo.` : ""} “${d.name}” finisce nella Cronologia dispositivi tolti: potrà rientrare con il link e il PIN, a meno che tu non lo blocchi permanentemente.`, {ok: "Togli", cancel: "Annulla", danger: true}))) return;
+    await op({op: "remove", client: cid, which: w}, `Tolto: ${d.name}`);
+  }
+  /* v115: cronologia: blocca permanentemente / sblocca / elimina */
+  async function histAct(a, cid, id){
+    const v = info[cid], e = v && (v.hist || []).find(x=>x.id === id); if(!e) return;
+    const nm = e.name || "questo dispositivo";
+    if(a === "pvBan"){
+      if(!(await messageBox("Bloccare questo dispositivo permanentemente?", `“${nm}” non potrà più aprire nessun link del programma, di nessun cliente. Potrai sbloccarlo quando vuoi da questa cronologia.`, {ok: "Sì, blocca", cancel: "No, non bloccare", danger: true}))) return;
+      return op({op: "ban", client: cid, id}, `Bloccato: ${nm}`);
+    }
+    if(a === "pvUnban"){
+      if(!(await messageBox("Sbloccare questo dispositivo?", `“${nm}” torna tra i dispositivi tolti: potrà rientrare solo con il link del cliente e il PIN (oppure con un link nuovo).`, {ok: "Sì, sblocca", cancel: "No"}))) return;
+      return op({op: "unban", client: cid, id}, `Sbloccato: ${nm}`);
+    }
+    if(!(await messageBox("Eliminare dalla cronologia?", e.ban ? `“${nm}” è bloccato: se lo elimini resterà bloccato per sempre e non potrai più sbloccarlo.` : `“${nm}” sparisce solo da questa lista: potrà comunque rientrare con il link del cliente${e.why === "rejected" ? " (e le sue richieste ripartono da zero)" : ""}.`, {ok: "Elimina", cancel: "Annulla", danger: !!e.ban}))) return;
+    return op({op: "histdel", client: cid, id}, "Eliminato dalla cronologia");
+  }
   async function approve(cid){
     const v = info[cid], c = getClient(cid); if(!v || !v.pending || !c) return;
-    if(v.device && !(await messageBox("Sostituire il dispositivo?", `${c.name} può avere un solo dispositivo. Approvando “${v.pending.name}”, “${v.device.name}” non vedrà più la pagina.`, {ok: "Approva e sostituisci", cancel: "Annulla"}))) return;
+    if(v.device && !(await messageBox("Sostituire i dispositivi?", `Approvando “${v.pending.name}”, ${v.dev2 ? `“${v.device.name}” e “${v.dev2.name}” non vedranno` : `“${v.device.name}” non vedrà`} più la pagina.`, {ok: "Approva e sostituisci", cancel: "Annulla"}))) return;
     await op({op: "approve", client: cid}, `Approvato: ${c.name} ora sceglie il suo PIN`);
   }
   async function remove(cid){
     const v = info[cid], c = getClient(cid); if(!v || !c) return;
-    if(!(await messageBox("Togliere il dispositivo?", `${c.name} non potrà più vedere la pagina${v.device ? ` su “${v.device.name}”` : ""} e nessuno potrà chiedere di nuovo l'accesso con questo link. Per ridargli l'accesso premi “+ Aggiungi dispositivo”: verrà creato un link nuovo da mandargli.`, {ok: "Togli il dispositivo", cancel: "Annulla", danger: true}))) return;
+    if(!(await messageBox(v.dev2 ? "Togliere tutti e due i dispositivi?" : "Togliere il dispositivo?", `${c.name} non potrà più vedere la pagina${v.device ? ` su “${v.device.name}”` : ""}${v.dev2 ? ` e su “${v.dev2.name}”` : ""} e nessuno potrà chiedere di nuovo l'accesso con questo link. Per ridargli l'accesso premi “+ Aggiungi dispositivo”: verrà creato un link nuovo da mandargli. ${v.dev2 ? "I dispositivi finiscono" : "Il dispositivo finisce"} nella Cronologia dispositivi tolti.`, {ok: v.dev2 ? "Togli tutti e due" : "Togli il dispositivo", cancel: "Annulla", danger: true}))) return;
     await op({op: "remove", client: cid}, "Dispositivo tolto: il link non vale più");
   }
   async function block(cid){
@@ -401,11 +496,16 @@
     const cid = (el && el.dataset && el.dataset.id) || openId;
     switch(a){
       case "pvPage": open = true; render(); window.scrollTo({top: 0}); poll(); return;
-      case "pvClose": open = false; render(); window.scrollTo({top: 0}); return;
+      case "pvClose": open = false; histOpen = false; render(); window.scrollTo({top: 0}); return;
+      case "pvHist": histOpen = true; render(); window.scrollTo({top: 0}); poll(); return;                   // v115: Cronologia dispositivi tolti
+      case "pvHistClose": histOpen = false; render(); window.scrollTo({top: 0}); return;
+      case "pvQClear": pvQ = ""; render(); return;
+      case "pvHistClear": histQ = ""; render(); return;
+      case "pvBan": case "pvUnban": case "pvHistDel": return histAct(a, cid, el.dataset.h);
       case "pvOpen": return dialog(cid);
       case "pvOk": return approve(cid);
-      case "pvNo": return op({op: "reject", client: cid}, "Richiesta rifiutata: il link non vale più");
-      case "pvDel": return remove(cid);
+      case "pvNo": return op({op: "reject", client: cid}, "Richiesta rifiutata: è nella Cronologia dispositivi tolti (può riprovare al massimo 3 volte)");
+      case "pvDel": return info[cid] && info[cid].dev2 ? dialog(cid) : remove(cid);   // v115: con 2 dispositivi scegli quale togliere
       case "pvBlock": return block(cid);
       case "pvUnblock": return op({op: "unblock", client: cid}, "Dispositivo sbloccato");
       case "pvAck": return op({op: "ack", client: cid, ids: [el.dataset.al]});
@@ -418,6 +518,15 @@
       case "pvOn": settings.viewOff = false; await saveSettings(); render(); poll(); toast("Visuale cliente attiva"); return;
     }
   }
+  /* v115: ricerca nella Visuale cliente e nella cronologia (aggiorna solo l'elenco, il cursore resta nella barra) */
+  document.addEventListener("input", e=>{
+    const t = e.target; if(!t || (t.id !== "pvQ" && t.id !== "pvHistQ")) return;
+    if(t.id === "pvQ"){ pvQ = t.value; const box = document.getElementById("pvTable"); if(box) box.innerHTML = pvTable(); }
+    else { histQ = t.value; const box = document.getElementById("pvHistList"); if(box) box.innerHTML = histList(); }
+    const bar = t.closest(".searchbar"), has = !!t.value, x = bar && bar.querySelector(".s-clear");
+    if(bar && has && !x){ const b = document.createElement("button"); b.type = "button"; b.className = "s-btn s-clear"; b.dataset.a = t.id === "pvQ" ? "pvQClear" : "pvHistClear"; b.setAttribute("aria-label", "Cancella la ricerca"); b.title = "Cancella"; b.textContent = "✕"; t.after(b); }
+    else if(!has && x) x.remove();
+  });
   /* il riquadro “visto … / approvato” si apre anche con Invio */
   document.addEventListener("keydown", e=>{ const t = e.target; if((e.key === "Enter" || e.key === " ") && t && t.classList && t.classList.contains("dev-card") && t.dataset.a === "pvOpen" && t.tagName !== "BUTTON"){ e.preventDefault(); t.click(); } });
 

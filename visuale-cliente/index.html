@@ -564,9 +564,13 @@ function privacyFlow(o){
   const kind = /iPhone|iPod/.test(ua) ? "iPhone" : isIPad ? "iPad" : /Android/.test(ua) ? "Android" : "computer";
   const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
   async function sha(s){ try{ const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)); return Array.from(new Uint8Array(b), x=>x.toString(16).padStart(2, "0")).join(""); }catch(_){ return ""; } }
+  /* v115: caratteristiche del TELEFONO (schermo, densità, fuso orario): uguali in Safari, WhatsApp, Instagram, Telegram e nell'icona dello stesso telefono */
+  const FP = (()=>{ try{ const w = screen.width | 0, h = screen.height | 0, r = Math.round((window.devicePixelRatio || 1) * 10) / 10;
+    const tz = String((Intl.DateTimeFormat().resolvedOptions() || {}).timeZone || "").replace(/[^A-Za-z_\/+-]/g, "").slice(0, 50);
+    return w && h ? `${Math.min(w, h)}x${Math.max(w, h)}x${r}|${tz}` : ""; }catch(_){ return ""; } })();
   async function api(method, body, extra){
-    const url = "../api/cliente" + (method === "GET" ? `?t=${encodeURIComponent(tok)}&d=${encodeURIComponent(dev)}${standalone ? "&a=1" : ""}${extra || ""}` : "");
-    const r = await fetch(url, {method, cache:"no-store", headers: body ? {"Content-Type":"application/json"} : {}, body: body ? JSON.stringify(Object.assign({t: tok, d: dev}, body)) : undefined});
+    const url = "../api/cliente" + (method === "GET" ? `?t=${encodeURIComponent(tok)}&d=${encodeURIComponent(dev)}${standalone ? "&a=1" : ""}${FP ? "&f=" + encodeURIComponent(FP) : ""}${extra || ""}` : "");
+    const r = await fetch(url, {method, cache:"no-store", headers: body ? {"Content-Type":"application/json"} : {}, body: body ? JSON.stringify(Object.assign({t: tok, d: dev, f: FP}, body)) : undefined});
     let j = null; try{ j = await r.json(); }catch(_){}
     if(j && typeof j.dev === "string" && /^[A-Za-z0-9_-]{16,64}$/.test(j.dev) && j.dev !== dev){ dev = j.dev; lsSet("pt_view_dev", dev); }   // v105: memoria cancellata da Safari
     return {status: r.status, j: j || {}};
@@ -601,6 +605,7 @@ function privacyFlow(o){
       const first = d.first || "", def = first ? (kind === "computer" ? T("Computer di ", "Computer of ") : kind === "iPad" ? T("Tablet di ", "Tablet of ") : T("Telefono di ", "Phone of ")) + first : "";
       gate(`<div class="big-ic">👋</div><h1>${T("Il tuo percorso con", "Your journey with")} ${esc(trainerName())}</h1>
       ${d.again ? `<p class="tip">${T("Non apri la pagina da più di 30 giorni: per sicurezza chiedi di nuovo l'accesso.", "You haven't opened this page for more than 30 days: for safety, request access again.")}</p>` : ""}
+      ${d.rej ? (()=>{ const left = Math.max(0, (d.max || 3) - d.rej); return `<p class="tip">${T("Il tuo personal trainer ha rifiutato la richiesta.", "Your personal trainer declined the request.")} ${left === 1 ? T("Puoi chiedere l'accesso ancora 1 volta.", "You can request access 1 more time.") : T(`Puoi chiedere l'accesso ancora ${left} volte.`, `You can request access ${left} more times.`)}</p>`; })() : ""}
       <p>${T("Qui vedi le tue sedute, i pagamenti, i traguardi e le firme. La pagina è solo da guardare.", "Here you can see your sessions, payments, milestones and signatures. This page is view-only.")}</p>
       <div class="inf"><b>${T("Informativa", "Privacy notice")}</b><br>${T("I tuoi dati sono trattati dal tuo personal trainer solo a scopo lavorativo, per seguire il tuo percorso, e non verranno divulgati a terzi. Per vedere la pagina il tuo trainer deve approvare questo dispositivo. Non condividere il link con altri.", "Your data is processed by your personal trainer for work purposes only, to follow your journey, and will not be disclosed to third parties. To see this page your trainer must approve this device. Do not share the link with others.")}</div>
       <label class="ck"><input type="checkbox" id="gCons"> ${T("Ho letto l'informativa", "I have read the notice")}</label>
@@ -626,8 +631,28 @@ function privacyFlow(o){
     /* v104: link non usato entro 1 ora · link già legato a un altro dispositivo · 30 giorni senza aprire la pagina */
     linkold(){ cacheClear(); gate(`<div class="center"><div class="big-ic">⌛</div><h1>${T("Link scaduto", "Link expired")}</h1>
       <p>${T("Questo link valeva 1 ora e non è stato usato in tempo. Chiedi al tuo personal trainer di mandartene uno nuovo.", "This link was valid for 1 hour and wasn't used in time. Ask your personal trainer to send you a new one.")}</p></div>`); },
-    used(d){ cacheClear(); gate(`<div class="center"><div class="big-ic">🔐</div><h1>${T("Link già usato", "Link already used")}</h1>
-      <p>${T("Questo link è già collegato a un altro dispositivo. Se hai cambiato telefono, chiedi al tuo personal trainer di togliere quello vecchio e di mandarti un link nuovo.", "This link is already linked to another device. If you changed phone, ask your personal trainer to remove the old one and send you a new link.")}</p>${d && d.canPin ? `<div class="mv"><p><b>${T("È il tuo telefono?", "Is this your phone?")}</b> ${T("Se hai cancellato i dati di Safari, usi una finestra privata o un altro browser, scrivi il tuo PIN: la pagina si sposta qui e il tuo personal trainer riceve un avviso.", "If you cleared Safari's data, use a private window or another browser, enter your PIN: the page moves here and your personal trainer gets a notice.")}</p><p><button class="btn primary" id="gMove" type="button" style="width:100%">🔑 ${T("Inserisci il tuo PIN", "Enter your PIN")}</button></p></div>` : ""}</div>`); if($("gMove")) $("gMove").onclick = () => pinScreen("move"); },
+    /* v115: il link vale per 2 dispositivi: il secondo si aggiunge con il PIN; con 2 già registrati il terzo resta fuori */
+    /* v115: dispositivo bloccato permanentemente · richieste finite · dispositivo tolto che torna */
+    banned(){ cacheClear(); gate(`<div class="center"><div class="big-ic">🚫</div><h1>${T("Dispositivo bloccato", "Device blocked")}</h1>
+      <p>${T("Questo dispositivo è stato bloccato dal personal trainer e non può aprire la pagina.", "This device has been blocked by the personal trainer and can't open the page.")}</p></div>`); },
+    askmax(){ cacheClear(); gate(`<div class="center"><div class="big-ic">✋</div><h1>${T("Richieste finite", "No more requests")}</h1>
+      <p>${T("Il tuo personal trainer ha rifiutato la richiesta 3 volte: con questo link non puoi più chiedere l'accesso. Se pensi che sia un errore, contatta il tuo personal trainer.", "Your personal trainer declined the request 3 times: you can't request access with this link anymore. If you think this is a mistake, contact your personal trainer.")}</p></div>`); },
+    used(d){ cacheClear(); const same = !!(d && d.canPin && d.same), add = !!(d && d.canPin), full = !!(d && d.full);
+      if(add && !same && d.back){ gate(`<div class="center"><div class="big-ic">👋</div><h1>${T("Bentornato", "Welcome back")}</h1>
+        <p>${T("Questo dispositivo", "This device")} (“${esc(d.back)}”) ${T("era collegato alla pagina. Digita il PIN creato sul primo dispositivo per tornare.", "was linked to the page. Enter the PIN created on the first device to come back.")}</p>
+        <p><button class="btn primary" id="gMove" type="button" style="width:100%">🔑 ${T("Digita il tuo PIN", "Enter your PIN")}</button></p></div>`); $("gMove").onclick = () => pinScreen("move", {same: 3}); return; }
+      if(same){ gate(`<div class="center"><div class="big-ic">📱</div><h1>${T("È il tuo telefono", "It's your phone")}</h1>
+        <p>${T("La tua pagina è già attiva su questo telefono", "Your page is already active on this phone")}${d.other ? ` (“${esc(d.other)}”)` : ""}${T(", aperta da un'altra app o da un altro browser. Digita il tuo PIN per aprirla anche qui.", ", opened from another app or browser. Enter your PIN to open it here too.")}</p>
+        <p><button class="btn primary" id="gMove" type="button" style="width:100%">🔑 ${T("Digita il tuo PIN", "Enter your PIN")}</button></p></div>`); $("gMove").onclick = () => pinScreen("move", {same: d.same}); return; }
+      gate(`<div class="center"><div class="big-ic">🔐</div><h1>${add ? T("Aggiungi questo dispositivo", "Add this device") : T("Link già usato", "Link already used")}</h1>
+      <p>${add ? T("Questo link è già collegato a un tuo dispositivo. Puoi usarlo su <b>2 dispositivi</b>: se anche questo è tuo (un altro telefono, un tablet o un computer), scrivi il tuo PIN e lo aggiungi.", "This link is already linked to one of your devices. You can use it on <b>2 devices</b>: if this one is yours too (another phone, a tablet or a computer), enter your PIN to add it.")
+        : full ? T("Questo link è già usato su <b>2 dispositivi</b>, il massimo. Per usarlo qui chiedi al tuo personal trainer di togliere uno dei due.", "This link is already used on <b>2 devices</b>, the maximum. To use it here, ask your personal trainer to remove one of them.")
+        : T("Questo link è già collegato a un altro dispositivo. Se hai cambiato telefono, chiedi al tuo personal trainer di togliere quello vecchio e di mandarti un link nuovo.", "This link is already linked to another device. If you changed phone, ask your personal trainer to remove the old one and send you a new link.")}</p>${add ? `<p><button class="btn primary" id="gMove" type="button" style="width:100%">🔑 ${T("Aggiungi con il tuo PIN", "Add with your PIN")}</button></p>` : ""}</div>`); if($("gMove")) $("gMove").onclick = () => nameStep(); },
+    /* v115: dopo “Azzera il PIN” il nuovo PIN si crea sul primo dispositivo */
+    pinwait(d){ cacheClear(); gate(`<div class="center"><div class="big-ic">🔑</div><h1>${T("PIN azzerato", "PIN reset")}</h1>
+      <p>${T("Il tuo personal trainer ha azzerato il PIN. Crea il nuovo PIN sul primo dispositivo", "Your personal trainer reset the PIN. Create the new PIN on your first device")}${d && d.other ? ` (“${esc(d.other)}”)` : ""}${T(", poi torna qui e scrivilo.", ", then come back here and enter it.")}</p><p><button class="btn primary" id="gRe" type="button">${T("Ho creato il PIN", "I created the PIN")}</button></p></div>`); $("gRe").onclick = boot; },
+    devoff(){ cacheClear(); gate(`<div class="center"><div class="big-ic">🚫</div><h1>${T("Dispositivo tolto", "Device removed")}</h1>
+      <p>${T("Il tuo personal trainer ha tolto questo dispositivo dalla tua pagina. Usa l'altro dispositivo, oppure contatta il tuo personal trainer.", "Your personal trainer removed this device from your page. Use your other device, or contact your personal trainer.")}</p></div>`); },
     moved(){ cacheClear(); gate(`<div class="center"><div class="big-ic">📲</div><h1>${T("Apri dall'icona", "Open from the icon")}</h1>
       <p>${T("La tua pagina ora si apre dall'icona sulla schermata Home del telefono. Puoi chiudere questa finestra.", "Your page now opens from the icon on your phone's Home screen. You can close this window.")}</p></div>`); },
     idle(){ cacheClear(); gate(`<div class="center"><div class="big-ic">⌛</div><h1>${T("Link scaduto", "Link expired")}</h1>
@@ -640,11 +665,20 @@ function privacyFlow(o){
     nonet(){ gate(`<div class="center"><div class="big-ic">📶</div><h1>${T("Nessuna connessione", "No connection")}</h1><p>${T("Collegati a internet e riprova.", "Connect to the internet and try again.")}</p><p><button class="btn primary" id="gRe">${T("Riprova", "Try again")}</button></p></div>`); $("gRe").onclick = boot; },
     toomany(){ gate(`<div class="center"><div class="big-ic">⏱️</div><h1>${T("Troppi tentativi", "Too many attempts")}</h1><p>${T("Riprova tra 15 minuti.", "Try again in 15 minutes.")}</p></div>`); }
   };
+  /* v115: nome del secondo dispositivo (diverso dal primo, basta un carattere) */
+  function nameStep(prev, msg){
+    gate(`<div class="center"><div class="big-ic">📱</div><h1>${T("Nome di questo dispositivo", "Name of this device")}</h1>
+      <p>${T("Dai un nome a questo dispositivo, diverso da quello del primo (basta cambiare un carattere). Es. “Telefono di", "Give this device a name, different from the first one (one character is enough). E.g. “Phone of")} ${esc(who.first || "")} 2”.</p>
+      <p><input id="gName" type="text" maxlength="40" autocomplete="off" value="${esc(prev || T("Telefono di", "Phone of") + " " + (who.first || "") + " 2")}"></p><p class="err" id="gErr" role="alert">${msg ? esc(msg) : ""}</p>
+      <p><button class="btn primary" id="gNext" type="button" style="width:100%">${T("Avanti", "Next")}</button></p></div>`);
+    const go = () => { const n = $("gName").value.trim().replace(/\s+/g, " "); if(n.length < 2){ $("gErr").textContent = T("Scrivi un nome (almeno 2 lettere).", "Write a name (at least 2 letters)."); return; } pinScreen("move", {name: n}); };
+    $("gNext").onclick = go; $("gName").addEventListener("keydown", e=>{ if(e.key === "Enter") go(); });
+  }
   /* tastierino del PIN */
   function pinScreen(mode, d){                       // mode: "set" (crea), "pin" (inserisci), "offline" (inserisci, senza internet)
     let val = "", first = "", step = mode === "set" ? 1 : 0, busy = false;
-    const title = () => mode === "move" ? T("Rientra con il tuo PIN", "Sign back in with your PIN") : mode === "app" ? T("Attiva l'app", "Activate the app") : mode === "set" ? (step === 1 ? T("Crea il tuo PIN", "Create your PIN") : T("Ripeti il PIN", "Repeat your PIN")) : `${T("Ciao", "Hi")} ${esc(who.first || "")}!`;
-    const sub = () => mode === "move" ? T("Scrivi il tuo PIN: la pagina si sposta su questo browser e quello di prima non funzionerà più.", "Enter your PIN: the page moves to this browser and the previous one will no longer work.") : mode === "app" ? T("Hai messo “Il mio percorso” sulla schermata Home. Scrivi il tuo PIN, lo stesso che usi in Safari, per usarla come app.", "You put “Il mio percorso” on your Home Screen. Enter your PIN, the same one you use in Safari, to use it as an app.") : mode === "set" ? (step === 1 ? T("4 cifre a tua scelta: ti servirà ogni volta che apri la pagina.", "4 digits of your choice: you'll need it every time you open the page.") : T("Scrivilo ancora una volta per conferma.", "Type it once more to confirm.")) : T("Inserisci il tuo PIN", "Enter your PIN");
+    const title = () => mode === "move" ? T("Aggiungi questo dispositivo", "Add this device") : mode === "app" ? T("Attiva l'app", "Activate the app") : mode === "set" ? (step === 1 ? T("Crea il tuo PIN", "Create your PIN") : T("Ripeti il PIN", "Repeat your PIN")) : `${T("Ciao", "Hi")} ${esc(who.first || "")}!`;
+    const sub = () => mode === "move" || (mode === "pin" && d && d.d2) ? T("Digita il PIN che hai creato sul primo dispositivo", "Enter the PIN you created on your first device") + (d && d.other ? ` (“${esc(d.other)}”)` : "") + "." : mode === "app" ? T("Hai messo “Il mio percorso” sulla schermata Home. Scrivi il tuo PIN, lo stesso che usi in Safari, per usarla come app.", "You put “Il mio percorso” on your Home Screen. Enter your PIN, the same one you use in Safari, to use it as an app.") : mode === "set" ? (step === 1 ? T("4 cifre a tua scelta: ti servirà ogni volta che apri la pagina.", "4 digits of your choice: you'll need it every time you open the page.") : T("Scrivilo ancora una volta per conferma.", "Type it once more to confirm.")) : T("Inserisci il tuo PIN", "Enter your PIN");
     gate(`<div class="center"><div class="big-ic">${mode === "set" ? "🔐" : mode === "app" ? "📲" : mode === "move" ? "🔑" : "🔒"}</div><h1 id="pT">${title()}</h1><p id="pS">${sub()}</p>
       <div class="pin" id="pDots" aria-live="polite">${"<span></span>".repeat(4)}</div><p class="err" id="pErr" role="alert">${d && d.msg ? esc(d.msg) : ""}</p>
       <div class="keys">${[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map(k=>`<button type="button" ${k === "" ? 'style="visibility:hidden" tabindex="-1"' : `data-k="${k}" aria-label="${k === "⌫" ? T("Cancella", "Delete") : k}"`}>${k}</button>`).join("")}</div>
@@ -669,9 +703,10 @@ function privacyFlow(o){
         return;
       }
       let r;
-      try{ r = await api("POST", {op: mode === "set" ? "setpin" : mode === "app" ? "app" : mode === "move" ? "move" : "pin", pin}); }
+      try{ r = await api("POST", Object.assign({op: mode === "set" ? "setpin" : mode === "app" ? "app" : mode === "move" ? "move" : "pin", pin}, mode === "move" && d ? {name: d.name} : {})); }
       catch(_){ busy = false; val = ""; dots(); $("pErr").textContent = T("Non riesco a collegarmi: riprova.", "I can't connect: try again."); return; }
       busy = false;
+      if(mode === "move" && !(d && d.same) && (r.j.error === "name_same" || r.j.error === "name")){ document.removeEventListener("keydown", kb); return nameStep(d && d.name, r.j.error === "name_same" ? T("Questo nome è uguale a quello del primo dispositivo", "This name is the same as the first device's") + (r.j.other ? ` (“${r.j.other}”)` : "") + T(": cambia almeno un carattere.", ": change at least one character.") : T("Scrivi un nome (almeno 2 lettere).", "Write a name (at least 2 letters).")); }
       if(r.j.state === "ok"){ document.removeEventListener("keydown", kb); await remember(pin, r.j); handle(r, true); if(mode === "set" && !standalone) showInstall(true); return; }
       if((r.j.state === "pin" || r.j.state === "apppin" || r.j.state === "movepin") && r.j.wrong){ val = ""; dots(); $("pErr").textContent = T("PIN sbagliato.", "Wrong PIN.") + " " + (r.j.left === 1 ? T("Ultimo tentativo prima del blocco.", "Last attempt before the lock.") : T(`Restano ${r.j.left} tentativi.`, `${r.j.left} attempts left.`)); return; }
       document.removeEventListener("keydown", kb); handle(r);
@@ -712,13 +747,17 @@ function privacyFlow(o){
       case "new": setK(""); lsDel(CK); if(BADBR) return openOut(); return S.welcome(j);   // v105: prima apri nel browser giusto
       case "waiting": return S.waiting(j);
       case "setpin": setK(""); lsDel(CK); return pinScreen("set");
-      case "pin": setK(""); return pinScreen("pin");
+      case "pin": setK(""); return pinScreen("pin", j);
+      case "pinwait": setK(""); return S.pinwait(j);
       case "removed": return S.removed();
       case "expired": return S.expired();
       case "linkold": return S.linkold();
       case "apppin": setK(""); return pinScreen("app");                 // v105: aperta dall'icona sulla schermata Home → il suo PIN
       case "movepin": return pinScreen("move");
       case "used": if(BADBR) return openOut(); return S.used(j);
+      case "devoff": return S.devoff();
+      case "banned": return S.banned();
+      case "askmax": return S.askmax();
       case "idle": return S.idle();
       case "moved": return S.moved();
       case "blocked": setK(""); return S.blocked();
@@ -1073,6 +1112,16 @@ function privacyFlow(o){
     if(demo === "wait") return S.waiting({name: "Telefono di Mario"});
     if(demo === "linkold") return S.linkold();
     if(demo === "used") return S.used();
+    if(demo === "used2") return S.used({canPin: true});
+    if(demo === "full") return S.used({full: true});
+    if(demo === "same") return S.used({canPin: true, same: 1, other: "Telefono di Mario"});
+    if(demo === "pinwait") return S.pinwait({other: "Telefono di Mario"});
+    if(demo === "name2") return nameStep();
+    if(demo === "devoff") return S.devoff();
+    if(demo === "banned") return S.banned();
+    if(demo === "askmax") return S.askmax();
+    if(demo === "back") return S.used({canPin: true, back: "Telefono Samsung"});
+    if(demo === "rej") return S.welcome({first: "Mario", rej: 1, max: 3});
     if(demo === "idle") return S.idle();
     if(demo === "moved") return S.moved();
     if(demo === "setpin") return pinScreen("set");
